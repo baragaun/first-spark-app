@@ -1,3 +1,13 @@
+node_modules
+
+# Output
+.output
+.vercel
+.netlify
+.wrangler
+/.svelte-kit
+/build
+
 # OS
 .DS_Store
 Thumbs.db
@@ -8,9 +18,6 @@ Thumbs.db
 !.env.example
 !.env.test
 
-# IDEs
-.idea
-
-# App files
-node_modules
-.svelte-kit
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
