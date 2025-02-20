@@ -5,6 +5,7 @@
     import { Alert, AlertDescription } from '$lib/components/ui/alert';
     import { writable } from 'svelte/store';
     import { goto } from '$app/navigation';
+    import * as RadioGroup from "$lib/components/ui/radio-group";
 
     // Step management
     const STEPS = {
@@ -23,6 +24,8 @@
     let resendTimer = 30; // Timer in seconds
     let canResend = false;
     let timerInterval: ReturnType<typeof setInterval>;
+    let showPassword = false;
+    let isPathFinder = "no"; // Initialize without $bindable
 
     const startResendTimer = () => {
         resendTimer = 30;
@@ -255,7 +258,6 @@
                                 type="text"
                                 placeholder="Username (e.g., CosmoExplorer, PixelPioneer)"
                                 bind:value={username}
-
                                 required
                             />
                             <p class="text-xs text-muted-foreground">
@@ -263,17 +265,50 @@
                                 Spark{Math.floor(Math.random() * 10000)}
                             </p>
                         </div>
-                        <div class="space-y-2">
-                            <Input
-                                type="password"
-                                placeholder="Password (min. 8 characters)"
-                                bind:value={password}
-                                minlength={8}
-                                required
-                            />
+                        <div class="space-y-2 relative">
+                            <div class="flex w-ful relative space-x-2">
+                                <Input
+                                    type={showPassword ? "text" : "password"}
+                                    placeholder="Password"
+                                    bind:value={password}
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    class="absolute right-3 top-1/2 -translate-y-1/2"
+                                    on:click={() => showPassword = !showPassword}
+                                >
+                                    {#if showPassword}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    {:else}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
+                                    {/if}
+                                </button>
+                            </div>
                             <p class="text-xs text-muted-foreground">
                                 Use at least 8 characters with a mix of letters, numbers & symbols
                             </p>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium">Are you a pathFinder?</label>
+                            <RadioGroup.Root bind:value={isPathFinder} class="flex gap-4">
+                                <div class="flex items-center space-x-2">
+                                    <RadioGroup.Item value="yes" id="yes">
+                                        <RadioGroup.Item.Indicator />
+                                    </RadioGroup.Item>
+                                    <label for="yes" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                        Yes
+                                    </label>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <RadioGroup.Item value="no" id="no">
+                                        <RadioGroup.Item.Indicator />
+                                    </RadioGroup.Item>
+                                    <label for="no" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                        No
+                                    </label>
+                                </div>
+                            </RadioGroup.Root>
                         </div>
                         <Button type="submit" class="w-full" disabled={loading}>
                             {loading ? 'Creating account...' : 'Create Account'}
