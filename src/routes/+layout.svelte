@@ -8,12 +8,11 @@
 </script>
 
 <div class="min-h-screen bg-background font-sans antialiased">
-<UserNav />
 <Sidebar.Provider>
 <AppSidebar />
-<NavBar />
 <main class="flex-1 h-full">
-    <Sidebar.Trigger />
+    <!-- <Sidebar.Trigger /> -->
+    <NavBar />
     {@render children?.()}
 </main>
 </Sidebar.Provider>

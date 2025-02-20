@@ -1,6 +1,7 @@
 <script lang="ts">
     import { Button } from '$lib/components/ui/button';
     import { Moon, Sun, Languages } from 'lucide-svelte';
+	import UserNav from './user-nav.svelte';
 
     // Theme state management
     let isDarkMode = false;
@@ -68,6 +69,15 @@
                     Sign Up
                 </Button>
             </div>
+            <!-- Mobile Menu Trigger -->
+            <Button
+                variant="ghost"
+                size="icon"
+                class="sm:hidden"
+            >
+                <span class="sr-only">Open Menu</span>
+            </Button>
+            <UserNav />
         </div>
     </div>
 </nav>
