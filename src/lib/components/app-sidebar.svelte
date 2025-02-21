@@ -38,6 +38,9 @@
     <Sidebar.Root>
         <Sidebar.Content>
             <Sidebar.Group>
+                <div class="flex justify-end p-2">
+                    <Sidebar.Trigger />
+                </div>
                 <Sidebar.Menu>
                     {#each items as item (item.title)}
                         <Sidebar.MenuItem>
