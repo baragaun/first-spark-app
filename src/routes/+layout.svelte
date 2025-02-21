@@ -1,13 +1,13 @@
 <script lang="ts">
-    import "../app.css";
+	import '../app.css';
     import * as Sidebar from "$lib/components/ui/sidebar/index.js";
-    import UserNav from "$lib/components/user-nav.svelte";
     import AppSidebar from "$lib/components/app-sidebar.svelte";
+	import UserNav from '@/components/user-nav.svelte';
 
     let { children } = $props();
     let open = $state(true);
 </script>
-
+<div class="min-h-screen bg-background font-sans antialiased">
 <UserNav />
 <Sidebar.Provider bind:open>
     <AppSidebar />
@@ -18,3 +18,4 @@
         {@render children?.()}
     </main>
 </Sidebar.Provider>
+</div>
