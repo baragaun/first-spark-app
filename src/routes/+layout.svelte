@@ -5,13 +5,16 @@
     import AppSidebar from "$lib/components/app-sidebar.svelte";
 
     let { children } = $props();
+    let open = $state(true);
 </script>
 
 <UserNav />
-<Sidebar.Provider>
+<Sidebar.Provider bind:open>
     <AppSidebar />
     <main class="flex-1 h-full">
-        <Sidebar.Trigger />
+        {#if !open}
+            <Sidebar.Trigger />
+        {/if}
         {@render children?.()}
     </main>
 </Sidebar.Provider>
