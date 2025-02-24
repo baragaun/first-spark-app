@@ -176,8 +176,12 @@
 							bind:value={password}
 							required
 						/>
-						<Button type="button" onclick={() => (showPassword = !showPassword)}
-							>{#if showPassword}
+						<button
+							type="button"
+							class="absolute right-3 top-1/2 -translate-y-1/2"
+							on:click={() => (showPassword = !showPassword)}
+						>
+							{#if showPassword}
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
 									width="20"
@@ -213,8 +217,8 @@
 										d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"
 									/><line x1="2" x2="22" y1="2" y2="22" /></svg
 								>
-							{/if}</Button
-						>
+							{/if}
+						</button>
 					</div>
 					<div class="flex items-center justify-end">
 						<Button variant="link" class="px-0 font-normal" href="/reset-password">
