@@ -2,6 +2,15 @@
 	import * as Avatar from '$lib/components/ui/avatar/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
+	import { goto } from '$app/navigation';
+	import { LogOut } from 'lucide-svelte';
+	import { authStore } from './nav-bar.svelte';
+
+	const handleLogout = () => {
+		localStorage.removeItem('authToken');
+		authStore.set({ isAuthenticated: false }); // Update auth store
+		goto('/signin');
+	};
 </script>
 
 <DropdownMenu.Root>
@@ -36,6 +45,12 @@
 			</DropdownMenu.Item>
 		</DropdownMenu.Group>
 		<DropdownMenu.Separator />
-		<DropdownMenu.Item>Log out</DropdownMenu.Item>
+		<DropdownMenu.Item
+			onclick={handleLogout}
+			class="bg-destructive text-white focus:bg-destructive focus:text-white"
+		>
+			<LogOut class="mr-2 h-4 w-4" />
+			Log out
+		</DropdownMenu.Item>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>
