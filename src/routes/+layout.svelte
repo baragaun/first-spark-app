@@ -11,7 +11,6 @@
 <Sidebar.Provider>
 <AppSidebar />
 <main class="flex-1 h-full">
-    <!-- <Sidebar.Trigger /> -->
     <NavBar />
     {@render children?.()}
 </main>

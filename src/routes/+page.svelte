@@ -20,7 +20,7 @@
         </h1>
 
         <p class="mx-auto max-w-[700px] text-lg text-muted-foreground">
-            A modern web framework that helps you build fast and responsive web applications.
+            The future is changing rapidly as it never has before.
         </p>
 
         <div class="flex flex-wrap items-center justify-center gap-4">
@@ -31,25 +31,8 @@
             >
                 Get Started
             </Button>
-
-            <Button
-                variant="outline"
-                size="lg"
-                class="shadow-md transition-all hover:scale-105 hover:bg-primary hover:text-primary-foreground hover:shadow-lg active:scale-100"
-            >
-                View Documentation
-            </Button>
         </div>
 
-        <div class="mt-8">
-            <p class="text-muted-foreground">
-                Learn more at <a
-                    href="https://svelte.dev/docs/kit"
-                    class="font-medium text-primary underline underline-offset-4 transition-colors hover:text-primary/80"
-                >
-                    svelte.dev/docs/kit
-                </a>
-            </p>
-        </div>
+
     </div>
 </div>
