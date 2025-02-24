@@ -1,61 +1,90 @@
 <script lang="ts">
-    import House from "lucide-svelte/icons/house";
-    import Inbox from "lucide-svelte/icons/inbox";
-    import Settings from "lucide-svelte/icons/settings";
-    import BookUser from "lucide-svelte/icons/book-user";
-    import MessageSquare from "lucide-svelte/icons/message-square"
-    import * as Sidebar from "$lib/components/ui/sidebar/index.js";
+	import House from 'lucide-svelte/icons/house';
+	import Inbox from 'lucide-svelte/icons/inbox';
+	import Settings from 'lucide-svelte/icons/settings';
+	import BookUser from 'lucide-svelte/icons/book-user';
+	import MessageSquare from 'lucide-svelte/icons/message-square';
+	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+	import { useSidebar } from '$lib/components/ui/sidebar/context.svelte.js';
+	import { fly } from 'svelte/transition';
+	import { quartOut } from 'svelte/easing';
 
-    const items = [
-        {
-            title: "Home",
-            url: "#",
-            icon: House,
-        },
-        {
-            title: "Inbox",
-            url: "#",
-            icon: Inbox,
-        },
-        {
-            title: "Conversations",
-            url: "#",
-            icon: MessageSquare,
-        },
-        {
-            title: "Contacts",
-            url: "#",
-            icon: BookUser,
-        },
-        {
-            title: "Settings",
-            url: "#",
-            icon: Settings,
-        },
-    ];
+	const sidebar = useSidebar();
+
+	const items = [
+		{
+			title: 'Home',
+			url: '#',
+			icon: House
+		},
+		{
+			title: 'Inbox',
+			url: '#',
+			icon: Inbox
+		},
+		{
+			title: 'Conversations',
+			url: '#',
+			icon: MessageSquare
+		},
+		{
+			title: 'Contacts',
+			url: '#',
+			icon: BookUser
+		},
+		{
+			title: 'Settings',
+			url: '#',
+			icon: Settings
+		}
+	];
 </script>
+
 <div class="flex">
-    <Sidebar.Root>
-        <Sidebar.Content>
-            <Sidebar.Group>
-                <div class="flex justify-end p-2">
-                    <Sidebar.Trigger />
-                </div>
-                <Sidebar.Menu>
-                    {#each items as item (item.title)}
-                        <Sidebar.MenuItem>
-                            <Sidebar.MenuButton>
-                                {#snippet child({ props })}
-                                    <a href={item.url} {...props}>
-                                        <item.icon />
-                                        <span>{item.title}</span>
-                                    </a>
-                                {/snippet}
-                            </Sidebar.MenuButton>
-                        </Sidebar.MenuItem>
-                    {/each}
-                </Sidebar.Menu>
-            </Sidebar.Group>
-        </Sidebar.Content>
-    </Sidebar.Root>
+	<Sidebar.Root collapsible="icon">
+		<Sidebar.Content>
+			<div class="mt-2 flex items-center p-2">
+				<a href="/" class="flex items-center gap-2 transition-colors hover:opacity-90">
+					<div in:fly={{ x: -20, duration: 300, delay: 100, easing: quartOut }}>
+						<img src="/fs-logo.svg" alt="App Logo" class="h-8 w-8" />
+					</div>
+					{#if sidebar.state !== 'collapsed'}
+						<span
+							in:fly={{ x: -20, duration: 300, delay: 200, easing: quartOut }}
+							out:fly={{ x: -20, duration: 200, easing: quartOut }}
+							class="font-lexend text-xl font-bold text-primary"
+						>
+							First Spark
+						</span>
+					{/if}
+				</a>
+			</div>
+
+			<Sidebar.Group>
+				<Sidebar.Menu>
+					{#each items as item, i (item.title)}
+						<div in:fly={{ x: -20, duration: 300, delay: 150 + i * 50, easing: quartOut }}>
+							<Sidebar.MenuItem>
+								<Sidebar.MenuButton>
+									{#snippet child({ props })}
+										<a href={item.url} {...props}>
+											<item.icon />
+											{#if sidebar.state !== 'collapsed'}
+												<span
+													in:fly={{ x: -20, duration: 300, delay: 200, easing: quartOut }}
+													out:fly={{ x: -20, duration: 200, easing: quartOut }}
+												>
+													{item.title}
+												</span>
+											{/if}
+										</a>
+									{/snippet}
+								</Sidebar.MenuButton>
+							</Sidebar.MenuItem>
+						</div>
+					{/each}
+				</Sidebar.Menu>
+			</Sidebar.Group>
+		</Sidebar.Content>
+	</Sidebar.Root>
 </div>
