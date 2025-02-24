@@ -54,7 +54,7 @@
 ### How to Test
 <!-- Provide detailed steps for QA to test the changes -->
 1. Prerequisites:
-  <!-- e.g. Do I need to be a specific role? -->
+   <!-- e.g. Do I need to be a specific role? -->
 2. Test steps:
    <!-- What is the quickest path to testing your solution? -->
 3. Expected results:
@@ -64,7 +64,8 @@
 - [ ] Linked related issues
 - [ ] Rebased with target branch
 - [ ] No lint errors
-- [ ] QA'd in multiple browsers
+- [ ] QA'd in Chrome, Safari & Firefox
+- [ ] QA'd mobile experience
 - [ ] Added/updated tests (if applicable)
 - [ ] Mobile responsive (if applicable)
 - [ ] Updated documentation (if applicable)
