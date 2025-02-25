@@ -8,12 +8,12 @@
 		CardHeader,
 		CardTitle
 	} from '$lib/components/ui/card';
-	import { Alert, AlertDescription } from '$lib/components/ui/alert';
 	import { writable } from 'svelte/store';
 	import { goto } from '$app/navigation';
-	import * as RadioGroup from '$lib/components/ui/radio-group';
 	import * as Switch from '$lib/components/ui/switch';
 	import { authStore } from '$lib/components/nav-bar.svelte';
+	import { PasswordInput } from '$lib/components/ui/password-input';
+	import EmailVerification from '$lib/components/email-verification.svelte';
 
 	// Step management
 	const STEPS = {
@@ -28,81 +28,34 @@
 	let username = '';
 	let password = '';
 	let loading = false;
-	let verificationError = '';
-	let resendTimer = 30; // Timer in seconds
-	let canResend = false;
-	let timerInterval: ReturnType<typeof setInterval>;
-	let showPassword = false;
-	let isPathFinder = 'no'; // Initialize without $bindable
-	let isAgeConfirmed = false; // Initialize without $bindable
+	let isAgeConfirmed = false;
 
-	const startResendTimer = () => {
-		resendTimer = 30;
-		canResend = false;
-
-		clearInterval(timerInterval);
-		timerInterval = setInterval(() => {
-			resendTimer -= 1;
-			if (resendTimer <= 0) {
-				clearInterval(timerInterval);
-				canResend = true;
-			}
-		}, 1000);
+	// Handle email submission from the EmailVerification component
+	const handleEmailSubmit = (event: CustomEvent<{ email: string }>) => {
+		email = event.detail.email;
 	};
 
-	const formatTime = (seconds: number) => {
-		const mins = Math.floor(seconds / 60);
-		const secs = seconds % 60;
-		return `${mins}:${secs.toString().padStart(2, '0')}`;
+	// Handle verification from the EmailVerification component
+	const handleVerify = (event: CustomEvent<{ code: string }>) => {
+		verificationCode = event.detail.code;
+		// If verification is successful, move to credentials step
+		currentStep.set(STEPS.CREDENTIALS);
 	};
 
-	const handleResendCode = async () => {
-		if (!canResend) return;
-
-		loading = true;
-		try {
-			// TODO: Implement resend logic here
-			await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-			startResendTimer();
-		} catch (error) {
-			console.error('Error resending code:', error);
-		} finally {
-			loading = false;
-		}
+	// Handle resend from the EmailVerification component
+	const handleResend = (event: CustomEvent<{ email: string }>) => {
+		// Any additional logic for resending
+		console.log('Resending code to:', event.detail.email);
 	};
 
-	// Handle email submission
-	const handleEmailSubmit = async () => {
-		loading = true;
-		try {
-			// TODO: Implement your email verification logic here
-			await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-			currentStep.set(STEPS.VERIFY);
-		} catch (error) {
-			console.error('Error sending verification code:', error);
-		} finally {
-			loading = false;
-		}
+	// Handle back button from the EmailVerification component
+	const handleBack = (event: CustomEvent) => {
+		// Any additional logic when going back
 	};
 
-	// Handle verification code submission
-	const handleVerifySubmit = async () => {
-		loading = true;
-		verificationError = '';
-		try {
-			// Check for the test verification code
-			if (verificationCode === '123456') {
-				await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-				currentStep.set(STEPS.CREDENTIALS);
-			} else {
-				throw new Error('Invalid verification code');
-			}
-		} catch (error) {
-			console.error('Error verifying code:', error);
-			verificationError = 'Invalid verification code. Please try again.';
-		} finally {
-			loading = false;
-		}
+	// Handle skip verification
+	const handleSkip = () => {
+		currentStep.set(STEPS.CREDENTIALS);
 	};
 
 	// Handle final signup
@@ -120,11 +73,6 @@
 			loading = false;
 		}
 	};
-
-	// Start the timer when the component mounts
-	$: if ($currentStep === STEPS.VERIFY) {
-		startResendTimer();
-	}
 </script>
 
 <div class="relative mx-auto flex h-screen items-center justify-center">
@@ -140,95 +88,44 @@
 			</Button>
 		{/if}
 
-		{#if $currentStep === STEPS.EMAIL}
+		{#if $currentStep === STEPS.EMAIL || $currentStep === STEPS.VERIFY}
 			<Card>
 				<CardHeader>
-					<CardTitle class="text-2xl">Sign Up</CardTitle>
+					<CardTitle class="text-2xl">
+						{$currentStep === STEPS.EMAIL ? 'Sign Up' : 'Verify your email'}
+					</CardTitle>
 					<CardDescription>
-						By continuing, you agree to our User Agreement and acknowledge that you understand the
-						Privacy Policy.
+						{#if $currentStep === STEPS.EMAIL}
+							By continuing, you agree to our User Agreement and acknowledge that you understand the
+							Privacy Policy.
+						{:else if $currentStep === STEPS.VERIFY}
+							Enter the six digit code we sent to {email}
+						{/if}
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<form on:submit|preventDefault={handleEmailSubmit} class="space-y-4">
-						<div class="space-y-2">
-							<Input type="email" placeholder="Enter your email" bind:value={email} required />
-						</div>
-						<div class="text-center text-sm">
+					<EmailVerification
+						bind:email
+						initialStep={$currentStep === STEPS.EMAIL ? 'email' : 'verify'}
+						buttonText="Continue"
+						verifyButtonText="Verify"
+						loadingText="Sending..."
+						verifyingText="Verifying..."
+						showSkipButton={true}
+						on:emailSubmit={handleEmailSubmit}
+						on:verify={handleVerify}
+						on:resend={handleResend}
+						on:back={handleBack}
+						on:skip={handleSkip}
+					/>
+
+					{#if $currentStep === STEPS.EMAIL}
+						<div class="mt-4 text-center text-sm">
 							<span class="text-muted-foreground">Already a firstSparker?</span>
 							{' '}
 							<Button variant="link" class="px-1 font-normal" href="/signin">Log In</Button>
 						</div>
-						<Button type="submit" class="w-full" disabled={loading}>
-							{loading ? 'Sending...' : 'Continue'}
-						</Button>
-					</form>
-				</CardContent>
-			</Card>
-		{:else if $currentStep === STEPS.VERIFY}
-			<Card>
-				<CardHeader>
-					<CardTitle class="text-2xl">Verify your email</CardTitle>
-					<CardDescription>
-						Enter the six digit code we sent to {email}
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					{#if verificationError}
-						<Alert variant="destructive" class="mb-4">
-							<AlertDescription>{verificationError}</AlertDescription>
-						</Alert>
 					{/if}
-					<form on:submit|preventDefault={handleVerifySubmit} class="space-y-4">
-						<div class="space-y-2">
-							<Input
-								type="text"
-								placeholder="Enter verification code"
-								bind:value={verificationCode}
-								maxlength={6}
-								required
-							/>
-						</div>
-						<div class="flex flex-col gap-2">
-							<Button type="submit" class="w-full" disabled={loading}>
-								{loading ? 'Verifying...' : 'Verify'}
-							</Button>
-
-							<div class="text-center text-sm text-muted-foreground">
-								Didn't get an email?
-								{#if canResend}
-									<Button
-										variant="link"
-										class="px-1 font-normal"
-										onclick={handleResendCode}
-										disabled={loading}
-									>
-										Resend code
-									</Button>
-								{:else}
-									<span>Resend in {formatTime(resendTimer)}</span>
-								{/if}
-							</div>
-
-							<div class="flex items-center justify-between">
-								<button
-									type="button"
-									class="text-sm text-muted-foreground hover:text-primary"
-									on:click={() => currentStep.set(STEPS.EMAIL)}
-								>
-									Change email
-								</button>
-								<Button
-									type="button"
-									variant="link"
-									class="text-sm"
-									onclick={() => currentStep.set(STEPS.CREDENTIALS)}
-								>
-									Skip verification
-								</Button>
-							</div>
-						</div>
-					</form>
 				</CardContent>
 			</Card>
 		{:else if $currentStep === STEPS.CREDENTIALS}
@@ -243,32 +140,6 @@
 				<CardContent>
 					<form on:submit|preventDefault={handleSignupSubmit} class="space-y-4">
 						<div class="space-y-2">
-							<label for="pathfinder-group" class="text-sm font-medium">Are you a pathFinder?</label
-							>
-							<RadioGroup.Root bind:value={isPathFinder} class="flex gap-4">
-								<RadioGroup.Root bind:value={isPathFinder} class="flex gap-4" id="pathfinder-group">
-									<div class="flex items-center space-x-2">
-										<RadioGroup.Item value="yes" id="yes" />
-										<label
-											for="yes"
-											class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-										>
-											Yes
-										</label>
-									</div>
-									<div class="flex items-center space-x-2">
-										<RadioGroup.Item value="no" id="no" />
-										<label
-											for="no"
-											class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-										>
-											No
-										</label>
-									</div>
-								</RadioGroup.Root>
-							</RadioGroup.Root>
-						</div>
-						<div class="space-y-2">
 							<Input
 								type="text"
 								placeholder="Username (e.g., CosmoExplorer, PixelPioneer)"
@@ -281,57 +152,7 @@
 							</p>
 						</div>
 						<div class="relative space-y-2">
-							<div class="w-ful relative flex space-x-2">
-								<Input
-									type={showPassword ? 'text' : 'password'}
-									placeholder="Password"
-									bind:value={password}
-									required
-								/>
-								<button
-									type="button"
-									class="absolute right-3 top-1/2 -translate-y-1/2"
-									on:click={() => (showPassword = !showPassword)}
-								>
-									{#if showPassword}
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											width="20"
-											height="20"
-											viewBox="0 0 24 24"
-											fill="none"
-											stroke="currentColor"
-											stroke-width="2"
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											class="text-muted-foreground"
-											><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle
-												cx="12"
-												cy="12"
-												r="3"
-											/></svg
-										>
-									{:else}
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											width="20"
-											height="20"
-											viewBox="0 0 24 24"
-											fill="none"
-											stroke="currentColor"
-											stroke-width="2"
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											class="text-muted-foreground"
-											><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" /><path
-												d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"
-											/><path
-												d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"
-											/><line x1="2" x2="22" y1="2" y2="22" /></svg
-										>
-									{/if}
-								</button>
-							</div>
+							<PasswordInput bind:value={password} placeholder="Password" required />
 							<p class="text-xs text-muted-foreground">
 								Use at least 8 characters with a mix of letters, numbers & symbols
 							</p>
@@ -343,8 +164,13 @@
 								</label>
 								<Switch.Root bind:checked={isAgeConfirmed} id="age-confirmation" />
 							</div>
+							{#if !isAgeConfirmed}
+								<p class="text-xs text-destructive">
+									You must confirm you are at least 18 years old to continue.
+								</p>
+							{/if}
 						</div>
-						<Button type="submit" class="w-full" disabled={loading}>
+						<Button type="submit" class="w-full" disabled={loading || !isAgeConfirmed}>
 							{loading ? 'Creating account...' : 'Create Account'}
 						</Button>
 					</form>

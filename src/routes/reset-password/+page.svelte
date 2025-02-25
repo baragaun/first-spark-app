@@ -126,12 +126,12 @@
 									Send me a magic link
 								</label>
 							</div>
-							<div class="flex items-center space-x-2">
+							<!-- <div class="flex items-center space-x-2">
 								<RadioGroup.Item value="recovery-code" id="recovery-code" />
 								<label for="recovery-code" class="text-sm font-medium leading-none">
 									I have a recovery code
 								</label>
-							</div>
+							</div> -->
 						</RadioGroup.Root>
 					</div>
 
@@ -140,15 +140,13 @@
 							<label for="recovery-code-input" class="text-sm font-medium"
 								>Enter recovery code</label
 							>
-							<InputOTP.Root maxlength={6} bind:value={recoveryCode}>
-								{#snippet children({ cells })}
-									<InputOTP.Group>
-										{#each cells as cell}
-											<InputOTP.Slot {cell} />
-										{/each}
-									</InputOTP.Group>
-								{/snippet}
-							</InputOTP.Root>
+							<Input
+								type="text"
+								id="recovery-code-input"
+								placeholder="Enter recovery code (e.g., asd7a8-132bku-11kbvo-aqwl71)"
+								bind:value={recoveryCode}
+								required
+							/>
 						</div>
 					{/if}
 
