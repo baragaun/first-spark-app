@@ -9,12 +9,14 @@
 	let open = $state(true);
 </script>
 
-<div class="min-h-screen bg-background font-sans antialiased">
+<div class="min-h-screen flex flex-col bg-background font-sans antialiased">
 	<Sidebar.Provider bind:open>
 		<AppSidebar />
-		<main class="h-full flex-1">
+		<main class="flex-1 flex flex-col">
 			<Sidebar.Trigger />
-			{@render children?.()}
+			<div class="flex-1">
+				{@render children?.()}
+			</div>
 			<Footer />
 		</main>
 	</Sidebar.Provider>

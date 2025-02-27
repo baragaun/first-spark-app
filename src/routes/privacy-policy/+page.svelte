@@ -67,24 +67,6 @@
                 {sectionCount} sections
             </p>
         </header>
-
-        <div class="policy-content">
-            {#each sections as section (section.id)}
-                <article class="policy-section">
-                    <h2>{section.title}</h2>
-                    <div class="section-content">
-                        <p>{section.content}</p>
-                        {#if section.listItems}
-                            <ul>
-                                {#each section.listItems as item}
-                                    <li>{item}</li>
-                                {/each}
-                            </ul>
-                        {/if}
-                    </div>
-                </article>
-            {/each}
-        </div>
     </div>
 </section>
 
@@ -107,33 +89,5 @@
 
     .last-updated {
         @apply text-muted-foreground;
-    }
-
-    .policy-content {
-        @apply space-y-12;
-    }
-
-    .policy-section {
-        @apply rounded-xl border bg-card p-8 shadow-sm transition-all hover:shadow-md;
-    }
-
-    .policy-section h2 {
-        @apply mb-4 text-2xl font-semibold text-primary;
-    }
-
-    .section-content {
-        @apply text-foreground;
-    }
-
-    .section-content p {
-        @apply mb-4 leading-7;
-    }
-
-    .section-content ul {
-        @apply space-y-2 pl-6 list-disc;
-    }
-
-    .section-content li {
-        @apply leading-7;
     }
 </style>

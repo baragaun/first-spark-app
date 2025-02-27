@@ -34,27 +34,6 @@
 			<h1>Terms of Service</h1>
 			<p class="last-updated">Last updated: {lastUpdated}</p>
 		</header>
-
-		<div class="terms-content">
-			{#each sections as section}
-				<article class="terms-section">
-					<h2>{section.title}</h2>
-					<div class="section-content">
-						<p>{section.content}</p>
-						{#if section.listItems}
-							{#if section.title === '2. Use License'}
-								<p>Under this license, you may not:</p>
-							{/if}
-							<ul>
-								{#each section.listItems as item}
-									<li>{item}</li>
-								{/each}
-							</ul>
-						{/if}
-					</div>
-				</article>
-			{/each}
-		</div>
 	</div>
 </section>
 
@@ -77,33 +56,5 @@
 
 	.last-updated {
 		@apply text-muted-foreground;
-	}
-
-	.terms-content {
-		@apply space-y-12;
-	}
-
-	.terms-section {
-		@apply rounded-xl border bg-card p-8 shadow-sm;
-	}
-
-	.terms-section h2 {
-		@apply mb-4 text-2xl font-semibold text-primary;
-	}
-
-	.section-content {
-		@apply text-foreground;
-	}
-
-	.section-content p {
-		@apply mb-4 leading-7;
-	}
-
-	.section-content ul {
-		@apply list-disc space-y-2 pl-6;
-	}
-
-	.section-content li {
-		@apply leading-7;
 	}
 </style>
