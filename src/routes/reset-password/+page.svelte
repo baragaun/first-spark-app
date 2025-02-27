@@ -10,7 +10,6 @@
 	} from '$lib/components/ui/card';
 	import { Alert, AlertDescription } from '$lib/components/ui/alert';
 	import * as RadioGroup from '$lib/components/ui/radio-group';
-	import * as InputOTP from '$lib/components/ui/input-otp';
 
 	let identifier = ''; // for email or username
 	let loading = false;
