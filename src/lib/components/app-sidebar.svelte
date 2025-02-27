@@ -8,13 +8,17 @@
 	import { useSidebar } from '$lib/components/ui/sidebar/context.svelte.js';
 	import { fly } from 'svelte/transition';
 	import { quartOut } from 'svelte/easing';
+	import { page } from '$app/stores';
 
 	const sidebar = useSidebar();
+
+	// Get current path for active state
+	let currentPath = $derived($page.url.pathname);
 
 	const items = [
 		{
 			title: 'Home',
-			url: '#',
+			url: '/',
 			icon: House
 		},
 		{
@@ -34,10 +38,15 @@
 		},
 		{
 			title: 'Settings',
-			url: '#',
+			url: '/settings',
 			icon: Settings
 		}
 	];
+
+	// Check if item is active
+	function isActive(url: string): boolean {
+		return currentPath === url;
+	}
 </script>
 
 <div class="flex">
@@ -65,7 +74,7 @@
 					{#each items as item, i (item.title)}
 						<div in:fly={{ x: -20, duration: 300, delay: 150 + i * 50, easing: quartOut }}>
 							<Sidebar.MenuItem>
-								<Sidebar.MenuButton>
+								<Sidebar.MenuButton isActive={isActive(item.url)}>
 									{#snippet child({ props })}
 										<a href={item.url} {...props}>
 											<item.icon />
