@@ -1,3 +1,10 @@
+<script lang="ts" context="module">
+	// Export the auth store at module level
+	export const authStore = writable({
+		isAuthenticated: false
+	});
+</script>
+
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import { Moon, Sun, Languages, Menu } from 'lucide-svelte';
@@ -5,9 +12,26 @@
 	import * as Sheet from '$lib/components/ui/sheet';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { onMount } from 'svelte';
+	import { writable } from 'svelte/store';
 
-	// Add isAuthenticated state (you'll replace this with your actual auth logic later)
-	let isAuthenticated = false;
+	// Update auth store when localStorage changes
+	const updateAuthState = () => {
+		const authToken = localStorage.getItem('authToken');
+		authStore.set({ isAuthenticated: !!authToken });
+	};
+
+	// Check authentication status on mount
+	onMount(() => {
+		updateAuthState();
+
+		// Listen for auth state changes
+		window.addEventListener('storage', () => {
+			updateAuthState();
+		});
+	});
+
+	// Subscribe to auth store changes
+	$: isAuthenticated = $authStore.isAuthenticated;
 
 	// Theme state management
 	let isDarkMode = false;
