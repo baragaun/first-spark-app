@@ -43,7 +43,7 @@
 	let timerInterval: ReturnType<typeof setInterval>;
 
 	// Store the original email to detect changes
-	let originalEmail = email;
+
 	// Track emails that have active cooldowns
 	const emailCooldowns = new Map<string, number>();
 
@@ -101,7 +101,6 @@
 		loading = true;
 		try {
 			onEmailSubmit({ email });
-			originalEmail = email; // Store the email we're verifying
 			currentStep.set(STEPS.VERIFY);
 			startResendTimer(email);
 		} catch (error) {
@@ -116,7 +115,9 @@
 		loading = true;
 		verificationError = '';
 		try {
-			onVerify({ email, code: verificationCode });
+			// Use the onVerify prop instead of dispatching an event
+			await onVerify({ email, code: verificationCode });
+			// Note: The parent component will handle the navigation
 		} catch (error) {
 			console.error('Error verifying code:', error);
 			verificationError = 'Invalid verification code. Please try again.';
