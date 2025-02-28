@@ -9,9 +9,5 @@ export default defineConfig({
 		environment: 'jsdom',
 		include: ['tests/unit/*.{test,spec}.{js,ts,svelte}'],
 		setupFiles: 'tests/setup.ts',
-		coverage: {
-			reporter: ['text', 'json', 'html'],
-			reportsDirectory: './coverage'
-		}
 	}
 });

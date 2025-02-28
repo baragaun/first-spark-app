@@ -1,0 +1,17 @@
+name: Run All Tests
+
+on:
+  push:
+    branches: [milestone-01]
+  pull_request:
+    branches: [milestone-01]
+
+jobs:
+  unit-tests:
+    name: Run Unit Tests
+    uses: ./.github/workflows/unit-tests.yml
+
+  integration-tests:
+    name: Run Integration Tests
+    uses: ./.github/workflows/integration-tests.yml
+    needs: unit-tests # Runs after unit tests pass

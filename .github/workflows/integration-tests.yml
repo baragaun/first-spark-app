@@ -1,14 +1,14 @@
 name: Integration Tests
 
 on:
-  push:
-    branches: [milestone-01]
-  pull_request:
-    branches: [milestone-01]
+  workflow_run:
+    workflows: ["Unit Tests"]
+    types:
+      - completed
 
 jobs:
   test:
-    name: Run All Tests
+    name: Run Integration Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -29,11 +29,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Run unit tests
-        run: pnpm run test
-
-      # - name: Install Playwright browsers
-      #   run: pnpm exec playwright install --with-deps chrome
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chrome
 
       - name: Build application
         run: pnpm run build
@@ -47,12 +44,4 @@ jobs:
       #   with:
       #     name: playwright-report
       #     path: playwright-report/
-      #     retention-days: 30
-
-      # - name: Upload Vitest report
-      #   if: always()
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: vitest-report
-      #     path: coverage/
       #     retention-days: 30
