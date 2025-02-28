@@ -8,6 +8,6 @@ export default defineConfig({
 		globals: true,
 		environment: 'jsdom',
 		include: ['tests/unit/*.{test,spec}.{js,ts,svelte}'],
-		setupFiles: 'tests/setup.ts',
+		setupFiles: 'tests/setup.ts'
 	}
 });
