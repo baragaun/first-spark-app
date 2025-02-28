@@ -4,16 +4,16 @@
 	import UserNav from './user-nav.svelte';
 	import * as Sheet from '$lib/components/ui/sheet';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import { onMount } from 'svelte';
+	import { browser } from '$app/environment';
 
 	// Add isAuthenticated state (you'll replace this with your actual auth logic later)
-	let isAuthenticated = false;
+	export let isAuthenticated = false;
 
 	// Theme state management
 	let isDarkMode = false;
 
-	// Initialize theme based on system preference or stored value
-	onMount(() => {
+	// Initialize theme
+	if (browser) {
 		// Check if theme is stored in localStorage
 		const storedTheme = localStorage.getItem('theme');
 		if (
@@ -23,7 +23,7 @@
 			isDarkMode = true;
 			document.documentElement.classList.add('dark');
 		}
-	});
+	}
 
 	const toggleTheme = () => {
 		isDarkMode = !isDarkMode;
