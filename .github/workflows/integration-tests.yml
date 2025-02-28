@@ -32,14 +32,14 @@ jobs:
       - name: Run unit tests
         run: pnpm run test
 
-      - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps chrome
+      # - name: Install Playwright browsers
+      #   run: pnpm exec playwright install --with-deps chrome
 
       - name: Build application
         run: pnpm run build
 
       - name: Run Playwright tests
-        run: pnpm run test:e2e:ci
+        run: pnpm playwright test
 
       # - name: Upload Playwright report
       #   if: always()
