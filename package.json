@@ -13,9 +13,9 @@
 		"format": "prettier --write .",
 		"lint": "eslint . --ext .js,.ts,.svelte --fix",
 		"lint:format": "prettier --check . && eslint .",
-		"test": "vitest tests/unit/components/",
-		"test:e2e": "playwright test --headed tests/e2e/",
-		"test:all": "vitest && playwright test --headed"
+		"test": "vitest",
+		"test:e2e": "playwright test --headed",
+		"test:all": "vitest run && playwright test"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",
