@@ -10,6 +10,7 @@
 	} from '$lib/components/ui/card';
 	import { Alert, AlertDescription } from '$lib/components/ui/alert';
 	import * as RadioGroup from '$lib/components/ui/radio-group';
+	import Mail from 'lucide-svelte/icons/mail';
 
 	let identifier = ''; // for email or username
 	let loading = false;
@@ -172,20 +173,7 @@
 				<div class="flex flex-col items-center space-y-4">
 					<!-- Email waiting illustration -->
 					<div class="mb-4 h-32 w-32">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-							class="h-full w-full text-muted-foreground"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="1"
-								d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"
-							/>
-						</svg>
+						<Mail class="h-full w-full text-muted-foreground" />
 					</div>
 
 					<Alert class="mb-4">
