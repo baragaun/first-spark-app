@@ -6,23 +6,27 @@ This is the frontend for the [First Spark platform](https://firstspark.social).
 
 ## Setting Up
 
-Use [nvm](https://github.com/nvm-sh/nvm) ([install](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating) 
+Use [nvm](https://github.com/nvm-sh/nvm) ([install](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating)
 if needed) to switch to the Node version this project uses:
+
 ```shell
 nvm use
 ```
 
 If you haven't already installed [pnpm](https://pnpm.io/):
+
 ```shell
 npm install -g pnpm
 ```
 
 Install dependencies
+
 ```shell
 pnpm install
 ```
 
 Start the development server
+
 ```shell
 pnpm run dev
 ```
