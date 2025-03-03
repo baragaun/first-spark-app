@@ -45,5 +45,10 @@
     "formsnap": "^2.0.0",
     "sveltekit-superforms": "^2.23.1",
     "tailwindcss-animate": "^1.0.7"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }
