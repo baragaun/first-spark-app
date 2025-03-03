@@ -10,7 +10,7 @@
 	</h1>
 
 	<p class="mx-auto max-w-[700px] text-lg text-muted-foreground">
-		The future is changing rapidly as it never has before.
+		Connect, inspire, thrive!
 	</p>
 
 	<div class="flex flex-wrap items-center justify-center gap-4">
