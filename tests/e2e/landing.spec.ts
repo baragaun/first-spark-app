@@ -1,4 +1,3 @@
-//import { expect, test } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 
 test('Landing page has welcome text, Get Started Button', async ({ page }) => {
