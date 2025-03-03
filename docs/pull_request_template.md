@@ -52,13 +52,6 @@
 
 ---
 
-### Reviewers
-
-<!-- Tag at least 2 others for review -->
-
-- [ ] Reviewer 1: @username
-- [ ] Reviewer 2: @username
-
 ### Next Steps
 
 <!-- What needs to happen after this PR is merged? -->
@@ -84,7 +77,8 @@
 - [ ] No lint errors
 - [ ] QA'd in Chrome, Safari & Firefox
 - [ ] QA'd mobile experience
-- [ ] Added/updated tests (if applicable)
+- [ ] Added/updated unit tests (if applicable)
+- [ ] Added/updated integration tests (if applicable)
 - [ ] Mobile responsive (if applicable)
 - [ ] Updated documentation (if applicable)
 - [ ] Notified the Team of this updates readiness
