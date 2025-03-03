@@ -144,7 +144,7 @@
 
         {#if $currentStep === STEPS.EMAIL}
           <div class="mt-4 text-center text-sm">
-            <span class="text-muted-foreground">Already a firstSparker?</span>
+            <span class="text-muted-foreground">Already a have an account?</span>
             {' '}
             <Button variant="link" class="px-1 font-normal" href="/signin">Log In</Button>
           </div>

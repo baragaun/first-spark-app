@@ -43,4 +43,5 @@ Together, these libraries provide a complete form solution:
 - **formsnap**: Handles the UI components and accessibility
 - **sveltekit-superforms**: Manages form data, validation, and submission
 
-This combination allows us to build robust, accessible, and type-safe forms with minimal boilerplate code.
+This combination allows us to build robust, accessible, and type-safe forms with minimal boilerplate 
+code.
