@@ -1,3 +1,4 @@
+//import { expect, test } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 
 test('Landing page has welcome text, Get Started Button', async ({ page }) => {
@@ -8,7 +9,7 @@ test('Landing page has welcome text, Get Started Button', async ({ page }) => {
   await expect(welcomeText).toBeVisible();
 
   // Verify the subtext is also present
-  const subtextElement = page.getByText('The future is changing rapidly as it never has before.');
+  const subtextElement = page.getByText('Connect, inspire, thrive!');
   await expect(subtextElement).toBeVisible();
 
   // Check for the Get Started button
