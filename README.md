@@ -41,4 +41,41 @@ pnpm build
 
 You can preview the production build with `pnpm run preview`.
 
+## Testing
+
+This project includes both unit tests and end-to-end (e2e) tests.
+
+### Unit Tests
+
+Unit tests are written using Vitest Library. To run unit tests:
+
+```shell
+# Run tests in watch mode (for development)
+pnpm run test
+```
+
+### End-to-End Tests
+
+E2E tests are written using Playwright. To run e2e tests:
+
+```shell
+# Run e2e tests with UI (for development)
+pnpm run test:e2e
+or
+pnpm playwright test --headed
+
+# Run e2e tests headless (for CI)
+pnpm run test:e2e:ci
+or
+pnpm playwright test
+```
+
+### Run All Tests
+
+To run both unit and e2e tests in sequence:
+
+```shell
+pnpm run test:all
+```
+
 > To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.

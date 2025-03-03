@@ -15,6 +15,7 @@
     "lint:format": "prettier --check . && eslint .",
     "test": "vitest",
     "test:e2e": "playwright test --headed",
+    "test:e2e:ci": "playwright test",
     "test:all": "vitest run && playwright test"
   },
   "devDependencies": {
