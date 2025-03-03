@@ -7,7 +7,7 @@
 
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
-  import { Moon, Sun, Languages, Menu } from 'lucide-svelte';
+  import { Moon, Sun, Languages, MoreHorizontal } from 'lucide-svelte';
   import UserNav from './user-nav.svelte';
   import * as Sheet from '$lib/components/ui/sheet';
   import * as Sidebar from '$lib/components/ui/sidebar/index.js';
@@ -64,15 +64,14 @@
 >
   <div class="flex h-16 items-center px-4">
     <!-- Sidebar Trigger (Both Mobile and Desktop) -->
-    <div class="flex-none">
+    <div class="mr-1 flex-none">
       <Sidebar.Trigger />
     </div>
 
     <!-- Logo and App Name (Mobile Only) -->
-    <div class="flex flex-1 justify-center md:justify-start">
+    <div class="flex flex-1 justify-start md:justify-center">
       <a href="/" class="flex items-center gap-2 transition-colors hover:opacity-90 md:hidden">
         <img src="/fs-logo.svg" alt="App Logo" class="h-8 w-8" />
-        <span class="font-lexend text-xl font-bold text-primary">First Spark</span>
       </a>
     </div>
 
@@ -120,15 +119,13 @@
 
       <!-- Mobile Menu Button -->
       <div class="flex md:hidden">
-        <Button
-          variant="ghost"
-          size="icon"
-          onclick={() => (isMobileMenuOpen = !isMobileMenuOpen)}
-          class="text-muted-foreground hover:text-foreground"
-        >
-          <Menu class="h-5 w-5" />
+        <div class="text-muted-foreground hover:text-foreground">
+          <MoreHorizontal
+            onclick={() => (isMobileMenuOpen = !isMobileMenuOpen)}
+            class="h-10 w-10 p-2"
+          />
           <span class="sr-only">Open Menu</span>
-        </Button>
+        </div>
         {#if isAuthenticated}
           <UserNav />
         {/if}
