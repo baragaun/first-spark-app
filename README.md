@@ -2,17 +2,28 @@
 
 <img src="https://firstspark.global/icon.svg" alt="First Spark" width="100" height="100">
 
-This is the frontend for the First Spark platform.
+This is the frontend for the [First Spark platform](https://firstspark.social).
 
-## Developing
+## Setting Up
+
+Use [nvm](https://github.com/nvm-sh/nvm) ([install](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating) 
+if needed) to switch to the Node version this project uses:
+```shell
+nvm use
+```
+
+If you haven't already installed [pnpm](https://pnpm.io/):
+```shell
+npm install -g pnpm
+```
 
 Install dependencies
-```bash
+```shell
 pnpm install
 ```
 
 Start the development server
-```bash
+```shell
 pnpm run dev
 ```
 
@@ -20,7 +31,7 @@ pnpm run dev
 
 To create a production version of your app:
 
-```bash
+```shell
 pnpm build
 ```
 
