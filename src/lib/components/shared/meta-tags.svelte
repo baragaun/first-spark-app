@@ -6,7 +6,7 @@
   let { title, description, canonicalUrl, ogImage }: MetaTagsProps = $props();
 
   // Derive the full canonical URL using environment variable
-  const fullCanonicalUrl = $derived(`${PUBLIC_SITE_URL}${canonicalUrl}`);
+  const fullCanonicalUrl = `${PUBLIC_SITE_URL}${canonicalUrl}`;
 </script>
 
 <svelte:head>
@@ -15,7 +15,7 @@
   <meta name="description" content={description} />
   <link rel="canonical" href={fullCanonicalUrl} />
 
-  <!-- Open Graph / Facebook -->
+  <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />

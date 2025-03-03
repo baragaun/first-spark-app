@@ -6,24 +6,21 @@
   import { cn } from '$lib/utils';
   import { FAQ_SECTIONS } from '$lib/docs/faq-data';
 
-  // Use runes for state management
   const initialFAQSections: FAQSection[] = $state(FAQ_SECTIONS);
 
-  // Derived state for open questions count
-  const openQuestions = $derived(
-    initialFAQSections.flatMap((section) => section.items.filter((item) => item.isOpen)).length,
-  );
+  function getOpenQuestionsCount() {
+    return initialFAQSections.flatMap((section) => section.items.filter((item) => item.isOpen))
+      .length;
+  }
 
-  // Function to toggle question state
   function handleQuestionToggle(sectionIndex: number, itemIndex: number): void {
     initialFAQSections[sectionIndex].items[itemIndex].isOpen =
       !initialFAQSections[sectionIndex].items[itemIndex].isOpen;
   }
 
-  // Track FAQ interactions
   $effect(() => {
-    if (typeof window !== 'undefined' && openQuestions > 0) {
-      console.log(`FAQ sections open: ${openQuestions}`);
+    if (typeof window !== 'undefined' && getOpenQuestionsCount() > 0) {
+      console.log(`FAQ sections open: ${getOpenQuestionsCount()}`);
     }
   });
 </script>
@@ -34,42 +31,55 @@
   canonicalUrl="/faq"
 />
 
-<section class="faq-container">
-  <header class="faq-header">
-    <h1>Frequently Asked Questions</h1>
-    <p class="subtitle">Find answers to common questions about using First Spark</p>
-    {#if openQuestions > 0}
-      <p class="open-counter">
-        {openQuestions} question{openQuestions === 1 ? '' : 's'} expanded
+<section class="container mx-auto px-4 py-16">
+  <header class="mb-16 text-center">
+    <h1 class="mb-6 text-5xl font-bold tracking-tight text-primary sm:text-5xl">
+      Frequently Asked Questions
+    </h1>
+    <p class="mx-auto max-w-2xl text-xl text-muted-foreground">
+      Find answers to common questions about using First Spark
+    </p>
+    {#if getOpenQuestionsCount() > 0}
+      <p class="mt-2 text-sm text-muted-foreground">
+        {getOpenQuestionsCount()} question{getOpenQuestionsCount() === 1 ? '' : 's'} expanded
       </p>
     {/if}
   </header>
 
-  <div class="faq-sections">
+  <div class="mx-auto max-w-3xl space-y-12">
     {#each initialFAQSections as section, sectionIndex (section.title)}
-      <article class="faq-section">
-        <header>
-          <h2>{section.title}</h2>
+      <article class="rounded-xl border bg-card p-6 shadow-sm">
+        <header class="mb-6 rounded-lg bg-muted p-4">
+          <h2 class="text-2xl font-semibold text-primary">{section.title}</h2>
         </header>
 
-        <div class="questions-list">
+        <div class="space-y-4">
           {#each section.items as item, itemIndex (item.question)}
-            <div class="question-item">
+            <div class="overflow-hidden rounded-lg border bg-background">
               <button
                 type="button"
                 onclick={() => handleQuestionToggle(sectionIndex, itemIndex)}
-                class={cn('question-button', item.isOpen && 'active')}
+                class={cn(
+                  'flex w-full items-center justify-between p-6 transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                  item.isOpen && 'bg-muted',
+                )}
                 aria-expanded={item.isOpen}
                 aria-controls="faq-answer-{sectionIndex}-{itemIndex}"
               >
-                <h3>{item.question}</h3>
-                <ChevronDown class={cn('chevron', item.isOpen && 'rotated')} aria-hidden="true" />
+                <h3 class="text-left text-lg font-medium sm:text-base">{item.question}</h3>
+                <ChevronDown
+                  class={cn(
+                    'h-5 w-5 transform transition-transform duration-200',
+                    item.isOpen && 'rotate-180',
+                  )}
+                  aria-hidden="true"
+                />
               </button>
 
               {#if item.isOpen}
                 <div
                   id="faq-answer-{sectionIndex}-{itemIndex}"
-                  class="answer"
+                  class="p-6 pt-0 text-muted-foreground"
                   transition:slide={{ duration: 200 }}
                   role="region"
                   aria-labelledby="question-{sectionIndex}-{itemIndex}"
@@ -84,98 +94,3 @@
     {/each}
   </div>
 </section>
-
-<style lang="postcss">
-  .faq-container {
-    @apply container mx-auto px-4 py-16;
-  }
-
-  .faq-header {
-    @apply mb-16 text-center;
-  }
-
-  .faq-header h1 {
-    @apply mb-6 text-5xl font-bold tracking-tight text-primary;
-  }
-
-  .subtitle {
-    @apply mx-auto max-w-2xl text-xl text-muted-foreground;
-  }
-
-  .open-counter {
-    @apply mt-2 text-sm text-muted-foreground;
-  }
-
-  .faq-sections {
-    @apply mx-auto max-w-3xl space-y-12;
-  }
-
-  .faq-section {
-    @apply rounded-xl border bg-card p-6 shadow-sm;
-  }
-
-  .faq-section header {
-    @apply mb-6 rounded-lg bg-muted p-4;
-  }
-
-  .faq-section h2 {
-    @apply text-2xl font-semibold text-primary;
-  }
-
-  .questions-list {
-    @apply space-y-4;
-  }
-
-  .question-item {
-    @apply overflow-hidden rounded-lg border bg-background;
-  }
-
-  .question-button {
-    @apply flex w-full items-center justify-between p-6 transition-colors hover:bg-muted/50;
-  }
-
-  .question-button h3 {
-    @apply text-left text-lg font-medium;
-  }
-
-  .chevron {
-    @apply h-5 w-5 transform transition-transform duration-200;
-  }
-
-  .chevron.rotated {
-    @apply rotate-180;
-  }
-
-  .answer {
-    @apply p-6 pt-0 text-muted-foreground;
-  }
-
-  /* Focus styles */
-  .question-button:focus-visible {
-    @apply outline-none ring-2 ring-ring ring-offset-2;
-  }
-
-  /* Active state */
-  .question-button.active {
-    @apply bg-muted;
-  }
-
-  /* Responsive adjustments */
-  @media (max-width: 640px) {
-    .faq-header h1 {
-      @apply text-4xl;
-    }
-
-    .subtitle {
-      @apply text-lg;
-    }
-
-    .question-button {
-      @apply p-4;
-    }
-
-    .question-button h3 {
-      @apply text-base;
-    }
-  }
-</style>

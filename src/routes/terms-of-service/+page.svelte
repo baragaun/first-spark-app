@@ -1,16 +1,12 @@
 <script lang="ts">
   import MetaTags from '$lib/components/shared/meta-tags.svelte';
 
-  // Use runes for state management
-  const lastUpdated = $state(
-    new Date().toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    }),
-  );
+  const lastUpdated = new Date().toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 
-  // Effect for tracking page views
   $effect(() => {
     if (typeof window !== 'undefined') {
       console.log(`Terms of Service viewed at ${new Date().toISOString()}`);

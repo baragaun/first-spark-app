@@ -1,22 +1,13 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
-  import LogoImage from '../../assets/icon.svg';
-
-  // Use runes for state management
-  const currentYear = $derived(new Date().getFullYear());
+  const currentYear = new Date().getFullYear();
 </script>
 
 <footer class="border-t bg-background">
   <div class="container mx-auto px-4 py-4">
     <div class="flex flex-col items-center justify-between gap-4 md:flex-row md:gap-8">
-      <!-- Logo and Copyright -->
-      <div class="flex flex-col items-center gap-2 lg:flex-row lg:items-center lg:gap-4">
-        <a href="/" class="flex items-center gap-2" aria-label="Go to homepage">
-          <img src={LogoImage} alt="First Spark Logo" class="h-8 w-8" width="32" height="32" />
-          <span class="font-lexend whitespace-nowrap text-xl font-bold text-primary"
-            >First Spark</span
-          >
-        </a>
+      <!-- Copyright -->
+      <div class="flex flex-col items-center lg:items-start">
         <p class="text-center text-sm text-muted-foreground lg:text-left">
           © {currentYear} First Spark. All rights reserved.
         </p>
