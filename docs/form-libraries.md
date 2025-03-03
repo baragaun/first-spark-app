@@ -2,7 +2,7 @@
 
 ## [formsnap](https://www.formsnap.dev/docs)
 
-Formsnap is a UI component library for Svelte that provides form primitives. We use it for:
+Formsnap is a [UI component](https://next.shadcn-svelte.com/docs/components/form) library for Svelte that provides form primitives. We use it for:
 
 - Creating accessible form components with proper ARIA attributes
 - Providing a consistent component API across our form elements
@@ -43,5 +43,5 @@ Together, these libraries provide a complete form solution:
 - **formsnap**: Handles the UI components and accessibility
 - **sveltekit-superforms**: Manages form data, validation, and submission
 
-This combination allows us to build robust, accessible, and type-safe forms with minimal boilerplate 
+This combination allows us to build robust, accessible, and type-safe forms with minimal boilerplate
 code.
