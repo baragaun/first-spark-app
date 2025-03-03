@@ -1,6 +1,6 @@
 # Form Libraries in Our Project
 
-## formsnap
+## [formsnap](https://www.formsnap.dev/docs)
 
 Formsnap is a UI component library for Svelte that provides form primitives. We use it for:
 
@@ -9,11 +9,18 @@ Formsnap is a UI component library for Svelte that provides form primitives. We 
 - Handling form field state management (errors, validation, etc.)
 - Building composable form components that work together seamlessly
 
-Formsnap serves as the foundation for our form UI components, providing the underlying functionality while our custom components add styling and project-specific behavior.
+Formsnap serves as the foundation for our form UI components, providing the underlying functionality 
+while our custom components add styling and project-specific behavior.
 
-## sveltekit-superforms
+References:
 
-Sveltekit-superforms is a form management library specifically designed for SvelteKit applications. We use it for:
+- [Homepage](https://www.formsnap.dev/docs)
+- [Github](https://github.com/svecosystem/formsnap)
+
+## [sveltekit-superforms](https://superforms.rocks/)
+
+Sveltekit-superforms is a form management library specifically designed for SvelteKit applications. 
+We use it for:
 
 - Form validation with schema support (works with Zod, Yup, etc.)
 - Type-safe form handling with TypeScript integration
@@ -22,6 +29,14 @@ Sveltekit-superforms is a form management library specifically designed for Svel
 - Simplified form state management
 - Handling form submissions with proper error handling
 - Managing form data throughout the form lifecycle
+
+References:
+
+- [Homepage](https://superforms.rocks/)
+- [Github](https://github.com/ciscoheat/sveltekit-superforms)
+- [Intro video](https://www.youtube.com/watch?v=MiKzH3kcVfs)
+
+## Combination
 
 Together, these libraries provide a complete form solution:
 
