@@ -60,6 +60,9 @@ importers:
       prettier:
         specifier: ^3.4.2
         version: 3.5.2
+      prettier-plugin-organize-imports:
+        specifier: ^4.1.0
+        version: 4.1.0(prettier@3.5.2)(typescript@5.7.3)
       prettier-plugin-svelte:
         specifier: ^3.3.3
         version: 3.3.3(prettier@3.5.2)(svelte@5.20.4)
@@ -2941,7 +2944,6 @@ snapshots:
     dependencies:
       prettier: 3.5.2
       typescript: 5.7.3
-    optional: true
 
   prettier-plugin-svelte@3.3.3(prettier@3.5.2)(svelte@5.20.4):
     dependencies:
