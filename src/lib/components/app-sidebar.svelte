@@ -8,45 +8,45 @@
   import { useSidebar } from '$lib/components/ui/sidebar/context.svelte.js';
   import { fly } from 'svelte/transition';
   import { quartOut } from 'svelte/easing';
-	import { page } from '$app/stores';
+  import { page } from '$app/stores';
 
   const sidebar = useSidebar();
 
-	// Get current path for active state
-	let currentPath = $derived($page.url.pathname);
+  // Get current path for active state
+  let currentPath = $derived($page.url.pathname);
 
-	const items = [
-		{
-			title: 'Home',
-			url: '/',
-			icon: House
-		},
-		{
-			title: 'Inbox',
-			url: '#',
-			icon: Inbox
-		},
-		{
-			title: 'Conversations',
-			url: '#',
-			icon: MessageSquare
-		},
-		{
-			title: 'Contacts',
-			url: '#',
-			icon: BookUser
-		},
-		{
-			title: 'Settings',
-			url: '/settings',
-			icon: Settings
-		}
-	];
+  const items = [
+    {
+      title: 'Home',
+      url: '/',
+      icon: House,
+    },
+    {
+      title: 'Inbox',
+      url: '#',
+      icon: Inbox,
+    },
+    {
+      title: 'Conversations',
+      url: '#',
+      icon: MessageSquare,
+    },
+    {
+      title: 'Contacts',
+      url: '#',
+      icon: BookUser,
+    },
+    {
+      title: 'Settings',
+      url: '/settings',
+      icon: Settings,
+    },
+  ];
 
-	// Check if item is active
-	function isActive(url: string): boolean {
-		return currentPath === url;
-	}
+  // Check if item is active
+  function isActive(url: string): boolean {
+    return currentPath === url;
+  }
 </script>
 
 <div class="flex">
@@ -69,31 +69,31 @@
         </a>
       </div>
 
-			<Sidebar.Group>
-				<Sidebar.Menu>
-					{#each items as item, i (item.title)}
-						<div in:fly={{ x: -20, duration: 300, delay: 150 + i * 50, easing: quartOut }}>
-							<Sidebar.MenuItem>
-								<Sidebar.MenuButton isActive={isActive(item.url)}>
-									{#snippet child({ props })}
-										<a href={item.url} {...props}>
-											<item.icon />
-											{#if sidebar.state !== 'collapsed'}
-												<span
-													in:fly={{ x: -20, duration: 300, delay: 200, easing: quartOut }}
-													out:fly={{ x: -20, duration: 200, easing: quartOut }}
-												>
-													{item.title}
-												</span>
-											{/if}
-										</a>
-									{/snippet}
-								</Sidebar.MenuButton>
-							</Sidebar.MenuItem>
-						</div>
-					{/each}
-				</Sidebar.Menu>
-			</Sidebar.Group>
-		</Sidebar.Content>
-	</Sidebar.Root>
+      <Sidebar.Group>
+        <Sidebar.Menu>
+          {#each items as item, i (item.title)}
+            <div in:fly={{ x: -20, duration: 300, delay: 150 + i * 50, easing: quartOut }}>
+              <Sidebar.MenuItem>
+                <Sidebar.MenuButton isActive={isActive(item.url)}>
+                  {#snippet child({ props })}
+                    <a href={item.url} {...props}>
+                      <item.icon />
+                      {#if sidebar.state !== 'collapsed'}
+                        <span
+                          in:fly={{ x: -20, duration: 300, delay: 200, easing: quartOut }}
+                          out:fly={{ x: -20, duration: 200, easing: quartOut }}
+                        >
+                          {item.title}
+                        </span>
+                      {/if}
+                    </a>
+                  {/snippet}
+                </Sidebar.MenuButton>
+              </Sidebar.MenuItem>
+            </div>
+          {/each}
+        </Sidebar.Menu>
+      </Sidebar.Group>
+    </Sidebar.Content>
+  </Sidebar.Root>
 </div>
