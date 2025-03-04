@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@baragaun/bg-node-client':
-        specifier: github:baragaun/bg-node-client
-        version: git+https://git@github.com:baragaun/bg-node-client.git#8a5f0a6a3127ea99ed3ac776cbefa5373b417126(prettier@3.5.2)
+        specifier: git+https://github.com/baragaun/bg-node-client
+        version: https://codeload.github.com/baragaun/bg-node-client/tar.gz/bc673f04955497c1dd31f8c751032d70c9fef01d(prettier@3.5.2)
       formsnap:
         specifier: ^2.0.0
         version: 2.0.0(svelte@5.20.4)(sveltekit-superforms@2.23.1(@sveltejs/kit@2.17.2(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.20.4)(vite@6.1.1(@types/node@22.13.9)(jiti@1.21.7)(yaml@2.7.0)))(svelte@5.20.4)(vite@6.1.1(@types/node@22.13.9)(jiti@1.21.7)(yaml@2.7.0)))(@types/json-schema@7.0.15)(svelte@5.20.4)(typescript@5.7.3))
@@ -132,8 +132,8 @@ packages:
   '@babel/runtime@7.9.6':
     resolution: {integrity: sha512-64AF1xY3OAkFHqOb9s4jpgk1Mm5vDZ4L3acHvAml+53nO1XbXLuDodsVpO4OIUsmemlUHMxNdYMNJmsvOwLrvQ==}
 
-  '@baragaun/bg-node-client@git+https://git@github.com:baragaun/bg-node-client.git#8a5f0a6a3127ea99ed3ac776cbefa5373b417126':
-    resolution: {commit: 8a5f0a6a3127ea99ed3ac776cbefa5373b417126, repo: git@github.com:baragaun/bg-node-client.git, type: git}
+  '@baragaun/bg-node-client@https://codeload.github.com/baragaun/bg-node-client/tar.gz/bc673f04955497c1dd31f8c751032d70c9fef01d':
+    resolution: {tarball: https://codeload.github.com/baragaun/bg-node-client/tar.gz/bc673f04955497c1dd31f8c751032d70c9fef01d}
     version: 0.0.1
     engines: {node: '>= 22.11 < 23.9'}
 
@@ -2748,7 +2748,7 @@ snapshots:
     dependencies:
       regenerator-runtime: 0.13.11
 
-  '@baragaun/bg-node-client@git+https://git@github.com:baragaun/bg-node-client.git#8a5f0a6a3127ea99ed3ac776cbefa5373b417126(prettier@3.5.2)':
+  '@baragaun/bg-node-client@https://codeload.github.com/baragaun/bg-node-client/tar.gz/bc673f04955497c1dd31f8c751032d70c9fef01d(prettier@3.5.2)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.10.0)
       '@signalapp/libsignal-client': 0.67.1
