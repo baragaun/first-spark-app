@@ -27,7 +27,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --no-frozen-lockfile --unsafe-perm
 
       - name: Run unit tests
         run: pnpm run test
@@ -53,7 +53,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --no-frozen-lockfile --unsafe-perm
 
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chrome
