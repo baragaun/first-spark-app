@@ -29,7 +29,7 @@
     "@testing-library/svelte": "^5.2.7",
     "@types/node": "^22.13.5",
     "autoprefixer": "^10.4.20",
-    "bits-ui": "^1.3.0",
+    "bits-ui": "^1.3.2",
     "clsx": "^2.1.1",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
@@ -52,6 +52,9 @@
     "vitest": "^3.0.7"
   },
   "dependencies": {
+    "@baragaun/bg-node-client": "github:baragaun/bg-node-client",
+    "formsnap": "^2.0.0",
+    "sveltekit-superforms": "^2.23.1",
     "tailwindcss-animate": "^1.0.7"
   },
   "pnpm": {
