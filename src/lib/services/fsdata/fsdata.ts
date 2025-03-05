@@ -1,6 +1,7 @@
-import BgNodeClient, {
-  DbType,
+import client, {
   type BgNodeClientConfig,
+  DbType,
+  ModelType,
   type MyUser,
   UserIdentType,
 } from '@baragaun/bg-node-client'
@@ -10,13 +11,12 @@ const config: BgNodeClientConfig = {
   dbType: DbType.rxdb,
   inBrowser: true,
 };
-let client: BgNodeClient | undefined = undefined;
 
 const fsdata = {
   getClient: () => {
-    if (!client) {
-      client = new BgNodeClient(null, config);
-    }
+    // if (!client) {
+    //   client = new BgNodeClient(null, config);
+    // }
 
     return client;
   },
@@ -28,24 +28,20 @@ const signUpUser = async (
   email: string | undefined,
   password: string | undefined,
 ): Promise<MyUser | null> => {
-  const result = await fsdata.getClient().signUpUser(
+  const result = await fsdata.getClient().operations.myUser.signUpUser(
     userHandle,
     email,
     password,
   );
 
-  if (result.error) {
-    console.error('SignUp failed.', result.error);
-  } else {
-    const myUser = result.object;
-    if (myUser) {
-      console.log('SignUp succeeded.', myUser);
-
-      return myUser;
-    }
+  if (result.error || !result.object?.userId) {
+    console.error('SignUpUser failed.', result.error);
+    return null;
   }
 
-  return null;
+  const { object } = await client.operations.findById<MyUser>(result.object.userId, ModelType.MyUser);
+
+  return object || null;
 }
 
 // EXAMPLE
@@ -54,24 +50,20 @@ const signInUser = async (
   identType: UserIdentType,
   password: string,
 ): Promise<MyUser | null> => {
-  const result = await fsdata.getClient().signInUser(
+  const result = await fsdata.getClient().operations.myUser.signInUser(
     ident,
     identType,
     password,
   );
 
-  if (result.error) {
-    console.error('SignUp failed.', result.error);
-  } else {
-    const myUser = result.object;
-    if (myUser) {
-      console.log('SignUp succeeded.', myUser);
-
-      return myUser;
-    }
+  if (result.error || !result.object?.userId) {
+    console.error('SignInUser failed.', result.error);
+    return null;
   }
 
-  return null;
+  const { object } = await client.operations.findById<MyUser>(result.object.userId, ModelType.MyUser);
+
+  return object || null;
 }
 
 export default fsdata;
