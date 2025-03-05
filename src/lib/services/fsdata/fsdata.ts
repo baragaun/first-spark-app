@@ -1,11 +1,11 @@
 import {
   createClient,
-  type BgNodeClientConfig,
   DbType,
-  ModelType,
+  UserIdentType,
+  type BgNodeClient,
+  type BgNodeClientConfig,
   type MyUser,
-  UserIdentType, type BgNodeClient,
-} from '@baragaun/bg-node-client'
+} from '@baragaun/bg-node-client';
 
 let _client: BgNodeClient | undefined;
 const _config: BgNodeClientConfig = {
@@ -20,7 +20,7 @@ const fsdata = {
   },
 
   getClient: () => _client,
-}
+};
 
 // EXAMPLE
 const signUpUser = async (
@@ -38,11 +38,7 @@ const signUpUser = async (
     return null;
   }
 
-  const result = await client.operations.myUser.signUpUser(
-    userHandle,
-    email,
-    password,
-  );
+  const result = await client.operations.myUser.signUpUser(userHandle, email, password);
 
   if (result.error || !result.object?.userId) {
     console.error('SignUpUser failed.', result.error);
@@ -50,7 +46,7 @@ const signUpUser = async (
   }
 
   return client.operations.myUser.findMyUser({ useCached: false });
-}
+};
 
 // EXAMPLE
 const signInUser = async (
@@ -65,11 +61,7 @@ const signInUser = async (
     return null;
   }
 
-  const result = await client.operations.myUser.signInUser(
-    ident,
-    identType,
-    password,
-  );
+  const result = await client.operations.myUser.signInUser(ident, identType, password);
 
   if (result.error || !result.object?.userId) {
     console.error('SignInUser failed.', result.error);
@@ -77,6 +69,6 @@ const signInUser = async (
   }
 
   return client.operations.myUser.findMyUser({ useCached: false });
-}
+};
 
 export default fsdata;
