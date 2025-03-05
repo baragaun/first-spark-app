@@ -1,25 +1,25 @@
-import client, {
+import {
+  createClient,
   type BgNodeClientConfig,
   DbType,
   ModelType,
   type MyUser,
-  UserIdentType,
+  UserIdentType, type BgNodeClient,
 } from '@baragaun/bg-node-client'
 
-const config: BgNodeClientConfig = {
+let _client: BgNodeClient | undefined;
+const _config: BgNodeClientConfig = {
   useMockData: false,
   dbType: DbType.rxdb,
   inBrowser: true,
 };
 
 const fsdata = {
-  getClient: () => {
-    // if (!client) {
-    //   client = new BgNodeClient(null, config);
-    // }
-
-    return client;
+  init: async (): Promise<void> => {
+    _client = await createClient(_config);
   },
+
+  getClient: () => _client,
 }
 
 // EXAMPLE
@@ -28,7 +28,17 @@ const signUpUser = async (
   email: string | undefined,
   password: string | undefined,
 ): Promise<MyUser | null> => {
-  const result = await fsdata.getClient().operations.myUser.signUpUser(
+  if (!fsdata.getClient()) {
+    await fsdata.init();
+  }
+  const client = fsdata.getClient();
+
+  if (!client) {
+    console.log('signUpUser: no client.');
+    return null;
+  }
+
+  const result = await client.operations.myUser.signUpUser(
     userHandle,
     email,
     password,
@@ -50,7 +60,14 @@ const signInUser = async (
   identType: UserIdentType,
   password: string,
 ): Promise<MyUser | null> => {
-  const result = await fsdata.getClient().operations.myUser.signInUser(
+  const client = fsdata.getClient();
+
+  if (!client) {
+    console.log('signInUser: no client.');
+    return null;
+  }
+
+  const result = await client.operations.myUser.signInUser(
     ident,
     identType,
     password,
