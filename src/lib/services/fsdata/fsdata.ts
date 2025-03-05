@@ -1,26 +1,26 @@
-import BgNodeClient, {
-  DbType,
-  UserIdentType,
+import {
+  createClient,
   type BgNodeClientConfig,
+  DbType,
+  ModelType,
   type MyUser,
-} from '@baragaun/bg-node-client';
+  UserIdentType, type BgNodeClient,
+} from '@baragaun/bg-node-client'
 
-const config: BgNodeClientConfig = {
+let _client: BgNodeClient | undefined;
+const _config: BgNodeClientConfig = {
   useMockData: false,
   dbType: DbType.rxdb,
   inBrowser: true,
 };
-let client: BgNodeClient | undefined = undefined;
 
 const fsdata = {
-  getClient: () => {
-    if (!client) {
-      client = new BgNodeClient(null, config);
-    }
-
-    return client;
+  init: async (): Promise<void> => {
+    _client = await createClient(_config);
   },
-};
+
+  getClient: () => _client,
+}
 
 // EXAMPLE
 const signUpUser = async (
@@ -28,21 +28,29 @@ const signUpUser = async (
   email: string | undefined,
   password: string | undefined,
 ): Promise<MyUser | null> => {
-  const result = await fsdata.getClient().signUpUser(userHandle, email, password);
+  if (!fsdata.getClient()) {
+    await fsdata.init();
+  }
+  const client = fsdata.getClient();
 
-  if (result.error) {
-    console.error('SignUp failed.', result.error);
-  } else {
-    const myUser = result.object;
-    if (myUser) {
-      console.log('SignUp succeeded.', myUser);
-
-      return myUser;
-    }
+  if (!client) {
+    console.log('signUpUser: no client.');
+    return null;
   }
 
-  return null;
-};
+  const result = await client.operations.myUser.signUpUser(
+    userHandle,
+    email,
+    password,
+  );
+
+  if (result.error || !result.object?.userId) {
+    console.error('SignUpUser failed.', result.error);
+    return null;
+  }
+
+  return client.operations.myUser.findMyUser({ useCached: false });
+}
 
 // EXAMPLE
 const signInUser = async (
@@ -50,20 +58,25 @@ const signInUser = async (
   identType: UserIdentType,
   password: string,
 ): Promise<MyUser | null> => {
-  const result = await fsdata.getClient().signInUser(ident, identType, password);
+  const client = fsdata.getClient();
 
-  if (result.error) {
-    console.error('SignUp failed.', result.error);
-  } else {
-    const myUser = result.object;
-    if (myUser) {
-      console.log('SignUp succeeded.', myUser);
-
-      return myUser;
-    }
+  if (!client) {
+    console.log('signInUser: no client.');
+    return null;
   }
 
-  return null;
-};
+  const result = await client.operations.myUser.signInUser(
+    ident,
+    identType,
+    password,
+  );
+
+  if (result.error || !result.object?.userId) {
+    console.error('SignInUser failed.', result.error);
+    return null;
+  }
+
+  return client.operations.myUser.findMyUser({ useCached: false });
+}
 
 export default fsdata;

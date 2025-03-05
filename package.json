@@ -59,7 +59,11 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
-      "esbuild"
+      "@firebase/util",
+      "@signalapp/libsignal-client",
+      "esbuild",
+      "protobufjs",
+      "rxdb"
     ]
   }
 }
