@@ -49,9 +49,7 @@ const signUpUser = async (
     return null;
   }
 
-  const { object } = await client.operations.findById<MyUser>(result.object.userId, ModelType.MyUser);
-
-  return object || null;
+  return client.operations.myUser.findMyUser({ useCached: false });
 }
 
 // EXAMPLE
@@ -78,9 +76,7 @@ const signInUser = async (
     return null;
   }
 
-  const { object } = await client.operations.findById<MyUser>(result.object.userId, ModelType.MyUser);
-
-  return object || null;
+  return client.operations.myUser.findMyUser({ useCached: false });
 }
 
 export default fsdata;
