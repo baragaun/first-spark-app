@@ -43,7 +43,7 @@ jobs:
 
       - name: Create build secrets
         run: |
-          echo ${{ secrets.PUBLIC_SITE_URL }}   
+          echo ${{ env.PUBLIC_SITE_URL }}   
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
