@@ -41,6 +41,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Create build secrets
+        run: |
+          echo ${{ secrets.PUBLIC_SITE_URL }}   
+
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
