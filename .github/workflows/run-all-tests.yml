@@ -3,6 +3,11 @@ name: Run All Tests
 on:
   push:
     branches: [milestone-01]
+    paths:
+    - 'src/**'
+    - 'tests/**'
+    - 'package.json'
+    - 'pnpm-lock.yaml'
   pull_request:
     branches: [milestone-01]
 
