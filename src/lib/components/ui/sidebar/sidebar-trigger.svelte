@@ -9,7 +9,6 @@
     ref = $bindable(null),
     class: className,
     onclick,
-    ...restProps
   }: ComponentProps<typeof Button> & {
     onclick?: (e: MouseEvent) => void;
   } = $props();

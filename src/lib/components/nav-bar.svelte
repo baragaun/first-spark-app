@@ -13,20 +13,15 @@
   import * as Sidebar from '$lib/components/ui/sidebar/index.js';
   import { onMount } from 'svelte';
   import { writable } from 'svelte/store';
-
-  // Update auth store when localStorage changes
-  const updateAuthState = () => {
-    const authToken = localStorage.getItem('authToken');
-    authStore.set({ isAuthenticated: !!authToken });
-  };
+  import fsdata from '$lib/services/fsdata/fsdata';
 
   // Check authentication status on mount
   onMount(() => {
-    updateAuthState();
+    authStore.set({ isAuthenticated: fsdata.isSignedIn() });
 
     // Listen for auth state changes
     window.addEventListener('storage', () => {
-      updateAuthState();
+      authStore.set({ isAuthenticated: fsdata.isSignedIn() });
     });
   });
 

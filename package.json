@@ -52,18 +52,17 @@
     "vitest": "^3.0.7"
   },
   "dependencies": {
-    "@baragaun/bg-node-client": "github:baragaun/bg-node-client",
+    "@baragaun/bg-node-client": "^0.0.8",
     "formsnap": "^2.0.0",
+    "rxdb": "^16.8.1",
     "sveltekit-superforms": "^2.23.1",
     "tailwindcss-animate": "^1.0.7"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
       "@firebase/util",
-      "@signalapp/libsignal-client",
       "esbuild",
-      "protobufjs",
-      "rxdb"
+      "protobufjs"
     ]
   }
 }

@@ -1,109 +1,32 @@
-import {
-  AppEnvironment,
-  BgNodeClient,
-  type BgNodeClientConfig,
-  CachePolicy,
-  DbType,
-  HttpHeaderName,
-  type MyUser,
-  UserIdentType,
-} from '@baragaun/bg-node-client';
-
-let _client: BgNodeClient | undefined;
-
-const _init = async (): Promise<boolean> => {
-  if (_client) {
-    return true;
-  }
-
-  const config: BgNodeClientConfig = {
-    dbType: DbType.rxdb,
-    inBrowser: true,
-    fsdata: {
-      url: import.meta.env.VITE_FSDATA_URL || 'http://localhost:8092/fsdata/api/graphql',
-      headers: {
-        [HttpHeaderName.consumer]: 'first-spark-app',
-      },
-    },
-  };
-
-  if (import.meta.env.VITE_APP_ENVIRONMENT) {
-    config.appEnvironment = import.meta.env.VITE_APP_ENVIRONMENT as AppEnvironment;
-  }
-
-  if (process.env.MOCK_DATA === 'true') {
-    config.useMockData = true;
-  }
-
-  _client = await new BgNodeClient().init(config);
-
-  if (!_client) {
-    throw new Error('Error initializing BgNodeClient');
-  }
-
-  return true;
-};
+import clientStore from '@/services/fsdata/clientStore'
+import findAvailableUserHandle from '@/services/fsdata/operations/findAvailableUserHandle';
+import findMyUser from '@/services/fsdata/operations/findMyUser';
+import init from '@/services/fsdata/init';
+import isUserIdentAvailable from '@/services/fsdata/operations/isUserIdentAvailable';
+import resetMyPassword from '@/services/fsdata/operations/resetMyPassword';
+import signInUser from '@/services/fsdata/operations/signInUser';
+import signInWithToken from '@/services/fsdata/operations/signInWithToken';
+import signMeOut from '@/services/fsdata/operations/signMeOut';
+import signUpUser from '@/services/fsdata/operations/signUpUser';
+import updateMyUser from '@/services/fsdata/operations/updateMyUser';
+import verifyMultiStepActionToken from '@/services/fsdata/operations/verifyMultiStepActionToken';
+import verifyMyEmail from '@/services/fsdata/operations/verifyMyEmail';
 
 const fsdata = {
-  init: _init,
-
-  getClient: () => _client,
-
-  signUpUser: async (
-    userHandle: string,
-    email: string | undefined,
-    password: string | undefined,
-  ): Promise<MyUser | null> => {
-    if (!(await _init()) || !_client) {
-      return null;
-    }
-
-    const result = await _client.operations.myUser.signUpUser({ userHandle, email, password });
-
-    if (result.error || !result.object?.userAuthResponse?.userId) {
-      console.error('SignUpUser failed.', result.error);
-
-      return null;
-    }
-
-    return result.object.myUser || null;
-  },
-
-  signInUser: async (
-    ident: string,
-    identType: UserIdentType,
-    password: string,
-  ): Promise<MyUser | null> => {
-    if (!(await _init()) || !_client) {
-      return null;
-    }
-
-    const result = await _client.operations.myUser.signInUser({ ident, identType, password });
-
-    if (result.error || !result.object?.userAuthResponse.userId) {
-      console.error('SignInUser failed.', result.error);
-
-      return null;
-    }
-
-    return result.object.myUser || null;
-  },
-
-  signOutUser: async (): Promise<void> => {
-    if (!(await _init()) || !_client) {
-      return;
-    }
-
-    await _client.operations.myUser.signMeOut();
-  },
-
-  findMyUser: async (cachePolicy: CachePolicy): Promise<MyUser | null> => {
-    if (!(await _init()) || !_client) {
-      return null;
-    }
-
-    return _client.operations.myUser.findMyUser({ cachePolicy });
-  },
+  client: clientStore.getClient(),
+  findAvailableUserHandle,
+  findMyUser,
+  init,
+  isSignedIn: () => clientStore.getClient()?.operations.myUser.isSignedIn() || false,
+  isUserIdentAvailable,
+  resetMyPassword,
+  signInUser,
+  signInWithToken,
+  signMeOut,
+  signUpUser,
+  updateMyUser,
+  verifyMultiStepActionToken,
+  verifyMyEmail,
 };
 
 export default fsdata;

@@ -3,32 +3,13 @@
   import { Input } from '$lib/components/ui/input';
   import { writable } from 'svelte/store';
   import { goto } from '$app/navigation';
+  import * as Switch from '$lib/components/ui/switch';
   import { authStore } from '$lib/components/nav-bar.svelte';
   import { PasswordInput } from '$lib/components/ui/password-input';
   import EmailVerification from '$lib/components/email-verification.svelte';
   import AuthCard from '$lib/components/ui/auth-card.svelte';
-
-  type PasswordValidation = {
-    minLength: boolean;
-    notTooSimple: boolean;
-    noRepetitivePattern: boolean;
-    doesNotReuseEmail: boolean;
-    isValid: boolean;
-  };
-
-  const commonPasswords = [
-    '123456',
-    'password',
-    '123456789',
-    '12345678',
-    '12345',
-    '1234567',
-    '1234567890',
-    'qwerty',
-    'abc123',
-    'password1',
-    // Add more common passwords as needed
-  ];
+  import fsdata from '@/services/fsdata/fsdata';
+  import { UserIdentType } from '@baragaun/bg-node-client';
 
   // Step management
   const STEPS = {
@@ -42,30 +23,12 @@
   let email = '';
   let username = '';
   let password = '';
+  let confirmPassword = '';
   let loading = false;
-
-  // Handle email submission from the EmailVerification component
-  const handleEmailSubmit = (event: CustomEvent<{ email: string }>) => {
-    email = event.detail.email;
-  };
-
-  // Handle verification callback
-  const handleVerify = async ({ email, code }: { email: string; code: string }) => {
-    // verificationCode = code;
-    // If verification is successful, move to credentials step
-    currentStep.set(STEPS.CREDENTIALS);
-  };
-
-  // Handle resend from the EmailVerification component
-  const handleResend = (event: CustomEvent<{ email: string }>) => {
-    // Any additional logic for resending
-    console.log('Resending code to:', event.detail.email);
-  };
-
-  // Handle back button from the EmailVerification component
-  const handleBack = (event: CustomEvent) => {
-    // Any additional logic when going back
-  };
+  let isAgeConfirmed = false;
+  let checkingUsername = false;
+  let usernameError = '';
+  let suggestedHandle = '';
 
   // Handle skip verification
   const handleSkip = () => {
@@ -76,10 +39,24 @@
   const handleSignupSubmit = async () => {
     loading = true;
     try {
-      // TODO: Implement your signup logic here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-      localStorage.setItem('authToken', 'your-auth-token');
-      authStore.set({ isAuthenticated: true }); // Update auth store
+      // First check if username is available
+      const isUsernameAvailable = await fsdata.isUserIdentAvailable(
+        username,
+        UserIdentType.userHandle,
+      );
+
+      if (!isUsernameAvailable) {
+        usernameError = 'This username is unavailable.';
+        loading = false;
+        return;
+      }
+
+      // If username is available, proceed with signup
+      const user = await fsdata.signUpUser(username, email, password);
+      if (!user) {
+        throw new Error('Failed to create account');
+      }
+      authStore.set({ isAuthenticated: true });
       await goto('/');
     } catch (error) {
       console.error('Error creating account:', error);
@@ -88,67 +65,62 @@
     }
   };
 
-  const validatePassword = (password: string): PasswordValidation => {
-    const repetitivePattern = /^(.)\1+$/;
-    const result: PasswordValidation = {
-      minLength: true,
-      notTooSimple: true,
-      noRepetitivePattern: true,
-      doesNotReuseEmail: true,
-      isValid: true,
+  const validatePassword = (password: string) => {
+    const minLength = password.length >= 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+    return {
+      isValid: minLength && hasUpperCase && hasLowerCase && hasNumber && hasSymbol,
+      minLength,
+      hasUpperCase,
+      hasLowerCase,
+      hasNumber,
+      hasSymbol,
     };
-
-    if (password.length < 8) {
-      result.minLength = false;
-      result.isValid = false;
-    }
-
-    if (commonPasswords.includes(password.toLowerCase())) {
-      result.notTooSimple = false;
-      result.isValid = false;
-    }
-
-    if (repetitivePattern.test(password)) {
-      result.noRepetitivePattern = false;
-      result.isValid = false;
-    }
-
-    if (email) {
-      const firstEmailPart = email.split('@')[0];
-      if (firstEmailPart && password.toLowerCase().includes(firstEmailPart.toLowerCase())) {
-        result.doesNotReuseEmail = false;
-        result.isValid = false;
-      }
-    }
-
-    return result;
   };
 
   const getPasswordError = (password: string) => {
-    if (!password) {
-      return '';
-    }
-
+    if (!password) return '';
     const validation = validatePassword(password);
 
     if (!validation.minLength) {
       return 'Password must be at least 8 characters long';
     }
-
     if (
-      !validation.notTooSimple ||
-      !validation.noRepetitivePattern ||
-      !validation.doesNotReuseEmail
+      !(
+        validation.hasUpperCase &&
+        validation.hasLowerCase &&
+        validation.hasNumber &&
+        validation.hasSymbol
+      )
     ) {
-      return 'Password is too simple or guessable';
+      return 'Password must include uppercase, lowercase, number and special character';
     }
-
     return '';
   };
+
+  // Add this function to fetch available handle
+  async function updateSuggestedHandle() {
+    // todo: This should only be called once, when the user clicked "Next" on the email
+    //  input step during onboarding.
+    if (email && fsdata.isSignedIn()) {
+      const handle = await fsdata.findAvailableUserHandle(email);
+      suggestedHandle = handle || '';
+      username = suggestedHandle;
+    }
+  }
+
+  // Watch email changes
+  $: if (email) {
+    updateSuggestedHandle();
+  }
 </script>
 
-<div class="relative mx-auto flex h-screen items-center justify-center">
-  <div class="relative w-full max-w-md px-4">
+<div class="grid flex-1 place-items-center">
+  <div class="flex flex-col items-center px-4">
     {#if $currentStep !== STEPS.EMAIL}
       <Button
         variant="ghost"
@@ -164,7 +136,7 @@
       <AuthCard
         title={$currentStep === STEPS.EMAIL ? 'Sign Up' : 'Verify your email'}
         description={$currentStep === STEPS.EMAIL
-          ? 'By continuing, you agree to our User Agreement and acknowledge that you understand and agree to our Privacy Policy.'
+          ? 'By continuing, you agree to our User Agreement and acknowledge that you understand the Privacy Policy.'
           : `Enter the six digit code we sent to ${email}`}
       >
         <EmailVerification
@@ -175,11 +147,8 @@
           loadingText="Sending..."
           verifyingText="Verifying..."
           showSkipButton={true}
-          onEmailSubmit={() => handleEmailSubmit}
-          onVerify={handleVerify}
-          onResend={() => handleResend}
-          onBack={() => handleBack}
           onSkip={handleSkip}
+          onVerificationSuccess={() => currentStep.set(STEPS.CREDENTIALS)}
         />
 
         {#if $currentStep === STEPS.EMAIL}
@@ -193,20 +162,28 @@
     {:else if $currentStep === STEPS.CREDENTIALS}
       <AuthCard
         title="Create your username and password"
+        description="First Spark is anonymous, so your username is what you'll go by here. Choose wisely—because once you get a name, you can't change it."
         showBackButton={true}
         onBack={() => currentStep.set(STEPS.VERIFY)}
       >
         <form on:submit|preventDefault={handleSignupSubmit} class="space-y-4">
           <div class="space-y-2">
-            <Input
-              type="text"
-              placeholder="Username (e.g., CosmoExplorer, PixelPioneer)"
-              bind:value={username}
-              required
-            />
-            <p class="text-xs text-muted-foreground">
-              Usernames are unique handles. We'll verify that yours is not already taken.
-            </p>
+            <div class="space-y-2">
+              <Input
+                type="text"
+                placeholder="Username (e.g., CosmoExplorer, PixelPioneer)"
+                bind:value={username}
+                required
+              />
+              {#if usernameError}
+                <p class="text-xs text-destructive">{usernameError}</p>
+              {/if}
+            </div>
+            {#if suggestedHandle}
+              <p class="text-xs text-muted-foreground">
+                Suggested username: {suggestedHandle}
+              </p>
+            {/if}
           </div>
           <div class="relative space-y-2">
             <PasswordInput bind:value={password} placeholder="Password" required />
@@ -220,6 +197,30 @@
                   >
                     At least 8 characters
                   </li>
+                  <li
+                    class:text-destructive={!/[A-Z]/.test(password)}
+                    class:text-green-500={/[A-Z]/.test(password)}
+                  >
+                    One uppercase letter
+                  </li>
+                  <li
+                    class:text-destructive={!/[a-z]/.test(password)}
+                    class:text-green-500={/[a-z]/.test(password)}
+                  >
+                    One lowercase letter
+                  </li>
+                  <li
+                    class:text-destructive={!/[0-9]/.test(password)}
+                    class:text-green-500={/[0-9]/.test(password)}
+                  >
+                    One number
+                  </li>
+                  <li
+                    class:text-destructive={!/[!@#$%^&*(),.?":{}|<>]/.test(password)}
+                    class:text-green-500={/[!@#$%^&*(),.?":{}|<>]/.test(password)}
+                  >
+                    One special character
+                  </li>
                 </ul>
               </div>
             {/if}
@@ -227,10 +228,34 @@
               <p class="text-xs text-destructive">{getPasswordError(password)}</p>
             {/if}
           </div>
+          <div class="relative space-y-2">
+            <PasswordInput bind:value={confirmPassword} placeholder="Confirm password" required />
+            {#if password && confirmPassword && password !== confirmPassword}
+              <p class="text-xs text-destructive">Passwords do not match</p>
+            {/if}
+          </div>
+          <div class="space-y-2">
+            <div class="flex items-center justify-between space-x-2">
+              <label for="age-confirmation" class="text-sm font-medium">
+                I confirm that I am at least 18 years of age.
+              </label>
+              <Switch.Root bind:checked={isAgeConfirmed} id="age-confirmation" />
+            </div>
+            {#if !isAgeConfirmed}
+              <p class="text-xs text-destructive">
+                You must confirm you are at least 18 years old to continue.
+              </p>
+            {/if}
+          </div>
           <Button
             type="submit"
             class="w-full"
-            disabled={loading || !password || !validatePassword(password).isValid}
+            disabled={loading ||
+              !isAgeConfirmed ||
+              !password ||
+              !confirmPassword ||
+              password !== confirmPassword ||
+              !validatePassword(password).isValid}
           >
             {loading ? 'Creating account...' : 'Create Account'}
           </Button>

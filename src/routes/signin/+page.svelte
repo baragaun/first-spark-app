@@ -14,6 +14,8 @@
   import * as RadioGroup from '$lib/components/ui/radio-group';
   import { authStore } from '$lib/components/nav-bar.svelte';
   import Mail from 'lucide-svelte/icons/mail';
+  import { UserIdentType } from '@baragaun/bg-node-client';
+  import fsdata from '$lib/services/fsdata/fsdata';
 
   let identifier = ''; // for email or username
   let password = '';
@@ -56,11 +58,20 @@
 
     try {
       if (loginMethod === 'password') {
-        // TODO: Implement your password signin logic here
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-        localStorage.setItem('authToken', 'your-auth-token');
-        authStore.set({ isAuthenticated: true }); // Update auth store
-        await goto('/');
+        await fsdata.signInUser(
+          identifier,
+          identifier.includes('@') ? UserIdentType.email : UserIdentType.userHandle,
+          password,
+        );
+
+        const isAuthenticated = fsdata.isSignedIn();
+
+        if (isAuthenticated) {
+          authStore.set({ isAuthenticated });
+          await goto('/');
+        } else {
+          error = 'Invalid credentials. Please try again.';
+        }
       } else {
         await handleMagicLinkSignIn();
       }
@@ -132,7 +143,7 @@
   });
 </script>
 
-<div class="relative mx-auto flex h-screen items-center justify-center px-4">
+<div class="grid flex-1 place-items-center">
   <Card class="relative w-full max-w-md">
     {#if !emailSent}
       <CardHeader>

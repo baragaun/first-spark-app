@@ -5,6 +5,8 @@
   import * as InputOTP from '$lib/components/ui/input-otp';
   import { onDestroy } from 'svelte';
   import { writable, get } from 'svelte/store';
+  import fsdata from '$lib/services/fsdata/fsdata';
+  import { UserIdentType } from '@baragaun/bg-node-client';
 
   // Props
   export let email = '';
@@ -14,13 +16,8 @@
   export let loadingText = 'Sending...';
   export let verifyingText = 'Verifying...';
   export let showSkipButton = false;
-
-  // Event callback props
-  export let onEmailSubmit = (data: { email: string }) => {};
-  export let onVerify = (data: { email: string; code: string }) => {};
-  export let onResend = (data: { email: string }) => {};
-  export let onBack = (data: { step: string }) => {};
-  export let onSkip = () => {};
+  export let onSkip = () => {}; // Add this prop for handling skip
+  export let onVerificationSuccess = () => {}; // Add this prop for handling successful verification
 
   // Email validation function
   const isValidEmail = (email: string): boolean => {
@@ -38,14 +35,29 @@
   let verificationCode = '';
   let loading = false;
   let verificationError = '';
+  let emailError = '';
   let resendTimer = 30; // Timer in seconds
   let canResend = false;
   let timerInterval: ReturnType<typeof setInterval>;
+  let actionId: string | undefined;
+  let expireAt: Date | undefined;
+  let checkingEmail = false;
 
   // Store the original email to detect changes
 
   // Track emails that have active cooldowns
   const emailCooldowns = new Map<string, number>();
+
+  // Check if email is available
+  const checkEmailAvailability = async (email: string): Promise<boolean> => {
+    try {
+      const isAvailable = await fsdata.isUserIdentAvailable(email, UserIdentType.email);
+      return isAvailable ?? false;
+    } catch (error) {
+      console.error('Error checking email availability:', error);
+      return false;
+    }
+  };
 
   const startResendTimer = (emailAddress: string) => {
     resendTimer = 30;
@@ -69,13 +81,36 @@
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const startEmailVerification = async (emailAddress: string) => {
+    emailError = '';
+
+    // Check if email is available first
+    checkingEmail = true;
+    const isAvailable = await checkEmailAvailability(emailAddress);
+    checkingEmail = false;
+
+    if (!isAvailable) {
+      emailError = 'This email address is already registered.';
+      return false;
+    }
+
+    // const response = await fsdata.signInWithToken(emailAddress);
+    // if (!response || !response?.actionProgress) {
+    //   return false;
+    // }
+    // actionId = response.actionProgress.actionId;
+
+    currentStep.set(STEPS.VERIFY);
+    startResendTimer(emailAddress);
+    return true;
+  };
+
   const handleResendCode = async () => {
     if (!canResend) return;
 
     loading = true;
     try {
-      onResend({ email });
-      startResendTimer(email);
+      await startEmailVerification(email);
     } catch (error) {
       console.error('Error resending code:', error);
     } finally {
@@ -85,13 +120,14 @@
 
   // Handle email submission
   const handleEmailSubmit = async () => {
+    emailError = '';
+
     // Check if this email has an active cooldown
     if (emailCooldowns.has(email)) {
       const cooldownEnd = emailCooldowns.get(email) || 0;
       const remainingTime = Math.ceil((cooldownEnd - Date.now()) / 1000);
 
       if (remainingTime > 0) {
-        // If same email and cooldown active, just show verification screen with current timer
         resendTimer = remainingTime;
         currentStep.set(STEPS.VERIFY);
         return;
@@ -100,24 +136,38 @@
 
     loading = true;
     try {
-      onEmailSubmit({ email });
-      currentStep.set(STEPS.VERIFY);
-      startResendTimer(email);
+      await startEmailVerification(email);
     } catch (error) {
       console.error('Error sending verification code:', error);
+      emailError = 'Failed to send verification code';
     } finally {
       loading = false;
     }
+  };
+
+  const verifyEmailCode = async (code: string) => {
+    // const response = await fsdata.verifyMultiStepActionToken(
+    //   actionId!, // actionId from previous step
+    //   code, // verification code
+    //   undefined, // newPassword (not needed for email verification)
+    // );
+
+    return true;
   };
 
   // Handle verification code submission
   const handleVerifySubmit = async () => {
     loading = true;
     verificationError = '';
+
     try {
-      // Use the onVerify prop instead of dispatching an event
-      await onVerify({ email, code: verificationCode });
-      // Note: The parent component will handle the navigation
+      const success = await verifyEmailCode(verificationCode);
+      if (success) {
+        // Call the success handler which will trigger the step change in the parent
+        onVerificationSuccess();
+      } else {
+        verificationError = 'Invalid verification code. Please try again.';
+      }
     } catch (error) {
       console.error('Error verifying code:', error);
       verificationError = 'Invalid verification code. Please try again.';
@@ -128,7 +178,6 @@
 
   const handleBack = () => {
     const currentStepValue = get(currentStep);
-    onBack({ step: currentStepValue });
     currentStep.set(currentStepValue === STEPS.VERIFY ? STEPS.EMAIL : STEPS.VERIFY);
   };
 
@@ -160,14 +209,23 @@
       {#if email && !isValidEmail(email)}
         <p class="text-xs text-destructive">Please enter a valid email address</p>
       {/if}
+      {#if emailError}
+        <p class="text-xs text-destructive">{emailError}</p>
+      {/if}
     </div>
     <Button
       type="submit"
       class="w-full"
-      disabled={loading || !email || !isValidEmail(email)}
+      disabled={loading || checkingEmail || !email || !isValidEmail(email)}
       onclick={handleEmailSubmit}
     >
-      {loading ? loadingText : buttonText}
+      {#if checkingEmail}
+        Checking email...
+      {:else if loading}
+        {loadingText}
+      {:else}
+        {buttonText}
+      {/if}
     </Button>
   </div>
 {:else if $currentStep === STEPS.VERIFY}
