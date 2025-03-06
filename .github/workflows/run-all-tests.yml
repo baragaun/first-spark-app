@@ -23,7 +23,6 @@ jobs:
 
       - name: Create build secrets
         run: |
-          echo "PUBLIC_SITE_URL=${{ secrets.PUBLIC_SITE_URL }}" >> .env
           echo "PUBLIC_SITE_URL=${{ env.PUBLIC_SITE_URL }}" >> .env
 
       - name: Install pnpm
@@ -48,8 +47,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     needs: unit-tests # Runs only if unit tests pass
-    env:
-      PUBLIC_SITE_URL: ${{ secrets.PUBLIC_SITE_URL }}
 
     steps:
       - name: Checkout code
