@@ -12,11 +12,13 @@
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "format": "prettier --write .",
     "lint": "eslint . --ext .js,.ts,.svelte --fix",
-    "lint:format": "prettier --check . && eslint ."
+    "lint:format": "prettier --check . && eslint .",
+    "build:translations": "inlang export"
   },
   "devDependencies": {
     "@eslint/compat": "^1.2.5",
     "@eslint/js": "^9.18.0",
+    "@inlang/cli": "^3.0.3",
     "@sveltejs/adapter-auto": "^4.0.0",
     "@sveltejs/kit": "^2.16.0",
     "@sveltejs/vite-plugin-svelte": "^5.0.0",
