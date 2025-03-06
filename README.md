@@ -19,13 +19,19 @@ If you haven't already installed [pnpm](https://pnpm.io/):
 npm install -g pnpm
 ```
 
-Install dependencies
+Install dependencies:
 
 ```shell
 pnpm install
 ```
 
-Start the development server
+Copy the development env file:
+
+```bash
+cp dev-env.txt .env
+```
+
+Start the development server:
 
 ```shell
 pnpm run dev

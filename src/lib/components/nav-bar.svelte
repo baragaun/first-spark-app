@@ -35,10 +35,9 @@
 
   // Theme state management
   let isDarkMode = false;
+  let isMobileMenuOpen = false;
 
-  // Initialize theme based on system preference or stored value
   onMount(() => {
-    // Check if theme is stored in localStorage
     const storedTheme = localStorage.getItem('theme');
     if (
       storedTheme === 'dark' ||
@@ -54,9 +53,6 @@
     document.documentElement.classList.toggle('dark');
     localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
   };
-
-  // Mobile menu state
-  let isMobileMenuOpen = false;
 </script>
 
 <nav
