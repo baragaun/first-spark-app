@@ -1,9 +1,9 @@
 <script lang="ts">
   import type { MetaTagsProps } from '$lib/types/meta';
-  import { PUBLIC_SITE_URL } from '$env/static/public';
+  // import { PUBLIC_SITE_URL } from '$env/static/public';
 
   // Provide a fallback URL if PUBLIC_SITE_URL is not defined
-  const siteUrl = PUBLIC_SITE_URL || 'http://localhost:5173';
+  const siteUrl = 'http://localhost:5173';
 
   // Use $props rune for component props
   let { title, description, canonicalUrl, ogImage }: MetaTagsProps = $props();
