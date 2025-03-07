@@ -1,5 +1,46 @@
 {
   "welcome": "Welcome to First Spark",
   "welcome_subtitle": "Connect, inspire, thrive!",
-  "get_started": "Get Started"
+  "get_started": "Get Started",
+
+  "signup": {
+    "title": "Sign Up",
+    "verify_email_title": "Verify your email",
+    "terms_agreement": "By continuing, you agree to our User Agreement and acknowledge that you understand the Privacy Policy.",
+    "verify_code_message": "Enter the six digit code we sent to {email}",
+    "have_account": "Already have an account?",
+    "login_link": "Log In",
+    "create_credentials_title": "Create your username and password",
+    "username_description": "First Spark is anonymous, so your username is what you'll go by here. Choose wisely—because once you get a name, you can't change it.",
+    "username_placeholder": "Username (e.g., CosmoExplorer, PixelPioneer)",
+    "username_suggestions": "Suggestions: {emailPrefix}Spark, Creative{random1}, Spark{random2}",
+    "password_placeholder": "Password",
+    "confirm_password_placeholder": "Confirm password",
+    "password_requirements": {
+      "title": "Password requirements:",
+      "min_length": "At least 8 characters",
+      "uppercase": "One uppercase letter",
+      "lowercase": "One lowercase letter",
+      "number": "One number",
+      "special": "One special character"
+    },
+    "password_errors": {
+      "min_length": "Password must be at least 8 characters long",
+      "requirements": "Password must include uppercase, lowercase, number and special character",
+      "mismatch": "Passwords do not match"
+    },
+    "age_confirmation": {
+      "label": "I confirm that I am at least 18 years of age.",
+      "error": "You must confirm you are at least 18 years old to continue."
+    },
+    "buttons": {
+      "back": "← Back",
+      "continue": "Continue",
+      "verify": "Verify",
+      "sending": "Sending...",
+      "verifying": "Verifying...",
+      "create_account": "Create Account",
+      "creating_account": "Creating account..."
+    }
+  }
 }

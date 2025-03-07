@@ -8,6 +8,7 @@
   import { PasswordInput } from '$lib/components/ui/password-input';
   import EmailVerification from '$lib/components/email-verification.svelte';
   import AuthCard from '$lib/components/ui/auth-card.svelte';
+  import { t } from '$lib/i18n';
 
   // Step management
   const STEPS = {
@@ -105,6 +106,13 @@
     }
     return '';
   };
+
+  // For username suggestions
+  const getRandomSuggestions = () => ({
+    emailPrefix: email.split('@')[0],
+    random1: Math.floor(Math.random() * 1000),
+    random2: Math.floor(Math.random() * 10000),
+  });
 </script>
 
 <div class="relative mx-auto flex h-screen items-center justify-center">
@@ -116,24 +124,24 @@
         class="absolute -top-12 left-0"
         onclick={() => currentStep.set($currentStep === STEPS.VERIFY ? STEPS.EMAIL : STEPS.VERIFY)}
       >
-        ← Back
+        {$t('signup.buttons.back')}
       </Button>
     {/if}
 
     {#if $currentStep === STEPS.EMAIL || $currentStep === STEPS.VERIFY}
       <AuthCard
-        title={$currentStep === STEPS.EMAIL ? 'Sign Up' : 'Verify your email'}
+        title={$currentStep === STEPS.EMAIL ? $t('signup.title') : $t('signup.verify_email_title')}
         description={$currentStep === STEPS.EMAIL
-          ? 'By continuing, you agree to our User Agreement and acknowledge that you understand the Privacy Policy.'
-          : `Enter the six digit code we sent to ${email}`}
+          ? $t('signup.terms_agreement')
+          : $t('signup.verify_code_message', { email })}
       >
         <EmailVerification
           bind:email
           initialStep={$currentStep === STEPS.EMAIL ? 'email' : 'verify'}
-          buttonText="Continue"
-          verifyButtonText="Verify"
-          loadingText="Sending..."
-          verifyingText="Verifying..."
+          buttonText={$t('signup.buttons.continue')}
+          verifyButtonText={$t('signup.buttons.verify')}
+          loadingText={$t('signup.buttons.sending')}
+          verifyingText={$t('signup.buttons.verifying')}
           showSkipButton={true}
           onEmailSubmit={() => handleEmailSubmit}
           onVerify={handleVerify}
@@ -144,16 +152,18 @@
 
         {#if $currentStep === STEPS.EMAIL}
           <div class="mt-4 text-center text-sm">
-            <span class="text-muted-foreground">Already a have an account?</span>
+            <span class="text-muted-foreground">{$t('signup.have_account')}</span>
             {' '}
-            <Button variant="link" class="px-1 font-normal" href="/signin">Log In</Button>
+            <Button variant="link" class="px-1 font-normal" href="/signin">
+              {$t('signup.login_link')}
+            </Button>
           </div>
         {/if}
       </AuthCard>
     {:else if $currentStep === STEPS.CREDENTIALS}
       <AuthCard
-        title="Create your username and password"
-        description="First Spark is anonymous, so your username is what you'll go by here. Choose wisely—because once you get a name, you can't change it."
+        title={$t('signup.create_credentials_title')}
+        description={$t('signup.username_description')}
         showBackButton={true}
         onBack={() => currentStep.set(STEPS.VERIFY)}
       >
@@ -161,13 +171,12 @@
           <div class="space-y-2">
             <Input
               type="text"
-              placeholder="Username (e.g., CosmoExplorer, PixelPioneer)"
+              placeholder={$t('signup.username_placeholder')}
               bind:value={username}
               required
             />
             <p class="text-xs text-muted-foreground">
-              Suggestions: {email.split('@')[0]}Spark, Creative{Math.floor(Math.random() * 1000)},
-              Spark{Math.floor(Math.random() * 10000)}
+              {$t('signup.username_suggestions', getRandomSuggestions())}
             </p>
           </div>
           <div class="relative space-y-2">
@@ -242,7 +251,7 @@
               password !== confirmPassword ||
               !validatePassword(password).isValid}
           >
-            {loading ? 'Creating account...' : 'Create Account'}
+            {loading ? $t('signup.buttons.creating_account') : $t('signup.buttons.create_account')}
           </Button>
         </form>
       </AuthCard>
