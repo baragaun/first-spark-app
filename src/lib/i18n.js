@@ -10,9 +10,14 @@ const i18n = new I18n({
       loader: () => import('./locales/en.json'),
     },
     {
-      locale: 'es',
+      locale: 'de',
       key: '',
-      loader: () => import('./locales/es.json'),
+      loader: () => import('./locales/de.json'),
+    },
+    {
+      locale: 'hi',
+      key: '',
+      loader: () => import('./locales/hi.json'),
     },
   ],
 });

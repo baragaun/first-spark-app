@@ -7,12 +7,14 @@
 
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
-  import { Moon, Sun, Languages, MoreHorizontal } from 'lucide-svelte';
+  import { Moon, Sun, MoreHorizontal } from 'lucide-svelte';
   import UserNav from './user-nav.svelte';
+  import LanguageSelector from './language-selector.svelte';
   import * as Sheet from '$lib/components/ui/sheet';
   import * as Sidebar from '$lib/components/ui/sidebar/index.js';
   import { onMount } from 'svelte';
   import { writable } from 'svelte/store';
+  import { locale } from '$lib/i18n';
 
   // Update auth store when localStorage changes
   const updateAuthState = () => {
@@ -90,10 +92,23 @@
 
       <!-- Desktop Navigation -->
       <div class="hidden md:flex md:items-center md:gap-4">
-        <!-- Language Switcher -->
-        <Button variant="ghost" size="icon" class="text-muted-foreground hover:text-foreground">
-          <Languages class="h-5 w-5" />
+        <!-- Theme Toggle -->
+        <Button
+          variant="ghost"
+          size="icon"
+          onclick={toggleTheme}
+          class="text-muted-foreground hover:text-foreground"
+          aria-label="Toggle theme"
+        >
+          {#if isDarkMode}
+            <Sun class="h-5 w-5 transition-all" />
+          {:else}
+            <Moon class="h-5 w-5 transition-all" />
+          {/if}
         </Button>
+
+        <!-- Language Selector -->
+        <LanguageSelector />
 
         {#if isAuthenticated}
           <UserNav />
@@ -154,14 +169,8 @@
             {/if}
           </Button>
 
-          <!-- Language Selection -->
-          <Button
-            variant="ghost"
-            class="font-lexend w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
-          >
-            <Languages class="h-5 w-5" />
-            <span>Change Language</span>
-          </Button>
+          <!-- Language Selector -->
+          <LanguageSelector isMobile={true} />
 
           <!-- Auth Buttons -->
           {#if isAuthenticated}
