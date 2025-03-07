@@ -1,74 +1,109 @@
 import {
-  createClient,
-  DbType,
-  UserIdentType,
-  type BgNodeClient,
+  AppEnvironment,
+  BgNodeClient,
   type BgNodeClientConfig,
+  CachePolicy,
+  DbType,
+  HttpHeaderName,
   type MyUser,
+  UserIdentType,
 } from '@baragaun/bg-node-client';
 
 let _client: BgNodeClient | undefined;
-const _config: BgNodeClientConfig = {
-  useMockData: false,
-  dbType: DbType.rxdb,
-  inBrowser: true,
+
+const _init = async (): Promise<boolean> => {
+  if (_client) {
+    return true;
+  }
+
+  const config: BgNodeClientConfig = {
+    dbType: DbType.rxdb,
+    inBrowser: true,
+    fsdata: {
+      url: import.meta.env.VITE_FSDATA_URL || 'http://localhost:8092/fsdata/api/graphql',
+      headers: {
+        [HttpHeaderName.consumer]: 'first-spark-app',
+      },
+    },
+  };
+
+  if (import.meta.env.VITE_APP_ENVIRONMENT) {
+    config.appEnvironment = import.meta.env.VITE_APP_ENVIRONMENT as AppEnvironment;
+  }
+
+  if (process.env.MOCK_DATA === 'true') {
+    config.useMockData = true;
+  }
+
+  _client = await new BgNodeClient().init(config);
+
+  if (!_client) {
+    throw new Error('Error initializing BgNodeClient');
+  }
+
+  return true;
 };
 
 const fsdata = {
-  init: async (): Promise<void> => {
-    _client = await createClient(_config);
-  },
+  init: _init,
 
   getClient: () => _client,
-};
 
-// EXAMPLE
-const signUpUser = async (
-  userHandle: string,
-  email: string | undefined,
-  password: string | undefined,
-): Promise<MyUser | null> => {
-  if (!fsdata.getClient()) {
-    await fsdata.init();
-  }
-  const client = fsdata.getClient();
+  signUpUser: async (
+    userHandle: string,
+    email: string | undefined,
+    password: string | undefined,
+  ): Promise<MyUser | null> => {
+    if (!(await _init()) || !_client) {
+      return null;
+    }
 
-  if (!client) {
-    console.log('signUpUser: no client.');
-    return null;
-  }
+    const result = await _client.operations.myUser.signUpUser({ userHandle, email, password });
 
-  const result = await client.operations.myUser.signUpUser(userHandle, email, password);
+    if (result.error || !result.object?.userAuthResponse?.userId) {
+      console.error('SignUpUser failed.', result.error);
 
-  if (result.error || !result.object?.userId) {
-    console.error('SignUpUser failed.', result.error);
-    return null;
-  }
+      return null;
+    }
 
-  return client.operations.myUser.findMyUser({ useCached: false });
-};
+    return result.object.myUser || null;
+  },
 
-// EXAMPLE
-const signInUser = async (
-  ident: string,
-  identType: UserIdentType,
-  password: string,
-): Promise<MyUser | null> => {
-  const client = fsdata.getClient();
+  signInUser: async (
+    ident: string,
+    identType: UserIdentType,
+    password: string,
+  ): Promise<MyUser | null> => {
+    if (!(await _init()) || !_client) {
+      return null;
+    }
 
-  if (!client) {
-    console.log('signInUser: no client.');
-    return null;
-  }
+    const result = await _client.operations.myUser.signInUser({ ident, identType, password });
 
-  const result = await client.operations.myUser.signInUser(ident, identType, password);
+    if (result.error || !result.object?.userAuthResponse.userId) {
+      console.error('SignInUser failed.', result.error);
 
-  if (result.error || !result.object?.userId) {
-    console.error('SignInUser failed.', result.error);
-    return null;
-  }
+      return null;
+    }
 
-  return client.operations.myUser.findMyUser({ useCached: false });
+    return result.object.myUser || null;
+  },
+
+  signOutUser: async (): Promise<void> => {
+    if (!(await _init()) || !_client) {
+      return;
+    }
+
+    await _client.operations.myUser.signMeOut();
+  },
+
+  findMyUser: async (cachePolicy: CachePolicy): Promise<MyUser | null> => {
+    if (!(await _init()) || !_client) {
+      return null;
+    }
+
+    return _client.operations.myUser.findMyUser({ cachePolicy });
+  },
 };
 
 export default fsdata;
