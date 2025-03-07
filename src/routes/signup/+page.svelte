@@ -164,7 +164,7 @@
       <AuthCard
         title={$currentStep === STEPS.EMAIL ? 'Sign Up' : 'Verify your email'}
         description={$currentStep === STEPS.EMAIL
-          ? 'By continuing, you agree to our User Agreement and acknowledge that you understand the Privacy Policy.'
+          ? 'By continuing, you agree to our User Agreement and acknowledge that you understand and agree to our Privacy Policy.'
           : `Enter the six digit code we sent to ${email}`}
       >
         <EmailVerification
