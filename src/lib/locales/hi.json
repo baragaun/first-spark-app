@@ -1,35 +1,35 @@
 {
-  "welcome": "Welcome to First Spark",
-  "welcome_subtitle": "Connect, inspire, thrive!",
-  "get_started": "Get Started",
+  "welcome": "फर्स्ट स्पार्क में आपका स्वागत है",
+  "welcome_subtitle": "जुड़ें, प्रेरित करें, विकसित हों!",
+  "get_started": "शुरू करें",
 
   "signup": {
-    "title": "Sign Up",
-    "verify_email_title": "Verify your email",
-    "terms_agreement": "By continuing, you agree to our User Agreement and acknowledge that you understand and agree to our Privacy Policy.",
-    "verify_code_message": "Enter the six digit code we sent to {email}",
-    "have_account": "Already have an account?",
-    "login_link": "Log In",
-    "create_credentials_title": "Create your username and password",
-    "username_description": "Usernames are unique handles. We'll verify that yours is not already taken.",
-    "username_placeholder": "Username (e.g., CosmoExplorer, PixelPioneer)",
-    "password_placeholder": "Password",
+    "title": "साइन अप",
+    "verify_email_title": "अपना ईमेल सत्यापित करें",
+    "terms_agreement": "जारी रखकर, आप हमारी उपयोगकर्ता सहमति और गोपनीयता नीति से सहमत हैं।",
+    "verify_code_message": "{email} पर भेजा गया छह अंकों का कोड दर्ज करें",
+    "have_account": "क्या पहले से खाता है?",
+    "login_link": "लॉग इन",
+    "create_credentials_title": "अपना यूजरनेम और पासवर्ड बनाएं",
+    "username_description": "यूजरनेम एक विशिष्ट पहचान है। हम जांच करेंगे कि आपका चुना हुआ नाम उपलब्ध है या नहीं।",
+    "username_placeholder": "यूजरनेम (उदाहरण: कॉस्मोएक्सप्लोरर, पिक्सलपायनियर)",
+    "password_placeholder": "पासवर्ड",
     "password_requirements": {
-      "title": "Password requirements:",
-      "min_length": "At least 8 characters"
+      "title": "पासवर्ड की आवश्यकताएं:",
+      "min_length": "कम से कम 8 अक्षर"
     },
     "password_errors": {
-      "min_length": "Password must be at least 8 characters long",
-      "too_simple": "Password is too simple or guessable"
+      "min_length": "पासवर्ड में कम से कम 8 अक्षर होने चाहिए",
+      "too_simple": "पासवर्ड बहुत सरल या आसानी से अनुमान लगाने योग्य है"
     },
     "buttons": {
-      "back": "← Back",
-      "continue": "Continue",
-      "verify": "Verify",
-      "sending": "Sending...",
-      "verifying": "Verifying...",
-      "create_account": "Create Account",
-      "creating_account": "Creating account..."
+      "back": "← वापस",
+      "continue": "जारी रखें",
+      "verify": "सत्यापित करें",
+      "sending": "भेजा जा रहा है...",
+      "verifying": "सत्यापित किया जा रहा है...",
+      "create_account": "खाता बनाएं",
+      "creating_account": "खाता बनाया जा रहा है..."
     }
   }
 }
