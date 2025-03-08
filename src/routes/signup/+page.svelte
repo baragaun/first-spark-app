@@ -8,7 +8,7 @@
   import { PasswordInput } from '$lib/components/ui/password-input';
   import EmailVerification from '$lib/components/email-verification.svelte';
   import AuthCard from '$lib/components/ui/auth-card.svelte';
-  import { t } from '$lib/i18n';
+  import { t, locale } from '@/i18n';
 
   // Step management
   const STEPS = {
@@ -92,7 +92,7 @@
     const validation = validatePassword(password);
 
     if (!validation.minLength) {
-      return 'Password must be at least 8 characters long';
+      return t('signup.password_errors.min_length');
     }
     if (
       !(
@@ -102,17 +102,10 @@
         validation.hasSymbol
       )
     ) {
-      return 'Password must include uppercase, lowercase, number and special character';
+      return t('signup.password_errors.requirements');
     }
     return '';
   };
-
-  // For username suggestions
-  const getRandomSuggestions = () => ({
-    emailPrefix: email.split('@')[0],
-    random1: Math.floor(Math.random() * 1000),
-    random2: Math.floor(Math.random() * 10000),
-  });
 </script>
 
 <div class="relative mx-auto flex h-screen items-center justify-center">
@@ -124,24 +117,24 @@
         class="absolute -top-12 left-0"
         onclick={() => currentStep.set($currentStep === STEPS.VERIFY ? STEPS.EMAIL : STEPS.VERIFY)}
       >
-        {$t('signup.buttons.back')}
+        {t('signup.buttons.back')}
       </Button>
     {/if}
 
     {#if $currentStep === STEPS.EMAIL || $currentStep === STEPS.VERIFY}
       <AuthCard
-        title={$currentStep === STEPS.EMAIL ? $t('signup.title') : $t('signup.verify_email_title')}
+        title={$currentStep === STEPS.EMAIL ? t('signup.title') : t('signup.verify_email_title')}
         description={$currentStep === STEPS.EMAIL
-          ? $t('signup.terms_agreement')
-          : $t('signup.verify_code_message', { email })}
+          ? t('signup.terms_agreement')
+          : t('signup.verify_code_message', { name: 'John' })}
       >
         <EmailVerification
           bind:email
           initialStep={$currentStep === STEPS.EMAIL ? 'email' : 'verify'}
-          buttonText={$t('signup.buttons.continue')}
-          verifyButtonText={$t('signup.buttons.verify')}
-          loadingText={$t('signup.buttons.sending')}
-          verifyingText={$t('signup.buttons.verifying')}
+          buttonText={t('signup.buttons.continue')}
+          verifyButtonText={t('signup.buttons.verify')}
+          loadingText={t('signup.buttons.sending')}
+          verifyingText={t('signup.buttons.verifying')}
           showSkipButton={true}
           onEmailSubmit={() => handleEmailSubmit}
           onVerify={handleVerify}
@@ -152,18 +145,18 @@
 
         {#if $currentStep === STEPS.EMAIL}
           <div class="mt-4 text-center text-sm">
-            <span class="text-muted-foreground">{$t('signup.have_account')}</span>
+            <span class="text-muted-foreground">{t('signup.have_account')}</span>
             {' '}
             <Button variant="link" class="px-1 font-normal" href="/signin">
-              {$t('signup.login_link')}
+              {t('signup.login_link')}
             </Button>
           </div>
         {/if}
       </AuthCard>
     {:else if $currentStep === STEPS.CREDENTIALS}
       <AuthCard
-        title={$t('signup.create_credentials_title')}
-        description={$t('signup.username_description')}
+        title={t('signup.create_credentials_title')}
+        description={t('signup.username_description')}
         showBackButton={true}
         onBack={() => currentStep.set(STEPS.VERIFY)}
       >
@@ -171,49 +164,57 @@
           <div class="space-y-2">
             <Input
               type="text"
-              placeholder={$t('signup.username_placeholder')}
+              placeholder={t('signup.username_placeholder')}
               bind:value={username}
               required
             />
             <p class="text-xs text-muted-foreground">
-              {$t('signup.username_suggestions', getRandomSuggestions())}
+              {t('signup.username_suggestions', {
+                emailPrefix: email.split('@')[0],
+                random1: Math.floor(Math.random() * 1000).toString(),
+                random2: Math.floor(Math.random() * 10000).toString(),
+              })}
             </p>
           </div>
           <div class="relative space-y-2">
-            <PasswordInput bind:value={password} placeholder="Password" required />
+            <PasswordInput
+              bind:value={password}
+              placeholder={t('signup.password_placeholder')}
+              required
+            />
             {#if password}
               <div class="space-y-2 text-xs">
-                <p class="text-muted-foreground">Password requirements:</p>
+                <p class="text-muted-foreground">{t('signup.password_requirements.title')}</p>
                 <ul class="list-inside list-disc space-y-1 pl-2">
                   <li
                     class:text-destructive={password.length < 8}
                     class:text-green-500={password.length >= 8}
                   >
-                    At least 8 characters
+                    {t('signup.password_requirements.min_length')}
                   </li>
                   <li
                     class:text-destructive={!/[A-Z]/.test(password)}
                     class:text-green-500={/[A-Z]/.test(password)}
                   >
-                    One uppercase letter
+                    {t('signup.password_requirements.uppercase')}
                   </li>
                   <li
                     class:text-destructive={!/[a-z]/.test(password)}
                     class:text-green-500={/[a-z]/.test(password)}
                   >
-                    One lowercase letter
+                    {t('signup.password_requirements.lowercase')}
                   </li>
                   <li
                     class:text-destructive={!/[0-9]/.test(password)}
                     class:text-green-500={/[0-9]/.test(password)}
                   >
-                    One number
+                    {t('signup.password_requirements.number')}
                   </li>
                   <li
                     class:text-destructive={!/[!@#$%^&*(),.?":{}|<>]/.test(password)}
                     class:text-green-500={/[!@#$%^&*(),.?":{}|<>]/.test(password)}
                   >
-                    One special character
+                    {t('signup.password_requirements.special')}
                   </li>
                 </ul>
               </div>
@@ -223,21 +224,25 @@
             {/if}
           </div>
           <div class="relative space-y-2">
-            <PasswordInput bind:value={confirmPassword} placeholder="Confirm password" required />
+            <PasswordInput
+              bind:value={confirmPassword}
+              placeholder={t('signup.confirm_password_placeholder')}
+              required
+            />
             {#if password && confirmPassword && password !== confirmPassword}
-              <p class="text-xs text-destructive">Passwords do not match</p>
+              <p class="text-xs text-destructive">t('signup.password_errors.mismatch')</p>
             {/if}
           </div>
           <div class="space-y-2">
             <div class="flex items-center justify-between space-x-2">
               <label for="age-confirmation" class="text-sm font-medium">
-                I confirm that I am at least 18 years of age.
+                {t('signup.age_confirmation.label')}
               </label>
               <Switch.Root bind:checked={isAgeConfirmed} id="age-confirmation" />
             </div>
             {#if !isAgeConfirmed}
               <p class="text-xs text-destructive">
-                You must confirm you are at least 18 years old to continue.
+                {t('signup.age_confirmation.error')}
               </p>
             {/if}
           </div>
@@ -251,7 +256,7 @@
               password !== confirmPassword ||
               !validatePassword(password).isValid}
           >
-            {loading ? $t('signup.buttons.creating_account') : $t('signup.buttons.create_account')}
+            {loading ? t('signup.buttons.creating_account') : t('signup.buttons.create_account')}
           </Button>
         </form>
       </AuthCard>

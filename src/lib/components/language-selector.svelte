@@ -2,7 +2,7 @@
   import { Button } from '$lib/components/ui/button';
   import { Languages } from 'lucide-svelte';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-  import { locale } from '$lib/i18n';
+  import { locale } from '@/i18n';
 
   export let isMobile = false;
 

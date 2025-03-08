@@ -22,4 +22,10 @@ const i18n = new I18n({
   ],
 });
 
-export const { t, locale, locales, loading, loadTranslations } = i18n;
+// Initialize i18n
+export const { t: rawT, locale, locales, loading, loadTranslations } = i18n;
+
+// Wrapper function to infer parameters automatically
+export function t(key: string, params?: Record<string, string>) {
+  return t(key, params as any); // Ensures TypeScript compatibility
+}

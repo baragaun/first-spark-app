@@ -14,7 +14,7 @@
   import * as Sidebar from '$lib/components/ui/sidebar/index.js';
   import { onMount } from 'svelte';
   import { writable } from 'svelte/store';
-  import { locale } from '$lib/i18n';
+  import { locale } from '@/i18n';
 
   // Update auth store when localStorage changes
   const updateAuthState = () => {

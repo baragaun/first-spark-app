@@ -4,43 +4,43 @@
   "get_started": "Loslegen",
 
   "signup": {
-    "title": "Sign Up",
-    "verify_email_title": "Verify your email",
-    "terms_agreement": "By continuing, you agree to our User Agreement and acknowledge that you understand the Privacy Policy.",
-    "verify_code_message": "Enter the six digit code we sent to {email}",
-    "have_account": "Already have an account?",
-    "login_link": "Log In",
-    "create_credentials_title": "Create your username and password",
-    "username_description": "First Spark is anonymous, so your username is what you'll go by here. Choose wisely—because once you get a name, you can't change it.",
-    "username_placeholder": "Username (e.g., CosmoExplorer, PixelPioneer)",
-    "username_suggestions": "Suggestions: {emailPrefix}Spark, Creative{random1}, Spark{random2}",
-    "password_placeholder": "Password",
-    "confirm_password_placeholder": "Confirm password",
+    "title": "Registrieren",
+    "verify_email_title": "E-Mail bestätigen",
+    "terms_agreement": "Durch die Fortsetzung stimmen Sie unserer Benutzervereinbarung zu und bestätigen, dass Sie die Datenschutzrichtlinie verstehen.",
+    "verify_code_message": "Geben Sie den sechsstelligen Code ein, den wir an {email} gesendet haben",
+    "have_account": "Bereits ein Konto?",
+    "login_link": "Anmelden",
+    "create_credentials_title": "Benutzername und Passwort erstellen",
+    "username_description": "First Spark ist anonym, daher ist Ihr Benutzername Ihre Identität hier. Wählen Sie mit Bedacht – denn sobald Sie einen Namen haben, können Sie ihn nicht mehr ändern.",
+    "username_placeholder": "Benutzername (z.B. KosmoEntdecker, PixelPionier)",
+    "username_suggestions": "Vorschläge: {emailPrefix}Spark, Kreativ{random1}, Spark{random2}",
+    "password_placeholder": "Passwort",
+    "confirm_password_placeholder": "Passwort bestätigen",
     "password_requirements": {
-      "title": "Password requirements:",
-      "min_length": "At least 8 characters",
-      "uppercase": "One uppercase letter",
-      "lowercase": "One lowercase letter",
-      "number": "One number",
-      "special": "One special character"
+      "title": "Passwortanforderungen:",
+      "min_length": "Mindestens 8 Zeichen",
+      "uppercase": "Ein Großbuchstabe",
+      "lowercase": "Ein Kleinbuchstabe",
+      "number": "Eine Zahl",
+      "special": "Ein Sonderzeichen"
     },
     "password_errors": {
-      "min_length": "Password must be at least 8 characters long",
-      "requirements": "Password must include uppercase, lowercase, number and special character",
-      "mismatch": "Passwords do not match"
+      "min_length": "Das Passwort muss mindestens 8 Zeichen lang sein",
+      "requirements": "Das Passwort muss Großbuchstaben, Kleinbuchstaben, Zahlen und Sonderzeichen enthalten",
+      "mismatch": "Die Passwörter stimmen nicht überein"
     },
     "age_confirmation": {
-      "label": "I confirm that I am at least 18 years of age.",
-      "error": "You must confirm you are at least 18 years old to continue."
+      "label": "Ich bestätige, dass ich mindestens 18 Jahre alt bin.",
+      "error": "Sie müssen bestätigen, dass Sie mindestens 18 Jahre alt sind, um fortzufahren."
     },
     "buttons": {
-      "back": "← Back",
-      "continue": "Continue",
-      "verify": "Verify",
-      "sending": "Sending...",
-      "verifying": "Verifying...",
-      "create_account": "Create Account",
-      "creating_account": "Creating account..."
+      "back": "← Zurück",
+      "continue": "Weiter",
+      "verify": "Bestätigen",
+      "sending": "Wird gesendet...",
+      "verifying": "Wird überprüft...",
+      "create_account": "Konto erstellen",
+      "creating_account": "Konto wird erstellt..."
     }
   }
 }
