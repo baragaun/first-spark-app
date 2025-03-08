@@ -1,0 +1,76 @@
+name: Run All Tests
+
+on:
+  push:
+    branches: [milestone-01]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+  pull_request:
+    branches: [milestone-01]
+
+jobs:
+  unit-tests:
+    name: Run Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile --unsafe-perm
+
+      - name: Run unit tests
+        run: pnpm run test
+
+  integration-tests:
+    name: Run Integration Tests
+    runs-on: ubuntu-latest
+    needs: unit-tests # Runs only if unit tests pass
+    env:
+      PUBLIC_SITE_URL: ${{ secrets.PUBLIC_SITE_URL }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create build secrets
+        run: |
+          echo "PUBLIC_SITE_URL=${{ env.PUBLIC_SITE_URL }}" >> .env
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chrome
+
+      - name: Build application
+        run: pnpm run build
+
+      - name: Run Playwright tests
+        run: pnpm playwright test

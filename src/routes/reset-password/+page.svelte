@@ -9,7 +9,6 @@
     CardTitle,
   } from '$lib/components/ui/card';
   import { Alert, AlertDescription } from '$lib/components/ui/alert';
-  import * as RadioGroup from '$lib/components/ui/radio-group';
   import Mail from 'lucide-svelte/icons/mail';
 
   let identifier = ''; // for email or username
@@ -19,8 +18,6 @@
   let resendTimer = 30;
   let canResend = false;
   let timerInterval: ReturnType<typeof setInterval>;
-  let resetMethod = 'magic-link'; // or "recovery-code"
-  let recoveryCode = '';
 
   const startResendTimer = () => {
     resendTimer = 30;
@@ -47,28 +44,16 @@
     error = '';
 
     try {
-      if (resetMethod === 'recovery-code') {
-        // Verify recovery code
-        if (!recoveryCode) {
-          throw new Error('Please enter your recovery code');
-        }
-        // TODO: Implement recovery code verification
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-        // If successful, redirect to password reset page
-        // await goto('/reset-password/new');
-      } else {
-        // Send magic link
-        // TODO: Implement your reset password logic here
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
+      // TODO: Implement your reset password logic here
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
 
-        // Simulate email check
-        if (identifier.includes('nonexistent')) {
-          throw new Error('No account found with this email address');
-        }
-
-        emailSent = true;
-        startResendTimer();
+      // Simulate email check
+      if (identifier.includes('nonexistent')) {
+        throw new Error('No account found with this email address');
       }
+
+      emailSent = true;
+      startResendTimer();
     } catch (err) {
       console.error('Error resetting password:', err);
       error =
@@ -104,7 +89,9 @@
     {#if !emailSent}
       <CardHeader>
         <CardTitle class="text-2xl">Reset your password</CardTitle>
-        <CardDescription>Choose how you'd like to reset your password</CardDescription>
+        <CardDescription
+          >We will email you a verification code if we can find this email address.</CardDescription
+        >
       </CardHeader>
       <CardContent>
         {#if error}
@@ -117,56 +104,19 @@
             <Input type="text" placeholder="Email or username" bind:value={identifier} required />
           </div>
 
-          <div class="space-y-2">
-            <label for="reset-method" class="text-sm font-medium">Reset method</label>
-            <RadioGroup.Root bind:value={resetMethod} class="flex flex-col gap-2" id="reset-method">
-              <div class="flex items-center space-x-2">
-                <RadioGroup.Item value="magic-link" id="magic-link" />
-                <label for="magic-link" class="text-sm font-medium leading-none">
-                  Send me a magic link
-                </label>
-              </div>
-              <!-- <div class="flex items-center space-x-2">
-								<RadioGroup.Item value="recovery-code" id="recovery-code" />
-								<label for="recovery-code" class="text-sm font-medium leading-none">
-									I have a recovery code
-								</label>
-							</div> -->
-            </RadioGroup.Root>
-          </div>
-
-          {#if resetMethod === 'recovery-code'}
-            <div class="space-y-2">
-              <label for="recovery-code-input" class="text-sm font-medium"
-                >Enter recovery code</label
-              >
-              <Input
-                type="text"
-                id="recovery-code-input"
-                placeholder="Enter recovery code (e.g., asd7a8-132bku-11kbvo-aqwl71)"
-                bind:value={recoveryCode}
-                required
-              />
-            </div>
-          {/if}
-
+          <Button type="submit" class="w-full" disabled={loading}>
+            {loading ? 'Sending email...' : 'Send email'}
+          </Button>
           <div class="flex items-center justify-between">
             <Button variant="link" class="px-0 font-normal" href="/support">Need help?</Button>
           </div>
-          <Button type="submit" class="w-full" disabled={loading}>
-            {#if resetMethod === 'magic-link'}
-              {loading ? 'Sending magic link...' : 'Send magic link'}
-            {:else}
-              {loading ? 'Verifying...' : 'Verify recovery code'}
-            {/if}
-          </Button>
         </form>
       </CardContent>
     {:else}
       <CardHeader>
         <CardTitle class="text-2xl">Check your inbox</CardTitle>
         <CardDescription>
-          We've sent a password reset link to {identifier}
+          We've sent a verification code to {identifier}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -178,8 +128,7 @@
 
           <Alert class="mb-4">
             <AlertDescription>
-              The magic link will expire in 10 minutes. Click the link in the email to reset your
-              password.
+              Note: The verification code will expire in 10 minutes.
             </AlertDescription>
           </Alert>
 
