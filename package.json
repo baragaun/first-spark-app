@@ -62,6 +62,7 @@
     "onlyBuiltDependencies": [
       "@firebase/util",
       "@signalapp/libsignal-client",
+      "es5-ext",
       "esbuild",
       "protobufjs",
       "rxdb"
