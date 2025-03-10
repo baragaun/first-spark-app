@@ -2,13 +2,11 @@
   import { Button } from '$lib/components/ui/button';
   import { Languages } from 'lucide-svelte';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-  import { locale } from '@/i18n';
+  import { locale, locales } from 'svelte-i18n';
 
   export let isMobile = false;
 
-  type LanguageCode = 'en' | 'de' | 'hi';
-
-  const languages: Record<LanguageCode, string> = {
+  const languages: Record<string, string> = {
     en: 'English',
     de: 'Deutsch',
     hi: 'हिन्दी',
@@ -19,10 +17,10 @@
   };
 
   const cycleLanguage = () => {
-    const langs = Object.keys(languages);
-    const currentIndex = langs.indexOf($locale);
-    const nextIndex = (currentIndex + 1) % langs.length;
-    $locale = langs[nextIndex];
+    const availableLocales = Object.keys(languages);
+    const currentIndex = availableLocales.indexOf($locale ?? 'en');
+    const nextIndex = (currentIndex + 1) % availableLocales.length;
+    $locale = availableLocales[nextIndex];
   };
 </script>
 
@@ -30,9 +28,10 @@
   <Button
     variant="ghost"
     class="font-lexend w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
-    onclick={(e: MouseEvent) => cycleLanguage()}
+    onclick={() => cycleLanguage()}
   >
     <Languages class="h-5 w-5" />
+    <span>Change Language</span>
   </Button>
 {:else}
   <DropdownMenu.Root>

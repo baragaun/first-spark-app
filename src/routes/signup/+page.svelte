@@ -7,7 +7,7 @@
   import { PasswordInput } from '$lib/components/ui/password-input';
   import EmailVerification from '$lib/components/email-verification.svelte';
   import AuthCard from '$lib/components/ui/auth-card.svelte';
-  import { t, locale } from '@/i18n';
+  import { _ } from 'svelte-i18n';
 
   type PasswordValidation = {
     minLength: boolean;
@@ -133,7 +133,7 @@
     const validation = validatePassword(password);
 
     if (!validation.minLength) {
-      return t('signup.password_errors.min_length');
+      return $_('signup.password_errors.min_length');
     }
 
     if (
@@ -141,7 +141,7 @@
       !validation.noRepetitivePattern ||
       !validation.doesNotReuseEmail
     ) {
-      return t('signup.password_errors.too_simple');
+      return $_('signup.password_errors.too_simple');
     }
 
     return '';
@@ -157,24 +157,24 @@
         class="absolute -top-12 left-0"
         onclick={() => currentStep.set($currentStep === STEPS.VERIFY ? STEPS.EMAIL : STEPS.VERIFY)}
       >
-        {t('signup.buttons.back')}
+        {$_('signup.buttons.back')}
       </Button>
     {/if}
 
     {#if $currentStep === STEPS.EMAIL || $currentStep === STEPS.VERIFY}
       <AuthCard
-        title={$currentStep === STEPS.EMAIL ? t('signup.title') : t('signup.verify_email_title')}
+        title={$currentStep === STEPS.EMAIL ? $_('signup.title') : $_('signup.verify_email_title')}
         description={$currentStep === STEPS.EMAIL
-          ? t('signup.terms_agreement')
-          : t('signup.verify_code_message', { email: email })}
+          ? $_('signup.terms_agreement')
+          : $_('signup.verify_code_message', { values: { email: email } })}
       >
         <EmailVerification
           bind:email
           initialStep={$currentStep === STEPS.EMAIL ? 'email' : 'verify'}
-          buttonText={t('signup.buttons.continue')}
-          verifyButtonText={t('signup.buttons.verify')}
-          loadingText={t('signup.buttons.sending')}
-          verifyingText={t('signup.buttons.verifying')}
+          buttonText={$_('signup.buttons.continue')}
+          verifyButtonText={$_('signup.buttons.verify')}
+          loadingText={$_('signup.buttons.sending')}
+          verifyingText={$_('signup.buttons.verifying')}
           showSkipButton={true}
           onEmailSubmit={() => handleEmailSubmit}
           onVerify={handleVerify}
@@ -185,17 +185,17 @@
 
         {#if $currentStep === STEPS.EMAIL}
           <div class="mt-4 text-center text-sm">
-            <span class="text-muted-foreground">{t('signup.have_account')}</span>
+            <span class="text-muted-foreground">{$_('signup.have_account')}</span>
             {' '}
             <Button variant="link" class="px-1 font-normal" href="/signin">
-              {t('signup.login_link')}
+              {$_('signup.login_link')}
             </Button>
           </div>
         {/if}
       </AuthCard>
     {:else if $currentStep === STEPS.CREDENTIALS}
       <AuthCard
-        title={t('signup.create_credentials_title')}
+        title={$_('signup.create_credentials_title')}
         showBackButton={true}
         onBack={() => currentStep.set(STEPS.VERIFY)}
       >
@@ -203,29 +203,29 @@
           <div class="space-y-2">
             <Input
               type="text"
-              placeholder={t('signup.username_placeholder')}
+              placeholder={$_('signup.username_placeholder')}
               bind:value={username}
               required
             />
             <p class="text-xs text-muted-foreground">
-              {t('signup.username_description')}
+              {$_('signup.username_description')}
             </p>
           </div>
           <div class="relative space-y-2">
             <PasswordInput
               bind:value={password}
-              placeholder={t('signup.password_placeholder')}
+              placeholder={$_('signup.password_placeholder')}
               required
             />
             {#if password}
               <div class="space-y-2 text-xs">
-                <p class="text-muted-foreground">{t('signup.password_requirements.title')}</p>
+                <p class="text-muted-foreground">{$_('signup.password_requirements.title')}</p>
                 <ul class="list-inside list-disc space-y-1 pl-2">
                   <li
                     class:text-destructive={password.length < 8}
                     class:text-green-500={password.length >= 8}
                   >
-                    {t('signup.password_requirements.min_length')}
+                    {$_('signup.password_requirements.min_length')}
                   </li>
                 </ul>
               </div>
@@ -239,7 +239,7 @@
             class="w-full"
             disabled={loading || !password || !validatePassword(password).isValid}
           >
-            {loading ? t('signup.buttons.creating_account') : t('signup.buttons.create_account')}
+            {loading ? $_('signup.buttons.creating_account') : $_('signup.buttons.create_account')}
           </Button>
         </form>
       </AuthCard>
