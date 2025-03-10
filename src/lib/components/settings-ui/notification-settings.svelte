@@ -1,36 +1,26 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
-  import * as Card from '$lib/components/ui/card';
+  import { Separator } from '$lib/components/ui/separator';
+  import { Switch } from '$lib/components/ui/switch';
   import { cn } from '$lib/utils';
 
-  interface NotificationChannels {
+  interface NotificationSettings {
     emailNotifications: boolean;
     pushNotifications: boolean;
-  }
-
-  interface NotificationEvents {
     chatMessageReceived: boolean;
     buddyApprovedConnection: boolean;
     friendReceivedChat: boolean;
     pathfinderAcceptedConnection: boolean;
+    unreadMessagesReminder: boolean;
+    newMessageNotification: boolean;
+    buddySubscribed: boolean;
+    buddyUnsubscribed: boolean;
+    conversationClosed: boolean;
+    securityAlerts: boolean;
+    newDeviceLogin: boolean;
+    usernameChangeNotification: boolean; // renamed from accountChanges
+    passwordChanges: boolean;
   }
-
-  interface SecurityNotifications {
-    recoveryCodeUsed: boolean;
-    passwordChanged: boolean;
-    usernameChanged: boolean;
-  }
-
-  interface NotificationSettings
-    extends NotificationChannels,
-      NotificationEvents,
-      SecurityNotifications {}
-
-  type NotificationEventConfig = {
-    id: string;
-    label: string;
-    checked: boolean;
-  };
 
   // Props declaration using runes
   let {
@@ -41,99 +31,27 @@
       buddyApprovedConnection: true,
       friendReceivedChat: true,
       pathfinderAcceptedConnection: true,
-      recoveryCodeUsed: true,
-      passwordChanged: true,
-      usernameChanged: true,
+      unreadMessagesReminder: true,
+      newMessageNotification: true,
+      buddySubscribed: true,
+      buddyUnsubscribed: true,
+      conversationClosed: true,
+      securityAlerts: true,
+      newDeviceLogin: true,
+      usernameChangeNotification: true, // renamed from accountChanges
+      passwordChanges: true,
     },
   } = $props<{ initialSettings?: NotificationSettings }>();
 
-  // State management
-  let isLoading = $state(false);
-  let emailNotifications = $state(initialSettings.emailNotifications);
-  let pushNotifications = $state(initialSettings.pushNotifications);
-  let notificationEvents = $state([
-    {
-      id: 'chat-message-received',
-      label: 'I received a chat message',
-      checked: initialSettings.chatMessageReceived,
-    },
-    {
-      id: 'buddy-approved-connection',
-      label: 'My buddy approved my connection request',
-      checked: initialSettings.buddyApprovedConnection,
-    },
-    {
-      id: 'friend-received-chat',
-      label: 'My friend received a chat message',
-      checked: initialSettings.friendReceivedChat,
-    },
-    {
-      id: 'pathfinder-accepted-connection',
-      label: 'Pathfinder accepted connection request',
-      checked: initialSettings.pathfinderAcceptedConnection,
-    },
-  ]);
+  let settings = $state<NotificationSettings>({ ...initialSettings });
 
-  let securityNotifications = $state([
-    {
-      id: 'recovery-code-used',
-      label: 'I am notified via email when a recovery code is consumed',
-      checked: initialSettings.recoveryCodeUsed,
-    },
-    {
-      id: 'password-changed',
-      label: 'I am notified via email when my password is changed',
-      checked: initialSettings.passwordChanged,
-    },
-    {
-      id: 'username-changed',
-      label: 'I am notified via email when my username is changed',
-      checked: initialSettings.usernameChanged,
-    },
-  ]);
-
-  // Derived state
-  let hasChanges = $derived(
-    emailNotifications !== initialSettings.emailNotifications ||
-      pushNotifications !== initialSettings.pushNotifications ||
-      notificationEvents[0].checked !== initialSettings.chatMessageReceived ||
-      notificationEvents[1].checked !== initialSettings.buddyApprovedConnection ||
-      notificationEvents[2].checked !== initialSettings.friendReceivedChat ||
-      notificationEvents[3].checked !== initialSettings.pathfinderAcceptedConnection ||
-      securityNotifications[0].checked !== initialSettings.recoveryCodeUsed ||
-      securityNotifications[1].checked !== initialSettings.passwordChanged ||
-      securityNotifications[2].checked !== initialSettings.usernameChanged,
-  );
-
-  // Effect for tracking changes
+  // Watch for changes and save automatically
   $effect(() => {
-    if (hasChanges) {
-      console.log('Notification settings changed');
+    if (JSON.stringify(settings) !== JSON.stringify(initialSettings)) {
+      saveNotificationSettings(settings);
+      initialSettings = { ...settings };
     }
   });
-
-  const handleSave = async () => {
-    try {
-      isLoading = true;
-      const settings: NotificationSettings = {
-        emailNotifications,
-        pushNotifications,
-        chatMessageReceived: notificationEvents[0].checked,
-        buddyApprovedConnection: notificationEvents[1].checked,
-        friendReceivedChat: notificationEvents[2].checked,
-        pathfinderAcceptedConnection: notificationEvents[3].checked,
-        recoveryCodeUsed: securityNotifications[0].checked,
-        passwordChanged: securityNotifications[1].checked,
-        usernameChanged: securityNotifications[2].checked,
-      };
-      // TODO: Implement API call
-      await saveNotificationSettings(settings);
-    } catch (error) {
-      console.error('Failed to save notification settings:', error);
-    } finally {
-      isLoading = false;
-    }
-  };
 
   async function saveNotificationSettings(settings: NotificationSettings): Promise<void> {
     // TODO: Implement actual API call
@@ -142,119 +60,167 @@
 </script>
 
 <div class="space-y-6">
+  <!-- General Section -->
   <div>
-    <h3 class="font-lexend text-lg font-medium">Notification Preferences</h3>
-    <p class="text-sm text-muted-foreground">Manage your notification settings and preferences.</p>
+    <h4 class="font-lexend mb-4 px-4 text-lg font-bold">General</h4>
+    <div class="space-y-4 px-4">
+      <div class="flex items-center justify-between py-2">
+        <div class="space-y-0.5">
+          <label for="email-notifications" class="text-sm font-medium">Email Notifications</label>
+          <p class="text-sm text-muted-foreground">Receive updates via email</p>
+        </div>
+        <Switch id="email-notifications" bind:checked={settings.emailNotifications} />
+      </div>
+
+      <div class="flex items-center justify-between py-2">
+        <div class="space-y-0.5">
+          <label for="push-notifications" class="text-sm font-medium">Push Notifications</label>
+          <p class="text-sm text-muted-foreground">Receive updates via push notifications</p>
+        </div>
+        <Switch id="push-notifications" bind:checked={settings.pushNotifications} />
+      </div>
+    </div>
   </div>
 
-  <div class="space-y-4">
-    <!-- Notification Channels -->
-    <Card.Root>
-      <Card.Header>
-        <Card.Title>Notification Channels</Card.Title>
-        <Card.Description>Choose how you want to receive notifications.</Card.Description>
-      </Card.Header>
-      <Card.Content>
-        <div class="space-y-4">
-          <div class="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="email-notifications"
-              bind:checked={emailNotifications}
-              class={cn('h-4 w-4 rounded border-input', 'focus:ring-2 focus:ring-primary')}
-            />
-            <label
-              for="email-notifications"
-              class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              Email Notifications
-            </label>
-          </div>
-          <div class="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="push-notifications"
-              bind:checked={pushNotifications}
-              class={cn('h-4 w-4 rounded border-input', 'focus:ring-2 focus:ring-primary')}
-            />
-            <label
-              for="push-notifications"
-              class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              Push Notifications
-            </label>
-          </div>
-        </div>
-      </Card.Content>
-    </Card.Root>
+  <Separator />
 
-    <!-- Event Subscriptions -->
-    <Card.Root>
-      <Card.Header>
-        <Card.Title>Event Subscriptions</Card.Title>
-        <Card.Description>Choose which events you want to be notified about.</Card.Description>
-      </Card.Header>
-      <Card.Content>
-        <div class="space-y-4">
-          {#each notificationEvents as event, i}
-            <div class="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id={event.id}
-                bind:checked={notificationEvents[i].checked}
-                class={cn('h-4 w-4 rounded border-input', 'focus:ring-2 focus:ring-primary')}
-              />
-              <label
-                for={event.id}
-                class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                {event.label}
-              </label>
-            </div>
-          {/each}
+  <!-- Message Section -->
+  <div>
+    <h4 class="font-lexend mb-4 px-4 text-lg font-bold">Message</h4>
+    <div class="space-y-4 px-4">
+      <div class="flex items-center justify-between py-2">
+        <div class="space-y-0.5">
+          <label for="chat-messages" class="text-sm font-medium">Chat Messages</label>
+          <p class="text-sm text-muted-foreground">Get notified when you receive a chat message</p>
         </div>
-      </Card.Content>
-    </Card.Root>
+        <Switch id="chat-messages" bind:checked={settings.chatMessageReceived} />
+      </div>
 
-    <!-- Security Notifications -->
-    <Card.Root>
-      <Card.Header>
-        <Card.Title>Security Notifications</Card.Title>
-        <Card.Description
-          >Choose which security events you want to be notified about.</Card.Description
-        >
-      </Card.Header>
-      <Card.Content>
-        <div class="space-y-4">
-          {#each securityNotifications as notification, i}
-            <div class="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id={notification.id}
-                bind:checked={securityNotifications[i].checked}
-                class={cn('h-4 w-4 rounded border-input', 'focus:ring-2 focus:ring-primary')}
-              />
-              <label
-                for={notification.id}
-                class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                {notification.label}
-              </label>
-            </div>
-          {/each}
+      <div class="flex items-center justify-between py-2">
+        <div class="space-y-0.5">
+          <label for="buddy-connections" class="text-sm font-medium">Buddy Connections</label>
+          <p class="text-sm text-muted-foreground">
+            Get notified when your buddy approved your connection request
+          </p>
         </div>
-      </Card.Content>
-    </Card.Root>
+        <Switch id="buddy-connections" bind:checked={settings.buddyApprovedConnection} />
+      </div>
 
-    <!-- Save Button -->
-    <div class="flex justify-end">
-      <Button
-        disabled={isLoading || !hasChanges}
-        onclick={handleSave}
-        class={cn('min-w-[100px]', isLoading && 'cursor-not-allowed opacity-50')}
-      >
-        {isLoading ? 'Saving...' : 'Save Preferences'}
-      </Button>
+      <div class="flex items-center justify-between py-2">
+        <div class="space-y-0.5">
+          <label for="friend-chat-updates" class="text-sm font-medium">Friend Chat Updates</label>
+          <p class="text-sm text-muted-foreground">
+            Get notified when friends receive chat messages
+          </p>
+        </div>
+        <Switch id="friend-chat-updates" bind:checked={settings.friendReceivedChat} />
+      </div>
+
+      <div class="flex items-center justify-between py-2">
+        <div class="space-y-0.5">
+          <label for="pathfinder-updates" class="text-sm font-medium">Pathfinder Updates</label>
+          <p class="text-sm text-muted-foreground">
+            Get notified when Pathfinder accepted connection request
+          </p>
+        </div>
+        <Switch id="pathfinder-updates" bind:checked={settings.pathfinderAcceptedConnection} />
+      </div>
+
+      <div class="flex items-center justify-between py-2">
+        <div class="space-y-0.5">
+          <label for="unread-messages" class="text-sm font-medium">Unread Messages Reminder</label>
+          <p class="text-sm text-muted-foreground">
+            Receive email notification reminders for unread messages when away
+          </p>
+        </div>
+        <Switch id="unread-messages" bind:checked={settings.unreadMessagesReminder} />
+      </div>
+
+      <div class="flex items-center justify-between py-2">
+        <div class="space-y-0.5">
+          <label for="new-messages" class="text-sm font-medium">New Message Notifications</label>
+          <p class="text-sm text-muted-foreground">Receive email notifications for new messages</p>
+        </div>
+        <Switch id="new-messages" bind:checked={settings.newMessageNotification} />
+      </div>
+
+      <div class="flex items-center justify-between py-2">
+        <div class="space-y-0.5">
+          <label for="buddy-subscribed" class="text-sm font-medium">Buddy Subscriptions</label>
+          <p class="text-sm text-muted-foreground">
+            Receive email notifications when a Buddy subscribes to your chat
+          </p>
+        </div>
+        <Switch id="buddy-subscribed" bind:checked={settings.buddySubscribed} />
+      </div>
+
+      <div class="flex items-center justify-between py-2">
+        <div class="space-y-0.5">
+          <label for="buddy-unsubscribed" class="text-sm font-medium">Buddy Unsubscriptions</label>
+          <p class="text-sm text-muted-foreground">
+            Receive email notifications when a Buddy unsubscribes from your chat
+          </p>
+        </div>
+        <Switch id="buddy-unsubscribed" bind:checked={settings.buddyUnsubscribed} />
+      </div>
+
+      <div class="flex items-center justify-between py-2">
+        <div class="space-y-0.5">
+          <label for="conversation-closed" class="text-sm font-medium">Conversation Closed</label>
+          <p class="text-sm text-muted-foreground">
+            Receive email notifications when a conversation is closed
+          </p>
+        </div>
+        <Switch id="conversation-closed" bind:checked={settings.conversationClosed} />
+      </div>
+    </div>
+  </div>
+
+  <Separator />
+
+  <!-- Security Section -->
+  <div>
+    <h4 class="font-lexend mb-4 px-4 text-lg font-bold">Security</h4>
+    <div class="space-y-4 px-4">
+      <div class="flex items-center justify-between py-2">
+        <div class="space-y-0.5">
+          <label for="security-alerts" class="text-sm font-medium">Security Alerts</label>
+          <p class="text-sm text-muted-foreground">
+            Get notified about important security updates and alerts
+          </p>
+        </div>
+        <Switch id="security-alerts" bind:checked={settings.securityAlerts} />
+      </div>
+
+      <div class="flex items-center justify-between py-2">
+        <div class="space-y-0.5">
+          <label for="new-device-login" class="text-sm font-medium">New Device Login</label>
+          <p class="text-sm text-muted-foreground">
+            Receive alerts when your account is accessed from a new device
+          </p>
+        </div>
+        <Switch id="new-device-login" bind:checked={settings.newDeviceLogin} />
+      </div>
+
+      <div class="flex items-center justify-between py-2">
+        <div class="space-y-0.5">
+          <label for="username-change" class="text-sm font-medium">Username Updates</label>
+          <p class="text-sm text-muted-foreground">
+            I am notified via email when my username is updated
+          </p>
+        </div>
+        <Switch id="username-change" bind:checked={settings.usernameChangeNotification} />
+      </div>
+
+      <div class="flex items-center justify-between py-2">
+        <div class="space-y-0.5">
+          <label for="password-changes" class="text-sm font-medium">Password Changes</label>
+          <p class="text-sm text-muted-foreground">
+            Receive notifications when your password is changed
+          </p>
+        </div>
+        <Switch id="password-changes" bind:checked={settings.passwordChanges} />
+      </div>
     </div>
   </div>
 </div>
