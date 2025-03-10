@@ -176,17 +176,18 @@ Forms and Actions
 - Implement proper client-side form validation using Svelte's reactive declarations.
 - Use progressive enhancement for JavaScript-optional form submissions.
 
-Internationalization (i18n) with Paraglide.js
-- Use Paraglide.js for internationalization: https://inlang.com/m/gerre34r/library-inlang-paraglideJs
-- Install Paraglide.js: `npm install @inlang/paraglide-js`
-- Set up language files in the `languages` directory.
-- Use the `t` function to translate strings:
+Internationalization (i18n) with svelte-i18n
+- Use svelte-i18n for internationalization: https://inlang.com/m/gerre34r/library-inlang-paraglideJs
+- Set up language files in the `src/lib/locales` directory.
+- Use the `_` function to translate strings:
   ```svelte
   <script>
-  import { t } from '@inlang/paraglide-js';
+  import { _ } from 'svelte-i18n'
   </script>
 
-  <h1>{t('welcome_message')}</h1>
+  <svelte:head>
+  <title>{$_('page_title')}</title>
+  </svelte:head>
   ```
 - Support multiple languages and RTL layouts.
 - Ensure text scaling and font adjustments for accessibility.
@@ -210,6 +211,6 @@ Documentation
 - Svelte 5 Runes: https://svelte-5-preview.vercel.app/docs/runes
 - Svelte Documentation: https://svelte.dev/docs
 - SvelteKit Documentation: https://kit.svelte.dev/docs
-- Paraglide.js Documentation: https://inlang.com/m/gerre34r/library-inlang-paraglideJs/usage
+- svelte-i18n Documentation: https://github.com/kaisermann/svelte-i18n/blob/main/docs/Getting%20Started.md
 
-Refer to Svelte, SvelteKit, and Paraglide.js documentation for detailed information on components, internationalization, and best practices.
+Refer to Svelte, SvelteKit, and svelte-i18n documentation for detailed information on components, internationalization, and best practices.
