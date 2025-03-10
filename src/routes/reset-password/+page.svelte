@@ -89,7 +89,9 @@
     {#if !emailSent}
       <CardHeader>
         <CardTitle class="text-2xl">Reset your password</CardTitle>
-        <CardDescription>We will email you a verification code if we can find this email address.</CardDescription>
+        <CardDescription
+          >We will email you a verification code if we can find this email address.</CardDescription
+        >
       </CardHeader>
       <CardContent>
         {#if error}

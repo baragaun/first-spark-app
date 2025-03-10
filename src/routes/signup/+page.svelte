@@ -14,7 +14,7 @@
     noRepetitivePattern: boolean;
     doesNotReuseEmail: boolean;
     isValid: boolean;
-  }
+  };
 
   const commonPasswords = [
     '123456',
@@ -230,9 +230,7 @@
           <Button
             type="submit"
             class="w-full"
-            disabled={loading ||
-              !password ||
-              !validatePassword(password).isValid}
+            disabled={loading || !password || !validatePassword(password).isValid}
           >
             {loading ? 'Creating account...' : 'Create Account'}
           </Button>

@@ -138,8 +138,8 @@
       <CardHeader>
         <CardTitle class="text-2xl">Log In</CardTitle>
         <CardDescription>
-          By continuing, you agree to our User Agreement and acknowledge
-          that you understand and agree to our Privacy Policy.
+          By continuing, you agree to our User Agreement and acknowledge that you understand and
+          agree to our Privacy Policy.
         </CardDescription>
       </CardHeader>
       <CardContent>
