@@ -9,6 +9,7 @@
     ref = $bindable(null),
     class: className,
     onclick,
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
     ...restProps
   }: ComponentProps<typeof Button> & {
     onclick?: (e: MouseEvent) => void;
