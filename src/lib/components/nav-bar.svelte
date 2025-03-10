@@ -91,7 +91,7 @@
 
       <!-- Desktop Navigation -->
       <div class="hidden md:flex md:items-center md:gap-4">
-        <!-- Language Switcher -->
+        <!-- Language Selector -->
         <LanguageSelector />
 
         {#if isAuthenticated}
@@ -153,14 +153,8 @@
             {/if}
           </Button>
 
-          <!-- Language Selection -->
-          <Button
-            variant="ghost"
-            class="font-lexend w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
-          >
-            <Languages class="h-5 w-5" />
-            <span>Change Language</span>
-          </Button>
+          <!-- Language Selector -->
+          <LanguageSelector />
 
           <!-- Auth Buttons -->
           {#if isAuthenticated}

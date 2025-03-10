@@ -1,10 +1,8 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
   import { Languages } from 'lucide-svelte';
+  import { locale } from 'svelte-i18n';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-  import { locale, locales } from 'svelte-i18n';
-
-  export let isMobile = false;
 
   const languages: Record<string, string> = {
     en: 'English',
@@ -24,16 +22,20 @@
   };
 </script>
 
-{#if isMobile}
+<!-- Mobile -->
+<div class="md:hidden">
   <Button
     variant="ghost"
-    class="font-lexend w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
+    class="font-lexend w-full justify-start gap-2 text-muted-foreground hover:text-foreground md:hidden"
     onclick={() => cycleLanguage()}
   >
     <Languages class="h-5 w-5" />
     <span>Change Language</span>
   </Button>
-{:else}
+</div>
+
+<!-- Desktop -->
+<div class="hidden md:flex">
   <DropdownMenu.Root>
     <DropdownMenu.Trigger>
       <Button
@@ -60,4 +62,4 @@
       {/each}
     </DropdownMenu.Content>
   </DropdownMenu.Root>
-{/if}
+</div>
