@@ -1,8 +1,6 @@
 <script lang="ts">
-  import { Button } from '$lib/components/ui/button';
   import { Separator } from '$lib/components/ui/separator';
   import { Switch } from '$lib/components/ui/switch';
-  import { cn } from '$lib/utils';
 
   interface NotificationSettings {
     emailNotifications: boolean;
@@ -18,11 +16,10 @@
     conversationClosed: boolean;
     securityAlerts: boolean;
     newDeviceLogin: boolean;
-    usernameChangeNotification: boolean; // renamed from accountChanges
+    usernameChangeNotification: boolean;
     passwordChanges: boolean;
   }
 
-  // Props declaration using runes
   let {
     initialSettings = {
       emailNotifications: true,
@@ -38,7 +35,7 @@
       conversationClosed: true,
       securityAlerts: true,
       newDeviceLogin: true,
-      usernameChangeNotification: true, // renamed from accountChanges
+      usernameChangeNotification: true,
       passwordChanges: true,
     },
   } = $props<{ initialSettings?: NotificationSettings }>();
@@ -48,13 +45,13 @@
   // Watch for changes and save automatically
   $effect(() => {
     if (JSON.stringify(settings) !== JSON.stringify(initialSettings)) {
-      saveNotificationSettings(settings);
+      saveNotificationSettings();
       initialSettings = { ...settings };
     }
   });
 
-  async function saveNotificationSettings(settings: NotificationSettings): Promise<void> {
-    // TODO: Implement actual API call
+  async function saveNotificationSettings(): Promise<void> {
+    // TODO: Implement actual API call using the settings state variable
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 </script>

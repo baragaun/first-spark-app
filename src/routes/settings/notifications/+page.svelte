@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { cn } from '$lib/utils';
   import { Button } from '$lib/components/ui/button';
   import * as Card from '$lib/components/ui/card';
 

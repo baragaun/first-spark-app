@@ -2,7 +2,6 @@
   import { cn } from '$lib/utils';
   import AccountSettings from '@/components/settings-ui/account-settings.svelte';
   import NotificationSettings from '@/components/settings-ui/notification-settings.svelte';
-  import * as Card from '$lib/components/ui/card';
   import { Button } from '$lib/components/ui/button';
 
   // State management using Svelte 5 runes

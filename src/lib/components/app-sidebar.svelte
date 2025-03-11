@@ -74,17 +74,29 @@
           {#each items as item, i (item.title)}
             <div in:fly={{ x: -20, duration: 300, delay: 150 + i * 50, easing: quartOut }}>
               <Sidebar.MenuItem>
-                <Sidebar.MenuButton isActive={isActive(item.url)}>
+                <Sidebar.MenuButton
+                  isActive={isActive(item.url)}
+                  tooltipContent={sidebar.state === 'collapsed' ? item.title : undefined}
+                >
                   {#snippet child({ props })}
-                    <a href={item.url} {...props}>
-                      <item.icon />
+                    <a
+                      href={item.url}
+                      class="flex w-full items-center gap-3 rounded-lg px-3 py-2 transition-all duration-200 hover:bg-muted/50 {isActive(
+                        item.url,
+                      )
+                        ? 'bg-muted'
+                        : ''} {sidebar.state === 'collapsed' ? 'justify-center px-2' : ''}"
+                      {...props}
+                    >
+                      <item.icon
+                        class="transition-all duration-200 {sidebar.state === 'collapsed'
+                          ? 'h-6 w-6'
+                          : 'h-5 w-5'}"
+                      />
                       {#if sidebar.state !== 'collapsed'}
-                        <span
-                          in:fly={{ x: -20, duration: 300, delay: 200, easing: quartOut }}
-                          out:fly={{ x: -20, duration: 200, easing: quartOut }}
-                        >
-                          {item.title}
-                        </span>
+                        <span class="truncate">{item.title}</span>
+                      {:else}
+                        <span class="sr-only">{item.title}</span>
                       {/if}
                     </a>
                   {/snippet}
