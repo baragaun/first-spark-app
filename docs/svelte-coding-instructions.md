@@ -1,7 +1,7 @@
-
 You are an expert in Svelte 5, SvelteKit, TypeScript, and modern web development.
 
 Key Principles
+
 - Write concise, technical code with accurate Svelte 5 and SvelteKit examples.
 - Leverage SvelteKit's server-side rendering (SSR) and static site generation (SSG) capabilities.
 - Prioritize performance optimization and minimal JavaScript for optimal user experience.
@@ -9,6 +9,7 @@ Key Principles
 - Organize files using SvelteKit's file-based routing system.
 
 Code Style and Structure
+
 - Write concise, technical TypeScript code with accurate examples.
 - Use functional and declarative programming patterns; avoid unnecessary classes except for state machines.
 - Prefer iteration and modularization over code duplication.
@@ -16,17 +17,20 @@ Code Style and Structure
 - Follow Svelte's official documentation for setup and configuration: https://svelte.dev/docs
 
 Naming Conventions
+
 - Use lowercase with hyphens for component files (e.g., `components/auth-form.svelte`).
 - Use PascalCase for component names in imports and usage.
 - Use camelCase for variables, functions, and props.
 
 TypeScript Usage
+
 - Use TypeScript for all code; prefer interfaces over types.
 - Avoid enums; use const objects instead.
 - Use functional components with TypeScript interfaces for props.
 - Enable strict mode in TypeScript for better type safety.
 
 Svelte Runes
+
 - `$state`: Declare reactive state
   ```typescript
   let count = $state(0);
@@ -55,6 +59,7 @@ Svelte Runes
   ```
 
 UI and Styling
+
 - Use Tailwind CSS for utility-first styling approach.
 - Leverage Shadcn components for pre-built, customizable UI elements.
 - Import Shadcn components from `$lib/components/ui`.
@@ -62,6 +67,7 @@ UI and Styling
 - Use Svelte's built-in transition and animation features.
 
 Shadcn Color Conventions
+
 - Use `background` and `foreground` convention for colors.
 - Define CSS variables without color space function:
   ```css
@@ -87,6 +93,7 @@ Shadcn Color Conventions
   - `--radius`: Border radius for components
 
 SvelteKit Project Structure
+
 - Use the recommended SvelteKit project structure:
   ```
   - src/
@@ -99,6 +106,7 @@ SvelteKit Project Structure
   ```
 
 Component Development
+
 - Create .svelte files for Svelte components.
 - Use .svelte.ts files for component logic and state machines.
 - Implement proper component composition and reusability.
@@ -106,21 +114,23 @@ Component Development
 - Leverage Svelte's reactive declarations for local state management.
 
 State Management
+
 - Use classes for complex state management (state machines):
+
   ```typescript
   // counter.svelte.ts
   class Counter {
     count = $state(0);
     incrementor = $state(1);
-    
+
     increment() {
       this.count += this.incrementor;
     }
-    
+
     resetCount() {
       this.count = 0;
     }
-    
+
     resetIncrementor() {
       this.incrementor = 1;
     }
@@ -128,10 +138,12 @@ State Management
 
   export const counter = new Counter();
   ```
+
 - Use in components:
+
   ```svelte
   <script lang="ts">
-  import { counter } from './counter.svelte.ts';
+    import { counter } from './counter.svelte.ts';
   </script>
 
   <button on:click={() => counter.increment()}>
@@ -140,17 +152,20 @@ State Management
   ```
 
 Routing and Pages
+
 - Utilize SvelteKit's file-based routing system in the src/routes/ directory.
 - Implement dynamic routes using [slug] syntax.
 - Use load functions for server-side data fetching and pre-rendering.
 - Implement proper error handling with +error.svelte pages.
 
 Server-Side Rendering (SSR) and Static Site Generation (SSG)
+
 - Leverage SvelteKit's SSR capabilities for dynamic content.
 - Implement SSG for static pages using prerender option.
 - Use the adapter-auto for automatic deployment configuration.
 
 Performance Optimization
+
 - Leverage Svelte's compile-time optimizations.
 - Use `{#key}` blocks to force re-rendering of components when needed.
 - Implement code splitting using dynamic imports for large applications.
@@ -160,6 +175,7 @@ Performance Optimization
 - Implement proper lazy loading for images and other assets.
 
 Data Fetching and API Routes
+
 - Use load functions for server-side data fetching.
 - Implement proper error handling for data fetching operations.
 - Create API routes in the src/routes/api/ directory.
@@ -167,38 +183,45 @@ Data Fetching and API Routes
 - Use SvelteKit's hooks for global API middleware.
 
 SEO and Meta Tags
+
 - Use Svelte:head component for adding meta information.
 - Implement canonical URLs for proper SEO.
 - Create reusable SEO components for consistent meta tag management.
 
 Forms and Actions
+
 - Utilize SvelteKit's form actions for server-side form handling.
 - Implement proper client-side form validation using Svelte's reactive declarations.
 - Use progressive enhancement for JavaScript-optional form submissions.
 
 Internationalization (i18n) with svelte-i18n
+
 - Use svelte-i18n for internationalization: https://inlang.com/m/gerre34r/library-inlang-paraglideJs
 - Set up language files in the `src/lib/locales` directory.
 - Use the `_` function to translate strings:
+
   ```svelte
   <script>
-  import { _ } from 'svelte-i18n'
+    import { _ } from 'svelte-i18n';
   </script>
 
   <svelte:head>
-  <title>{$_('page_title')}</title>
+    <title>{$_('page_title')}</title>
   </svelte:head>
   ```
+
 - Support multiple languages and RTL layouts.
 - Ensure text scaling and font adjustments for accessibility.
 
 Accessibility
+
 - Ensure proper semantic HTML structure in Svelte components.
 - Implement ARIA attributes where necessary.
 - Ensure keyboard navigation support for interactive elements.
 - Use Svelte's bind:this for managing focus programmatically.
 
 Key Conventions
+
 1. Embrace Svelte's simplicity and avoid over-engineering solutions.
 2. Use SvelteKit for full-stack applications with SSR and API routes.
 3. Prioritize Web Vitals (LCP, FID, CLS) for performance optimization.
@@ -208,6 +231,7 @@ Key Conventions
 7. Keep your Svelte and SvelteKit versions up to date.
 
 Documentation
+
 - Svelte 5 Runes: https://svelte-5-preview.vercel.app/docs/runes
 - Svelte Documentation: https://svelte.dev/docs
 - SvelteKit Documentation: https://kit.svelte.dev/docs

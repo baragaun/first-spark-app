@@ -7,7 +7,7 @@
 
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
-  import { Moon, Sun, Languages, MoreHorizontal } from 'lucide-svelte';
+  import { Moon, Sun, MoreHorizontal } from 'lucide-svelte';
   import UserNav from './user-nav.svelte';
   import * as Sheet from '$lib/components/ui/sheet';
   import * as Sidebar from '$lib/components/ui/sidebar/index.js';
