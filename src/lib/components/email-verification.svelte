@@ -16,13 +16,9 @@
   export let showSkipButton = false;
 
   // Event callback props
-  /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   export let onEmailSubmit = (data: { email: string }) => {};
-  /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   export let onVerify = (data: { email: string; code: string }) => {};
-  /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   export let onResend = (data: { email: string }) => {};
-  /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   export let onBack = (data: { step: string }) => {};
   export let onSkip = () => {};
 
