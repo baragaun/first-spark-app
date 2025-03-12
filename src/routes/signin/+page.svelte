@@ -153,7 +153,9 @@
           <div class="space-y-2">
             <Input
               type="text"
-              placeholder={loginMethod === 'password' ? $_('signin.username_or_email_placeholder') : $_('signin.email_placeholder')}
+              placeholder={loginMethod === 'password'
+                ? $_('signin.username_or_email_placeholder')
+                : $_('signin.email_placeholder')}
               bind:value={identifier}
               required
             />
@@ -161,9 +163,7 @@
 
           <!-- Login Method Selection -->
           <div class="space-y-2">
-            <label for="login-method" class="text-sm font-medium"
-              >{$_('signin.auth_method')}</label
-            >
+            <label for="login-method" class="text-sm font-medium">{$_('signin.auth_method')}</label>
             <RadioGroup.Root id="login-method" bind:value={loginMethod} class="flex gap-4">
               <div class="flex items-center space-x-2">
                 <RadioGroup.Item value="password" id="password" />
@@ -171,7 +171,7 @@
                   for="password"
                   class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
-                {$_('signin.auth_method1')}
+                  {$_('signin.auth_method1')}
                 </label>
               </div>
               <div class="flex items-center space-x-2">
@@ -180,7 +180,7 @@
                   for="magic-link"
                   class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
-                {$_('signin.auth_method2')}
+                  {$_('signin.auth_method2')}
                 </label>
               </div>
             </RadioGroup.Root>
@@ -188,7 +188,11 @@
 
           {#if loginMethod === 'password'}
             <div class="space-y-2">
-              <PasswordInput bind:value={password} placeholder={$_('signin.password_placeholder')} required />
+              <PasswordInput
+                bind:value={password}
+                placeholder={$_('signin.password_placeholder')}
+                required
+              />
             </div>
             <div class="flex items-center justify-end">
               <Button variant="link" class="px-0 font-normal" href="/reset-password">
@@ -208,7 +212,9 @@
           <div class="text-center text-sm">
             <span class="text-muted-foreground">{$_('signin.have_account')}</span>
             {' '}
-            <Button variant="link" class="px-1 font-normal" href="/signup">{$_('signin.buttons.signup')}</Button>
+            <Button variant="link" class="px-1 font-normal" href="/signup"
+              >{$_('signin.buttons.signup')}</Button
+            >
           </div>
         </form>
       </CardContent>
@@ -241,7 +247,7 @@
                 onclick={handleResendEmail}
                 disabled={loading}
               >
-              {$_('signin.buttons.resend_otp')}
+                {$_('signin.buttons.resend_otp')}
               </Button>
             {:else}
               <span>{$_('signin.otp_timer')}{formatTime(resendTimer)}</span>
@@ -256,7 +262,7 @@
               error = '';
             }}
           >
-          {$_('signin.buttons.back')}
+            {$_('signin.buttons.back')}
           </Button>
         </div>
       </CardContent>

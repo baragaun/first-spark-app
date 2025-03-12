@@ -15,9 +15,9 @@ export function initI18n() {
   });
 
   if (browser) {
-    const savedLanguage = localStorage.getItem(LANGUAGE_KEY);
+    const savedLanguage: string = localStorage.getItem(LANGUAGE_KEY) || 'en';
 
-    if (savedLanguage && SUPPORTED_LANGUAGES.includes(savedLanguage as any)) {
+    if (savedLanguage && SUPPORTED_LANGUAGES.includes(savedLanguage)) {
       locale.set(savedLanguage);
       return;
     }
@@ -25,7 +25,7 @@ export function initI18n() {
     const navigatorLocale = getLocaleFromNavigator();
     const language = navigatorLocale?.split('-')[0] || DEFAULT_LANGUAGE;
 
-    if (SUPPORTED_LANGUAGES.includes(language as any)) {
+    if (SUPPORTED_LANGUAGES.includes(language)) {
       locale.set(language);
       localStorage.setItem(LANGUAGE_KEY, language);
     } else {

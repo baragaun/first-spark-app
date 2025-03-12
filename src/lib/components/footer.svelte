@@ -2,6 +2,8 @@
   import { Button } from '$lib/components/ui/button';
   import { _ } from 'svelte-i18n';
   const currentYear = new Date().getFullYear();
+  // in line @html elements are XSS vulnerable as they don't escape html when rendered
+  $: copyrightMessage = $_('footer.copyright', { values: { year: currentYear } });
 </script>
 
 <footer class="border-t bg-background">
@@ -10,7 +12,7 @@
       <!-- Copyright -->
       <div class="flex flex-col items-center lg:items-start">
         <p class="text-center text-sm text-muted-foreground lg:text-left">
-          {@html $_('footer.copyright', { values: { year: currentYear } })}
+          {copyrightMessage}
         </p>
       </div>
 
