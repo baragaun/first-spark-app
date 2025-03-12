@@ -113,22 +113,82 @@
 
   // Remove unused handleContinue function since it's redundant with handleEmailChange
 
-  // Add password validation logic
-  const validatePassword = (password: string) => {
-    if (!password) return false;
-    if (password.length < 8) return false;
+  type PasswordValidation = {
+    minLength: boolean;
+    notTooSimple: boolean;
+    noRepetitivePattern: boolean;
+    doesNotReuseEmail: boolean;
+    isValid: boolean;
+  };
 
-    // Check for common/simple passwords
-    const commonPasswords = ['password', '12345678', 'qwerty123'];
-    if (commonPasswords.includes(password.toLowerCase())) return false;
+  const commonPasswords = [
+    '123456',
+    'password',
+    '123456789',
+    '12345678',
+    '12345',
+    '1234567',
+    '1234567890',
+    'qwerty',
+    'abc123',
+    'password1',
+  ];
 
-    return true;
+  const validatePassword = (password: string): PasswordValidation => {
+    const repetitivePattern = /^(.)\1+$/;
+    const result: PasswordValidation = {
+      minLength: true,
+      notTooSimple: true,
+      noRepetitivePattern: true,
+      doesNotReuseEmail: true,
+      isValid: true,
+    };
+
+    if (password.length < 8) {
+      result.minLength = false;
+      result.isValid = false;
+    }
+
+    if (commonPasswords.includes(password.toLowerCase())) {
+      result.notTooSimple = false;
+      result.isValid = false;
+    }
+
+    if (repetitivePattern.test(password)) {
+      result.noRepetitivePattern = false;
+      result.isValid = false;
+    }
+
+    if (emails[0]) {
+      const firstEmailPart = emails[0].split('@')[0];
+      if (firstEmailPart && password.toLowerCase().includes(firstEmailPart.toLowerCase())) {
+        result.doesNotReuseEmail = false;
+        result.isValid = false;
+      }
+    }
+
+    return result;
   };
 
   const getPasswordError = (password: string) => {
-    if (!password) return '';
-    if (password.length < 8) return 'Password must be at least 8 characters long';
-    if (!validatePassword(password)) return 'Password is too simple or guessable';
+    if (!password) {
+      return '';
+    }
+
+    const validation = validatePassword(password);
+
+    if (!validation.minLength) {
+      return 'Password must be at least 8 characters long';
+    }
+
+    if (
+      !validation.notTooSimple ||
+      !validation.noRepetitivePattern ||
+      !validation.doesNotReuseEmail
+    ) {
+      return 'Password is too simple or guessable';
+    }
+
     return '';
   };
 
@@ -138,7 +198,8 @@
       return;
     }
 
-    if (!validatePassword(newPassword)) {
+    const validation = validatePassword(newPassword);
+    if (!validation.isValid) {
       error = getPasswordError(newPassword);
       return;
     }
@@ -446,7 +507,7 @@
               />
             </div>
 
-            <div class="space-y-2">
+            <div class="relative space-y-2">
               <label for="new-password" class="text-sm font-medium leading-none">
                 New Password
               </label>
@@ -461,19 +522,16 @@
                   <p class="text-muted-foreground">Password requirements:</p>
                   <ul class="list-inside list-disc space-y-1 pl-2">
                     <li
-                      class:text-destructive={newPassword.length < 8}
-                      class:text-green-500={newPassword.length >= 8}
+                      class:text-destructive={!validatePassword(newPassword).minLength}
+                      class:text-green-500={validatePassword(newPassword).minLength}
                     >
                       At least 8 characters
                     </li>
-                    <li
-                      class:text-destructive={!validatePassword(newPassword)}
-                      class:text-green-500={validatePassword(newPassword)}
-                    >
-                      Must not be a common or simple password
-                    </li>
                   </ul>
                 </div>
+              {/if}
+              {#if newPassword && getPasswordError(newPassword)}
+                <p class="text-xs text-destructive">{getPasswordError(newPassword)}</p>
               {/if}
             </div>
 
@@ -511,7 +569,7 @@
                 disabled={isLoading ||
                   !currentPassword ||
                   !newPassword ||
-                  !validatePassword(newPassword) ||
+                  !validatePassword(newPassword).isValid ||
                   newPassword !== confirmPassword}
               >
                 {isLoading ? 'Saving...' : 'Save Changes'}
