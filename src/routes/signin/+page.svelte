@@ -14,6 +14,7 @@
   import * as RadioGroup from '$lib/components/ui/radio-group';
   import { authStore } from '$lib/components/nav-bar.svelte';
   import Mail from 'lucide-svelte/icons/mail';
+  import { _ } from 'svelte-i18n';
 
   let identifier = ''; // for email or username
   let password = '';
@@ -136,10 +137,9 @@
   <Card class="relative w-full max-w-md">
     {#if !emailSent}
       <CardHeader>
-        <CardTitle class="text-2xl">Log In</CardTitle>
+        <CardTitle class="text-2xl">{$_('signin.buttons.continue')}</CardTitle>
         <CardDescription>
-          By continuing, you agree to our User Agreement and acknowledge that you understand and
-          agree to our Privacy Policy.
+          {$_('signin.terms_agreement')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -153,7 +153,7 @@
           <div class="space-y-2">
             <Input
               type="text"
-              placeholder={loginMethod === 'password' ? 'Email or username' : 'Email'}
+              placeholder={loginMethod === 'password' ? $_('signin.username_or_email_placeholder') : $_('signin.email_placeholder')}
               bind:value={identifier}
               required
             />
@@ -162,7 +162,7 @@
           <!-- Login Method Selection -->
           <div class="space-y-2">
             <label for="login-method" class="text-sm font-medium"
-              >How would you like to login?</label
+              >{$_('signin.auth_method')}</label
             >
             <RadioGroup.Root id="login-method" bind:value={loginMethod} class="flex gap-4">
               <div class="flex items-center space-x-2">
@@ -171,7 +171,7 @@
                   for="password"
                   class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
-                  Password
+                {$_('signin.auth_method1')}
                 </label>
               </div>
               <div class="flex items-center space-x-2">
@@ -180,7 +180,7 @@
                   for="magic-link"
                   class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
-                  Get magic link
+                {$_('signin.auth_method2')}
                 </label>
               </div>
             </RadioGroup.Root>
@@ -188,35 +188,35 @@
 
           {#if loginMethod === 'password'}
             <div class="space-y-2">
-              <PasswordInput bind:value={password} placeholder="Password" required />
+              <PasswordInput bind:value={password} placeholder={$_('signin.password_placeholder')} required />
             </div>
             <div class="flex items-center justify-end">
               <Button variant="link" class="px-0 font-normal" href="/reset-password">
-                Forgot password?
+                {$_('signin.forgot_password')}
               </Button>
             </div>
           {/if}
 
           <Button type="submit" class="w-full" disabled={loading}>
             {#if loginMethod === 'password'}
-              {loading ? 'Signing in...' : 'Log In'}
+              {loading ? $_('signin.buttons.authenticating') : $_('signin.buttons.continue')}
             {:else}
-              {loading ? 'Sending magic link...' : 'Send magic link'}
+              {loading ? $_('signin.buttons.sending') : $_('signin.buttons.continue_otp')}
             {/if}
           </Button>
 
           <div class="text-center text-sm">
-            <span class="text-muted-foreground">New to First Spark?</span>
+            <span class="text-muted-foreground">{$_('signin.have_account')}</span>
             {' '}
-            <Button variant="link" class="px-1 font-normal" href="/signup">Sign Up</Button>
+            <Button variant="link" class="px-1 font-normal" href="/signup">{$_('signin.buttons.signup')}</Button>
           </div>
         </form>
       </CardContent>
     {:else}
       <CardHeader>
-        <CardTitle class="text-2xl">Check your inbox</CardTitle>
+        <CardTitle class="text-2xl">{$_('signin.otp_title')}</CardTitle>
         <CardDescription>
-          We've sent a magic link to {identifier}
+          {$_('signin.otp_subtitle')}{identifier}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -228,12 +228,12 @@
 
           <Alert class="mb-4">
             <AlertDescription>
-              The magic link will expire in 10 minutes. Click the link in the email to sign in.
+              {$_('signin.otp_expiration')}
             </AlertDescription>
           </Alert>
 
           <div class="text-center text-sm text-muted-foreground">
-            Didn't get an email?
+            {$_('signin.otp_renewal')}
             {#if canResend}
               <Button
                 variant="link"
@@ -241,10 +241,10 @@
                 onclick={handleResendEmail}
                 disabled={loading}
               >
-                Resend email
+              {$_('signin.buttons.resend_otp')}
               </Button>
             {:else}
-              <span>Resend in {formatTime(resendTimer)}</span>
+              <span>{$_('signin.otp_timer')}{formatTime(resendTimer)}</span>
             {/if}
           </div>
 
@@ -256,7 +256,7 @@
               error = '';
             }}
           >
-            Back to Log In
+          {$_('signin.buttons.back')}
           </Button>
         </div>
       </CardContent>

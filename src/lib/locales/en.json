@@ -2,7 +2,6 @@
   "welcome": "Welcome to First Spark",
   "welcome_subtitle": "Connect, inspire, thrive!",
   "get_started": "Get Started",
-
   "sidebar": {
     "logo": {
       "alt": "App Logo",
@@ -51,7 +50,33 @@
     "change": "Change Language",
     "select": "Select Language"
   },
-
+  "signin": {
+    "title": "Log In",
+    "terms_agreement": "By continuing, you agree to our User Agreement and acknowledge that you understand and agree to our Privacy Policy.",
+    "have_account": "New to First Spark?",
+    "auth_method": "How would you like to login?",
+    "auth_method1": "Password",
+    "auth_method2": "One time password",
+    "forgot_password": "Forgot your password?",
+    "username_or_email_placeholder": "Username or Email",
+    "email_placeholder": "Email",
+    "password_placeholder": "Password",
+    "otp_title": "Check your inbox",
+    "otp_subtitle": "We've sent a magic link to ",
+    "otp_expiration": "The verification code will expire in 10 minutes. Enter the code below to log in.",
+    "otp_timer": "Resend in ",
+    "otp_renewal": "Didn't get an email?",
+    "buttons": {
+      "back": "← Back to Log In",
+      "continue": "Log In",
+      "continue_otp": "Send me my code",
+      "resend_otp": "Resend email",
+      "verify": "Verify",
+      "sending": "Sending OTP...",
+      "verifying": "Logging in...",
+      "signup": "Sign Up"
+    }
+  },
   "signup": {
     "title": "Sign Up",
     "verify_email_title": "Verify your email",
