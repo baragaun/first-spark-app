@@ -196,7 +196,7 @@ Forms and Actions
 
 Internationalization (i18n) with svelte-i18n
 
-- Use svelte-i18n for internationalization: https://inlang.com/m/gerre34r/library-inlang-paraglideJs
+- Use svelte-i18n for internationalization: https://github.com/kaisermann/svelte-i18n/blob/main/docs/Getting%20Started.md
 - Set up language files in the `src/lib/locales` directory.
 - Use the `_` function to translate strings:
 
