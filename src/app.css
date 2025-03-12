@@ -59,7 +59,7 @@
     --card-foreground: 0 0% 98%;
 
     --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
+    --input: 240 5.9% 30%; /* Updated from a darker value to be more visible */
 
     --primary: 0 0% 98%;
     --primary-foreground: 240 5.9% 10%;
@@ -70,7 +70,7 @@
     --accent: 240 3.7% 15.9%;
     --accent-foreground: 0 0% 98%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 84.2% 60.2%; /* Updated to be more prominent */
     --destructive-foreground: 0 0% 98%;
 
     --ring: 240 4.9% 83.9%;
