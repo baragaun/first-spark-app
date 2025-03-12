@@ -14,6 +14,7 @@
   import { onMount } from 'svelte';
   import { writable } from 'svelte/store';
   import LanguageSelector from './language-selector.svelte';
+  import { _ } from 'svelte-i18n';
 
   // Update auth store when localStorage changes
   const updateAuthState = () => {
@@ -103,10 +104,10 @@
               href="/signin"
               class="font-lexend text-muted-foreground hover:text-foreground"
             >
-              Log In
+              {$_('nav.auth.log_in')}
             </Button>
             <Button variant="default" href="/signup" class="font-lexend shadow-sm hover:shadow-md">
-              Sign Up
+              {$_('nav.auth.sign_up')}
             </Button>
           </div>
         {/if}
@@ -119,7 +120,7 @@
             onclick={() => (isMobileMenuOpen = !isMobileMenuOpen)}
             class="h-10 w-10 p-2"
           />
-          <span class="sr-only">Open Menu</span>
+          <span class="sr-only">{$_('nav.open_menu')}</span>
         </div>
         {#if isAuthenticated}
           <UserNav />
@@ -133,7 +134,7 @@
 <Sheet.Root bind:open={isMobileMenuOpen}>
   <Sheet.Content side="right" class="w-[300px]">
     <div class="flex flex-col gap-4 p-6">
-      <h2 class="font-lexend text-lg font-semibold">Menu</h2>
+      <h2 class="font-lexend text-lg font-semibold">{$_('nav.menu')}</h2>
 
       <div class="flex flex-col gap-4">
         <!-- Mobile Menu Items -->
@@ -146,10 +147,10 @@
           >
             {#if isDarkMode}
               <Sun class="h-5 w-5" />
-              <span>Light Mode</span>
+              <span>{$_('nav.theme.light_mode')}</span>
             {:else}
               <Moon class="h-5 w-5" />
-              <span>Dark Mode</span>
+              <span>{$_('nav.theme.dark_mode')}</span>
             {/if}
           </Button>
 
@@ -164,7 +165,7 @@
               class="font-lexend w-full justify-start text-muted-foreground hover:text-foreground"
               onclick={() => (isMobileMenuOpen = false)}
             >
-              Sign Out
+              {$_('nav.auth.sign_out')}
             </Button>
           {:else}
             <Button
@@ -173,7 +174,7 @@
               class="font-lexend w-full justify-start text-muted-foreground hover:text-foreground"
               onclick={() => (isMobileMenuOpen = false)}
             >
-              Log In
+              {$_('nav.auth.log_in')}
             </Button>
             <Button
               variant="default"
@@ -181,7 +182,7 @@
               class="font-lexend w-full justify-start shadow-sm hover:shadow-md"
               onclick={() => (isMobileMenuOpen = false)}
             >
-              Sign Up
+              {$_('nav.auth.sign_up')}
             </Button>
           {/if}
         </div>

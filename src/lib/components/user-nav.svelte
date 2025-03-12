@@ -5,6 +5,7 @@
   import { goto } from '$app/navigation';
   import { LogOut } from 'lucide-svelte';
   import { authStore } from './nav-bar.svelte';
+  import { _ } from 'svelte-i18n';
 
   const handleLogout = () => {
     localStorage.removeItem('authToken');
@@ -32,15 +33,15 @@
     <DropdownMenu.Separator />
     <DropdownMenu.Group>
       <DropdownMenu.Item>
-        Profile
+        {$_('user_nav.profile')}
         <DropdownMenu.Shortcut>⌘P</DropdownMenu.Shortcut>
       </DropdownMenu.Item>
       <DropdownMenu.Item>
-        Inbox
+        {$_('user_nav.inbox')}
         <DropdownMenu.Shortcut>⌘I</DropdownMenu.Shortcut>
       </DropdownMenu.Item>
       <DropdownMenu.Item>
-        Settings
+        {$_('user_nav.settings')}
         <DropdownMenu.Shortcut>⌘S</DropdownMenu.Shortcut>
       </DropdownMenu.Item>
     </DropdownMenu.Group>
@@ -50,7 +51,7 @@
       class="bg-destructive text-white focus:bg-destructive focus:text-white"
     >
       <LogOut class="mr-2 h-4 w-4" />
-      Log out
+      {$_('user_nav.logout')}
     </DropdownMenu.Item>
   </DropdownMenu.Content>
 </DropdownMenu.Root>

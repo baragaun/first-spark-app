@@ -3,6 +3,55 @@
   "welcome_subtitle": "Connect, inspire, thrive!",
   "get_started": "Get Started",
 
+  "sidebar": {
+    "logo": {
+      "alt": "App Logo",
+      "title": "First Spark"
+    },
+    "menu": {
+      "home": "Home",
+      "inbox": "Inbox",
+      "conversations": "Conversations",
+      "contacts": "Contacts",
+      "settings": "Settings"
+    }
+  },
+
+  "nav": {
+    "menu": "Menu",
+    "open_menu": "Open Menu",
+    "theme": {
+      "light_mode": "Light Mode",
+      "dark_mode": "Dark Mode"
+    },
+    "auth": {
+      "log_in": "Log In",
+      "sign_up": "Sign Up",
+      "sign_out": "Sign Out"
+    }
+  },
+
+  "footer": {
+    "copyright": "© {year} First Spark. All rights reserved.",
+    "navigation": {
+      "faq": "FAQ",
+      "privacy_policy": "Privacy Policy",
+      "terms_of_service": "Terms of Service"
+    }
+  },
+
+  "user_nav": {
+    "profile": "Profile",
+    "inbox": "Inbox",
+    "settings": "Settings",
+    "logout": "Log out"
+  },
+
+  "language": {
+    "change": "Change Language",
+    "select": "Select Language"
+  },
+
   "signup": {
     "title": "Sign Up",
     "verify_email_title": "Verify your email",

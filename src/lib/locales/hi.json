@@ -3,6 +3,55 @@
   "welcome_subtitle": "जुड़ें, प्रेरित करें, विकसित हों!",
   "get_started": "शुरू करें",
 
+  "sidebar": {
+    "logo": {
+      "alt": "ऐप लोगो",
+      "title": "फर्स्ट स्पार्क"
+    },
+    "menu": {
+      "home": "होम",
+      "inbox": "इनबॉक्स",
+      "conversations": "वार्तालाप",
+      "contacts": "संपर्क",
+      "settings": "सेटिंग्स"
+    }
+  },
+
+  "nav": {
+    "menu": "मेनू",
+    "open_menu": "मेनू खोलें",
+    "theme": {
+      "light_mode": "लाइट मोड",
+      "dark_mode": "डार्क मोड"
+    },
+    "auth": {
+      "log_in": "लॉग इन",
+      "sign_up": "साइन अप",
+      "sign_out": "साइन आउट"
+    }
+  },
+
+  "footer": {
+    "copyright": "© {year} First Spark. सर्वाधिकार सुरक्षित।",
+    "navigation": {
+      "faq": "सामान्य प्रश्न",
+      "privacy_policy": "गोपनीयता नीति",
+      "terms_of_service": "सेवा की शर्तें"
+    }
+  },
+
+  "user_nav": {
+    "profile": "प्रोफ़ाइल",
+    "inbox": "इनबॉक्स",
+    "settings": "सेटिंग्स",
+    "logout": "लॉग आउट"
+  },
+
+  "language": {
+    "change": "भाषा बदलें",
+    "select": "भाषा चुनें"
+  },
+
   "signup": {
     "title": "साइन अप",
     "verify_email_title": "अपना ईमेल सत्यापित करें",

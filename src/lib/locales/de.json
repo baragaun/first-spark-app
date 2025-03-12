@@ -3,6 +3,55 @@
   "welcome_subtitle": "Verbinden, inspirieren, wachsen!",
   "get_started": "Jetzt starten",
 
+  "sidebar": {
+    "logo": {
+      "alt": "App-Logo",
+      "title": "First Spark"
+    },
+    "menu": {
+      "home": "Startseite",
+      "inbox": "Posteingang",
+      "conversations": "Gespräche",
+      "contacts": "Kontakte",
+      "settings": "Einstellungen"
+    }
+  },
+
+  "nav": {
+    "menu": "Menü",
+    "open_menu": "Menü öffnen",
+    "theme": {
+      "light_mode": "Heller Modus",
+      "dark_mode": "Dunkler Modus"
+    },
+    "auth": {
+      "log_in": "Anmelden",
+      "sign_up": "Registrieren",
+      "sign_out": "Abmelden"
+    }
+  },
+
+  "footer": {
+    "copyright": "© {year} First Spark. Alle Rechte vorbehalten.",
+    "navigation": {
+      "faq": "FAQ",
+      "privacy_policy": "Datenschutzerklärung",
+      "terms_of_service": "Nutzungsbedingungen"
+    }
+  },
+
+  "user_nav": {
+    "profile": "Profil",
+    "inbox": "Posteingang",
+    "settings": "Einstellungen",
+    "logout": "Abmelden"
+  },
+
+  "language": {
+    "change": "Sprache ändern",
+    "select": "Sprache auswählen"
+  },
+
   "signup": {
     "title": "Registrierung",
     "verify_email_title": "E-Mail bestätigen",

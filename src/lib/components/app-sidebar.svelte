@@ -8,32 +8,33 @@
   import { useSidebar } from '$lib/components/ui/sidebar/context.svelte.js';
   import { fly } from 'svelte/transition';
   import { quartOut } from 'svelte/easing';
+  import { _ } from 'svelte-i18n';
 
   const sidebar = useSidebar();
 
-  const items = [
+  $: items = [
     {
-      title: 'Home',
+      title: $_('sidebar.menu.home'),
       url: '#',
       icon: House,
     },
     {
-      title: 'Inbox',
+      title: $_('sidebar.menu.inbox'),
       url: '#',
       icon: Inbox,
     },
     {
-      title: 'Conversations',
+      title: $_('sidebar.menu.conversations'),
       url: '#',
       icon: MessageSquare,
     },
     {
-      title: 'Contacts',
+      title: $_('sidebar.menu.contacts'),
       url: '#',
       icon: BookUser,
     },
     {
-      title: 'Settings',
+      title: $_('sidebar.menu.settings'),
       url: '#',
       icon: Settings,
     },
@@ -46,7 +47,7 @@
       <div class="mt-2 flex items-center p-2">
         <a href="/" class="flex items-center gap-2 transition-colors hover:opacity-90">
           <div in:fly={{ x: -20, duration: 300, delay: 100, easing: quartOut }}>
-            <img src="/fs-logo.svg" alt="App Logo" class="h-8 w-8" />
+            <img src="/fs-logo.svg" alt={$_('sidebar.logo.alt')} class="h-8 w-8" />
           </div>
           {#if sidebar.state !== 'collapsed'}
             <span
@@ -54,7 +55,7 @@
               out:fly={{ x: -20, duration: 200, easing: quartOut }}
               class="font-lexend text-xl font-bold text-primary"
             >
-              First Spark
+              {$_('sidebar.logo.title')}
             </span>
           {/if}
         </a>

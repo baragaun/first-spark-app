@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
+  import { _ } from 'svelte-i18n';
   const currentYear = new Date().getFullYear();
 </script>
 
@@ -9,7 +10,7 @@
       <!-- Copyright -->
       <div class="flex flex-col items-center lg:items-start">
         <p class="text-center text-sm text-muted-foreground lg:text-left">
-          © {currentYear} First Spark. All rights reserved.
+          {@html $_('footer.copyright', { values: { year: currentYear } })}
         </p>
       </div>
 
@@ -19,21 +20,21 @@
         aria-label="Footer navigation"
       >
         <Button variant="link" href="/faq" class="text-muted-foreground hover:text-primary">
-          FAQ
+          {$_('footer.navigation.faq')}
         </Button>
         <Button
           variant="link"
           href="/privacy-policy"
           class="text-muted-foreground hover:text-primary"
         >
-          Privacy Policy
+          {$_('footer.navigation.privacy_policy')}
         </Button>
         <Button
           variant="link"
           href="/terms-of-service"
           class="text-muted-foreground hover:text-primary"
         >
-          Terms of Service
+          {$_('footer.navigation.terms_of_service')}
         </Button>
       </nav>
     </div>

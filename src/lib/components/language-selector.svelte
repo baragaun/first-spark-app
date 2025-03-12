@@ -2,7 +2,7 @@
   import { Button } from '$lib/components/ui/button';
   import { Languages } from 'lucide-svelte';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-  import { locale } from 'svelte-i18n';
+  import { locale, _ } from 'svelte-i18n';
   import { DEFAULT_LANGUAGE, LANGUAGE_KEY, LANGUAGE_NAMES } from '$lib/i18n/constants';
 
   let currentLocale = DEFAULT_LANGUAGE;
@@ -35,7 +35,7 @@
     onclick={() => selectLanguage()}
   >
     <Languages class="h-5 w-5" />
-    <span>Change Language</span>
+    <span>{$_('language.change')}</span>
   </Button>
 </div>
 
@@ -47,13 +47,13 @@
         variant="ghost"
         size="icon"
         class="text-muted-foreground hover:text-foreground"
-        aria-label="Select language"
+        aria-label={$_('language.select')}
       >
         <Languages class="h-5 w-5" />
       </Button>
     </DropdownMenu.Trigger>
     <DropdownMenu.Content>
-      <DropdownMenu.Label>Select Language</DropdownMenu.Label>
+      <DropdownMenu.Label>{$_('language.select')}</DropdownMenu.Label>
       <DropdownMenu.Separator />
       {#each Object.entries(LANGUAGE_NAMES) as [code, name]}
         <DropdownMenu.Item class="cursor-pointer" onclick={() => handleLanguageChange(code)}>
