@@ -1,7 +1,6 @@
 import { browser } from '$app/environment';
 import { getLocaleFromNavigator, init, locale, register } from 'svelte-i18n';
-
-const defaultLocale = 'en';
+import { DEFAULT_LANGUAGE, LANGUAGE_KEY, SUPPORTED_LANGUAGES } from './constants';
 
 // Register all locales
 register('en', () => import('../locales/en.json'));
@@ -11,19 +10,27 @@ register('hi', () => import('../locales/hi.json'));
 // Initialize only in browser
 export function initI18n() {
   init({
-    fallbackLocale: defaultLocale,
-    initialLocale: defaultLocale,
+    fallbackLocale: DEFAULT_LANGUAGE,
+    initialLocale: DEFAULT_LANGUAGE,
   });
 
   if (browser) {
+    const savedLanguage = localStorage.getItem(LANGUAGE_KEY);
+
+    if (savedLanguage && SUPPORTED_LANGUAGES.includes(savedLanguage as any)) {
+      locale.set(savedLanguage);
+      return;
+    }
+
     const navigatorLocale = getLocaleFromNavigator();
-    // Extract the language part from the locale (e.g., 'en-US' -> 'en')
-    const language = navigatorLocale?.split('-')[0] || defaultLocale;
-    // Only set if it's one of our supported languages
-    if (['en', 'de', 'hi'].includes(language)) {
+    const language = navigatorLocale?.split('-')[0] || DEFAULT_LANGUAGE;
+
+    if (SUPPORTED_LANGUAGES.includes(language as any)) {
       locale.set(language);
+      localStorage.setItem(LANGUAGE_KEY, language);
     } else {
-      locale.set(defaultLocale);
+      locale.set(DEFAULT_LANGUAGE);
+      localStorage.setItem(LANGUAGE_KEY, DEFAULT_LANGUAGE);
     }
   }
 }

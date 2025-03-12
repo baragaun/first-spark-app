@@ -1,24 +1,29 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
   import { Languages } from 'lucide-svelte';
-  import { locale } from 'svelte-i18n';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+  import { locale } from 'svelte-i18n';
+  import { DEFAULT_LANGUAGE, LANGUAGE_KEY, LANGUAGE_NAMES } from '$lib/i18n/constants';
 
-  const languages: Record<string, string> = {
-    en: 'English',
-    de: 'Deutsch',
-    hi: 'हिन्दी',
+  let currentLocale = DEFAULT_LANGUAGE;
+
+  // Subscribe to locale changes
+  $: {
+    currentLocale = $locale || DEFAULT_LANGUAGE;
+  }
+
+  const handleLanguageChange = (code: keyof typeof LANGUAGE_NAMES) => {
+    locale.set(code);
+    localStorage.setItem(LANGUAGE_KEY, code);
   };
 
-  const handleLanguageChange = (code: string) => {
-    $locale = code;
-  };
-
-  const cycleLanguage = () => {
-    const availableLocales = Object.keys(languages);
-    const currentIndex = availableLocales.indexOf($locale ?? 'en');
+  const selectLanguage = () => {
+    const availableLocales = Object.keys(LANGUAGE_NAMES);
+    const currentIndex = availableLocales.indexOf(currentLocale);
     const nextIndex = (currentIndex + 1) % availableLocales.length;
-    $locale = availableLocales[nextIndex];
+    const newLocale = availableLocales[nextIndex];
+    locale.set(newLocale);
+    localStorage.setItem(LANGUAGE_KEY, newLocale);
   };
 </script>
 
@@ -27,7 +32,7 @@
   <Button
     variant="ghost"
     class="font-lexend w-full justify-start gap-2 text-muted-foreground hover:text-foreground md:hidden"
-    onclick={() => cycleLanguage()}
+    onclick={() => selectLanguage()}
   >
     <Languages class="h-5 w-5" />
     <span>Change Language</span>
@@ -50,7 +55,7 @@
     <DropdownMenu.Content>
       <DropdownMenu.Label>Select Language</DropdownMenu.Label>
       <DropdownMenu.Separator />
-      {#each Object.entries(languages) as [code, name]}
+      {#each Object.entries(LANGUAGE_NAMES) as [code, name]}
         <DropdownMenu.Item class="cursor-pointer" onclick={() => handleLanguageChange(code)}>
           <span class:font-bold={$locale === code}>
             {name}
