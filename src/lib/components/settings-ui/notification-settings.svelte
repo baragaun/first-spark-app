@@ -4,18 +4,18 @@
 
   interface NotificationSettings {
     emailNotifications: boolean;
-    pushNotifications: boolean;
-    chatMessageReceived: boolean;
-    buddyApprovedConnection: boolean;
-    friendReceivedChat: boolean;
-    pathfinderAcceptedConnection: boolean;
-    unreadMessagesReminder: boolean;
-    newMessageNotification: boolean;
-    buddySubscribed: boolean;
-    buddyUnsubscribed: boolean;
-    conversationClosed: boolean;
-    securityAlerts: boolean;
-    newDeviceLogin: boolean;
+    // pushNotifications: boolean;
+    // chatMessageReceived: boolean;
+    // buddyApprovedConnection: boolean;
+    // friendReceivedChat: boolean;
+    // pathfinderAcceptedConnection: boolean;
+    // unreadMessagesReminder: boolean;
+    // newMessageNotification: boolean;
+    // buddySubscribed: boolean;
+    // buddyUnsubscribed: boolean;
+    // conversationClosed: boolean;
+    // securityAlerts: boolean;
+    // newDeviceLogin: boolean;
     usernameChangeNotification: boolean;
     passwordChanges: boolean;
   }
@@ -23,18 +23,18 @@
   let {
     initialSettings = {
       emailNotifications: true,
-      pushNotifications: true,
-      chatMessageReceived: true,
-      buddyApprovedConnection: true,
-      friendReceivedChat: true,
-      pathfinderAcceptedConnection: true,
-      unreadMessagesReminder: true,
-      newMessageNotification: true,
-      buddySubscribed: true,
-      buddyUnsubscribed: true,
-      conversationClosed: true,
-      securityAlerts: true,
-      newDeviceLogin: true,
+      // pushNotifications: true,
+      // chatMessageReceived: true,
+      // buddyApprovedConnection: true,
+      // friendReceivedChat: true,
+      // pathfinderAcceptedConnection: true,
+      // unreadMessagesReminder: true,
+      // newMessageNotification: true,
+      // buddySubscribed: true,
+      // buddyUnsubscribed: true,
+      // conversationClosed: true,
+      // securityAlerts: true,
+      // newDeviceLogin: true,
       usernameChangeNotification: true,
       passwordChanges: true,
     },
@@ -54,21 +54,37 @@
     // TODO: Implement actual API call using the settings state variable
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }
+
+  // Function to toggle settings
+  const toggleSetting = (key: keyof NotificationSettings) => {
+    settings[key] = !settings[key];
+  };
 </script>
 
 <div class="space-y-6">
   <!-- General Section -->
   <div>
     <h4 class="font-lexend mb-4 px-4 text-lg font-bold">General</h4>
-    <div class="space-y-4 px-4">
-      <div class="flex items-center justify-between py-2">
+    <div class="space-y-4 px-2">
+      <div
+        class="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 hover:bg-muted/50"
+        onclick={() => toggleSetting('emailNotifications')}
+        onkeydown={(e) => e.key === 'Enter' && toggleSetting('emailNotifications')}
+        tabindex="0"
+        role="button"
+      >
         <div class="space-y-0.5">
           <label for="email-notifications" class="text-sm font-medium">Email Notifications</label>
           <p class="text-sm text-muted-foreground">Receive updates via email</p>
         </div>
-        <Switch id="email-notifications" bind:checked={settings.emailNotifications} />
+        <Switch
+          id="email-notifications"
+          checked={settings.emailNotifications}
+          onchange={() => toggleSetting('emailNotifications')}
+        />
       </div>
 
+      <!-- Commenting out Push Notifications
       <div class="flex items-center justify-between py-2">
         <div class="space-y-0.5">
           <label for="push-notifications" class="text-sm font-medium">Push Notifications</label>
@@ -76,12 +92,13 @@
         </div>
         <Switch id="push-notifications" bind:checked={settings.pushNotifications} />
       </div>
+      -->
     </div>
   </div>
 
   <Separator />
 
-  <!-- Message Section -->
+  <!-- Commenting out Message Section
   <div>
     <h4 class="font-lexend mb-4 px-4 text-lg font-bold">Message</h4>
     <div class="space-y-4 px-4">
@@ -174,11 +191,13 @@
   </div>
 
   <Separator />
+  -->
 
   <!-- Security Section -->
   <div>
     <h4 class="font-lexend mb-4 px-4 text-lg font-bold">Security</h4>
-    <div class="space-y-4 px-4">
+    <div class="space-y-4 px-2">
+      <!-- Commenting out Security Alerts and New Device Login
       <div class="flex items-center justify-between py-2">
         <div class="space-y-0.5">
           <label for="security-alerts" class="text-sm font-medium">Security Alerts</label>
@@ -198,25 +217,46 @@
         </div>
         <Switch id="new-device-login" bind:checked={settings.newDeviceLogin} />
       </div>
+      -->
 
-      <div class="flex items-center justify-between py-2">
+      <div
+        class="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 hover:bg-muted/50"
+        onclick={() => toggleSetting('usernameChangeNotification')}
+        onkeydown={(e) => e.key === 'Enter' && toggleSetting('usernameChangeNotification')}
+        tabindex="0"
+        role="button"
+      >
         <div class="space-y-0.5">
           <label for="username-change" class="text-sm font-medium">Username Updates</label>
           <p class="text-sm text-muted-foreground">
             I am notified via email when my username is updated
           </p>
         </div>
-        <Switch id="username-change" bind:checked={settings.usernameChangeNotification} />
+        <Switch
+          id="username-change"
+          checked={settings.usernameChangeNotification}
+          onchange={() => toggleSetting('usernameChangeNotification')}
+        />
       </div>
 
-      <div class="flex items-center justify-between py-2">
+      <div
+        class="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 hover:bg-muted/50"
+        onclick={() => toggleSetting('passwordChanges')}
+        onkeydown={(e) => e.key === 'Enter' && toggleSetting('passwordChanges')}
+        tabindex="0"
+        role="button"
+      >
         <div class="space-y-0.5">
           <label for="password-changes" class="text-sm font-medium">Password Changes</label>
           <p class="text-sm text-muted-foreground">
             Receive notifications when your password is changed
           </p>
         </div>
-        <Switch id="password-changes" bind:checked={settings.passwordChanges} />
+        <Switch
+          id="password-changes"
+          checked={settings.passwordChanges}
+          onchange={() => toggleSetting('passwordChanges')}
+        />
       </div>
     </div>
   </div>

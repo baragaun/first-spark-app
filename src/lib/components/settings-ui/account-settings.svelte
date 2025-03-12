@@ -7,22 +7,31 @@
   import * as Dialog from '$lib/components/ui/dialog';
   import DialogOverlayBlur from '$lib/components/ui/dialog/dialog-overlay-blur.svelte';
   import { goto } from '$app/navigation';
+  import { PasswordInput } from '$lib/components/ui/password-input';
+  import AlertDescription from '../ui/alert/alert-description.svelte';
 
   // State management using Svelte 5 runes
   let isLoading = $state(false);
   let showDeleteConfirm = $state(false);
   let showUsernameEdit = $state(false);
   let showEmailEdit = $state(false);
-  let showSessionsEdit = $state(false);
-  let showDataDownload = $state(false);
-  let confirmEmail = $state(''); // Add this line
-  let hasPassword = $state(false); // Add this line
+  // let showSessionsEdit = $state(false);
+  // let showDataDownload = $state(false);
+  let confirmEmail = $state('');
   let showConfirmation = $state(false);
+  let showPasswordEdit = $state(false);
 
   let currentUsername = $state('johndoe');
   let newUsername = $state('');
   let emails = $state(['primary@example.com', 'secondary@example.com']);
   let newEmail = $state('');
+  let currentPassword = $state('');
+  let newPassword = $state('');
+  let confirmPassword = $state('');
+  let error = $state('');
+
+  let emailChangePassword = $state('');
+  let emailChangeError = $state('');
 
   const handleUsernameChange = async () => {
     try {
@@ -36,19 +45,9 @@
     }
   };
 
-  const handleEmailAdd = async () => {
-    try {
-      isLoading = true;
-      // TODO: Implement email addition API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      emails = [...emails, newEmail];
-      showEmailEdit = false;
-      newEmail = '';
-    } finally {
-      isLoading = false;
-    }
-  };
+  // handleEmail function removed as it's not being used
 
+  /* Commenting out unused functions for milestone-1
   const handleSignOutAll = async () => {
     try {
       isLoading = true;
@@ -77,6 +76,7 @@
       isLoading = false;
     }
   };
+  */
 
   const handleAccountDeletion = async () => {
     try {
@@ -91,31 +91,80 @@
   };
 
   const handleEmailChange = async () => {
+    if (!emailChangePassword) {
+      emailChangeError = 'Current password is required';
+      return;
+    }
+
     try {
       isLoading = true;
-      // TODO: Implement email change API call
+      emailChangeError = '';
+      // TODO: Implement email change API call with password verification
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      emails = [newEmail, ...emails.slice(1)];
-      showEmailEdit = false;
-      newEmail = '';
+      showConfirmation = true;
+      emailChangePassword = '';
+    } catch (e) {
+      emailChangeError = 'Invalid password. Please try again.';
+      console.error('Email change failed:', e);
     } finally {
       isLoading = false;
     }
   };
 
-  async function handleContinue() {
+  // Remove unused handleContinue function since it's redundant with handleEmailChange
+
+  // Add password validation logic
+  const validatePassword = (password: string) => {
+    if (!password) return false;
+    if (password.length < 8) return false;
+
+    // Check for common/simple passwords
+    const commonPasswords = ['password', '12345678', 'qwerty123'];
+    if (commonPasswords.includes(password.toLowerCase())) return false;
+
+    return true;
+  };
+
+  const getPasswordError = (password: string) => {
+    if (!password) return '';
+    if (password.length < 8) return 'Password must be at least 8 characters long';
+    if (!validatePassword(password)) return 'Password is too simple or guessable';
+    return '';
+  };
+
+  const handlePasswordChange = async () => {
+    if (!currentPassword) {
+      error = 'Current password is required';
+      return;
+    }
+
+    if (!validatePassword(newPassword)) {
+      error = getPasswordError(newPassword);
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      error = 'Passwords do not match';
+      return;
+    }
+
     try {
       isLoading = true;
-      // TODO: Implement your API call here
+      error = '';
+      // TODO: Implement password change API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      showConfirmation = true;
-    } catch (error) {
-      // Handle error
-      console.error('Error:', error);
+
+      showPasswordEdit = false;
+      currentPassword = '';
+      newPassword = '';
+      confirmPassword = '';
+    } catch (e) {
+      error = 'Failed to update password. Please try again.';
+      console.error('Password change failed:', e);
     } finally {
       isLoading = false;
     }
-  }
+  };
 </script>
 
 <div class="space-y-6">
@@ -207,7 +256,7 @@
         onclick={() => (showEmailEdit = true)}
       >
         <div class="flex flex-col text-left sm:flex-row sm:items-center sm:gap-2">
-          <p class="text-sm font-medium">Email Addresses</p>
+          <p class="text-sm font-medium">Email</p>
         </div>
         <div class="flex items-center gap-2">
           <p class="text-right text-sm text-muted-foreground group-hover:text-foreground">
@@ -226,67 +275,93 @@
           showEmailEdit = open;
           if (!open) {
             newEmail = '';
+            emailChangePassword = '';
+            emailChangeError = '';
             showConfirmation = false;
           }
         }}
       >
         <Dialog.Content class="sm:max-w-[425px]">
           {#if !showConfirmation}
-            <!-- Initial Email Change Screen -->
             <Dialog.Header class="space-y-2">
-              <Dialog.Title class="text-xl font-semibold">Change your email address</Dialog.Title>
+              <Dialog.Title class="text-xl font-semibold">Change your email</Dialog.Title>
               <Dialog.Description class="text-base text-muted-foreground">
-                To change your email address, you need to create a password first. We'll walk you
-                through it.
+                Enter your current password and new email address.
               </Dialog.Description>
             </Dialog.Header>
 
-            <div class="mt-6 space-y-4">
+            <form
+              onsubmit={(e) => {
+                e.preventDefault();
+                handleEmailChange();
+              }}
+              class="mt-6 space-y-4"
+            >
+              {#if emailChangeError}
+                <Alert.Root variant="destructive">
+                  <AlertDescription>{emailChangeError}</AlertDescription>
+                </Alert.Root>
+              {/if}
+
               <div class="rounded-lg border bg-muted/50 p-4">
                 <p class="text-sm font-medium text-muted-foreground">Current Email</p>
                 <p class="mt-1 text-base">{emails[0]}</p>
               </div>
 
-              {#if hasPassword}
-                <div class="space-y-2">
-                  <label for="new-email" class="text-sm font-medium leading-none">
-                    New Email Address
-                  </label>
-                  <Input
-                    id="new-email"
-                    type="email"
-                    placeholder="Enter new email address"
-                    bind:value={newEmail}
-                  />
-                </div>
-              {/if}
-            </div>
+              <div class="space-y-2">
+                <label for="new-email" class="text-sm font-medium leading-none"> New Email </label>
+                <Input
+                  id="new-email"
+                  type="email"
+                  placeholder="Enter new email address"
+                  bind:value={newEmail}
+                  required
+                />
+              </div>
 
-            <Dialog.Footer class="mt-6 flex justify-end gap-3">
-              <Button
-                variant="outline"
-                onclick={() => {
-                  showEmailEdit = false;
-                  newEmail = '';
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                disabled={isLoading}
-                onclick={async () => {
-                  await handleContinue();
-                }}
-              >
-                Continue
-              </Button>
-            </Dialog.Footer>
+              <div class="space-y-2">
+                <label for="email-change-password" class="text-sm font-medium leading-none">
+                  Current Password
+                </label>
+                <PasswordInput
+                  id="email-change-password"
+                  placeholder="Enter your current password"
+                  bind:value={emailChangePassword}
+                  required
+                />
+              </div>
+
+              <Dialog.Footer class="mt-6 flex justify-end gap-3">
+                <Button
+                  variant="outline"
+                  type="button"
+                  onclick={() => {
+                    showEmailEdit = false;
+                    newEmail = '';
+                    emailChangePassword = '';
+                    emailChangeError = '';
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isLoading ||
+                    !newEmail ||
+                    !emailChangePassword ||
+                    newEmail === emails[0]}
+                >
+                  {isLoading ? 'Verifying...' : 'Continue'}
+                </Button>
+              </Dialog.Footer>
+            </form>
           {:else}
             <!-- Confirmation Screen -->
             <Dialog.Header class="space-y-2">
               <Dialog.Title class="text-xl font-semibold">Check your email</Dialog.Title>
               <Dialog.Description class="text-base text-muted-foreground">
-                We sent a message to {emails[0]} with a link to create your password.
+                We sent a verification link to {newEmail}. Click the link to confirm your new email
+                address.
               </Dialog.Description>
             </Dialog.Header>
 
@@ -296,6 +371,8 @@
                 onclick={() => {
                   showEmailEdit = false;
                   showConfirmation = false;
+                  newEmail = '';
+                  emailChangePassword = '';
                 }}
               >
                 Done
@@ -308,7 +385,7 @@
       <!-- Password Dialog -->
       <button
         class="group flex w-full items-center justify-between rounded-lg py-2 hover:bg-muted/50"
-        onclick={() => goto('/reset-password')}
+        onclick={() => (showPasswordEdit = true)}
       >
         <div class="flex flex-col text-left sm:flex-row sm:items-center sm:gap-2">
           <p class="text-sm font-medium">Password</p>
@@ -323,7 +400,128 @@
         </div>
       </button>
 
-      <!-- Sessions Dialog -->
+      <Dialog.Root
+        class=""
+        open={showPasswordEdit}
+        onOpenChange={(open: boolean) => {
+          showPasswordEdit = open;
+          if (!open) {
+            currentPassword = '';
+            newPassword = '';
+            confirmPassword = '';
+            error = '';
+          }
+        }}
+      >
+        <Dialog.Content class="sm:max-w-[425px]">
+          <Dialog.Header class="space-y-2">
+            <Dialog.Title class="text-xl font-semibold">Change password</Dialog.Title>
+            <Dialog.Description class="text-base text-muted-foreground">
+              Enter your current password and choose a new one.
+            </Dialog.Description>
+          </Dialog.Header>
+
+          <form
+            onsubmit={(e) => {
+              e.preventDefault();
+              handlePasswordChange();
+            }}
+            class="mt-6 space-y-4"
+          >
+            {#if error}
+              <Alert.Root variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert.Root>
+            {/if}
+
+            <div class="space-y-2">
+              <label for="current-password" class="text-sm font-medium leading-none">
+                Current Password
+              </label>
+              <PasswordInput
+                id="current-password"
+                placeholder="Enter current password"
+                bind:value={currentPassword}
+                required
+              />
+            </div>
+
+            <div class="space-y-2">
+              <label for="new-password" class="text-sm font-medium leading-none">
+                New Password
+              </label>
+              <PasswordInput
+                id="new-password"
+                placeholder="Enter new password"
+                bind:value={newPassword}
+                required
+              />
+              {#if newPassword}
+                <div class="space-y-2 text-xs">
+                  <p class="text-muted-foreground">Password requirements:</p>
+                  <ul class="list-inside list-disc space-y-1 pl-2">
+                    <li
+                      class:text-destructive={newPassword.length < 8}
+                      class:text-green-500={newPassword.length >= 8}
+                    >
+                      At least 8 characters
+                    </li>
+                    <li
+                      class:text-destructive={!validatePassword(newPassword)}
+                      class:text-green-500={validatePassword(newPassword)}
+                    >
+                      Must not be a common or simple password
+                    </li>
+                  </ul>
+                </div>
+              {/if}
+            </div>
+
+            <div class="space-y-2">
+              <label for="confirm-password" class="text-sm font-medium leading-none">
+                Confirm New Password
+              </label>
+              <PasswordInput
+                id="confirm-password"
+                placeholder="Confirm new password"
+                bind:value={confirmPassword}
+                required
+              />
+              {#if confirmPassword && newPassword !== confirmPassword}
+                <p class="text-xs text-destructive">Passwords do not match</p>
+              {/if}
+            </div>
+
+            <Dialog.Footer class="mt-6 flex justify-end gap-3">
+              <Button
+                variant="outline"
+                type="button"
+                onclick={() => {
+                  showPasswordEdit = false;
+                  currentPassword = '';
+                  newPassword = '';
+                  confirmPassword = '';
+                  error = '';
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isLoading ||
+                  !currentPassword ||
+                  !newPassword ||
+                  !validatePassword(newPassword) ||
+                  newPassword !== confirmPassword}
+              >
+                {isLoading ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </Dialog.Footer>
+          </form>
+        </Dialog.Content>
+      </Dialog.Root>
+
+      <!-- Sessions Dialog - Commented out for milestone-1
       <button
         class="group flex w-full items-center justify-between rounded-lg py-2 hover:bg-muted/50"
         onclick={() => (showSessionsEdit = true)}
@@ -364,8 +562,9 @@
           </Dialog.Footer>
         </Dialog.Content>
       </Dialog.Root>
+      -->
 
-      <!-- Data Download Dialog -->
+      <!-- Data Download Dialog - Commented out for milestone-1
       <button
         class="group flex w-full items-center justify-between rounded-lg py-2 hover:bg-muted/50"
         onclick={() => (showDataDownload = true)}
@@ -406,6 +605,7 @@
           </Dialog.Footer>
         </Dialog.Content>
       </Dialog.Root>
+      -->
     </div>
   </div>
 
@@ -462,18 +662,18 @@
           <div class="mt-4 space-y-4">
             <div class="space-y-2">
               <label for="confirm-email" class="text-sm font-medium leading-none">
-                Confirm your email address
+                Type your email <span class="text-muted-foreground">({emails[0]})</span> to confirm
               </label>
               <Input
                 id="confirm-email"
                 type="email"
-                placeholder="Enter your email address"
+                placeholder={emails[0]}
                 bind:value={confirmEmail}
               />
             </div>
           </div>
 
-          <Dialog.Footer class="flex justify-end gap-2">
+          <Dialog.Footer class="mt-6 flex justify-end gap-2">
             <Button
               variant="outline"
               onclick={() => {
@@ -485,7 +685,8 @@
             </Button>
             <Button
               variant="destructive"
-              disabled={isLoading || confirmEmail !== emails[0]}
+              disabled={isLoading ||
+                confirmEmail.toLowerCase().trim() !== emails[0].toLowerCase().trim()}
               onclick={handleAccountDeletion}
             >
               {isLoading ? 'Deleting...' : 'Delete Account'}
