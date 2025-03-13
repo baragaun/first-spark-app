@@ -8,12 +8,10 @@
   import { useSidebar } from '$lib/components/ui/sidebar/context.svelte.js';
   import { fly } from 'svelte/transition';
   import { quartOut } from 'svelte/easing';
-  import { page } from '$app/stores';
+  import { page } from '$app/state';
+	import type { ComponentProps } from "svelte";
 
-  const sidebar = useSidebar();
-
-  // Get current path for active state
-  let currentPath = $derived($page.url.pathname);
+  let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
 
   const items = [
     {
@@ -43,13 +41,10 @@
     },
   ];
 
-  // Check if item is active
-  function isActive(url: string): boolean {
-    return currentPath === url;
-  }
+  let activeItem = $state(items[0]);
+	const sidebar = useSidebar();
 </script>
 
-<div class="flex">
   <Sidebar.Root collapsible="icon">
     <Sidebar.Content>
       <div class="mt-2 flex items-center p-2">
@@ -75,31 +70,18 @@
             <div in:fly={{ x: -20, duration: 300, delay: 150 + i * 50, easing: quartOut }}>
               <Sidebar.MenuItem>
                 <Sidebar.MenuButton
-                  isActive={isActive(item.url)}
-                  tooltipContent={sidebar.state === 'collapsed' ? item.title : undefined}
+                tooltipContentProps={{ hidden: false }}
+                onclick={() => {
+                  activeItem = item;
+                  sidebar.setOpen(true);
+                }}
+                isActive={activeItem.title == item.title}
                 >
-                  {#snippet child({ props })}
-                    <a
-                      href={item.url}
-                      class="flex w-full items-center gap-3 rounded-lg px-3 py-2 transition-all duration-200 hover:bg-muted/50 {isActive(
-                        item.url,
-                      )
-                        ? 'bg-muted'
-                        : ''} {sidebar.state === 'collapsed' ? 'justify-center px-2' : ''}"
-                      {...props}
-                    >
-                      <item.icon
-                        class="transition-all duration-200 {sidebar.state === 'collapsed'
-                          ? 'h-6 w-6'
-                          : 'h-5 w-5'}"
-                      />
-                      {#if sidebar.state !== 'collapsed'}
-                        <span class="truncate">{item.title}</span>
-                      {:else}
-                        <span class="sr-only">{item.title}</span>
-                      {/if}
-                    </a>
+                  {#snippet tooltipContent()}
+                      {item.title}
                   {/snippet}
+                  <item.icon />
+                  <span>{item.title}</span>
                 </Sidebar.MenuButton>
               </Sidebar.MenuItem>
             </div>
@@ -108,4 +90,3 @@
       </Sidebar.Group>
     </Sidebar.Content>
   </Sidebar.Root>
-</div>
