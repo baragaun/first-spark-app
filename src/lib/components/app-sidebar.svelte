@@ -8,45 +8,30 @@
   import { useSidebar } from '$lib/components/ui/sidebar/context.svelte.js';
   import { fly } from 'svelte/transition';
   import { quartOut } from 'svelte/easing';
-  import { page } from '$app/stores';
+  import { getStores } from '$app/stores';
 
+  const { page } = getStores();
   const sidebar = useSidebar();
 
-  // Get current path for active state
-  let currentPath = $derived($page.url.pathname);
+  // State declarations using runes
+  let items = $state({
+    home: { title: 'Home', url: '/', icon: House },
+    inbox: { title: 'Inbox', url: '#', icon: Inbox },
+    conversations: { title: 'Conversations', url: '#', icon: MessageSquare },
+    contacts: { title: 'Contacts', url: '#', icon: BookUser },
+    settings: { title: 'Settings', url: '/settings', icon: Settings },
+  });
 
-  const items = [
-    {
-      title: 'Home',
-      url: '/',
-      icon: House,
-    },
-    {
-      title: 'Inbox',
-      url: '#',
-      icon: Inbox,
-    },
-    {
-      title: 'Conversations',
-      url: '#',
-      icon: MessageSquare,
-    },
-    {
-      title: 'Contacts',
-      url: '#',
-      icon: BookUser,
-    },
-    {
-      title: 'Settings',
-      url: '/settings',
-      icon: Settings,
-    },
-  ];
-
-  // Check if item is active
-  function isActive(url: string): boolean {
-    return currentPath === url;
-  }
+  // Derived values using runes
+  let currentPath = $derived.by(() => $page.url.pathname);
+  let sidebarState = $derived.by(() => sidebar.state);
+  let itemsList = $derived.by(() => Object.values(items));
+  let isActive = (url: string) => {
+    if (url === '/') {
+      return currentPath === '/';
+    }
+    return currentPath.startsWith(url);
+  };
 </script>
 
 <div class="flex">
@@ -54,10 +39,10 @@
     <Sidebar.Content>
       <div class="mt-2 flex items-center p-2">
         <a href="/" class="flex items-center gap-2 transition-colors hover:opacity-90">
-          <div in:fly={{ x: -20, duration: 300, delay: 100, easing: quartOut }}>
+          <div transition:fly={{ x: -20, duration: 300, delay: 100, easing: quartOut }}>
             <img src="/fs-logo.svg" alt="App Logo" class="h-8 w-8" />
           </div>
-          {#if sidebar.state !== 'collapsed'}
+          {#if sidebarState !== 'collapsed'}
             <span
               in:fly={{ x: -20, duration: 300, delay: 200, easing: quartOut }}
               out:fly={{ x: -20, duration: 200, easing: quartOut }}
@@ -71,32 +56,20 @@
 
       <Sidebar.Group>
         <Sidebar.Menu>
-          {#each items as item, i (item.title)}
-            <div in:fly={{ x: -20, duration: 300, delay: 150 + i * 50, easing: quartOut }}>
+          {#each itemsList as item, i}
+            {@const delay = 150 + i * 50}
+            <div transition:fly={{ x: -20, duration: 300, delay, easing: quartOut }}>
               <Sidebar.MenuItem>
-                <Sidebar.MenuButton
-                  isActive={isActive(item.url)}
-                  tooltipContent={sidebar.state === 'collapsed' ? item.title : undefined}
-                >
+                <Sidebar.MenuButton isActive={isActive(item.url)}>
                   {#snippet child({ props })}
-                    <a
-                      href={item.url}
-                      class="flex w-full items-center gap-3 rounded-lg px-3 py-2 transition-all duration-200 hover:bg-muted/50 {isActive(
-                        item.url,
-                      )
-                        ? 'bg-muted'
-                        : ''} {sidebar.state === 'collapsed' ? 'justify-center px-2' : ''}"
-                      {...props}
-                    >
-                      <item.icon
-                        class="transition-all duration-200 {sidebar.state === 'collapsed'
-                          ? 'h-6 w-6'
-                          : 'h-5 w-5'}"
-                      />
-                      {#if sidebar.state !== 'collapsed'}
-                        <span class="truncate">{item.title}</span>
-                      {:else}
-                        <span class="sr-only">{item.title}</span>
+                    <a href={item.url} {...props}>
+                      <item.icon />
+                      {#if sidebarState !== 'collapsed'}
+                        <span
+                          transition:fly={{ x: -20, duration: 300, delay: 200, easing: quartOut }}
+                        >
+                          {item.title}
+                        </span>
                       {/if}
                     </a>
                   {/snippet}

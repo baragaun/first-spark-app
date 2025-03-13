@@ -1,8 +1,14 @@
 <script lang="ts">
   import { Dialog as DialogPrimitive } from 'bits-ui';
   import { cn } from '$lib/utils.js';
+  import type { HTMLAttributes } from 'svelte/elements';
 
-  let { class: className, ...props } = $props();
+  type DialogOverlayProps = DialogPrimitive.OverlayProps & {
+    class?: string;
+  };
+
+  let { class: className, ...props }: DialogOverlayProps = $props();
+
   let mounted = $state(false);
 
   $effect(() => {

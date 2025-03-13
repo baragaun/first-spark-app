@@ -5,7 +5,6 @@
   import { ChevronRight, AlertTriangle } from 'lucide-svelte';
   import * as Alert from '$lib/components/ui/alert';
   import * as Dialog from '$lib/components/ui/dialog';
-  import DialogOverlayBlur from '$lib/components/ui/dialog/dialog-overlay-blur.svelte';
   import { goto } from '$app/navigation';
   import { PasswordInput } from '$lib/components/ui/password-input';
   import AlertDescription from '../ui/alert/alert-description.svelte';
@@ -15,12 +14,15 @@
   let showDeleteConfirm = $state(false);
   let showUsernameEdit = $state(false);
   let showEmailEdit = $state(false);
-  // let showSessionsEdit = $state(false);
-  // let showDataDownload = $state(false);
-  let confirmEmail = $state('');
   let showConfirmation = $state(false);
   let showPasswordEdit = $state(false);
+  let confirmEmail = $state('');
 
+  // Commented states preserved for future use
+  // let showSessionsEdit = $state(false);
+  // let showDataDownload = $state(false);
+
+  // User data states
   let currentUsername = $state('johndoe');
   let newUsername = $state('');
   let emails = $state(['primary@example.com', 'secondary@example.com']);
@@ -29,11 +31,23 @@
   let newPassword = $state('');
   let confirmPassword = $state('');
   let error = $state('');
-
   let emailChangePassword = $state('');
   let emailChangeError = $state('');
 
+  // Derived states
+  let isUsernameValid = $derived.by(() => newUsername && newUsername !== currentUsername);
+
+  let isEmailValid = $derived.by(() => newEmail && newEmail !== emails[0] && emailChangePassword);
+
+  let isPasswordValid = $derived.by(() => {
+    if (!currentPassword || !newPassword || !confirmPassword) return false;
+    const validation = validatePassword(newPassword);
+    return validation.isValid && newPassword === confirmPassword;
+  });
+
   const handleUsernameChange = async () => {
+    if (!isUsernameValid) return;
+
     try {
       isLoading = true;
       // TODO: Implement username change API call
@@ -45,9 +59,7 @@
     }
   };
 
-  // handleEmail function removed as it's not being used
-
-  /* Commenting out unused functions for milestone-1
+  /* Preserving commented functions for milestone-1
   const handleSignOutAll = async () => {
     try {
       isLoading = true;
@@ -83,15 +95,14 @@
       isLoading = true;
       // TODO: Implement account deletion API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      // After successful deletion, redirect to signup page
-      goto('/signup');
+      await goto('/signup');
     } finally {
       isLoading = false;
     }
   };
 
   const handleEmailChange = async () => {
-    if (!emailChangePassword) {
+    if (!isEmailValid) {
       emailChangeError = 'Current password is required';
       return;
     }
@@ -110,8 +121,6 @@
       isLoading = false;
     }
   };
-
-  // Remove unused handleContinue function since it's redundant with handleEmailChange
 
   type PasswordValidation = {
     minLength: boolean;
@@ -132,7 +141,7 @@
     'qwerty',
     'abc123',
     'password1',
-  ];
+  ] as const;
 
   const validatePassword = (password: string): PasswordValidation => {
     const repetitivePattern = /^(.)\1+$/;
@@ -149,7 +158,7 @@
       result.isValid = false;
     }
 
-    if (commonPasswords.includes(password.toLowerCase())) {
+    if (commonPasswords.includes(password.toLowerCase() as (typeof commonPasswords)[number])) {
       result.notTooSimple = false;
       result.isValid = false;
     }
@@ -170,12 +179,10 @@
     return result;
   };
 
-  const getPasswordError = (password: string) => {
-    if (!password) {
-      return '';
-    }
+  const getPasswordError = $derived.by(() => {
+    if (!newPassword) return '';
 
-    const validation = validatePassword(password);
+    const validation = validatePassword(newPassword);
 
     if (!validation.minLength) {
       return 'Password must be at least 8 characters long';
@@ -190,22 +197,11 @@
     }
 
     return '';
-  };
+  });
 
   const handlePasswordChange = async () => {
-    if (!currentPassword) {
-      error = 'Current password is required';
-      return;
-    }
-
-    const validation = validatePassword(newPassword);
-    if (!validation.isValid) {
-      error = getPasswordError(newPassword);
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      error = 'Passwords do not match';
+    if (!isPasswordValid) {
+      error = 'Please check password requirements';
       return;
     }
 
@@ -226,6 +222,23 @@
       isLoading = false;
     }
   };
+
+  // Reset form states when dialogs close
+  $effect(() => {
+    if (!showUsernameEdit) newUsername = '';
+    if (!showEmailEdit) {
+      newEmail = '';
+      emailChangePassword = '';
+      emailChangeError = '';
+      showConfirmation = false;
+    }
+    if (!showPasswordEdit) {
+      currentPassword = '';
+      newPassword = '';
+      confirmPassword = '';
+      error = '';
+    }
+  });
 </script>
 
 <div class="space-y-6">
@@ -261,7 +274,6 @@
           }
         }}
       >
-        <DialogOverlayBlur class="fixed inset-0 z-50" />
         <Dialog.Content class="sm:max-w-[425px]">
           <Dialog.Header class="space-y-2">
             <Dialog.Title class="text-lg font-semibold">Change Username</Dialog.Title>
@@ -530,8 +542,8 @@
                   </ul>
                 </div>
               {/if}
-              {#if newPassword && getPasswordError(newPassword)}
-                <p class="text-xs text-destructive">{getPasswordError(newPassword)}</p>
+              {#if newPassword && getPasswordError}
+                <p class="text-xs text-destructive">{getPasswordError}</p>
               {/if}
             </div>
 

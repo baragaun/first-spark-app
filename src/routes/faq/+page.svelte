@@ -6,21 +6,25 @@
   import { cn } from '$lib/utils';
   import { FAQ_SECTIONS } from '$lib/docs/faq-data';
 
-  const initialFAQSections: FAQSection[] = $state(FAQ_SECTIONS);
+  let faqSections = $state(FAQ_SECTIONS);
 
-  function getOpenQuestionsCount() {
-    return initialFAQSections.flatMap((section) => section.items.filter((item) => item.isOpen))
-      .length;
-  }
+  let openQuestionsCount = $derived.by(
+    () => faqSections.flatMap((section) => section.items.filter((item) => item.isOpen)).length,
+  );
+
+  let snapshot = {
+    capture: () => faqSections,
+    restore: (value: FAQSection[]) => (faqSections = value),
+  };
 
   function handleQuestionToggle(sectionIndex: number, itemIndex: number): void {
-    initialFAQSections[sectionIndex].items[itemIndex].isOpen =
-      !initialFAQSections[sectionIndex].items[itemIndex].isOpen;
+    faqSections[sectionIndex].items[itemIndex].isOpen =
+      !faqSections[sectionIndex].items[itemIndex].isOpen;
   }
 
-  $effect(() => {
-    if (typeof window !== 'undefined' && getOpenQuestionsCount() > 0) {
-      console.log(`FAQ sections open: ${getOpenQuestionsCount()}`);
+  $effect.root(() => {
+    if (typeof window !== 'undefined' && openQuestionsCount > 0) {
+      console.log(`FAQ sections open: ${openQuestionsCount}`);
     }
   });
 </script>
@@ -39,15 +43,15 @@
     <p class="mx-auto max-w-2xl text-xl text-muted-foreground">
       Find answers to common questions about using First Spark
     </p>
-    {#if getOpenQuestionsCount() > 0}
+    {#if openQuestionsCount > 0}
       <p class="mt-2 text-sm text-muted-foreground">
-        {getOpenQuestionsCount()} question{getOpenQuestionsCount() === 1 ? '' : 's'} expanded
+        {openQuestionsCount} question{openQuestionsCount === 1 ? '' : 's'} expanded
       </p>
     {/if}
   </header>
 
   <div class="mx-auto max-w-3xl space-y-12">
-    {#each initialFAQSections as section, sectionIndex (section.title)}
+    {#each faqSections as section, sectionIndex (section.title)}
       <article class="rounded-xl border bg-card p-6 shadow-sm">
         <header class="mb-6 rounded-lg bg-muted p-4">
           <h2 class="text-2xl font-semibold text-primary">{section.title}</h2>
