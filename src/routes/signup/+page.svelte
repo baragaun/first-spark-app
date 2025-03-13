@@ -51,7 +51,6 @@
   };
 
   // Handle verification callback
-  /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   const handleVerify = async ({ email, code }: { email: string; code: string }) => {
     // verificationCode = code;
     // If verification is successful, move to credentials step
@@ -65,7 +64,6 @@
   };
 
   // Handle back button from the EmailVerification component
-  /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   const handleBack = (event: CustomEvent) => {
     // Any additional logic when going back
   };
