@@ -1,13 +1,9 @@
-<script lang="ts">
+<script lang="ts" module>
   import House from 'lucide-svelte/icons/house';
   import Inbox from 'lucide-svelte/icons/inbox';
   import Settings from 'lucide-svelte/icons/settings';
   import BookUser from 'lucide-svelte/icons/book-user';
   import MessageSquare from 'lucide-svelte/icons/message-square';
-  import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-  import { useSidebar } from '$lib/components/ui/sidebar/context.svelte.js';
-  import { fly } from 'svelte/transition';
-  import { quartOut } from 'svelte/easing';
 
   const items = [
     {
@@ -36,50 +32,57 @@
       icon: Settings,
     },
   ];
-
-  let activeItem = $state(items[0]);
-  const sidebar = useSidebar();
 </script>
 
-<Sidebar.Root collapsible="icon">
-  <Sidebar.Content>
-    <div class="mt-2 flex items-center p-2">
-      <a href="/" class="flex items-center gap-2 transition-colors hover:opacity-90">
-        <div in:fly={{ x: -20, duration: 300, delay: 100, easing: quartOut }}>
-          <img src="/fs-logo.svg" alt="App Logo" class="h-8 w-8" />
-        </div>
-        {#if sidebar.state !== 'collapsed'}
-          <span
-            in:fly={{ x: -20, duration: 300, delay: 200, easing: quartOut }}
-            out:fly={{ x: -20, duration: 200, easing: quartOut }}
-            class="font-lexend text-xl font-bold text-primary"
-          >
-            First Spark
-          </span>
-        {/if}
-      </a>
-    </div>
+<script lang="ts">
+  import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+  import type { ComponentProps } from 'svelte';
+  import { page } from '$app/state';
 
+  function isItemActive(itemUrl: string, currentPath: string): boolean {
+    if (itemUrl === '/') {
+      return currentPath === '/';
+    }
+    return itemUrl !== '#' && currentPath.startsWith(itemUrl);
+  }
+
+  let {
+    ref = $bindable(null),
+    class: className,
+    collapsible = "icon",
+    ...restProps
+  }: ComponentProps<typeof Sidebar.Root> = $props();
+</script>
+
+<Sidebar.Root bind:ref {collapsible} {...restProps}>
+  <Sidebar.Content>
+    <Sidebar.Header>
+      <Sidebar.Menu>
+        <Sidebar.MenuItem>
+          <div class="flex items-center justify-horizontal pt-2">
+            <div class="flex aspect-square size-8 items-center justify-center rounded-lg">
+              <img src="/fs-logo.svg" alt="First Spark Logo" class="size-8" />
+            </div>
+            <span class="truncate ps-2 font-lexend text-xl font-bold text-primary">First Spark</span>
+          </div>
+        </Sidebar.MenuItem>
+      </Sidebar.Menu>
+    </Sidebar.Header>
     <Sidebar.Group>
       <Sidebar.Menu>
         {#each items as item, i (item.title)}
-          <div in:fly={{ x: -20, duration: 300, delay: 150 + i * 50, easing: quartOut }}>
-            <Sidebar.MenuItem>
-              <Sidebar.MenuButton
-                tooltipContentProps={{ hidden: false }}
-                onclick={() => {
-                  activeItem = item;
-                }}
-                isActive={activeItem.title == item.title}
-              >
-                {#snippet tooltipContent()}
-                  {item.title}
+          <Sidebar.MenuItem>
+            <Sidebar.MenuButton
+              isActive={isItemActive(item.url, page.url.pathname)}
+            >
+              {#snippet child({ props })}
+                <a href={item.url} {...props}>
+                  <item.icon />
+                  <span>{item.title}</span>
+                </a>
                 {/snippet}
-                <item.icon />
-                <span>{item.title}</span>
-              </Sidebar.MenuButton>
-            </Sidebar.MenuItem>
-          </div>
+            </Sidebar.MenuButton>
+          </Sidebar.MenuItem>
         {/each}
       </Sidebar.Menu>
     </Sidebar.Group>

@@ -6,11 +6,10 @@
   import Footer from '$lib/components/footer.svelte';
 
   let { children } = $props();
-  let open = $state(true);
 </script>
 
 <div class="flex min-h-screen flex-col bg-background font-sans antialiased">
-  <Sidebar.Provider bind:open>
+  <Sidebar.Provider>
     <AppSidebar />
     <div class="flex flex-1 flex-col">
       <NavBar />

@@ -29,7 +29,7 @@
   class={cn('h-10 w-10', className)}
   {...restProps}
 >
-  {#if sidebar.open === true}
+  {#if sidebar.state !== 'collapsed'}
     <ChevronLeft />
   {:else}
     <Menu />
