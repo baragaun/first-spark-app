@@ -7,28 +7,7 @@
   import { PasswordInput } from '$lib/components/ui/password-input';
   import EmailVerification from '$lib/components/email-verification.svelte';
   import AuthCard from '$lib/components/ui/auth-card.svelte';
-
-  type PasswordValidation = {
-    minLength: boolean;
-    notTooSimple: boolean;
-    noRepetitivePattern: boolean;
-    doesNotReuseEmail: boolean;
-    isValid: boolean;
-  };
-
-  const commonPasswords = [
-    '123456',
-    'password',
-    '123456789',
-    '12345678',
-    '12345',
-    '1234567',
-    '1234567890',
-    'qwerty',
-    'abc123',
-    'password1',
-    // Add more common passwords as needed
-  ];
+  import { getPasswordError, validatePassword } from '@/utils/validation';
 
   // Step management
   const STEPS = {
@@ -86,64 +65,6 @@
     } finally {
       loading = false;
     }
-  };
-
-  const validatePassword = (password: string): PasswordValidation => {
-    const repetitivePattern = /^(.)\1+$/;
-    const result: PasswordValidation = {
-      minLength: true,
-      notTooSimple: true,
-      noRepetitivePattern: true,
-      doesNotReuseEmail: true,
-      isValid: true,
-    };
-
-    if (password.length < 8) {
-      result.minLength = false;
-      result.isValid = false;
-    }
-
-    if (commonPasswords.includes(password.toLowerCase())) {
-      result.notTooSimple = false;
-      result.isValid = false;
-    }
-
-    if (repetitivePattern.test(password)) {
-      result.noRepetitivePattern = false;
-      result.isValid = false;
-    }
-
-    if (email) {
-      const firstEmailPart = email.split('@')[0];
-      if (firstEmailPart && password.toLowerCase().includes(firstEmailPart.toLowerCase())) {
-        result.doesNotReuseEmail = false;
-        result.isValid = false;
-      }
-    }
-
-    return result;
-  };
-
-  const getPasswordError = (password: string) => {
-    if (!password) {
-      return '';
-    }
-
-    const validation = validatePassword(password);
-
-    if (!validation.minLength) {
-      return 'Password must be at least 8 characters long';
-    }
-
-    if (
-      !validation.notTooSimple ||
-      !validation.noRepetitivePattern ||
-      !validation.doesNotReuseEmail
-    ) {
-      return 'Password is too simple or guessable';
-    }
-
-    return '';
   };
 </script>
 

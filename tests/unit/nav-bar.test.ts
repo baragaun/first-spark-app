@@ -11,7 +11,7 @@ describe('NavBar', () => {
   it('renders theme toggle button', async () => {
     render(NavBar);
     const themeToggleButton = screen.getByRole('button', { name: /toggle theme/i });
-    await expect(themeToggleButton).toBeVisible();
+    expect(themeToggleButton).toBeVisible();
   });
 
   it('renders login and signup buttons when not authenticated', async () => {
@@ -21,22 +21,22 @@ describe('NavBar', () => {
     const signUpButton = screen.getByText('Sign Up');
     const logInButton = screen.getByText('Log In');
 
-    await expect(logInButton).toBeVisible();
-    await expect(signUpButton).toBeVisible();
+    expect(logInButton).toBeVisible();
+    expect(signUpButton).toBeVisible();
   });
 
   it('renders UserNav component when authenticated', async () => {
     // Set authenticated state
     localStorage.setItem('authToken', 'your-auth-token');
     authStore.set({ isAuthenticated: true });
-    await render(NavBar);
+    render(NavBar);
 
     // Verify login/signup buttons are not present when authenticated
     const signUpButton = screen.queryByText('Sign Up');
     const logInButton = screen.queryByText('Log In');
 
     //await expect(logInButton).toBeVisible();
-    await expect(signUpButton).not.toBeInTheDocument();
-    await expect(logInButton).not.toBeInTheDocument();
+    expect(signUpButton).not.toBeInTheDocument();
+    expect(logInButton).not.toBeInTheDocument();
   });
 });

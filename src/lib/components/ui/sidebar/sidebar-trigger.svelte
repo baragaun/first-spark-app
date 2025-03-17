@@ -21,7 +21,7 @@
   type="button"
   onclick={(e) => {
     onclick?.(e);
-    sidebar.toggle();
+    sidebar?.toggle();
   }}
   data-sidebar="trigger"
   variant="ghost"
@@ -29,7 +29,7 @@
   class={cn('h-10 w-10', className)}
   {...restProps}
 >
-  {#if sidebar.state !== 'collapsed'}
+  {#if sidebar?.state !== 'collapsed'}
     <ChevronLeft />
   {:else}
     <Menu />

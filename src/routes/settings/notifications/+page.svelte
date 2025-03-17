@@ -1,148 +1,263 @@
 <script lang="ts">
-  import { Button } from '$lib/components/ui/button';
-  import * as Card from '$lib/components/ui/card';
+  import { Separator } from '$lib/components/ui/separator';
+  import { Switch } from '$lib/components/ui/switch';
 
-  // Notification settings state using Svelte 5 runes
-  let emailNotifications = $state(true);
-  let pushNotifications = $state(true);
-  let isLoading = $state(false);
+  interface NotificationSettings {
+    emailNotifications: boolean;
+    // pushNotifications: boolean;
+    // chatMessageReceived: boolean;
+    // buddyApprovedConnection: boolean;
+    // friendReceivedChat: boolean;
+    // pathfinderAcceptedConnection: boolean;
+    // unreadMessagesReminder: boolean;
+    // newMessageNotification: boolean;
+    // buddySubscribed: boolean;
+    // buddyUnsubscribed: boolean;
+    // conversationClosed: boolean;
+    // securityAlerts: boolean;
+    // newDeviceLogin: boolean;
+    usernameChangeNotification: boolean;
+    passwordChanges: boolean;
+  }
 
-  // Event subscription states
-  let chatMessageReceived = $state(true);
-  let buddyApprovedConnection = $state(true);
-  let friendReceivedChat = $state(true);
-  let pathfinderAcceptedConnection = $state(true);
+  let {
+    initialSettings = {
+      emailNotifications: true,
+      // pushNotifications: true,
+      // chatMessageReceived: true,
+      // buddyApprovedConnection: true,
+      // friendReceivedChat: true,
+      // pathfinderAcceptedConnection: true,
+      // unreadMessagesReminder: true,
+      // newMessageNotification: true,
+      // buddySubscribed: true,
+      // buddyUnsubscribed: true,
+      // conversationClosed: true,
+      // securityAlerts: true,
+      // newDeviceLogin: true,
+      usernameChangeNotification: true,
+      passwordChanges: true,
+    },
+  } = $props<{ initialSettings?: NotificationSettings }>();
 
-  // User role state
-  let userRole = $state<'student' | 'pathfinder'>('student');
+  let settings = $state<NotificationSettings>({ ...initialSettings });
 
-  const handleSave = async () => {};
+  // Watch for changes and save automatically
+  $effect(() => {
+    if (JSON.stringify(settings) !== JSON.stringify(initialSettings)) {
+      saveNotificationSettings();
+      initialSettings = { ...settings };
+    }
+  });
+
+  async function saveNotificationSettings(): Promise<void> {
+    // TODO: Implement actual API call using the settings state variable
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+
+  // Function to toggle settings
+  const toggleSetting = (key: keyof NotificationSettings) => {
+    settings[key] = !settings[key];
+  };
 </script>
 
-<div class="container py-6">
-  <div class="flex items-center justify-between">
-    <h1 class="font-lexend text-3xl font-bold tracking-tight">Notification Settings</h1>
-    <Button variant="outline" href="/settings">Back to Settings</Button>
+<div class="space-y-6">
+  <!-- General Section -->
+  <div>
+    <h4 class="font-lexend mb-4 px-4 text-lg font-bold">General</h4>
+    <div class="space-y-4 px-2">
+      <div
+        class="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 hover:bg-muted/50"
+        onclick={() => toggleSetting('emailNotifications')}
+        onkeydown={(e) => e.key === 'Enter' && toggleSetting('emailNotifications')}
+        tabindex="0"
+        role="button"
+      >
+        <div class="space-y-0.5">
+          <label for="email-notifications" class="text-sm font-medium">Email Notifications</label>
+          <p class="text-sm text-muted-foreground">Receive updates via email</p>
+        </div>
+        <Switch
+          id="email-notifications"
+          checked={settings.emailNotifications}
+          onchange={() => toggleSetting('emailNotifications')}
+        />
+      </div>
+
+      <!-- Commenting out Push Notifications
+      <div class="flex items-center justify-between py-2">
+        <div class="space-y-0.5">
+          <label for="push-notifications" class="text-sm font-medium">Push Notifications</label>
+          <p class="text-sm text-muted-foreground">Receive updates via push notifications</p>
+        </div>
+        <Switch id="push-notifications" bind:checked={settings.pushNotifications} />
+      </div>
+      -->
+    </div>
   </div>
 
-  <div class="mt-8 space-y-6">
-    <!-- General Notification Settings -->
-    <Card.Root>
-      <Card.Header>
-        <Card.Title>Notification Channels</Card.Title>
-        <Card.Description>Choose how you want to receive notifications.</Card.Description>
-      </Card.Header>
-      <Card.Content>
-        <div class="space-y-4">
-          <div class="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="email-notifications"
-              bind:checked={emailNotifications}
-              class="h-4 w-4 rounded border-input"
-            />
-            <label for="email-notifications">Email Notifications</label>
-          </div>
-          <div class="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="push-notifications"
-              bind:checked={pushNotifications}
-              class="h-4 w-4 rounded border-input"
-            />
-            <label for="push-notifications">Push Notifications</label>
-          </div>
-        </div>
-      </Card.Content>
-    </Card.Root>
+  <Separator />
 
-    <!-- User Role Selection -->
-    <Card.Root>
-      <Card.Header>
-        <Card.Title>User Role</Card.Title>
-        <Card.Description>Specify your role in the system</Card.Description>
-      </Card.Header>
-      <Card.Content>
-        <div class="flex items-center space-x-4">
-          <label class="flex items-center space-x-2">
-            <input
-              type="radio"
-              name="userRole"
-              value="student"
-              bind:group={userRole}
-              class="h-4 w-4"
-            />
-            <span>Student</span>
-          </label>
-          <label class="flex items-center space-x-2">
-            <input
-              type="radio"
-              name="userRole"
-              value="pathfinder"
-              bind:group={userRole}
-              class="h-4 w-4"
-            />
-            <span>Pathfinder</span>
-          </label>
+  <!-- Commenting out Message Section
+  <div>
+    <h4 class="font-lexend mb-4 px-4 text-lg font-bold">Message</h4>
+    <div class="space-y-4 px-4">
+      <div class="flex items-center justify-between py-2">
+        <div class="space-y-0.5">
+          <label for="chat-messages" class="text-sm font-medium">Chat Messages</label>
+          <p class="text-sm text-muted-foreground">Get notified when you receive a chat message</p>
         </div>
-      </Card.Content>
-    </Card.Root>
+        <Switch id="chat-messages" bind:checked={settings.chatMessageReceived} />
+      </div>
 
-    <!-- Event Subscriptions -->
-    <Card.Root>
-      <Card.Header>
-        <Card.Title>Event Subscriptions</Card.Title>
-        <Card.Description>Choose which events you want to be notified about.</Card.Description>
-      </Card.Header>
-      <Card.Content>
-        <div class="space-y-4">
-          <div class="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="chat-message-received"
-              bind:checked={chatMessageReceived}
-              class="h-4 w-4 rounded border-input"
-            />
-            <label for="chat-message-received">I received a chat message</label>
-          </div>
-          <div class="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="buddy-approved-connection"
-              bind:checked={buddyApprovedConnection}
-              class="h-4 w-4 rounded border-input"
-            />
-            <label for="buddy-approved-connection">My buddy approved my connection request</label>
-          </div>
-          <div class="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="friend-received-chat"
-              bind:checked={friendReceivedChat}
-              class="h-4 w-4 rounded border-input"
-            />
-            <label for="friend-received-chat">My friend received a chat message</label>
-          </div>
-          <div class="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="pathfinder-accepted-connection"
-              bind:checked={pathfinderAcceptedConnection}
-              class="h-4 w-4 rounded border-input"
-            />
-            <label for="pathfinder-accepted-connection"
-              >Pathfinder accepted connection request</label
-            >
-          </div>
+      <div class="flex items-center justify-between py-2">
+        <div class="space-y-0.5">
+          <label for="buddy-connections" class="text-sm font-medium">Buddy Connections</label>
+          <p class="text-sm text-muted-foreground">
+            Get notified when your buddy approved your connection request
+          </p>
         </div>
-      </Card.Content>
-    </Card.Root>
+        <Switch id="buddy-connections" bind:checked={settings.buddyApprovedConnection} />
+      </div>
 
-    <!-- Save Button -->
-    <div class="flex justify-end">
-      <Button disabled={isLoading} onclick={handleSave}>
-        {isLoading ? 'Saving...' : 'Save Preferences'}
-      </Button>
+      <div class="flex items-center justify-between py-2">
+        <div class="space-y-0.5">
+          <label for="friend-chat-updates" class="text-sm font-medium">Friend Chat Updates</label>
+          <p class="text-sm text-muted-foreground">
+            Get notified when friends receive chat messages
+          </p>
+        </div>
+        <Switch id="friend-chat-updates" bind:checked={settings.friendReceivedChat} />
+      </div>
+
+      <div class="flex items-center justify-between py-2">
+        <div class="space-y-0.5">
+          <label for="pathfinder-updates" class="text-sm font-medium">Pathfinder Updates</label>
+          <p class="text-sm text-muted-foreground">
+            Get notified when Pathfinder accepted connection request
+          </p>
+        </div>
+        <Switch id="pathfinder-updates" bind:checked={settings.pathfinderAcceptedConnection} />
+      </div>
+
+      <div class="flex items-center justify-between py-2">
+        <div class="space-y-0.5">
+          <label for="unread-messages" class="text-sm font-medium">Unread Messages Reminder</label>
+          <p class="text-sm text-muted-foreground">
+            Receive email notification reminders for unread messages when away
+          </p>
+        </div>
+        <Switch id="unread-messages" bind:checked={settings.unreadMessagesReminder} />
+      </div>
+
+      <div class="flex items-center justify-between py-2">
+        <div class="space-y-0.5">
+          <label for="new-messages" class="text-sm font-medium">New Message Notifications</label>
+          <p class="text-sm text-muted-foreground">Receive email notifications for new messages</p>
+        </div>
+        <Switch id="new-messages" bind:checked={settings.newMessageNotification} />
+      </div>
+
+      <div class="flex items-center justify-between py-2">
+        <div class="space-y-0.5">
+          <label for="buddy-subscribed" class="text-sm font-medium">Buddy Subscriptions</label>
+          <p class="text-sm text-muted-foreground">
+            Receive email notifications when a Buddy subscribes to your chat
+          </p>
+        </div>
+        <Switch id="buddy-subscribed" bind:checked={settings.buddySubscribed} />
+      </div>
+
+      <div class="flex items-center justify-between py-2">
+        <div class="space-y-0.5">
+          <label for="buddy-unsubscribed" class="text-sm font-medium">Buddy Unsubscriptions</label>
+          <p class="text-sm text-muted-foreground">
+            Receive email notifications when a Buddy unsubscribes from your chat
+          </p>
+        </div>
+        <Switch id="buddy-unsubscribed" bind:checked={settings.buddyUnsubscribed} />
+      </div>
+
+      <div class="flex items-center justify-between py-2">
+        <div class="space-y-0.5">
+          <label for="conversation-closed" class="text-sm font-medium">Conversation Closed</label>
+          <p class="text-sm text-muted-foreground">
+            Receive email notifications when a conversation is closed
+          </p>
+        </div>
+        <Switch id="conversation-closed" bind:checked={settings.conversationClosed} />
+      </div>
+    </div>
+  </div>
+
+  <Separator />
+  -->
+
+  <!-- Security Section -->
+  <div>
+    <h4 class="font-lexend mb-4 px-4 text-lg font-bold">Security</h4>
+    <div class="space-y-4 px-2">
+      <!-- Commenting out Security Alerts and New Device Login
+      <div class="flex items-center justify-between py-2">
+        <div class="space-y-0.5">
+          <label for="security-alerts" class="text-sm font-medium">Security Alerts</label>
+          <p class="text-sm text-muted-foreground">
+            Get notified about important security updates and alerts
+          </p>
+        </div>
+        <Switch id="security-alerts" bind:checked={settings.securityAlerts} />
+      </div>
+
+      <div class="flex items-center justify-between py-2">
+        <div class="space-y-0.5">
+          <label for="new-device-login" class="text-sm font-medium">New Device Login</label>
+          <p class="text-sm text-muted-foreground">
+            Receive alerts when your account is accessed from a new device
+          </p>
+        </div>
+        <Switch id="new-device-login" bind:checked={settings.newDeviceLogin} />
+      </div>
+      -->
+
+      <div
+        class="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 hover:bg-muted/50"
+        onclick={() => toggleSetting('usernameChangeNotification')}
+        onkeydown={(e) => e.key === 'Enter' && toggleSetting('usernameChangeNotification')}
+        tabindex="0"
+        role="button"
+      >
+        <div class="space-y-0.5">
+          <label for="username-change" class="text-sm font-medium">Username Updates</label>
+          <p class="text-sm text-muted-foreground">
+            I am notified via email when my username is updated
+          </p>
+        </div>
+        <Switch
+          id="username-change"
+          checked={settings.usernameChangeNotification}
+          onchange={() => toggleSetting('usernameChangeNotification')}
+        />
+      </div>
+
+      <div
+        class="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 hover:bg-muted/50"
+        onclick={() => toggleSetting('passwordChanges')}
+        onkeydown={(e) => e.key === 'Enter' && toggleSetting('passwordChanges')}
+        tabindex="0"
+        role="button"
+      >
+        <div class="space-y-0.5">
+          <label for="password-changes" class="text-sm font-medium">Password Changes</label>
+          <p class="text-sm text-muted-foreground">
+            Receive notifications when your password is changed
+          </p>
+        </div>
+        <Switch
+          id="password-changes"
+          checked={settings.passwordChanges}
+          onchange={() => toggleSetting('passwordChanges')}
+        />
+      </div>
     </div>
   </div>
 </div>

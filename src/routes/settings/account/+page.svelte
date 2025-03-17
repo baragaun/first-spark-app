@@ -8,7 +8,9 @@
   import DialogOverlayBlur from '$lib/components/ui/dialog/dialog-overlay-blur.svelte';
   import { goto } from '$app/navigation';
   import { PasswordInput } from '$lib/components/ui/password-input';
-  import AlertDescription from '../ui/alert/alert-description.svelte';
+  import { AlertDescription } from '$lib/components/ui/alert';
+  import { getPasswordError, validatePassword } from '@/utils/validation';
+  // import AlertDescription from '../ui/alert/alert-description.svelte';
 
   // State management using Svelte 5 runes
   let isLoading = $state(false);
@@ -45,39 +47,6 @@
     }
   };
 
-  // handleEmail function removed as it's not being used
-
-  /* Commenting out unused functions for milestone-1
-  const handleSignOutAll = async () => {
-    try {
-      isLoading = true;
-      // TODO: Implement sign out from all devices API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      showSessionsEdit = false;
-    } finally {
-      isLoading = false;
-    }
-  };
-
-  const handleDataDownload = async () => {
-    try {
-      isLoading = true;
-      // TODO: Implement data download API call
-      const dummyData = JSON.stringify({ user: currentUsername, data: 'example' });
-      const blob = new Blob([dummyData], { type: 'application/json' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${currentUsername}-data.json`;
-      a.click();
-      window.URL.revokeObjectURL(url);
-      showDataDownload = false;
-    } finally {
-      isLoading = false;
-    }
-  };
-  */
-
   const handleAccountDeletion = async () => {
     try {
       isLoading = true;
@@ -109,87 +78,6 @@
     } finally {
       isLoading = false;
     }
-  };
-
-  // Remove unused handleContinue function since it's redundant with handleEmailChange
-
-  type PasswordValidation = {
-    minLength: boolean;
-    notTooSimple: boolean;
-    noRepetitivePattern: boolean;
-    doesNotReuseEmail: boolean;
-    isValid: boolean;
-  };
-
-  const commonPasswords = [
-    '123456',
-    'password',
-    '123456789',
-    '12345678',
-    '12345',
-    '1234567',
-    '1234567890',
-    'qwerty',
-    'abc123',
-    'password1',
-  ];
-
-  const validatePassword = (password: string): PasswordValidation => {
-    const repetitivePattern = /^(.)\1+$/;
-    const result: PasswordValidation = {
-      minLength: true,
-      notTooSimple: true,
-      noRepetitivePattern: true,
-      doesNotReuseEmail: true,
-      isValid: true,
-    };
-
-    if (password.length < 8) {
-      result.minLength = false;
-      result.isValid = false;
-    }
-
-    if (commonPasswords.includes(password.toLowerCase())) {
-      result.notTooSimple = false;
-      result.isValid = false;
-    }
-
-    if (repetitivePattern.test(password)) {
-      result.noRepetitivePattern = false;
-      result.isValid = false;
-    }
-
-    if (emails[0]) {
-      const firstEmailPart = emails[0].split('@')[0];
-      if (firstEmailPart && password.toLowerCase().includes(firstEmailPart.toLowerCase())) {
-        result.doesNotReuseEmail = false;
-        result.isValid = false;
-      }
-    }
-
-    return result;
-  };
-
-  const getPasswordError = (password: string) => {
-    if (!password) {
-      return '';
-    }
-
-    const validation = validatePassword(password);
-
-    if (!validation.minLength) {
-      return 'Password must be at least 8 characters long';
-    }
-
-    if (
-      !validation.notTooSimple ||
-      !validation.noRepetitivePattern ||
-      !validation.doesNotReuseEmail
-    ) {
-      return 'Password is too simple or guessable';
-    }
-
-    return '';
   };
 
   const handlePasswordChange = async () => {
@@ -578,92 +466,6 @@
           </form>
         </Dialog.Content>
       </Dialog.Root>
-
-      <!-- Sessions Dialog - Commented out for milestone-1
-      <button
-        class="group flex w-full items-center justify-between rounded-lg py-2 hover:bg-muted/50"
-        onclick={() => (showSessionsEdit = true)}
-      >
-        <div class="flex flex-col text-left sm:flex-row sm:items-center sm:gap-2">
-          <p class="text-sm font-medium">Active Sessions</p>
-        </div>
-        <div class="flex items-center gap-2">
-          <p class="text-right text-sm text-muted-foreground group-hover:text-foreground">
-            Sign out from all devices
-          </p>
-          <ChevronRight
-            class="h-5 w-5 stroke-[2] text-muted-foreground transition-colors group-hover:text-foreground"
-          />
-        </div>
-      </button>
-
-      <Dialog.Root
-        class=""
-        open={showSessionsEdit}
-        onOpenChange={(open: boolean) => {
-          showSessionsEdit = open;
-        }}
-      >
-        <Dialog.Content class="sm:max-w-[425px]">
-          <Dialog.Header class="space-y-2">
-            <Dialog.Title class="text-lg font-semibold">Active Sessions</Dialog.Title>
-            <Dialog.Description class="text-sm text-muted-foreground">
-              Sign out from all devices except your current session.
-            </Dialog.Description>
-          </Dialog.Header>
-
-          <Dialog.Footer class="flex justify-end gap-2">
-            <Button variant="outline" onclick={() => (showSessionsEdit = false)}>Cancel</Button>
-            <Button variant="destructive" disabled={isLoading} onclick={handleSignOutAll}>
-              {isLoading ? 'Signing out...' : 'Sign Out All Devices'}
-            </Button>
-          </Dialog.Footer>
-        </Dialog.Content>
-      </Dialog.Root>
-      -->
-
-      <!-- Data Download Dialog - Commented out for milestone-1
-      <button
-        class="group flex w-full items-center justify-between rounded-lg py-2 hover:bg-muted/50"
-        onclick={() => (showDataDownload = true)}
-      >
-        <div class="flex flex-col text-left sm:flex-row sm:items-center sm:gap-2">
-          <p class="text-sm font-medium">Download Your Data</p>
-        </div>
-        <div class="flex items-center gap-2">
-          <p class="text-right text-sm text-muted-foreground group-hover:text-foreground">
-            Get a copy of your data
-          </p>
-          <ChevronRight
-            class="h-5 w-5 stroke-[2] text-muted-foreground transition-colors group-hover:text-foreground"
-          />
-        </div>
-      </button>
-
-      <Dialog.Root
-        class=""
-        open={showDataDownload}
-        onOpenChange={(open: boolean) => {
-          showDataDownload = open;
-        }}
-      >
-        <Dialog.Content class="sm:max-w-[425px]">
-          <Dialog.Header class="space-y-2">
-            <Dialog.Title class="text-lg font-semibold">Download Your Data</Dialog.Title>
-            <Dialog.Description class="text-sm text-muted-foreground">
-              Download a copy of all your personal data in JSON format.
-            </Dialog.Description>
-          </Dialog.Header>
-
-          <Dialog.Footer class="flex justify-end gap-2">
-            <Button variant="outline" onclick={() => (showDataDownload = false)}>Cancel</Button>
-            <Button disabled={isLoading} onclick={handleDataDownload}>
-              {isLoading ? 'Preparing...' : 'Download Data'}
-            </Button>
-          </Dialog.Footer>
-        </Dialog.Content>
-      </Dialog.Root>
-      -->
     </div>
   </div>
 

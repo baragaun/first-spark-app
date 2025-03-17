@@ -49,7 +49,7 @@
   let {
     ref = $bindable(null),
     class: className,
-    collapsible = "icon",
+    collapsible = 'icon',
     ...restProps
   }: ComponentProps<typeof Sidebar.Root> = $props();
 </script>
@@ -59,11 +59,12 @@
     <Sidebar.Header>
       <Sidebar.Menu>
         <Sidebar.MenuItem>
-          <div class="flex items-center justify-horizontal pt-2">
+          <div class="justify-horizontal flex items-center pt-2">
             <div class="flex aspect-square size-8 items-center justify-center rounded-lg">
               <img src="/fs-logo.svg" alt="First Spark Logo" class="size-8" />
             </div>
-            <span class="truncate ps-2 font-lexend text-xl font-bold text-primary">First Spark</span>
+            <span class="font-lexend truncate ps-2 text-xl font-bold text-primary">First Spark</span
+            >
           </div>
         </Sidebar.MenuItem>
       </Sidebar.Menu>
@@ -72,15 +73,13 @@
       <Sidebar.Menu>
         {#each items as item, i (item.title)}
           <Sidebar.MenuItem>
-            <Sidebar.MenuButton
-              isActive={isItemActive(item.url, page.url.pathname)}
-            >
+            <Sidebar.MenuButton isActive={isItemActive(item.url, page.url.pathname)}>
               {#snippet child({ props })}
                 <a href={item.url} {...props}>
                   <item.icon />
                   <span>{item.title}</span>
                 </a>
-                {/snippet}
+              {/snippet}
             </Sidebar.MenuButton>
           </Sidebar.MenuItem>
         {/each}
