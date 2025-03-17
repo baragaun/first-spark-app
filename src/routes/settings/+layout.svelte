@@ -1,14 +1,13 @@
 <script lang="ts">
   import { cn } from '$lib/utils';
   import { Button } from '$lib/components/ui/button';
-  import { getStores } from '$app/stores';
+  import { page } from '$app/state';
   import { goto } from '$app/navigation';
 
-  const { page } = getStores();
   let { children } = $props();
 
   let activeTab = $derived.by(() => {
-    const path = $page.url.pathname;
+    const path = page.url.pathname;
     if (path.includes('/notifications')) return 'notifications';
     return 'account';
   });

@@ -41,6 +41,7 @@
   } = $props<{ initialSettings?: NotificationSettings }>();
 
   let settings = $state<NotificationSettings>({ ...initialSettings });
+  let isSaving = $state(false);
 
   // Watch for changes and save automatically
   $effect(() => {
@@ -51,8 +52,14 @@
   });
 
   async function saveNotificationSettings(): Promise<void> {
-    // TODO: Implement actual API call using the settings state variable
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    // Add loading state
+    isSaving = true;
+    try {
+      // TODO: Implement actual API call using the settings state variable
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    } finally {
+      isSaving = false;
+    }
   }
 
   // Function to toggle settings
@@ -72,6 +79,7 @@
         onkeydown={(e) => e.key === 'Enter' && toggleSetting('emailNotifications')}
         tabindex="0"
         role="button"
+        aria-pressed={settings.emailNotifications}
       >
         <div class="space-y-0.5">
           <label for="email-notifications" class="text-sm font-medium">Email Notifications</label>
@@ -225,6 +233,7 @@
         onkeydown={(e) => e.key === 'Enter' && toggleSetting('usernameChangeNotification')}
         tabindex="0"
         role="button"
+        aria-pressed={settings.usernameChangeNotification}
       >
         <div class="space-y-0.5">
           <label for="username-change" class="text-sm font-medium">Username Updates</label>
@@ -245,6 +254,7 @@
         onkeydown={(e) => e.key === 'Enter' && toggleSetting('passwordChanges')}
         tabindex="0"
         role="button"
+        aria-pressed={settings.passwordChanges}
       >
         <div class="space-y-0.5">
           <label for="password-changes" class="text-sm font-medium">Password Changes</label>

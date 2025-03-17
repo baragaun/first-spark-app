@@ -21,12 +21,6 @@
     faqSections[sectionIndex].items[itemIndex].isOpen =
       !faqSections[sectionIndex].items[itemIndex].isOpen;
   }
-
-  $effect.root(() => {
-    if (typeof window !== 'undefined' && openQuestionsCount > 0) {
-      console.log(`FAQ sections open: ${openQuestionsCount}`);
-    }
-  });
 </script>
 
 <MetaTags

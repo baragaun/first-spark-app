@@ -3,17 +3,14 @@
   import { cn } from '$lib/utils.js';
   import type { Snippet } from 'svelte';
 
-  type DialogTitleProps = DialogPrimitive.TitleProps & {
-    class?: string;
-    children?: Snippet;
-  };
-
   let {
     ref = $bindable(null),
     class: className,
     children,
     ...restProps
-  }: DialogTitleProps = $props();
+  }: DialogPrimitive.TitleProps & {
+    children?: Snippet;
+  } = $props();
 </script>
 
 <DialogPrimitive.Title

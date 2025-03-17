@@ -4,17 +4,14 @@
   import type { WithElementRef } from 'bits-ui';
   import type { Snippet } from 'svelte';
 
-  type DialogHeaderProps = WithElementRef<HTMLAttributes<HTMLDivElement>> & {
-    class?: string;
-    children?: Snippet;
-  };
-
   let {
     ref = $bindable(null),
     class: className,
     children,
     ...restProps
-  }: DialogHeaderProps = $props();
+  }: WithElementRef<HTMLAttributes<HTMLDivElement>> & {
+    children?: Snippet;
+  } = $props();
 </script>
 
 <div
