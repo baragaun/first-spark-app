@@ -1,15 +1,7 @@
+import { DEFAULT_LANGUAGE } from '$lib/i18n/constants';
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
-
-// Mock browser globals
-// global.localStorage = {
-//   getItem: vi.fn(),
-//   setItem: vi.fn(),
-//   clear: vi.fn(),
-//   length: 0,
-//   key: vi.fn(),
-//   removeItem: vi.fn(),
-// } as Storage;
+import { setupI18n } from './setup/i18n-setup';
 
 // Mock matchMedia
 global.matchMedia = vi.fn().mockImplementation((query) => ({
@@ -22,3 +14,6 @@ global.matchMedia = vi.fn().mockImplementation((query) => ({
   removeEventListener: vi.fn(),
   dispatchEvent: vi.fn(),
 }));
+
+// Setup i18n with default language
+setupI18n(DEFAULT_LANGUAGE);
