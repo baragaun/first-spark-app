@@ -140,7 +140,6 @@
       </button>
 
       <Dialog.Root
-        class=""
         open={showUsernameEdit}
         onOpenChange={(open: boolean) => {
           showUsernameEdit = open;
@@ -218,7 +217,6 @@
       </button>
 
       <Dialog.Root
-        class=""
         open={showEmailEdit}
         onOpenChange={(open: boolean) => {
           showEmailEdit = open;
@@ -350,7 +348,6 @@
       </button>
 
       <Dialog.Root
-        class=""
         open={showPasswordEdit}
         onOpenChange={(open: boolean) => {
           showPasswordEdit = open;
@@ -493,7 +490,6 @@
       </button>
 
       <Dialog.Root
-        class=""
         open={showDeleteConfirm}
         onOpenChange={(open: boolean) => {
           showDeleteConfirm = open;
