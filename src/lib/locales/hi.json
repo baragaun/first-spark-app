@@ -105,5 +105,30 @@
       "create_account": "खाता बनाएं",
       "creating_account": "खाता बनाया जा रहा है..."
     }
+  },
+  "reset_password": {
+    "title": "अपना पासवर्ड रीसेट करें",
+    "description": "यदि हमें यह ईमेल पता मिल जाता है तो हम आपको एक सत्यापन कोड ईमेल करेंगे।",
+    "check_inbox": {
+      "title": "अपना इनबॉक्स जांचें",
+      "description": "हमने {email} पर एक सत्यापन कोड भेजा है",
+      "code_expiration": "नोट: सत्यापन कोड 10 मिनट में समाप्त हो जाएगा।",
+      "didnt_get_email": "ईमेल नहीं मिला?"
+    },
+    "form": {
+      "identifier_placeholder": "ईमेल या यूजरनेम",
+      "errors": {
+        "account_not_found": "इस ईमेल पते से कोई खाता नहीं मिला",
+        "default_error": "आपका अनुरोध प्रोसेस नहीं किया जा सका। कृपया पुनः प्रयास करें।"
+      }
+    },
+    "buttons": {
+      "send_email": "ईमेल भेजें",
+      "sending_email": "ईमेल भेजा जा रहा है...",
+      "resend_email": "ईमेल पुनः भेजें",
+      "resend_timer": "{time} में पुनः भेजें",
+      "back_to_login": "लॉग इन पर वापस जाएं",
+      "need_help": "मदद चाहिए?"
+    }
   }
 }

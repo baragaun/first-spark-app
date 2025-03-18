@@ -105,5 +105,30 @@
       "create_account": "Create Account",
       "creating_account": "Creating account..."
     }
+  },
+  "reset_password": {
+    "title": "Reset your password",
+    "description": "We will email you a verification code if we can find this email address.",
+    "check_inbox": {
+      "title": "Check your inbox",
+      "description": "We've sent a verification code to {email}",
+      "code_expiration": "Note: The verification code will expire in 10 minutes.",
+      "didnt_get_email": "Didn't get an email?"
+    },
+    "form": {
+      "identifier_placeholder": "Email or username",
+      "errors": {
+        "account_not_found": "No account found with this email address",
+        "default_error": "Unable to process your request. Please try again."
+      }
+    },
+    "buttons": {
+      "send_email": "Send email",
+      "sending_email": "Sending email...",
+      "resend_email": "Resend email",
+      "resend_timer": "Resend in {time}",
+      "back_to_login": "Back to Log In",
+      "need_help": "Need help?"
+    }
   }
 }

@@ -105,5 +105,30 @@
       "create_account": "Konto erstellen",
       "creating_account": "Konto wird erstellt..."
     }
+  },
+  "reset_password": {
+    "title": "Passwort zurücksetzen",
+    "description": "Wir senden Ihnen einen Verifizierungscode, wenn wir diese E-Mail-Adresse finden können.",
+    "check_inbox": {
+      "title": "Überprüfen Sie Ihren Posteingang",
+      "description": "Wir haben einen Verifizierungscode an {email} gesendet",
+      "code_expiration": "Hinweis: Der Verifizierungscode läuft in 10 Minuten ab.",
+      "didnt_get_email": "Keine E-Mail erhalten?"
+    },
+    "form": {
+      "identifier_placeholder": "E-Mail oder Benutzername",
+      "errors": {
+        "account_not_found": "Kein Konto mit dieser E-Mail-Adresse gefunden",
+        "default_error": "Ihre Anfrage konnte nicht verarbeitet werden. Bitte versuchen Sie es erneut."
+      }
+    },
+    "buttons": {
+      "send_email": "E-Mail senden",
+      "sending_email": "E-Mail wird gesendet...",
+      "resend_email": "E-Mail erneut senden",
+      "resend_timer": "Erneut senden in {time}",
+      "back_to_login": "Zurück zur Anmeldung",
+      "need_help": "Hilfe benötigt?"
+    }
   }
 }

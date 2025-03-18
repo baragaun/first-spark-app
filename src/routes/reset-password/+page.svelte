@@ -10,6 +10,7 @@
   } from '$lib/components/ui/card';
   import { Alert, AlertDescription } from '$lib/components/ui/alert';
   import Mail from 'lucide-svelte/icons/mail';
+  import { _ } from 'svelte-i18n';
 
   let identifier = ''; // for email or username
   let loading = false;
@@ -88,10 +89,8 @@
   <Card class="relative w-full max-w-md">
     {#if !emailSent}
       <CardHeader>
-        <CardTitle class="text-2xl">Reset your password</CardTitle>
-        <CardDescription
-          >We will email you a verification code if we can find this email address.</CardDescription
-        >
+        <CardTitle class="text-2xl">{$_('reset_password.title')}</CardTitle>
+        <CardDescription>{$_('reset_password.description')}</CardDescription>
       </CardHeader>
       <CardContent>
         {#if error}
@@ -101,22 +100,31 @@
         {/if}
         <form on:submit|preventDefault={handleResetPassword} class="space-y-4">
           <div class="space-y-2">
-            <Input type="text" placeholder="Email or username" bind:value={identifier} required />
+            <Input
+              type="text"
+              placeholder={$_('reset_password.form.identifier_placeholder')}
+              bind:value={identifier}
+              required
+            />
           </div>
 
           <Button type="submit" class="w-full" disabled={loading}>
-            {loading ? 'Sending email...' : 'Send email'}
+            {loading
+              ? $_('reset_password.buttons.sending_email')
+              : $_('reset_password.buttons.send_email')}
           </Button>
           <div class="flex items-center justify-between">
-            <Button variant="link" class="px-0 font-normal" href="/support">Need help?</Button>
+            <Button variant="link" class="px-0 font-normal" href="/support">
+              {$_('reset_password.buttons.need_help')}
+            </Button>
           </div>
         </form>
       </CardContent>
     {:else}
       <CardHeader>
-        <CardTitle class="text-2xl">Check your inbox</CardTitle>
+        <CardTitle class="text-2xl">{$_('reset_password.check_inbox.title')}</CardTitle>
         <CardDescription>
-          We've sent a verification code to {identifier}
+          {$_('reset_password.check_inbox.description', { values: { email: identifier } })}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -128,12 +136,12 @@
 
           <Alert class="mb-4">
             <AlertDescription>
-              Note: The verification code will expire in 10 minutes.
+              {$_('reset_password.check_inbox.code_expiration')}
             </AlertDescription>
           </Alert>
 
           <div class="text-center text-sm text-muted-foreground">
-            Didn't get an email?
+            {$_('reset_password.check_inbox.didnt_get_email')}
             {#if canResend}
               <Button
                 variant="link"
@@ -141,14 +149,20 @@
                 onclick={handleResendEmail}
                 disabled={loading}
               >
-                Resend email
+                {$_('reset_password.buttons.resend_email')}
               </Button>
             {:else}
-              <span>Resend in {formatTime(resendTimer)}</span>
+              <span
+                >{$_('reset_password.buttons.resend_timer', {
+                  values: { time: formatTime(resendTimer) },
+                })}</span
+              >
             {/if}
           </div>
 
-          <Button variant="outline" class="mt-4 w-full" href="/signin">Back to Log In</Button>
+          <Button variant="outline" class="mt-4 w-full" href="/signin">
+            {$_('reset_password.buttons.back_to_login')}
+          </Button>
         </div>
       </CardContent>
     {/if}
