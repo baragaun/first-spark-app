@@ -1,20 +1,19 @@
 <script lang="ts">
-  import Sun from "@lucide/svelte/icons/sun";
-  import Moon from "@lucide/svelte/icons/moon";
-  import { toggleMode } from "mode-watcher";
-  import { Button } from "$lib/components/ui/button/index.js";
-  
-  const { iconButton = true, class: className = "" } = $props();
+  import Sun from '@lucide/svelte/icons/sun';
+  import Moon from '@lucide/svelte/icons/moon';
+  import { toggleMode } from 'mode-watcher';
+  import { Button } from '$lib/components/ui/button/index.js';
 
+  const { iconButton = true, class: className = '' } = $props();
 </script>
 
-<Button 
-  onclick={toggleMode} 
-  variant="ghost" 
-  size={iconButton ? "icon" : "sm"} 
+<Button
+  onclick={toggleMode}
+  variant="ghost"
+  size={iconButton ? 'icon' : 'sm'}
   class={`${className} text-muted-foreground`}
 >
-  <div class={"flex items-center"}>
+  <div class={'flex items-center'}>
     <Sun
       class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
     />

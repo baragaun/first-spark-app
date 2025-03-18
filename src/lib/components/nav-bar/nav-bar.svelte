@@ -23,7 +23,7 @@
 
   onMount(() => {
     updateAuthState();
-    
+
     window.addEventListener('storage', () => {
       updateAuthState();
     });
@@ -55,16 +55,12 @@
           <Button
             variant="ghost"
             href="/signin"
-            class="hidden font-lexend text-muted-foreground hover:text-foreground md:flex"
+            class="font-lexend hidden text-muted-foreground hover:text-foreground md:flex"
           >
             Sign In
           </Button>
         {/if}
-        <Button
-          variant="default"
-          href="/signup"
-          class="font-lexend shadow-sm hover:shadow-md"
-        >
+        <Button variant="default" href="/signup" class="font-lexend shadow-sm hover:shadow-md">
           Sign Up
         </Button>
         <AvatarMenu />
