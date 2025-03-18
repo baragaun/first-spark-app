@@ -12,10 +12,12 @@
   import { Alert, AlertDescription } from '$lib/components/ui/alert';
   import { goto } from '$app/navigation';
   import * as RadioGroup from '$lib/components/ui/radio-group';
-  import { authStore } from '$lib/components/nav-bar.svelte';
   import Mail from 'lucide-svelte/icons/mail';
-  import { UserIdentType } from '@baragaun/bg-node-client';
-  import dataProvider from '@/services/dataProvider/dataProvider';
+  import { getContext } from 'svelte';
+  import type { UserContext } from '@/context/userContext.svelte';
+
+  // Get the user context
+  const userContext = getContext<UserContext>('userContext');
 
   let identifier = ''; // for email or username
   let password = '';
@@ -31,6 +33,7 @@
   const emailCooldowns = new Map<string, number>();
 
   const startResendTimer = (emailAddress: string) => {
+    // Timer logic remains the same
     resendTimer = 30;
     canResend = false;
     emailCooldowns.set(emailAddress, Date.now() + resendTimer * 1000);
@@ -58,19 +61,13 @@
 
     try {
       if (loginMethod === 'password') {
-        await dataProvider.signInUser(
-          identifier,
-          identifier.includes('@') ? UserIdentType.email : UserIdentType.userHandle,
-          password,
-        );
+        // Use userContext for sign in
+        const user = await userContext.signIn(identifier, password);
 
-        const isAuthenticated = dataProvider.isSignedIn();
-
-        if (isAuthenticated) {
-          authStore.set({ isAuthenticated });
+        if (user) {
           await goto('/');
         } else {
-          error = 'Invalid credentials. Please try again.';
+          error = userContext.error || 'Invalid credentials. Please try again.';
         }
       } else {
         await handleMagicLinkSignIn();

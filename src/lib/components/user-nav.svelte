@@ -4,9 +4,7 @@
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
   import { goto } from '$app/navigation';
   import { LogOut, Loader2 } from 'lucide-svelte';
-  import { authStore } from './nav-bar.svelte';
   import dataProvider from '@/services/dataProvider/dataProvider';
-  import { onMount } from 'svelte';
   import { CachePolicy, type MyUser } from '@baragaun/bg-node-client';
 
   let isLoggingOut = $state(false);
@@ -41,7 +39,6 @@
     try {
       isLoggingOut = true;
       await dataProvider.signMeOut();
-      authStore.set({ isAuthenticated: false });
       currentUser = null;
       await goto('/signin');
     } catch (error) {

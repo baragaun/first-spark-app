@@ -2,8 +2,8 @@ import {
   AppEnvironment,
   BgNodeClient,
   CachePolicy,
-  type BgNodeClientConfig,
   HttpHeaderName,
+  type BgNodeClientConfig,
 } from '@baragaun/bg-node-client';
 
 import dataProviderStore from './dataProviderStore';

@@ -1,10 +1,3 @@
-<script lang="ts" context="module">
-  // Export the auth store at module level
-  export const authStore = writable({
-    isAuthenticated: false,
-  });
-</script>
-
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
   import { Moon, Sun, Languages, MoreHorizontal } from 'lucide-svelte';
@@ -12,21 +5,11 @@
   import * as Sheet from '$lib/components/ui/sheet';
   import * as Sidebar from '$lib/components/ui/sidebar/index.js';
   import { onMount } from 'svelte';
-  import { writable } from 'svelte/store';
-  import dataProvider from '@/services/dataProvider/dataProvider';
+  import { getContext } from 'svelte';
+  import type { UserContext } from '$lib/context/userContext.svelte.ts';
 
-  // Check authentication status on mount
-  onMount(() => {
-    authStore.set({ isAuthenticated: dataProvider.isSignedIn() });
-
-    // Listen for auth state changes
-    window.addEventListener('storage', () => {
-      authStore.set({ isAuthenticated: dataProvider.isSignedIn() });
-    });
-  });
-
-  // Subscribe to auth store changes
-  $: isAuthenticated = $authStore.isAuthenticated;
+  // Get the user context
+  const userContext = getContext<UserContext>('userContext');
 
   // Theme state management
   let isDarkMode = false;
@@ -90,7 +73,7 @@
           <Languages class="h-5 w-5" />
         </Button>
 
-        {#if isAuthenticated}
+        {#if userContext.isAuthenticated}
           <UserNav />
         {:else}
           <div class="flex items-center gap-2">
@@ -117,7 +100,7 @@
           />
           <span class="sr-only">Open Menu</span>
         </div>
-        {#if isAuthenticated}
+        {#if userContext.isAuthenticated}
           <UserNav />
         {/if}
       </div>
@@ -159,12 +142,15 @@
           </Button>
 
           <!-- Auth Buttons -->
-          {#if isAuthenticated}
+          {#if userContext.isAuthenticated}
             <Button
               variant="destructive"
               href="/signout"
               class="font-lexend w-full justify-start text-muted-foreground hover:text-foreground"
-              onclick={() => (isMobileMenuOpen = false)}
+              onclick={() => {
+                userContext.signOut();
+                isMobileMenuOpen = false;
+              }}
             >
               Sign Out
             </Button>

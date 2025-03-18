@@ -4,13 +4,16 @@
   import { writable } from 'svelte/store';
   import { goto } from '$app/navigation';
   import * as Switch from '$lib/components/ui/switch';
-  import { authStore } from '$lib/components/nav-bar.svelte';
+  import { getContext } from 'svelte';
+  import type { UserContext } from '@/context/userContext.svelte';
   import { PasswordInput } from '$lib/components/ui/password-input';
   import EmailVerification from '$lib/components/email-verification.svelte';
   import AuthCard from '$lib/components/ui/auth-card.svelte';
-  import dataProvider from '@/services/dataProvider/dataProvider';
   import { UserIdentType } from '@baragaun/bg-node-client';
-  import passwordHelpers from '@/helpers/passwordHelpers'
+  import passwordHelpers from '@/helpers/passwordHelpers';
+
+  // Get the user context
+  const userContext = getContext<UserContext>('userContext');
 
   // Step management
   const STEPS = {
@@ -41,7 +44,7 @@
     loading = true;
     try {
       // First check if username is available
-      const isUsernameAvailable = await dataProvider.isUserIdentAvailable(
+      const isUsernameAvailable = await userContext.isUserIdentAvailable(
         username,
         UserIdentType.userHandle,
       );
@@ -53,11 +56,10 @@
       }
 
       // If username is available, proceed with signup
-      const user = await dataProvider.signUpUser(username, email, password);
+      const user = await userContext.signUp(username, email, password);
       if (!user) {
         throw new Error('Failed to create account');
       }
-      authStore.set({ isAuthenticated: true });
       await goto('/');
     } catch (error) {
       console.error('Error creating account:', error);
@@ -70,8 +72,8 @@
   async function updateSuggestedHandle() {
     // todo: This should only be called once, when the user clicked "Next" on the email
     //  input step during onboarding.
-    if (email && dataProvider.isSignedIn()) {
-      const handle = await dataProvider.findAvailableUserHandle(email);
+    if (email && userContext.isSignedIn()) {
+      const handle = await userContext.findAvailableUserHandle(email);
       suggestedHandle = handle || '';
       username = suggestedHandle;
     }
@@ -138,8 +140,25 @@
                 placeholder="Username (e.g., CosmoExplorer, PixelPioneer)"
                 bind:value={username}
                 required
+                onblur={async () => {
+                  if (username) {
+                    checkingUsername = true;
+                    usernameError = '';
+                    const isAvailable = await userContext.isUserIdentAvailable(
+                      username,
+                      UserIdentType.userHandle,
+                    );
+                    checkingUsername = false;
+
+                    if (!isAvailable) {
+                      usernameError = 'This username is unavailable.';
+                    }
+                  }
+                }}
               />
-              {#if usernameError}
+              {#if checkingUsername}
+                <p class="text-xs text-muted-foreground">Checking username availability...</p>
+              {:else if usernameError}
                 <p class="text-xs text-destructive">{usernameError}</p>
               {/if}
             </div>

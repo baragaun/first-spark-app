@@ -7,17 +7,18 @@
   import { writable, get } from 'svelte/store';
   import dataProvider from '@/services/dataProvider/dataProvider';
   import { UserIdentType } from '@baragaun/bg-node-client';
+  import { userContext } from '@/context/userContext.svelte';
 
   // Props
   export let email = '';
-  export let initialStep = 'email'; // 'email' or 'verify'
+  export let initialStep = 'email';
   export let buttonText = 'Continue';
   export let verifyButtonText = 'Verify';
   export let loadingText = 'Sending...';
   export let verifyingText = 'Verifying...';
   export let showSkipButton = false;
-  export let onSkip = () => {}; // Add this prop for handling skip
-  export let onVerificationSuccess = () => {}; // Add this prop for handling successful verification
+  export let onSkip = () => {};
+  export let onVerificationSuccess = () => {};
 
   // Email validation function
   const isValidEmail = (email: string): boolean => {
@@ -84,21 +85,16 @@
   const startEmailVerification = async (emailAddress: string) => {
     emailError = '';
 
-    // Check if email is available first
-    checkingEmail = true;
-    const isAvailable = await checkEmailAvailability(emailAddress);
-    checkingEmail = false;
-
-    if (!isAvailable) {
-      emailError = 'This email address is already registered.';
+    const signUpResponse = await dataProvider.signUpUser(emailAddress, undefined, undefined);
+    if (!signUpResponse || !signUpResponse?.id) {
       return false;
     }
 
-    // const response = await fsdata.signInWithToken(emailAddress);
-    // if (!response || !response?.actionProgress) {
-    //   return false;
-    // }
-    // actionId = response.actionProgress.actionId;
+    const response = await userContext.signInWithToken(emailAddress);
+    if (!response || !response?.actionProgress) {
+      return false;
+    }
+    actionId = response.actionProgress.actionId;
 
     currentStep.set(STEPS.VERIFY);
     startResendTimer(emailAddress);
@@ -146,11 +142,11 @@
   };
 
   const verifyEmailCode = async (code: string) => {
-    // const response = await fsdata.verifyMultiStepActionToken(
-    //   actionId!, // actionId from previous step
-    //   code, // verification code
-    //   undefined, // newPassword (not needed for email verification)
-    // );
+    const response = await userContext.verifyMultiStepActionToken(
+      actionId!, // actionId from previous step
+      code, // verification code
+      undefined, // newPassword (not needed for email verification)
+    );
 
     return true;
   };
@@ -202,9 +198,21 @@
         type="email"
         placeholder="Enter your email"
         bind:value={email}
-        pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2}"
         title="Please enter a valid email address"
+        pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2}$"
         required
+        onblur={async () => {
+          if (email && isValidEmail(email)) {
+            checkingEmail = true;
+            const isAvailable = await checkEmailAvailability(email);
+            checkingEmail = false;
+            if (!isAvailable) {
+              emailError = 'This email address is already registered.';
+            } else {
+              emailError = '';
+            }
+          }
+        }}
       />
       {#if email && !isValidEmail(email)}
         <p class="text-xs text-destructive">Please enter a valid email address</p>
@@ -216,7 +224,7 @@
     <Button
       type="submit"
       class="w-full"
-      disabled={loading || checkingEmail || !email || !isValidEmail(email)}
+      disabled={loading || checkingEmail || !email || !isValidEmail(email) || emailError !== ''}
       onclick={handleEmailSubmit}
     >
       {#if checkingEmail}

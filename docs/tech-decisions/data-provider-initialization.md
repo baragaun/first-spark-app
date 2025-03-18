@@ -2,7 +2,7 @@
 
 ## Overview
 
-We use [bg-node-client](https://github.com/baragaun/bg-node-client) to integrate with the 
+We use [bg-node-client](https://github.com/baragaun/bg-node-client) to integrate with the
 GraphQL API of our First Spark backend.
 
 The Data Provider is used in this Svelte app to make it available throughout the app.

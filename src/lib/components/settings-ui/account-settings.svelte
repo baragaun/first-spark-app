@@ -9,7 +9,7 @@
   import { goto } from '$app/navigation';
   import { PasswordInput } from '$lib/components/ui/password-input';
   import AlertDescription from '../ui/alert/alert-description.svelte';
-  import passwordHelpers from '@/helpers/passwordHelpers'
+  import passwordHelpers from '@/helpers/passwordHelpers';
 
   // State management using Svelte 5 runes
   let isLoading = $state(false);
@@ -440,7 +440,9 @@
                 required
               />
               {#if newPassword && passwordHelpers.getPasswordError(newPassword)}
-                <p class="text-xs text-destructive">{passwordHelpers.getPasswordError(newPassword)}</p>
+                <p class="text-xs text-destructive">
+                  {passwordHelpers.getPasswordError(newPassword)}
+                </p>
               {/if}
             </div>
 

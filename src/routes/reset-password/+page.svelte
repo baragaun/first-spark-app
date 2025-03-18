@@ -13,8 +13,7 @@
   import dataProvider from '@/services/dataProvider/dataProvider';
   import { onDestroy } from 'svelte';
   import { goto } from '$app/navigation';
-  import { authStore } from '$lib/components/nav-bar.svelte';
-  import passwordHelpers from '@/helpers/passwordHelpers'
+  import passwordHelpers from '@/helpers/passwordHelpers';
 
   let identifier = ''; // for email or username
   let loading = false;
@@ -120,7 +119,6 @@
         throw new Error('Failed to verify code and reset password');
       }
 
-      authStore.set({ isAuthenticated: true });
       await goto('/');
     } catch (err) {
       console.error('Error resetting password:', err);
@@ -132,7 +130,6 @@
       loading = false;
     }
   };
-
 </script>
 
 <div class="grid flex-1 place-items-center">
