@@ -47,13 +47,13 @@ describe('NavBar', () => {
     // Set authenticated state
     localStorage.setItem('authToken', 'your-auth-token');
     authStore.set({ isAuthenticated: true });
-    await render(NavBar);
+    render(NavBar);
 
     // Verify login/signup buttons are not present when authenticated
     const signUpButton = screen.queryByText(get(_)('nav.auth.sign_up'));
     const logInButton = screen.queryByText(get(_)('nav.auth.log_in'));
 
-    await expect(signUpButton).not.toBeInTheDocument();
-    await expect(logInButton).not.toBeInTheDocument();
+    expect(signUpButton).not.toBeInTheDocument();
+    expect(logInButton).not.toBeInTheDocument();
   });
 });
