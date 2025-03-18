@@ -8,7 +8,7 @@
   import { PasswordInput } from '$lib/components/ui/password-input';
   import EmailVerification from '$lib/components/email-verification.svelte';
   import AuthCard from '$lib/components/ui/auth-card.svelte';
-  import fsdata from '@/services/fsdata/fsdata';
+  import dataProvider from '@/services/dataProvider/dataProvider';
   import { UserIdentType } from '@baragaun/bg-node-client';
   import passwordHelpers from '@/helpers/passwordHelpers'
 
@@ -41,7 +41,7 @@
     loading = true;
     try {
       // First check if username is available
-      const isUsernameAvailable = await fsdata.isUserIdentAvailable(
+      const isUsernameAvailable = await dataProvider.isUserIdentAvailable(
         username,
         UserIdentType.userHandle,
       );
@@ -53,7 +53,7 @@
       }
 
       // If username is available, proceed with signup
-      const user = await fsdata.signUpUser(username, email, password);
+      const user = await dataProvider.signUpUser(username, email, password);
       if (!user) {
         throw new Error('Failed to create account');
       }
@@ -70,8 +70,8 @@
   async function updateSuggestedHandle() {
     // todo: This should only be called once, when the user clicked "Next" on the email
     //  input step during onboarding.
-    if (email && fsdata.isSignedIn()) {
-      const handle = await fsdata.findAvailableUserHandle(email);
+    if (email && dataProvider.isSignedIn()) {
+      const handle = await dataProvider.findAvailableUserHandle(email);
       suggestedHandle = handle || '';
       username = suggestedHandle;
     }

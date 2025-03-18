@@ -1,12 +1,12 @@
 import { browser } from '$app/environment';
-import init from '$lib/services/fsdata/init';
+import dataProvider from '$lib/services/dataProvider/dataProvider';
 import type { LayoutLoad } from './$types';
 
 export const load: LayoutLoad = async () => {
   // Only initialize in browser environment
   if (browser) {
     try {
-      await init();
+      await dataProvider.init();
       console.log('BgNodeClient initialized successfully');
 
       return {

@@ -5,7 +5,7 @@
   import { goto } from '$app/navigation';
   import { LogOut, Loader2 } from 'lucide-svelte';
   import { authStore } from './nav-bar.svelte';
-  import fsdata from '$lib/services/fsdata/fsdata';
+  import dataProvider from '@/services/dataProvider/dataProvider';
   import { onMount } from 'svelte';
   import { CachePolicy, type MyUser } from '@baragaun/bg-node-client';
 
@@ -15,7 +15,7 @@
 
   async function loadMyUser() {
     try {
-      if (!fsdata.isSignedIn()) {
+      if (!dataProvider.isSignedIn()) {
         currentUser = null;
 
         return;
@@ -23,7 +23,7 @@
 
       isLoading = true;
       // todo: Periodically we need to refresh the user object and use CachePolicy.networkFirst
-      currentUser = await fsdata.findMyUser(CachePolicy.cacheFirst);
+      currentUser = await dataProvider.findMyUser(CachePolicy.cacheFirst);
     } catch (error) {
       console.error('Error loading user data:', error);
     } finally {
@@ -40,7 +40,7 @@
   const handleLogout = async () => {
     try {
       isLoggingOut = true;
-      await fsdata.signMeOut();
+      await dataProvider.signMeOut();
       authStore.set({ isAuthenticated: false });
       currentUser = null;
       await goto('/signin');

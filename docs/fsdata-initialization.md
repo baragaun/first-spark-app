@@ -27,7 +27,7 @@ We initialize the FSData client (BgNodeClient) in `src/routes/+layout.ts` to ens
 
 ```typescript
 import type { LayoutLoad } from './$types';
-import init from '$lib/services/fsdata/init';
+import init from '$lib/services/dataProvider/init';
 import { browser } from '$app/environment';
 
 export const load: LayoutLoad = async () => {
@@ -95,7 +95,7 @@ export const load: LayoutLoad = async () => {
 1. **Access FSData Client**
 
    ```typescript
-   import clientStore from '$lib/services/fsdata/clientStore';
+   import clientStore from '$lib/services/dataProvider/clientStore';
 
    const client = clientStore.getClient();
    if (client) {
@@ -130,8 +130,8 @@ export const load: LayoutLoad = async () => {
 ## Related Files
 
 - `src/routes/+layout.ts` - Main initialization logic
-- `src/lib/services/fsdata/init.ts` - FSData client initialization
-- `src/lib/services/fsdata/clientStore.ts` - Global client storage
+- `src/lib/services/dataProvider/init.ts` - FSData client initialization
+- `src/lib/services/dataProvider/clientStore.ts` - Global client storage
 - `src/routes/+layout.svelte` - Layout component using initialization status
 
 ## References

@@ -15,7 +15,7 @@
   import { authStore } from '$lib/components/nav-bar.svelte';
   import Mail from 'lucide-svelte/icons/mail';
   import { UserIdentType } from '@baragaun/bg-node-client';
-  import fsdata from '$lib/services/fsdata/fsdata';
+  import dataProvider from '@/services/dataProvider/dataProvider';
 
   let identifier = ''; // for email or username
   let password = '';
@@ -58,13 +58,13 @@
 
     try {
       if (loginMethod === 'password') {
-        await fsdata.signInUser(
+        await dataProvider.signInUser(
           identifier,
           identifier.includes('@') ? UserIdentType.email : UserIdentType.userHandle,
           password,
         );
 
-        const isAuthenticated = fsdata.isSignedIn();
+        const isAuthenticated = dataProvider.isSignedIn();
 
         if (isAuthenticated) {
           authStore.set({ isAuthenticated });

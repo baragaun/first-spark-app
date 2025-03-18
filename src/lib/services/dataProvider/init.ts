@@ -6,13 +6,13 @@ import {
   HttpHeaderName,
 } from '@baragaun/bg-node-client';
 
-import clientStore from './clientStore';
+import dataProviderStore from './dataProviderStore';
 
 const init = async (): Promise<boolean> => {
-  console.log('fsdata._init called.');
+  console.log('fsdata.init called.');
 
-  if (clientStore.getClient()) {
-    console.log('fsdata._init: client already exists.');
+  if (dataProviderStore.getClient()) {
+    console.log('fsdata.init: client already exists.');
     return true;
   }
 
@@ -40,7 +40,7 @@ const init = async (): Promise<boolean> => {
     throw new Error('Error initializing BgNodeClient');
   }
 
-  clientStore.setClient(client);
+  dataProviderStore.setClient(client);
 
   // todo: Only fetch a fresh copy of the user if this code is not called too often
   // Ideally, this code is only called once per session. We may have to set a timer

@@ -1,4 +1,4 @@
-import clientStore from '@/services/fsdata/clientStore';
+import dataProviderStore from '@/services/dataProvider/dataProviderStore';
 import { type MyUser } from '@baragaun/bg-node-client';
 
 const signUpUser = async (
@@ -6,7 +6,7 @@ const signUpUser = async (
   email: string | undefined,
   password: string | undefined,
 ): Promise<MyUser | null> => {
-  const client = clientStore.getClient();
+  const client = dataProviderStore.getClient();
   if (!client) {
     console.error('fsdata.signUpUser failed: client not initialized.');
     // todo: show error to user

@@ -10,7 +10,7 @@
   } from '$lib/components/ui/card';
   import { Alert, AlertDescription } from '$lib/components/ui/alert';
   import * as InputOTP from '$lib/components/ui/input-otp';
-  import fsdata from '$lib/services/fsdata/fsdata';
+  import dataProvider from '@/services/dataProvider/dataProvider';
   import { onDestroy } from 'svelte';
   import { goto } from '$app/navigation';
   import { authStore } from '$lib/components/nav-bar.svelte';
@@ -54,7 +54,7 @@
     error = '';
 
     try {
-      const response = await fsdata.resetMyPassword(identifier);
+      const response = await dataProvider.resetMyPassword(identifier);
 
       if (!response || !response?.actionProgress) {
         // Silently fail - don't show any error
@@ -110,7 +110,7 @@
         throw new Error('Reset action ID is missing');
       }
 
-      const result = await fsdata.verifyMultiStepActionToken(
+      const result = await dataProvider.verifyMultiStepActionToken(
         resetActionId,
         verificationCode,
         password,

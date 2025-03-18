@@ -1,9 +1,9 @@
-import clientStore from '@/services/fsdata/clientStore';
-import { ResetMyPasswordListener } from '@/services/fsdata/listeners/ResetMyPasswordListener';
+import dataProviderStore from '@/services/dataProvider/dataProviderStore';
+import { ResetMyPasswordListener } from '@/services/dataProvider/listeners/ResetMyPasswordListener';
 import type { MultiStepActionProgressResult } from '@baragaun/bg-node-client';
 
 const resetMyPassword = async (ident: string): Promise<MultiStepActionProgressResult | null> => {
-  const client = clientStore.getClient();
+  const client = dataProviderStore.getClient();
   if (!client) {
     console.error('fsdata.resetPassword failed: client not initialized.');
     // todo: show error to user

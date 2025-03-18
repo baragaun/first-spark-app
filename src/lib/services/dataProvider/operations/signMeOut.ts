@@ -1,7 +1,7 @@
-import clientStore from '@/services/fsdata/clientStore';
+import dataProviderStore from '@/services/dataProvider/dataProviderStore';
 
 const signMeOut = async (): Promise<void> => {
-  const client = clientStore.getClient();
+  const client = dataProviderStore.getClient();
   if (!client) {
     console.error('fsdata.signMeOut failed: client not initialized.');
     // todo: show error to user

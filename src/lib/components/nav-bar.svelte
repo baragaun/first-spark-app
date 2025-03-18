@@ -13,15 +13,15 @@
   import * as Sidebar from '$lib/components/ui/sidebar/index.js';
   import { onMount } from 'svelte';
   import { writable } from 'svelte/store';
-  import fsdata from '$lib/services/fsdata/fsdata';
+  import dataProvider from '@/services/dataProvider/dataProvider';
 
   // Check authentication status on mount
   onMount(() => {
-    authStore.set({ isAuthenticated: fsdata.isSignedIn() });
+    authStore.set({ isAuthenticated: dataProvider.isSignedIn() });
 
     // Listen for auth state changes
     window.addEventListener('storage', () => {
-      authStore.set({ isAuthenticated: fsdata.isSignedIn() });
+      authStore.set({ isAuthenticated: dataProvider.isSignedIn() });
     });
   });
 

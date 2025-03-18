@@ -1,8 +1,8 @@
-import clientStore from '@/services/fsdata/clientStore';
-import { VerifyMyEmailListener } from '@/services/fsdata/listeners/VerifyMyEmailListener';
+import dataProviderStore from '@/services/dataProvider/dataProviderStore';
+import { VerifyMyEmailListener } from '@/services/dataProvider/listeners/VerifyMyEmailListener';
 
 const verifyMyEmail = async (email: string): Promise<void> => {
-  const client = clientStore.getClient();
+  const client = dataProviderStore.getClient();
   if (!client) {
     console.error('fsdata.verifyMyEmail failed: client not initialized.');
     // todo: show error to user

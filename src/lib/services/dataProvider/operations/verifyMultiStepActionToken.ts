@@ -1,11 +1,11 @@
-import clientStore from '@/services/fsdata/clientStore';
+import dataProviderStore from '@/services/dataProvider/dataProviderStore';
 
 const verifyMultiStepActionToken = async (
   actionId: string,
   token: string,
   newPassword: string | undefined,
 ): Promise<boolean> => {
-  const client = clientStore.getClient();
+  const client = dataProviderStore.getClient();
   if (!client) {
     console.error('fsdata.verifyMultiStepActionToken failed: client not initialized.');
     // todo: show error to user

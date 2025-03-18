@@ -1,11 +1,11 @@
-import clientStore from '@/services/fsdata/clientStore';
-import { SignInWithTokenListener } from '@/services/fsdata/listeners/SignInWithTokenListener';
+import dataProviderStore from '@/services/dataProvider/dataProviderStore';
+import { SignInWithTokenListener } from '@/services/dataProvider/listeners/SignInWithTokenListener';
 import type { MultiStepActionProgressResult } from '@baragaun/bg-node-client';
 
 const signInWithToken = async (
   userIdent: string,
 ): Promise<MultiStepActionProgressResult | null> => {
-  const client = clientStore.getClient();
+  const client = dataProviderStore.getClient();
   if (!client) {
     console.error('fsdata.signInWithToken failed: client not initialized.');
     // todo: show error to user
