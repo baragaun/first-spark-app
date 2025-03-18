@@ -14,6 +14,7 @@
   import { onDestroy } from 'svelte';
   import { goto } from '$app/navigation';
   import { authStore } from '$lib/components/nav-bar.svelte';
+  import passwordHelpers from '@/helpers/passwordHelpers'
 
   let identifier = ''; // for email or username
   let loading = false;
@@ -132,42 +133,6 @@
     }
   };
 
-  const validatePassword = (password: string) => {
-    const minLength = password.length >= 8;
-    const hasUpperCase = /[A-Z]/.test(password);
-    const hasLowerCase = /[a-z]/.test(password);
-    const hasNumber = /[0-9]/.test(password);
-    const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-
-    return {
-      isValid: minLength && hasUpperCase && hasLowerCase && hasNumber && hasSymbol,
-      minLength,
-      hasUpperCase,
-      hasLowerCase,
-      hasNumber,
-      hasSymbol,
-    };
-  };
-
-  const getPasswordError = (password: string) => {
-    if (!password) return '';
-    const validation = validatePassword(password);
-
-    if (!validation.minLength) {
-      return 'Password must be at least 8 characters long';
-    }
-    if (
-      !(
-        validation.hasUpperCase &&
-        validation.hasLowerCase &&
-        validation.hasNumber &&
-        validation.hasSymbol
-      )
-    ) {
-      return 'Password must include uppercase, lowercase, number and special character';
-    }
-    return '';
-  };
 </script>
 
 <div class="grid flex-1 place-items-center">
@@ -259,8 +224,8 @@
                 </ul>
               </div>
             {/if}
-            {#if password && getPasswordError(password)}
-              <p class="text-xs text-destructive">{getPasswordError(password)}</p>
+            {#if password && passwordHelpers.getPasswordError(password)}
+              <p class="text-xs text-destructive">{passwordHelpers.getPasswordError(password)}</p>
             {/if}
           </div>
 

@@ -9,6 +9,7 @@
   import { goto } from '$app/navigation';
   import { PasswordInput } from '$lib/components/ui/password-input';
   import AlertDescription from '../ui/alert/alert-description.svelte';
+  import passwordHelpers from '@/helpers/passwordHelpers'
 
   // State management using Svelte 5 runes
   let isLoading = $state(false);
@@ -113,94 +114,15 @@
 
   // Remove unused handleContinue function since it's redundant with handleEmailChange
 
-  type PasswordValidation = {
-    minLength: boolean;
-    notTooSimple: boolean;
-    noRepetitivePattern: boolean;
-    doesNotReuseEmail: boolean;
-    isValid: boolean;
-  };
-
-  const commonPasswords = [
-    '123456',
-    'password',
-    '123456789',
-    '12345678',
-    '12345',
-    '1234567',
-    '1234567890',
-    'qwerty',
-    'abc123',
-    'password1',
-  ];
-
-  const validatePassword = (password: string): PasswordValidation => {
-    const repetitivePattern = /^(.)\1+$/;
-    const result: PasswordValidation = {
-      minLength: true,
-      notTooSimple: true,
-      noRepetitivePattern: true,
-      doesNotReuseEmail: true,
-      isValid: true,
-    };
-
-    if (password.length < 8) {
-      result.minLength = false;
-      result.isValid = false;
-    }
-
-    if (commonPasswords.includes(password.toLowerCase())) {
-      result.notTooSimple = false;
-      result.isValid = false;
-    }
-
-    if (repetitivePattern.test(password)) {
-      result.noRepetitivePattern = false;
-      result.isValid = false;
-    }
-
-    if (emails[0]) {
-      const firstEmailPart = emails[0].split('@')[0];
-      if (firstEmailPart && password.toLowerCase().includes(firstEmailPart.toLowerCase())) {
-        result.doesNotReuseEmail = false;
-        result.isValid = false;
-      }
-    }
-
-    return result;
-  };
-
-  const getPasswordError = (password: string) => {
-    if (!password) {
-      return '';
-    }
-
-    const validation = validatePassword(password);
-
-    if (!validation.minLength) {
-      return 'Password must be at least 8 characters long';
-    }
-
-    if (
-      !validation.notTooSimple ||
-      !validation.noRepetitivePattern ||
-      !validation.doesNotReuseEmail
-    ) {
-      return 'Password is too simple or guessable';
-    }
-
-    return '';
-  };
-
   const handlePasswordChange = async () => {
     if (!currentPassword) {
       error = 'Current password is required';
       return;
     }
 
-    const validation = validatePassword(newPassword);
+    const validation = passwordHelpers.validatePassword(newPassword, emails[0]);
     if (!validation.isValid) {
-      error = getPasswordError(newPassword);
+      error = passwordHelpers.getPasswordError(newPassword);
       return;
     }
 
@@ -517,21 +439,8 @@
                 bind:value={newPassword}
                 required
               />
-              {#if newPassword}
-                <div class="space-y-2 text-xs">
-                  <p class="text-muted-foreground">Password requirements:</p>
-                  <ul class="list-inside list-disc space-y-1 pl-2">
-                    <li
-                      class:text-destructive={!validatePassword(newPassword).minLength}
-                      class:text-green-500={validatePassword(newPassword).minLength}
-                    >
-                      At least 8 characters
-                    </li>
-                  </ul>
-                </div>
-              {/if}
-              {#if newPassword && getPasswordError(newPassword)}
-                <p class="text-xs text-destructive">{getPasswordError(newPassword)}</p>
+              {#if newPassword && passwordHelpers.getPasswordError(newPassword)}
+                <p class="text-xs text-destructive">{passwordHelpers.getPasswordError(newPassword)}</p>
               {/if}
             </div>
 
@@ -569,7 +478,7 @@
                 disabled={isLoading ||
                   !currentPassword ||
                   !newPassword ||
-                  !validatePassword(newPassword).isValid ||
+                  !passwordHelpers.validatePassword(newPassword).isValid ||
                   newPassword !== confirmPassword}
               >
                 {isLoading ? 'Saving...' : 'Save Changes'}

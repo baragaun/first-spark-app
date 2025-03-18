@@ -10,6 +10,7 @@
   import AuthCard from '$lib/components/ui/auth-card.svelte';
   import fsdata from '@/services/fsdata/fsdata';
   import { UserIdentType } from '@baragaun/bg-node-client';
+  import passwordHelpers from '@/helpers/passwordHelpers'
 
   // Step management
   const STEPS = {
@@ -63,43 +64,6 @@
     } finally {
       loading = false;
     }
-  };
-
-  const validatePassword = (password: string) => {
-    const minLength = password.length >= 8;
-    const hasUpperCase = /[A-Z]/.test(password);
-    const hasLowerCase = /[a-z]/.test(password);
-    const hasNumber = /[0-9]/.test(password);
-    const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-
-    return {
-      isValid: minLength && hasUpperCase && hasLowerCase && hasNumber && hasSymbol,
-      minLength,
-      hasUpperCase,
-      hasLowerCase,
-      hasNumber,
-      hasSymbol,
-    };
-  };
-
-  const getPasswordError = (password: string) => {
-    if (!password) return '';
-    const validation = validatePassword(password);
-
-    if (!validation.minLength) {
-      return 'Password must be at least 8 characters long';
-    }
-    if (
-      !(
-        validation.hasUpperCase &&
-        validation.hasLowerCase &&
-        validation.hasNumber &&
-        validation.hasSymbol
-      )
-    ) {
-      return 'Password must include uppercase, lowercase, number and special character';
-    }
-    return '';
   };
 
   // Add this function to fetch available handle
@@ -162,7 +126,7 @@
     {:else if $currentStep === STEPS.CREDENTIALS}
       <AuthCard
         title="Create your username and password"
-        description="First Spark is anonymous, so your username is what you'll go by here. Choose wisely—because once you get a name, you can't change it."
+        description="First Spark is anonymous, so your username is what you'll go by here."
         showBackButton={true}
         onBack={() => currentStep.set(STEPS.VERIFY)}
       >
@@ -187,45 +151,8 @@
           </div>
           <div class="relative space-y-2">
             <PasswordInput bind:value={password} placeholder="Password" required />
-            {#if password}
-              <div class="space-y-2 text-xs">
-                <p class="text-muted-foreground">Password requirements:</p>
-                <ul class="list-inside list-disc space-y-1 pl-2">
-                  <li
-                    class:text-destructive={password.length < 8}
-                    class:text-green-500={password.length >= 8}
-                  >
-                    At least 8 characters
-                  </li>
-                  <li
-                    class:text-destructive={!/[A-Z]/.test(password)}
-                    class:text-green-500={/[A-Z]/.test(password)}
-                  >
-                    One uppercase letter
-                  </li>
-                  <li
-                    class:text-destructive={!/[a-z]/.test(password)}
-                    class:text-green-500={/[a-z]/.test(password)}
-                  >
-                    One lowercase letter
-                  </li>
-                  <li
-                    class:text-destructive={!/[0-9]/.test(password)}
-                    class:text-green-500={/[0-9]/.test(password)}
-                  >
-                    One number
-                  </li>
-                  <li
-                    class:text-destructive={!/[!@#$%^&*(),.?":{}|<>]/.test(password)}
-                    class:text-green-500={/[!@#$%^&*(),.?":{}|<>]/.test(password)}
-                  >
-                    One special character
-                  </li>
-                </ul>
-              </div>
-            {/if}
-            {#if password && getPasswordError(password)}
-              <p class="text-xs text-destructive">{getPasswordError(password)}</p>
+            {#if password && passwordHelpers.getPasswordError(password)}
+              <p class="text-xs text-destructive">{passwordHelpers.getPasswordError(password)}</p>
             {/if}
           </div>
           <div class="relative space-y-2">
@@ -255,7 +182,7 @@
               !password ||
               !confirmPassword ||
               password !== confirmPassword ||
-              !validatePassword(password).isValid}
+              !passwordHelpers.validatePassword(password).isValid}
           >
             {loading ? 'Creating account...' : 'Create Account'}
           </Button>
