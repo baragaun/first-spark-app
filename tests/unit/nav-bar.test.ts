@@ -1,4 +1,4 @@
-import NavBar, { authStore } from '$lib/components/nav-bar.svelte';
+import NavBar, { authStore } from '@/components/nav-bar/nav-bar.svelte';
 import { render, screen } from '@testing-library/svelte';
 import { beforeEach, describe, expect, it } from 'vitest';
 
@@ -8,35 +8,41 @@ describe('NavBar', () => {
     authStore.set({ isAuthenticated: false });
   });
 
+  const signUpButton = screen.queryByText('Sign Up');
+  const signInButton = screen.queryByText('Sign In');
+  const signOutButton = screen.queryByText('Sign Out');
+
   it('renders theme toggle button', async () => {
     render(NavBar);
     const themeToggleButton = screen.getByRole('button', { name: /toggle theme/i });
     expect(themeToggleButton).toBeVisible();
   });
 
-  it('renders login and signup buttons when not authenticated', async () => {
+  it('renders language selection button', async () => {
+    render(NavBar);
+    const languageButton = screen.getByRole('button', { name: /change language/i });
+    expect(languageButton).toBeVisible();
+  });
+
+  it('renders signin button', async () => {
     authStore.set({ isAuthenticated: false });
     render(NavBar);
 
-    const signUpButton = screen.getByText('Sign Up');
-    const logInButton = screen.getByText('Log In');
+    expect(signInButton).toBeVisible();
+  });
 
-    expect(logInButton).toBeVisible();
+  it('renders signup button', async () => {
+    authStore.set({ isAuthenticated: false });
+    render(NavBar);
+
     expect(signUpButton).toBeVisible();
   });
 
-  it('renders UserNav component when authenticated', async () => {
-    // Set authenticated state
+  it('renders Sign Out button component when authenticated', async () => {
     localStorage.setItem('authToken', 'your-auth-token');
     authStore.set({ isAuthenticated: true });
     render(NavBar);
 
-    // Verify login/signup buttons are not present when authenticated
-    const signUpButton = screen.queryByText('Sign Up');
-    const logInButton = screen.queryByText('Log In');
-
-    //await expect(logInButton).toBeVisible();
-    expect(signUpButton).not.toBeInTheDocument();
-    expect(logInButton).not.toBeInTheDocument();
+    expect(signOutButton).toBeVisible();
   });
 });

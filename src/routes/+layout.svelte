@@ -2,7 +2,7 @@
   import '../app.css';
   import * as Sidebar from '$lib/components/ui/sidebar/index.js';
   import AppSidebar from '$lib/components/app-sidebar.svelte';
-  import NavBar from '@/components/nav-bar.svelte';
+  import NavBar from '@/components/nav-bar/nav-bar.svelte';
   import Footer from '$lib/components/footer.svelte';
 
   let { children } = $props();

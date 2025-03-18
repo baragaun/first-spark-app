@@ -3,7 +3,7 @@
   import { Input } from '$lib/components/ui/input';
   import { writable } from 'svelte/store';
   import { goto } from '$app/navigation';
-  import { authStore } from '$lib/components/nav-bar.svelte';
+  import { authStore } from '@/components/nav-bar/nav-bar.svelte';
   import { PasswordInput } from '$lib/components/ui/password-input';
   import EmailVerification from '$lib/components/email-verification.svelte';
   import AuthCard from '$lib/components/ui/auth-card.svelte';

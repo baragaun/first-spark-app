@@ -12,7 +12,7 @@
   import { Alert, AlertDescription } from '$lib/components/ui/alert';
   import { goto } from '$app/navigation';
   import * as RadioGroup from '$lib/components/ui/radio-group';
-  import { authStore } from '$lib/components/nav-bar.svelte';
+  import { authStore } from '@/components/nav-bar/nav-bar.svelte';
   import Mail from 'lucide-svelte/icons/mail';
 
   let identifier = ''; // for email or username
