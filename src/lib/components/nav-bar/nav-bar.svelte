@@ -9,45 +9,25 @@
 
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
-  import { Moon, Sun, Languages } from 'lucide-svelte';
   import AvatarMenu from './avatar-menu.svelte';
   import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+  import ThemeButton from '../theme-button.svelte';
+  import LanguageButton from '../language-button.svelte';
 
-  // Update auth store when localStorage changes
+  $: isAuthenticated = $authStore?.isAuthenticated ?? false;
+
   const updateAuthState = () => {
     const authToken = localStorage.getItem('authToken');
     authStore.set({ isAuthenticated: !!authToken });
   };
 
-  // Check authentication status on mount
   onMount(() => {
     updateAuthState();
-
-    // Listen for auth state changes
+    
     window.addEventListener('storage', () => {
       updateAuthState();
     });
   });
-
-  // Theme state management
-  let isDarkMode = false;
-
-  onMount(() => {
-    const storedTheme = localStorage.getItem('theme');
-    if (
-      storedTheme === 'dark' ||
-      (!storedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)
-    ) {
-      isDarkMode = true;
-      document.documentElement.classList.add('dark');
-    }
-  });
-
-  const toggleTheme = () => {
-    isDarkMode = !isDarkMode;
-    document.documentElement.classList.toggle('dark');
-    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-  };
 </script>
 
 <nav
@@ -68,33 +48,23 @@
 
     <!-- Right side items -->
     <div class="flex flex-none items-center gap-2">
-      <!-- Theme Toggle (Desktop Only) -->
-      <Button
-        variant="ghost"
-        size="icon"
-        onclick={toggleTheme}
-        class="hidden text-muted-foreground hover:text-foreground md:flex"
-        aria-label="Toggle theme"
-      >
-        {#if isDarkMode}
-          <Sun class="h-5 w-5 transition-all" />
-        {:else}
-          <Moon class="h-5 w-5 transition-all" />
-        {/if}
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        class="hidden text-muted-foreground hover:text-foreground md:flex"
-        aria-label="Change language"
-        >
-        <Languages class="h-5 w-5" />
-      </Button>
+      <ThemeButton class="hidden md:flex" />
+      <LanguageButton class="hidden md:flex" />
       <div class="flex items-center gap-2">
-        <Button variant="ghost" href="/signin" class="hidden font-lexend text-muted-foreground hover:text-foreground md:flex">
-          Sign In
-        </Button>
-        <Button variant="default" href="/signup" class="font-lexend shadow-sm hover:shadow-md">
+        {#if !isAuthenticated}
+          <Button
+            variant="ghost"
+            href="/signin"
+            class="hidden font-lexend text-muted-foreground hover:text-foreground md:flex"
+          >
+            Sign In
+          </Button>
+        {/if}
+        <Button
+          variant="default"
+          href="/signup"
+          class="font-lexend shadow-sm hover:shadow-md"
+        >
           Sign Up
         </Button>
         <AvatarMenu />

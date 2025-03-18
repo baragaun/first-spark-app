@@ -5,7 +5,7 @@
   import { goto } from '$app/navigation';
   import { Languages, LogIn, LogOut, Moon, MoreHorizontal, Sun } from 'lucide-svelte';
   import { authStore } from './nav-bar.svelte';
-  import { onMount } from 'svelte';
+  import { toggleMode } from "mode-watcher";
 
   const handleLogout = () => {
     localStorage.removeItem('authToken');
@@ -14,24 +14,6 @@
   };
   
   $: isAuthenticated = $authStore?.isAuthenticated ?? false;
-  let isDarkMode = false;
-  
-  onMount(() => {
-    const storedTheme = localStorage.getItem('theme');
-    if (
-      storedTheme === 'dark' ||
-      (!storedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)
-    ) {
-      isDarkMode = true;
-      document.documentElement.classList.add('dark');
-    }
-  });
-
-  const toggleTheme = () => {
-    isDarkMode = !isDarkMode;
-    document.documentElement.classList.toggle('dark');
-    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-  };
 </script>
 
 <DropdownMenu.Root>
@@ -58,17 +40,18 @@
       <DropdownMenu.Separator />
       {/if}
       <DropdownMenu.Group>
-        <DropdownMenu.Item onclick={() => toggleTheme()}>
-          {#if isDarkMode}
-          <Sun class="h-4 w-4 transition-all" />
-          {:else}
-          <Moon class="h-4 w-4 transition-all" />
-          {/if}
+        <DropdownMenu.Item onclick={toggleMode}>
+          <Sun
+            class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
+          />
+          <Moon
+            class="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
+          />
           Toggle theme
         </DropdownMenu.Item>
         <DropdownMenu.Item>
         <Languages class="h-5 w-5 transition-all" />
-          Language
+          Change language
         </DropdownMenu.Item>
       </DropdownMenu.Group>
       <DropdownMenu.Separator />

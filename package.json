@@ -55,6 +55,7 @@
   "dependencies": {
     "@baragaun/bg-node-client": "github:baragaun/bg-node-client",
     "formsnap": "^2.0.0",
+    "mode-watcher": "^0.5.1",
     "sveltekit-superforms": "^2.23.1",
     "tailwindcss-animate": "^1.0.7"
   },

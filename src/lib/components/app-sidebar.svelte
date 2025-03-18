@@ -63,8 +63,9 @@
             <div class="flex aspect-square size-8 items-center justify-center rounded-lg">
               <img src="/fs-logo.svg" alt="First Spark Logo" class="size-8" />
             </div>
-            <span class="font-lexend truncate ps-2 text-xl font-bold text-primary">First Spark</span
-            >
+            <span class="font-lexend truncate ps-2 text-xl font-bold text-primary">
+              First Spark
+            </span>
           </div>
         </Sidebar.MenuItem>
       </Sidebar.Menu>
