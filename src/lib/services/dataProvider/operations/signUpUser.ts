@@ -2,7 +2,7 @@ import dataProviderStore from '@/services/dataProvider/dataProviderStore';
 import { type MyUser } from '@baragaun/bg-node-client';
 
 const signUpUser = async (
-  userHandle: string,
+  userHandle: string | undefined,
   email: string | undefined,
   password: string | undefined,
 ): Promise<MyUser | null> => {

@@ -5,7 +5,6 @@
   import * as InputOTP from '$lib/components/ui/input-otp';
   import { onDestroy } from 'svelte';
   import { writable, get } from 'svelte/store';
-  import dataProvider from '@/services/dataProvider/dataProvider';
   import { UserIdentType } from '@baragaun/bg-node-client';
   import { userContext } from '@/context/userContext.svelte';
 
@@ -52,7 +51,7 @@
   // Check if email is available
   const checkEmailAvailability = async (email: string): Promise<boolean> => {
     try {
-      const isAvailable = await dataProvider.isUserIdentAvailable(email, UserIdentType.email);
+      const isAvailable = await userContext.isUserIdentAvailable(email, UserIdentType.email);
       return isAvailable ?? false;
     } catch (error) {
       console.error('Error checking email availability:', error);
@@ -85,7 +84,7 @@
   const startEmailVerification = async (emailAddress: string) => {
     emailError = '';
 
-    const signUpResponse = await dataProvider.signUpUser(emailAddress, undefined, undefined);
+    const signUpResponse = await userContext.signUp(undefined, emailAddress, undefined);
     if (!signUpResponse || !signUpResponse?.id) {
       return false;
     }

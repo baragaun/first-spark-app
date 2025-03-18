@@ -59,7 +59,7 @@ export class UserContext {
     }
   }
 
-  async signUp(username: string, email: string, password: string) {
+  async signUp(username: string | undefined, email: string, password: string | undefined) {
     try {
       this.isLoading = true;
       this.error = null;
