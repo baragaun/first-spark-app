@@ -5,7 +5,6 @@
   import { ChevronRight, AlertTriangle } from 'lucide-svelte';
   import * as Alert from '$lib/components/ui/alert';
   import * as Dialog from '$lib/components/ui/dialog';
-  import DialogOverlayBlur from '$lib/components/ui/dialog/dialog-overlay-blur.svelte';
   import { goto } from '$app/navigation';
   import { PasswordInput } from '$lib/components/ui/password-input';
   import { AlertDescription } from '$lib/components/ui/alert';
@@ -148,7 +147,6 @@
           }
         }}
       >
-        <DialogOverlayBlur class="fixed inset-0 z-50" />
         <Dialog.Content class="sm:max-w-[425px]">
           <Dialog.Header class="space-y-2">
             <Dialog.Title class="text-lg font-semibold">Change Username</Dialog.Title>
