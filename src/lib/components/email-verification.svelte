@@ -85,7 +85,7 @@
   const startEmailVerification = async (emailAddress: string) => {
     emailError = '';
 
-    const signUpResponse = await dataProvider.signUpUser(emailAddress, undefined, undefined);
+    const signUpResponse = await dataProvider.signUpUser('', emailAddress, undefined);
     if (!signUpResponse || !signUpResponse?.id) {
       return false;
     }
