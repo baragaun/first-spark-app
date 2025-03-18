@@ -1,20 +1,20 @@
-# FSData Client Initialization in SvelteKit
+# Data Provider
 
 ## Overview
 
-We initialize the FSData client (BgNodeClient) in `src/routes/+layout.ts` to ensure proper client-side initialization across our SvelteKit application. This document explains why we chose this approach and how it works.
+We initialize the Data Provider (BgNodeClient) in `src/routes/+layout.ts` to ensure proper client-side initialization across our SvelteKit application. This document explains why we chose this approach and how it works.
 
 ## Why +layout.ts?
 
 1. **Global Initialization**
 
    - `+layout.ts` is executed for every route in the application
-   - Ensures the FSData client is initialized before any page components are rendered
+   - Ensures the Data Provider is initialized before any page components are rendered
    - Provides consistent client state across all routes
 
 2. **Browser-Only Execution**
 
-   - FSData client requires browser-specific features (RxDB)
+   - Data Provider requires browser-specific features (RxDB)
    - `+layout.ts` allows us to use SvelteKit's `browser` check
    - Prevents initialization attempts during Server-Side Rendering (SSR)
 
@@ -63,7 +63,7 @@ export const load: LayoutLoad = async () => {
 
 2. **Initialization Flow**
 
-   - Attempts to initialize FSData client only in browser
+   - Attempts to initialize Data Provider only in browser
    - Stores client instance in `clientStore` for global access
    - Provides initialization status to all routes
 
@@ -76,7 +76,7 @@ export const load: LayoutLoad = async () => {
 
 1. **+layout.server.ts**
 
-   - Not suitable because FSData client requires browser environment
+   - Not suitable because Data Provider requires browser environment
    - Would conflict with RxDB's browser-only requirements
 
 2. **Individual Page Initialization**
@@ -92,10 +92,10 @@ export const load: LayoutLoad = async () => {
 
 ## Best Practices
 
-1. **Access FSData Client**
+1. **Access Data Provider**
 
    ```typescript
-   import clientStore from '$lib/services/dataProvider/clientStore';
+   import clientStore from '@/services/dataProvider/dataProvider';
 
    const client = clientStore.getClient();
    if (client) {
@@ -130,7 +130,7 @@ export const load: LayoutLoad = async () => {
 ## Related Files
 
 - `src/routes/+layout.ts` - Main initialization logic
-- `src/lib/services/dataProvider/init.ts` - FSData client initialization
+- `src/lib/services/dataProvider/init.ts` - Data Provider initialization
 - `src/lib/services/dataProvider/clientStore.ts` - Global client storage
 - `src/routes/+layout.svelte` - Layout component using initialization status
 
@@ -138,4 +138,4 @@ export const load: LayoutLoad = async () => {
 
 - [SvelteKit Load Functions](https://kit.svelte.dev/docs/load)
 - [SvelteKit Routing](https://kit.svelte.dev/docs/routing)
-- [FSData Client Documentation](https://github.com/baragaun/bg-node-client/blob/main/README.md)
+- [Data Provider Documentation](https://github.com/baragaun/bg-node-client/blob/main/README.md)

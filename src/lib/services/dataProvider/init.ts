@@ -9,10 +9,10 @@ import {
 import dataProviderStore from './dataProviderStore';
 
 const init = async (): Promise<boolean> => {
-  console.log('fsdata.init called.');
+  console.log('dataProvider.init called.');
 
   if (dataProviderStore.getClient()) {
-    console.log('fsdata.init: client already exists.');
+    console.log('dataProvider.init: client already exists.');
     return true;
   }
 
