@@ -9,6 +9,29 @@
   import AuthCard from '$lib/components/ui/auth-card.svelte';
   import { getPasswordError, validatePassword } from '@/utils/validation';
 
+  
+  // This is not necessarily complete or correct, but takes into account the updated return value from `signup`
+  // 
+  // const onSignUp = async () => {
+  //   loading = true;
+  //   try {
+  //     const { myUser, error } = await myUserContext.signUp(email);
+
+  //     if (!myUser) {
+  //       throw new Error(error || 'Failed to create account');
+  //     }
+
+  //     await goto('/');
+  //   } catch (error) {
+  //     console.error('Error creating account:', error);
+  //   } finally {
+  //     loading = false;
+  //   }
+  // };
+
+
+
+
   // Step management
   const STEPS = {
     EMAIL: 'email',
