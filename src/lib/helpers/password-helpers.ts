@@ -1,11 +1,6 @@
-export interface PasswordValidation {
-  minLength: boolean;
-  notTooSimple: boolean;
-  noRepetitivePattern: boolean;
-  doesNotReuseEmail: boolean;
-  isValid: boolean;
-}
+import type { PasswordValidationResult } from './types';
 
+const minLength = 8;
 const commonPasswords = [
   '123456',
   'password',
@@ -19,9 +14,9 @@ const commonPasswords = [
   'password1',
 ];
 
-export const validatePassword = (password: string): PasswordValidation => {
+const validatePassword = (password: string, email?: string): PasswordValidationResult => {
   const repetitivePattern = /^(.)\1+$/;
-  const result: PasswordValidation = {
+  const result: PasswordValidationResult = {
     minLength: true,
     notTooSimple: true,
     noRepetitivePattern: true,
@@ -29,7 +24,7 @@ export const validatePassword = (password: string): PasswordValidation => {
     isValid: true,
   };
 
-  if (password.length < 8) {
+  if (password.length < minLength) {
     result.minLength = false;
     result.isValid = false;
   }
@@ -44,10 +39,18 @@ export const validatePassword = (password: string): PasswordValidation => {
     result.isValid = false;
   }
 
+  if (email) {
+    const firstEmailPart = email.split('@')[0];
+    if (firstEmailPart && password.toLowerCase().includes(firstEmailPart.toLowerCase())) {
+      result.doesNotReuseEmail = false;
+      result.isValid = false;
+    }
+  }
+
   return result;
 };
 
-export const getPasswordError = (password: string) => {
+const getPasswordError = (password: string) => {
   if (!password) {
     return '';
   }
@@ -55,7 +58,7 @@ export const getPasswordError = (password: string) => {
   const validation = validatePassword(password);
 
   if (!validation.minLength) {
-    return 'Password must be at least 8 characters long';
+    return `Password must be at least ${minLength} characters long.`;
   }
 
   if (
@@ -68,3 +71,11 @@ export const getPasswordError = (password: string) => {
 
   return '';
 };
+
+const passwordHelpers = {
+  minLength,
+  validatePassword,
+  getPasswordError,
+};
+
+export default passwordHelpers;

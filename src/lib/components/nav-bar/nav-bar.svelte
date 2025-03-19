@@ -1,33 +1,13 @@
-<script lang="ts" context="module">
-  // Export the auth store at module level
-  import { onMount } from 'svelte';
-  import { writable } from 'svelte/store';
-  export const authStore = writable({
-    isAuthenticated: false,
-  });
-</script>
-
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
   import AvatarMenu from './avatar-menu.svelte';
   import * as Sidebar from '$lib/components/ui/sidebar/index.js';
   import ThemeButton from '../theme-button.svelte';
   import LanguageButton from '../language-button.svelte';
+  import { getContext } from 'svelte';
+  import type { MyUserContext } from '@/context/my-user-context.svelte';
 
-  $: isAuthenticated = $authStore?.isAuthenticated ?? false;
-
-  const updateAuthState = () => {
-    const authToken = localStorage.getItem('authToken');
-    authStore.set({ isAuthenticated: !!authToken });
-  };
-
-  onMount(() => {
-    updateAuthState();
-
-    window.addEventListener('storage', () => {
-      updateAuthState();
-    });
-  });
+  const myUserContext = getContext<MyUserContext>('userContext');
 </script>
 
 <nav
@@ -51,7 +31,7 @@
       <ThemeButton class="hidden md:flex" />
       <LanguageButton class="hidden md:flex" />
       <div class="flex items-center gap-2">
-        {#if !isAuthenticated}
+        {#if !myUserContext.isAuthenticated}
           <Button
             variant="ghost"
             href="/signin"
