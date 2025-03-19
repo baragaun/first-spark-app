@@ -16,8 +16,7 @@
   import { getContext } from 'svelte';
   import type { MyUserContext } from '@/context/myUserContext.svelte';
 
-  // Get the user context
-  const userContext = getContext<MyUserContext>('userContext');
+  const myUserContext = getContext<MyUserContext>('myUserContext');
 
   let identifier = ''; // for email or username
   let password = '';
@@ -61,13 +60,12 @@
 
     try {
       if (loginMethod === 'password') {
-        // Use userContext for sign in
-        const user = await userContext.signIn(identifier, password);
+        const { myUser, error: errorFromContext } = await myUserContext.signIn(identifier, undefined, password);
 
-        if (user) {
+        if (myUser) {
           await goto('/');
         } else {
-          error = userContext.error || 'Invalid credentials. Please try again.';
+          error = errorFromContext || 'Your input could not be verified. Please try again.';
         }
       } else {
         await handleMagicLinkSignIn();

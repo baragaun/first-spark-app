@@ -54,16 +54,16 @@ export class MyUserContext {
 }
 
 // Singleton instance
-export const userContext = new MyUserContext();
+export const myUserContext = new MyUserContext();
 ```
 
 ```svelte
 <!-- UserProvider.svelte -->
 <script>
   import { setContext } from 'svelte';
-  import { userContext } from './myUserContext.svelte';
+  import { myUserContext } from './myUserContext.svelte';
 
-  setContext('userContext', userContext);
+  setContext('myUserContext', myUserContext);
 </script>
 
 <slot />

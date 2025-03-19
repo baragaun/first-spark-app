@@ -37,6 +37,7 @@
   const handleLogout = async () => {
     try {
       isLoggingOut = true;
+      // todo: User MyUserProvider
       await dataProvider.signMeOut();
       currentUser = null;
       await goto('/signin');

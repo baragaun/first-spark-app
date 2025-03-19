@@ -13,7 +13,7 @@
   import passwordHelpers from '@/helpers/passwordHelpers';
 
   // Get the user context
-  const userContext = getContext<MyUserContext>('userContext');
+  const myUserContext = getContext<MyUserContext>('myUserContext');
 
   // Step management
   const STEPS = {
@@ -40,26 +40,15 @@
   };
 
   // Handle final signup
-  const handleSignupSubmit = async () => {
+  const onSignUp = async () => {
     loading = true;
     try {
-      // First check if username is available
-      const isUsernameAvailable = await userContext.isUserIdentAvailable(
-        username,
-        UserIdentType.userHandle,
-      );
+      const { myUser, error } = await myUserContext.signUp(email);
 
-      if (!isUsernameAvailable) {
-        usernameError = 'This username is unavailable.';
-        loading = false;
-        return;
+      if (!myUser) {
+        throw new Error(error || 'Failed to create account');
       }
 
-      // If username is available, proceed with signup
-      const user = await userContext.signUp(username, email, password);
-      if (!user) {
-        throw new Error('Failed to create account');
-      }
       await goto('/');
     } catch (error) {
       console.error('Error creating account:', error);
@@ -72,8 +61,8 @@
   async function updateSuggestedHandle() {
     // todo: This should only be called once, when the user clicked "Next" on the email
     //  input step during onboarding.
-    if (email && userContext.isSignedIn()) {
-      const handle = await userContext.findAvailableUserHandle(email);
+    if (email && myUserContext.isSignedIn()) {
+      const handle = await myUserContext.findAvailableUserHandle(email);
       suggestedHandle = handle || '';
       username = suggestedHandle;
     }
@@ -132,7 +121,7 @@
         showBackButton={true}
         onBack={() => currentStep.set(STEPS.VERIFY)}
       >
-        <form on:submit|preventDefault={handleSignupSubmit} class="space-y-4">
+        <form on:submit|preventDefault={onSignUp} class="space-y-4">
           <div class="space-y-2">
             <div class="space-y-2">
               <Input
@@ -144,7 +133,7 @@
                   if (username) {
                     checkingUsername = true;
                     usernameError = '';
-                    const isAvailable = await userContext.isUserIdentAvailable(
+                    const isAvailable = await myUserContext.isUserIdentAvailable(
                       username,
                       UserIdentType.userHandle,
                     );

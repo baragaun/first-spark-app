@@ -85,8 +85,8 @@ export class MyUserContext {
 
   public async signIn(
     userIdent: string,
+    identType: UserIdentType | undefined,
     password: string,
-    identType?: UserIdentType,
   ): Promise<{ myUser?: MyUser, error?: string }> {
     if (!this.client || this.isSignedIn()) {
       this.myUser = null;
@@ -139,7 +139,7 @@ export class MyUserContext {
     }
   }
 
-  async signUp(email: string) {
+  async signUp(email: string): Promise<{ myUser?: MyUser, error?: string }> {
     if (!this.client) {
       this.myUser = null;
 

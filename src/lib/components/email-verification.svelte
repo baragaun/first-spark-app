@@ -3,10 +3,12 @@
   import { Input } from '$lib/components/ui/input';
   import { Alert, AlertDescription } from '$lib/components/ui/alert';
   import * as InputOTP from '$lib/components/ui/input-otp';
-  import { onDestroy } from 'svelte';
+  import { getContext, onDestroy } from 'svelte'
   import { writable, get } from 'svelte/store';
   import { UserIdentType } from '@baragaun/bg-node-client';
-  import { userContext } from '@/context/myUserContext.svelte';
+  import type { MyUserContext } from '$lib/context/myUserContext.svelte.ts';
+
+  const myUserContext = getContext<MyUserContext>('myUserContext');
 
   // Props
   export let email = '';
@@ -51,7 +53,7 @@
   // Check if email is available
   const checkEmailAvailability = async (email: string): Promise<boolean> => {
     try {
-      const isAvailable = await userContext.isUserIdentAvailable(email, UserIdentType.email);
+      const isAvailable = await myUserContext.isUserIdentAvailable(email, UserIdentType.email);
       return isAvailable ?? false;
     } catch (error) {
       console.error('Error checking email availability:', error);
@@ -84,12 +86,7 @@
   const startEmailVerification = async (emailAddress: string) => {
     emailError = '';
 
-    const signUpResponse = await userContext.signUp(undefined, emailAddress, undefined);
-    if (!signUpResponse || !signUpResponse?.id) {
-      return false;
-    }
-
-    const response = await userContext.signInWithToken(emailAddress);
+    const response = await myUserContext.verifyMyEmail(emailAddress);
     if (!response || !response?.actionProgress) {
       return false;
     }
@@ -141,7 +138,7 @@
   };
 
   const verifyEmailCode = async (code: string) => {
-    const response = await userContext.verifyMultiStepActionToken(
+    const response = await myUserContext.verifyMultiStepActionToken(
       actionId!, // actionId from previous step
       code, // verification code
       undefined, // newPassword (not needed for email verification)

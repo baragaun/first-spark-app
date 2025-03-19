@@ -8,8 +8,7 @@
   import { getContext } from 'svelte';
   import type { MyUserContext } from '$lib/context/myUserContext.svelte.ts';
 
-  // Get the user context
-  const userContext = getContext<MyUserContext>('userContext');
+  const myUserContext = getContext<MyUserContext>('myUserContext');
 
   // Theme state management
   let isDarkMode = false;
@@ -73,7 +72,7 @@
           <Languages class="h-5 w-5" />
         </Button>
 
-        {#if userContext.isAuthenticated}
+        {#if myUserContext.isAuthenticated}
           <UserNav />
         {:else}
           <div class="flex items-center gap-2">
@@ -100,7 +99,7 @@
           />
           <span class="sr-only">Open Menu</span>
         </div>
-        {#if userContext.isAuthenticated}
+        {#if myUserContext.isAuthenticated}
           <UserNav />
         {/if}
       </div>
@@ -142,13 +141,13 @@
           </Button>
 
           <!-- Auth Buttons -->
-          {#if userContext.isAuthenticated}
+          {#if myUserContext.isAuthenticated}
             <Button
               variant="destructive"
               href="/signout"
               class="font-lexend w-full justify-start text-muted-foreground hover:text-foreground"
               onclick={() => {
-                userContext.signMeOut();
+                myUserContext.signMeOut();
                 isMobileMenuOpen = false;
               }}
             >
