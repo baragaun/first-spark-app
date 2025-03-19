@@ -5,7 +5,7 @@
   import { goto } from '$app/navigation';
   import * as Switch from '$lib/components/ui/switch';
   import { getContext } from 'svelte';
-  import type { UserContext } from '@/context/userContext.svelte';
+  import type { MyUserContext } from '@/context/myUserContext.svelte';
   import { PasswordInput } from '$lib/components/ui/password-input';
   import EmailVerification from '$lib/components/email-verification.svelte';
   import AuthCard from '$lib/components/ui/auth-card.svelte';
@@ -13,7 +13,7 @@
   import passwordHelpers from '@/helpers/passwordHelpers';
 
   // Get the user context
-  const userContext = getContext<UserContext>('userContext');
+  const userContext = getContext<MyUserContext>('userContext');
 
   // Step management
   const STEPS = {

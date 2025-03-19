@@ -6,10 +6,10 @@
   import * as Sidebar from '$lib/components/ui/sidebar/index.js';
   import { onMount } from 'svelte';
   import { getContext } from 'svelte';
-  import type { UserContext } from '$lib/context/userContext.svelte.ts';
+  import type { MyUserContext } from '$lib/context/myUserContext.svelte.ts';
 
   // Get the user context
-  const userContext = getContext<UserContext>('userContext');
+  const userContext = getContext<MyUserContext>('userContext');
 
   // Theme state management
   let isDarkMode = false;
@@ -148,7 +148,7 @@
               href="/signout"
               class="font-lexend w-full justify-start text-muted-foreground hover:text-foreground"
               onclick={() => {
-                userContext.signOut();
+                userContext.signMeOut();
                 isMobileMenuOpen = false;
               }}
             >

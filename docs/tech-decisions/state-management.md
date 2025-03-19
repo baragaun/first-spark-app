@@ -2,7 +2,8 @@
 
 ## Decision Context
 
-When implementing user authentication and profile management in our Svelte application, we needed to choose an appropriate state management approach. The main options considered were:
+When implementing user authentication and profile management in our Svelte application, we needed 
+to choose an appropriate state management approach. The main options considered were:
 
 1. Svelte stores (writable/readable)
 2. Class-based state with Svelte runes
@@ -11,32 +12,39 @@ When implementing user authentication and profile management in our Svelte appli
 
 ## Decision: Class-based State with Context API
 
-We chose to implement a hybrid approach using a class-based state container with Svelte's runes for reactivity, exposed through Svelte's context API.
+We chose to implement a hybrid approach using a class-based state container with Svelte's runes for 
+reactivity, exposed through Svelte's context API.
 
 ### Why Not Just Svelte Stores?
 
-While Svelte's built-in stores provide a simple reactive state management solution, they have limitations for our use case:
+While Svelte's built-in stores provide a simple reactive state management solution, they have 
+limitations for our use case:
 
-1. **Lack of Encapsulation**: Stores are primarily focused on state, not behavior. For user management, we needed to encapsulate both state (user data, loading states, errors) and behavior (login, logout, profile updates) in a cohesive unit.
+1. **Lack of Encapsulation**: Stores are primarily focused on state, not behavior. For user 
+   management, we needed to encapsulate both state (user data, loading states, errors) and behavior 
+   (login, logout, profile updates) in a cohesive unit.
 
-2. **Type Safety Challenges**: While stores can be typed, complex interdependent state with derived values is more cleanly expressed in a class structure with TypeScript.
+2. **Type Safety Challenges**: While stores can be typed, complex interdependent state with 
+   derived values is more cleanly expressed in a class structure with TypeScript.
 
-3. **Testing Complexity**: Testing multiple interconnected stores can be challenging, whereas a class can be easily mocked and tested as a unit.
+3. **Testing Complexity**: Testing multiple interconnected stores can be challenging, whereas 
+   a class can be easily mocked and tested as a unit.
 
-4. **State Fragmentation**: Using separate stores for user data, loading states, and errors would fragment related state across multiple stores, making it harder to maintain consistency.
+4. **State Fragmentation**: Using separate stores for user data, loading states, and errors would 
+   fragment related state across multiple stores, making it harder to maintain consistency.
 
 ## Implementation Details
 
 Our implementation consists of:
 
-1. A `UserContext` class that uses Svelte's runes (`$state`, `$derived`) for reactivity
+1. A `MyUserContext` class that uses Svelte's runes (`$state`, `$derived`) for reactivity
 2. A singleton instance of this class exported for global access
 3. A `UserProvider` component that injects this instance into Svelte's context API
 4. Components accessing the context via `getContext`
 
 ```typescript
-// UserContext class with runes
-export class UserContext {
+// MyUserContext class with runes
+export class MyUserContext {
   user = $state<MyUser | null>(null);
   isLoading = $state(false);
   error = $state<string | null>(null);
@@ -46,14 +54,14 @@ export class UserContext {
 }
 
 // Singleton instance
-export const userContext = new UserContext();
+export const userContext = new MyUserContext();
 ```
 
 ```svelte
 <!-- UserProvider.svelte -->
 <script>
   import { setContext } from 'svelte';
-  import { userContext } from './userContext.svelte';
+  import { userContext } from './myUserContext.svelte';
 
   setContext('userContext', userContext);
 </script>
@@ -78,4 +86,6 @@ export const userContext = new UserContext();
 
 ## Conclusion
 
-The class-based state container with context API approach provides the best balance of encapsulation, type safety, and reactivity for our user management needs. It leverages Svelte's strengths while providing a structured approach to managing complex state and behavior.
+The class-based state container with context API approach provides the best balance of 
+encapsulation, type safety, and reactivity for our user management needs. It leverages 
+Svelte's strengths while providing a structured approach to managing complex state and behavior.

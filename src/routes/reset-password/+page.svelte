@@ -10,7 +10,6 @@
   } from '$lib/components/ui/card';
   import { Alert, AlertDescription } from '$lib/components/ui/alert';
   import * as InputOTP from '$lib/components/ui/input-otp';
-  import dataProvider from '@/services/dataProvider/dataProvider';
   import { onDestroy } from 'svelte';
   import { goto } from '$app/navigation';
   import passwordHelpers from '@/helpers/passwordHelpers';

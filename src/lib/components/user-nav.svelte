@@ -4,7 +4,6 @@
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
   import { goto } from '$app/navigation';
   import { LogOut, Loader2 } from 'lucide-svelte';
-  import dataProvider from '@/services/dataProvider/dataProvider';
   import { CachePolicy, type MyUser } from '@baragaun/bg-node-client';
 
   let isLoggingOut = $state(false);

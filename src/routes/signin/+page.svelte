@@ -14,10 +14,10 @@
   import * as RadioGroup from '$lib/components/ui/radio-group';
   import Mail from 'lucide-svelte/icons/mail';
   import { getContext } from 'svelte';
-  import type { UserContext } from '@/context/userContext.svelte';
+  import type { MyUserContext } from '@/context/myUserContext.svelte';
 
   // Get the user context
-  const userContext = getContext<UserContext>('userContext');
+  const userContext = getContext<MyUserContext>('userContext');
 
   let identifier = ''; // for email or username
   let password = '';

@@ -1,14 +1,14 @@
 <script lang="ts">
   import { setContext } from 'svelte';
-  import { userContext } from './userContext.svelte';
+  import { myUserContext } from './myUserContext.svelte';
   import { onMount } from 'svelte';
 
   // Set the user context for child components to consume
-  setContext('userContext', userContext);
+  setContext('myUserContext', myUserContext);
 
   // Refresh user data on mount
   onMount(() => {
-    userContext.loadUser();
+    myUserContext.loadMyUser();
   });
 </script>
 

@@ -6,7 +6,7 @@
   import { onDestroy } from 'svelte';
   import { writable, get } from 'svelte/store';
   import { UserIdentType } from '@baragaun/bg-node-client';
-  import { userContext } from '@/context/userContext.svelte';
+  import { userContext } from '@/context/myUserContext.svelte';
 
   // Props
   export let email = '';
