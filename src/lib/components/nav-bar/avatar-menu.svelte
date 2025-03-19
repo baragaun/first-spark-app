@@ -4,16 +4,15 @@
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
   import { goto } from '$app/navigation';
   import { Languages, LogIn, LogOut, Moon, MoreHorizontal, Sun } from 'lucide-svelte';
-  import { authStore } from './nav-bar.svelte';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { toggleMode } from 'mode-watcher';
 
+  const isAuthenticated = $derived(myUserContext.isAuthenticated);
+
   const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    authStore.set({ isAuthenticated: false }); // Update auth store
+  // TODO: Handle logout
     goto('/signin');
   };
-
-  $: isAuthenticated = $authStore?.isAuthenticated ?? false;
 </script>
 
 <DropdownMenu.Root>
@@ -69,6 +68,5 @@
         Sign in
       </DropdownMenu.Item>
     {/if}
-    <!-- {/if} -->
   </DropdownMenu.Content>
 </DropdownMenu.Root>

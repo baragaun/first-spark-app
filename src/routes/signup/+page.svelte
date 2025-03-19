@@ -3,11 +3,10 @@
   import { Input } from '$lib/components/ui/input';
   import { writable } from 'svelte/store';
   import { goto } from '$app/navigation';
-  import { authStore } from '@/components/nav-bar/nav-bar.svelte';
   import { PasswordInput } from '$lib/components/ui/password-input';
   import EmailVerification from '$lib/components/email-verification.svelte';
   import AuthCard from '$lib/components/ui/auth-card.svelte';
-  import { getPasswordError, validatePassword } from '@/utils/validation';
+  import passwordHelpers from '@/helpers/password-helpers';
 
   
   // This is not necessarily complete or correct, but takes into account the updated return value from `signup`
@@ -81,7 +80,7 @@
       // TODO: Implement your signup logic here
       await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
       localStorage.setItem('authToken', 'your-auth-token');
-      authStore.set({ isAuthenticated: true }); // Update auth store
+      // authStore.set({ isAuthenticated: true }); // Update auth store
       await goto('/');
     } catch (error) {
       console.error('Error creating account:', error);
@@ -167,14 +166,14 @@
                 </ul>
               </div>
             {/if}
-            {#if password && getPasswordError(password)}
-              <p class="text-xs text-destructive">{getPasswordError(password)}</p>
+            {#if password && passwordHelpers.getPasswordError(password)}
+              <p class="text-xs text-destructive">{passwordHelpers.getPasswordError(password)}</p>
             {/if}
           </div>
           <Button
             type="submit"
             class="w-full"
-            disabled={loading || !password || !validatePassword(password).isValid}
+            disabled={loading || !password || !passwordHelpers.validatePassword(password).isValid}
           >
             {loading ? 'Creating account...' : 'Create Account'}
           </Button>

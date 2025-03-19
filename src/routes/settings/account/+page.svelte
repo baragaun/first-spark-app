@@ -8,8 +8,7 @@
   import { goto } from '$app/navigation';
   import { PasswordInput } from '$lib/components/ui/password-input';
   import { AlertDescription } from '$lib/components/ui/alert';
-  import { getPasswordError, validatePassword } from '@/utils/validation';
-  // import AlertDescription from '../ui/alert/alert-description.svelte';
+  import passwordHelpers from '@/helpers/password-helpers';
 
   // State management using Svelte 5 runes
   let isLoading = $state(false);
@@ -85,9 +84,9 @@
       return;
     }
 
-    const validation = validatePassword(newPassword);
+    const validation = passwordHelpers.validatePassword(newPassword);
     if (!validation.isValid) {
-      error = getPasswordError(newPassword);
+      error = passwordHelpers.getPasswordError(newPassword);
       return;
     }
 
@@ -405,16 +404,16 @@
                   <p class="text-muted-foreground">Password requirements:</p>
                   <ul class="list-inside list-disc space-y-1 pl-2">
                     <li
-                      class:text-destructive={!validatePassword(newPassword).minLength}
-                      class:text-green-500={validatePassword(newPassword).minLength}
+                      class:text-destructive={!passwordHelpers.validatePassword(newPassword).minLength}
+                      class:text-green-500={passwordHelpers.validatePassword(newPassword).minLength}
                     >
                       At least 8 characters
                     </li>
                   </ul>
                 </div>
               {/if}
-              {#if newPassword && getPasswordError(newPassword)}
-                <p class="text-xs text-destructive">{getPasswordError(newPassword)}</p>
+              {#if newPassword && passwordHelpers.getPasswordError(newPassword)}
+                <p class="text-xs text-destructive">{passwordHelpers.getPasswordError(newPassword)}</p>
               {/if}
             </div>
 
@@ -452,7 +451,7 @@
                 disabled={isLoading ||
                   !currentPassword ||
                   !newPassword ||
-                  !validatePassword(newPassword).isValid ||
+                  !passwordHelpers.validatePassword(newPassword).isValid ||
                   newPassword !== confirmPassword}
               >
                 {isLoading ? 'Saving...' : 'Save Changes'}

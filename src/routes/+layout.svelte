@@ -5,13 +5,12 @@
   import AppSidebar from '$lib/components/app-sidebar.svelte';
   import NavBar from '@/components/nav-bar/nav-bar.svelte';
   import Footer from '$lib/components/footer.svelte';
-  import MyUserProvider from '@/context/my-user-provider.svelte';
+  import MyUserProvider from '@/contexts/my-user-provider.svelte';
 
-  let { children, data } = $props();
+  let { children } = $props();
 </script>
 
-{#if data.initialized}
-  <MyUserProvider>
+<MyUserProvider>
     <div class="flex min-h-screen flex-col bg-background font-sans antialiased">
       <ModeWatcher />
       <Sidebar.Provider>
@@ -25,13 +24,6 @@
         </div>
       </Sidebar.Provider>
     </div>
-  </MyUserProvider>
-{:else if data.error}
-  <div class="error-container">
-    <p>Failed to initialize app: {data.error}</p>
-  </div>
-{:else}
-  <div class="loading-container">
-    <p>Loading...</p>
-  </div>
-{/if}
+  <!-- {/if} -->
+</MyUserProvider>
+
