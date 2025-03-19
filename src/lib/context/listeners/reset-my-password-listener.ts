@@ -9,47 +9,72 @@ export class ResetMyPasswordListener implements MultiStepActionListener {
   public id: string;
   public actionId: string;
   public client: BgNodeClient;
+  private verificationCode: string;
+  private newPassword: string;
+  private errorCallback: (message: string) => void;
+  private loadingCallback: (isLoading: boolean) => void;
 
-  public constructor(id: string, actionId: string, client: BgNodeClient) {
+  public constructor(
+    id: string,
+    actionId: string,
+    client: BgNodeClient,
+    verificationCode?: string,
+    newPassword?: string,
+    errorCallback?: (message: string) => void,
+    loadingCallback?: (isLoading: boolean) => void,
+  ) {
     this.id = id;
     this.actionId = actionId;
     this.client = client;
+    this.verificationCode = verificationCode || '';
+    this.newPassword = newPassword || '';
+    this.errorCallback = errorCallback || (() => {});
+    this.loadingCallback = loadingCallback || (() => {});
   }
 
   public async onEvent(eventType: MultiStepActionEventType, action: SidMultiStepActionProgress) {
     if (!this.client) {
-      console.error(
-        'ResetMyPasswordListener.onNotificationSentOrFailed failed: client not initialized.',
-      );
-      // todo: Show an error message to user.
+      console.error('ResetMyPasswordListener: client not initialized.');
+      this.errorCallback('Client not initialized');
       return;
     }
 
     if (eventType === MultiStepActionEventType.notificationFailed) {
-      // The notification failed to go out.
-      console.error(
-        'ResetMyPasswordListener.onNotificationSentOrFailed: Notification failed.',
-        action.notificationResult,
-      );
-      // todo Show an error message to the user.
+      console.error('ResetMyPasswordListener: Notification failed.', action.notificationResult);
+      this.errorCallback('Failed to send verification code');
+      this.loadingCallback(false);
+      return;
+    }
+
+    if (eventType === MultiStepActionEventType.tokenFailed) {
+      console.error('ResetMyPasswordListener: incorrect token.', action.notificationResult);
+      this.errorCallback('Invalid verification code');
+      this.loadingCallback(false);
+      return;
+    }
+
+    if (eventType === MultiStepActionEventType.timedOut) {
+      console.error('ResetMyPasswordListener: timeout.', action.notificationResult);
+      this.errorCallback('Verification timed out. Please try again.');
+      this.loadingCallback(false);
+      return;
+    }
+
+    if (eventType === MultiStepActionEventType.failed) {
+      console.error('ResetMyPasswordListener: error.', action.notificationResult);
+      this.errorCallback('Password reset failed');
+      this.loadingCallback(false);
       return;
     }
 
     if (eventType === MultiStepActionEventType.notificationSent) {
-      // The notification has been sent out.
-      console.log(
-        'ResetMyPasswordListener.onNotificationSentOrFailed: Notification sent out.',
-        action.notificationResult,
-      );
-      // todo: Get the confirmation token and the new password from the user:
-      const token = '666666';
-      const newPassword = 'some-fake-password';
+      console.log('ResetMyPasswordListener: Notification sent out.', action.notificationResult);
 
       const verifyResponse =
         await this.client.operations.multiStepAction.verifyMultiStepActionToken(
           this.actionId,
-          token,
-          newPassword,
+          this.verificationCode,
+          this.newPassword,
         );
 
       // NOTE: The verifyResponse does NOT contain the result of the verification. The server
@@ -61,57 +86,14 @@ export class ResetMyPasswordListener implements MultiStepActionListener {
           'ResetMyPasswordListener.onNotificationSentOrFailed failed.',
           verifyResponse.error,
         );
-        // todo: Show an error message to user.
+        this.errorCallback('Verification failed');
+        this.loadingCallback(false);
       }
-
-      return;
-    }
-
-    if (eventType === MultiStepActionEventType.tokenFailed) {
-      console.error(
-        'ResetMyPasswordListener.onNotificationSentOrFailed: incorrect token.',
-        action.notificationResult,
-      );
-      // The user entered the wrong token.
-      // todo: Show an error message to the user.
-      return;
-    }
-
-    if (eventType === MultiStepActionEventType.timedOut) {
-      console.error(
-        'ResetMyPasswordListener.onNotificationSentOrFailed: timeout.',
-        action.notificationResult,
-      );
-      // The multi-step action timed out.
-      // todo: Show an error message to the user.
-      return;
-    }
-
-    if (eventType === MultiStepActionEventType.failed) {
-      console.error(
-        'ResetMyPasswordListener.onNotificationSentOrFailed: error.',
-        action.notificationResult,
-      );
-      // Something went wrong.
-      // todo: Show an error message to the user, depending on action.result
       return;
     }
 
     if (eventType === MultiStepActionEventType.success) {
-      // The token was accepted. The user is now signed in.
-      console.log(
-        'ResetMyPasswordListener.onNotificationSentOrFailed: success.',
-        action.notificationResult,
-      );
-
-      if (!this.client.operations.myUser.isSignedIn()) {
-        console.error('ResetMyPasswordListener.onFinished failed: user not signed in.');
-        // todo: Show an error message to user.
-        return;
-      }
-
-      // Success! The user us logged in.
-      // todo navigate to the dashboard
+      console.log('ResetMyPasswordListener: success.', action.notificationResult);
     }
   }
 }

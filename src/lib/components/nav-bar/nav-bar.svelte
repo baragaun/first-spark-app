@@ -52,7 +52,7 @@
               await myUserContext.signMeOut();
               goto('/signin');
             }}
-            class="font-lexend shadow-sm hover:shadow-md flex items-center gap-2"
+            class="font-lexend flex items-center gap-2 shadow-sm hover:shadow-md"
           >
             <LogOut class="h-4 w-4" />
             <span class="hidden md:inline">Sign Out</span>

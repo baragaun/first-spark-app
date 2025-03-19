@@ -9,15 +9,25 @@
     CardTitle,
   } from '$lib/components/ui/card';
   import { Alert, AlertDescription } from '$lib/components/ui/alert';
-  import Mail from 'lucide-svelte/icons/mail';
+  import * as InputOTP from '$lib/components/ui/input-otp';
+  import { onDestroy } from 'svelte';
+  import { goto } from '$app/navigation';
+  import passwordHelpers from '$lib/helpers/password-helpers';
+  import { myUserContext } from '@/context/my-user-context.svelte';
+  import { ResetMyPasswordListener } from '@/context/listeners/reset-my-password-listener';
 
   let identifier = ''; // for email or username
   let loading = false;
   let error = '';
-  let emailSent = false;
+  let verificationCode = '';
+  let step = 'email'; // 'email' or 'verify'
   let resendTimer = 30;
   let canResend = false;
   let timerInterval: ReturnType<typeof setInterval>;
+  let password = '';
+  let confirmPassword = '';
+  let resetActionId: string | undefined;
+  let resetExpireAt: Date | undefined;
 
   const startResendTimer = () => {
     resendTimer = 30;
@@ -39,118 +49,256 @@
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleResetPassword = async () => {
+  const handleSendCode = async () => {
     loading = true;
     error = '';
 
     try {
-      // TODO: Implement your reset password logic here
+      const response = await myUserContext.resetMyPassword(identifier);
 
-
-      // Simulate email check
-      if (identifier.includes('nonexistent')) {
-        throw new Error('No account found with this email address');
+      if (!response || !response?.actionProgress?.actionId) {
+        // Silently fail - don't show any error
+        // Just stay on the same step
+        return;
       }
 
-      emailSent = true;
+      resetActionId = response.actionProgress.actionId;
+      resetExpireAt = response.actionProgress.expiresAt
+        ? new Date(response.actionProgress.expiresAt)
+        : undefined;
+      console.log('Reset password action started:', { resetActionId, resetExpireAt });
+
+      step = 'verify';
       startResendTimer();
     } catch (err) {
-      console.error('Error resetting password:', err);
-      error =
-        err instanceof Error ? err.message : 'Unable to process your request. Please try again.';
+      // Silently fail - don't show any error
+      console.error('Error sending verification code:', err);
     } finally {
       loading = false;
     }
   };
 
-  const handleResendEmail = async () => {
+  const handleResendCode = async () => {
     if (!canResend) return;
 
     loading = true;
     try {
-      // TODO: Implement resend logic here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-      startResendTimer();
+      await handleSendCode();
     } catch (error) {
-      console.error('Error resending email:', error);
+      console.error('Error resending code:', error);
     } finally {
       loading = false;
     }
   };
 
-  import { onDestroy } from 'svelte';
   onDestroy(() => {
     clearInterval(timerInterval);
   });
+
+  const handleVerifyAndReset = async () => {
+    loading = true;
+    error = '';
+
+    if (password !== confirmPassword) {
+      error = 'Passwords do not match';
+      loading = false;
+      return;
+    }
+
+    try {
+      if (!resetActionId) {
+        throw new Error('Reset action ID is missing');
+      }
+
+      const client = await myUserContext.getClient();
+
+      const listener = new ResetMyPasswordListener(
+        'reset-password-listener',
+        resetActionId,
+        client,
+        verificationCode,
+        password,
+        //todo add function for error
+      );
+
+      client.operations.multiStepAction.addMultiStepActionListener(resetActionId, listener);
+
+      const result = await myUserContext.verifyMultiStepActionToken(
+        resetActionId,
+        verificationCode,
+        password,
+      );
+
+      if (!result) {
+        throw new Error('Failed to verify code and reset password');
+      }
+
+      await goto('/');
+    } catch (err) {
+      console.error('Error resetting password:', err);
+      error =
+        err instanceof Error
+          ? err.message
+          : 'Invalid verification code or password reset failed. Please try again.';
+    } finally {
+      loading = false;
+    }
+  };
 </script>
 
-<div class="relative mx-auto flex h-screen items-center justify-center">
+<div class="grid flex-1 place-items-center">
   <Card class="relative w-full max-w-md">
-    {#if !emailSent}
-      <CardHeader>
-        <CardTitle class="text-2xl">Reset your password</CardTitle>
-        <CardDescription
-          >We will email you a verification code if we can find this email address.</CardDescription
-        >
-      </CardHeader>
-      <CardContent>
-        {#if error}
-          <Alert variant="destructive" class="mb-4">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
+    <CardHeader>
+      <CardTitle class="text-2xl">Reset your password</CardTitle>
+      <CardDescription>
+        {#if step === 'email'}
+          Enter your email or username to receive a verification code
+        {:else if step === 'verify'}
+          Enter the verification code we sent to {identifier}
+        {:else}
+          Enter your new password
         {/if}
-        <form on:submit|preventDefault={handleResetPassword} class="space-y-4">
+      </CardDescription>
+    </CardHeader>
+    <CardContent>
+      {#if error}
+        <Alert variant="destructive" class="mb-4">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      {/if}
+
+      {#if step === 'email'}
+        <form on:submit|preventDefault={handleSendCode} class="space-y-4">
           <div class="space-y-2">
             <Input type="text" placeholder="Email or username" bind:value={identifier} required />
           </div>
 
-          <Button type="submit" class="w-full" disabled={loading}>
-            {loading ? 'Sending email...' : 'Send email'}
-          </Button>
           <div class="flex items-center justify-between">
             <Button variant="link" class="px-0 font-normal" href="/support">Need help?</Button>
           </div>
+
+          <Button type="submit" class="w-full" disabled={loading}>
+            {loading ? 'Sending code...' : 'Send verification code'}
+          </Button>
         </form>
-      </CardContent>
-    {:else}
-      <CardHeader>
-        <CardTitle class="text-2xl">Check your inbox</CardTitle>
-        <CardDescription>
-          We've sent a verification code to {identifier}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div class="flex flex-col items-center space-y-4">
-          <!-- Email waiting illustration -->
-          <div class="mb-4 h-32 w-32">
-            <Mail class="h-full w-full text-muted-foreground" />
+      {:else if step === 'verify'}
+        <form on:submit|preventDefault={handleVerifyAndReset} class="space-y-4">
+          <div class="space-y-2">
+            <label for="verification-code" class="text-sm font-medium"> Verification code </label>
+            <InputOTP.Root maxlength={6} bind:value={verificationCode}>
+              {#snippet children({ cells })}
+                <InputOTP.Group>
+                  {#each cells as cell}
+                    <InputOTP.Slot {cell} />
+                  {/each}
+                </InputOTP.Group>
+              {/snippet}
+            </InputOTP.Root>
           </div>
 
-          <Alert class="mb-4">
-            <AlertDescription>
-              Note: The verification code will expire in 10 minutes.
-            </AlertDescription>
-          </Alert>
+          <div class="relative space-y-2">
+            <label for="confirm-password" class="text-sm font-medium"> New password </label>
+            <Input type="password" placeholder="New password" bind:value={password} required />
+            {#if password}
+              <div class="space-y-2 text-xs">
+                <p class="text-muted-foreground">Password requirements:</p>
+                <ul class="list-inside list-disc space-y-1 pl-2">
+                  <li
+                    class:text-destructive={password.length < 8}
+                    class:text-green-500={password.length >= 8}
+                  >
+                    At least 8 characters
+                  </li>
+                  <li
+                    class:text-destructive={!/[A-Z]/.test(password)}
+                    class:text-green-500={/[A-Z]/.test(password)}
+                  >
+                    One uppercase letter
+                  </li>
+                  <li
+                    class:text-destructive={!/[a-z]/.test(password)}
+                    class:text-green-500={/[a-z]/.test(password)}
+                  >
+                    One lowercase letter
+                  </li>
+                  <li
+                    class:text-destructive={!/[0-9]/.test(password)}
+                    class:text-green-500={/[0-9]/.test(password)}
+                  >
+                    One number
+                  </li>
+                  <li
+                    class:text-destructive={!/[!@#$%^&*(),.?":{}|<>]/.test(password)}
+                    class:text-green-500={/[!@#$%^&*(),.?":{}|<>]/.test(password)}
+                  >
+                    One special character
+                  </li>
+                </ul>
+              </div>
+            {/if}
+            {#if password && passwordHelpers.getPasswordError(password)}
+              <p class="text-xs text-destructive">{passwordHelpers.getPasswordError(password)}</p>
+            {/if}
+          </div>
+
+          <div class="space-y-2">
+            <label for="confirm-password" class="text-sm font-medium"> Confirm password </label>
+            <Input
+              id="confirm-password"
+              type="password"
+              placeholder="Confirm new password"
+              bind:value={confirmPassword}
+              required
+            />
+          </div>
 
           <div class="text-center text-sm text-muted-foreground">
-            Didn't get an email?
+            Didn't receive the code?
             {#if canResend}
               <Button
                 variant="link"
                 class="px-1 font-normal"
-                onclick={handleResendEmail}
+                onclick={handleResendCode}
                 disabled={loading}
               >
-                Resend email
+                Resend code
               </Button>
             {:else}
               <span>Resend in {formatTime(resendTimer)}</span>
             {/if}
           </div>
 
-          <Button variant="outline" class="mt-4 w-full" href="/signin">Back to Log In</Button>
-        </div>
-      </CardContent>
-    {/if}
+          <Button
+            type="submit"
+            class="w-full"
+            disabled={loading || verificationCode.length < 6 || !password || !confirmPassword}
+          >
+            {loading ? 'Resetting password...' : 'Verify and Reset Password'}
+          </Button>
+
+          <Button variant="outline" class="w-full" onclick={() => (step = 'email')}>Back</Button>
+        </form>
+      {:else if step === 'password'}
+        <form on:submit|preventDefault={handleVerifyAndReset} class="space-y-4">
+          <div class="space-y-2">
+            <Input type="password" placeholder="New password" bind:value={password} required />
+          </div>
+          <div class="space-y-2">
+            <Input
+              type="password"
+              placeholder="Confirm new password"
+              bind:value={confirmPassword}
+              required
+            />
+          </div>
+
+          <Button type="submit" class="w-full" disabled={loading}>
+            {loading ? 'Resetting password...' : 'Reset password'}
+          </Button>
+
+          <Button variant="outline" class="w-full" onclick={() => (step = 'verify')}>Back</Button>
+        </form>
+      {/if}
+    </CardContent>
   </Card>
 </div>

@@ -10,6 +10,7 @@
   import { myUserContext } from '$lib/context/my-user-context.svelte';
   import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert';
   import X from 'lucide-svelte/icons/x';
+  import { VerifyMyEmailListener } from '@/context/listeners/verify-email-listener';
 
   const { getPasswordError, validatePassword } = passwordHelpers;
 
@@ -63,11 +64,16 @@
   };
 
   // Handle verification callback
-  const handleVerify = async ({code }: {code: string }) => {
+  const handleVerify = async ({ code }: { code: string }) => {
     loading = true;
     error = '';
     try {
-      // Call verifyMultiStepActionToken from myUserContext
+      const client = await myUserContext.getClient();
+
+      const listener = new VerifyMyEmailListener('verify-email-listener', actionId, client);
+
+      client.operations.multiStepAction.addMultiStepActionListener(actionId, listener);
+
       const result = await myUserContext.verifyMultiStepActionToken(actionId, code);
 
       if (!result) {
@@ -139,14 +145,14 @@
           : `Enter the six digit code we sent to ${email}`}
       >
         {#if error}
-          <Alert variant="destructive" class="mb-4 relative">
+          <Alert variant="destructive" class="relative mb-4">
             <AlertTitle>Error</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
             <Button
               variant="ghost"
               size="icon"
-              class="absolute top-2 right-2 h-6 w-6 p-0"
-              onclick={() => error = ''}
+              class="absolute right-2 top-2 h-6 w-6 p-0"
+              onclick={() => (error = '')}
             >
               <X class="h-4 w-4" />
               <span class="sr-only">Close</span>

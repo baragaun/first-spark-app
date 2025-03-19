@@ -9,6 +9,7 @@
   import { UserIdentType } from '@baragaun/bg-node-client';
   import OtpVerification from '$lib/components/otp-verification.svelte';
   import X from 'lucide-svelte/icons/x';
+  import { SignInWithTokenListener } from '@/context/listeners/sign-in-with-token-listener';
 
   let identifier = ''; // either an email or a username
   let identType = UserIdentType.email; // either an email or a username
@@ -18,7 +19,7 @@
   let emailSent = false;
   let resendTimer = 30;
   let canResend = false;
-  let actionId : string;
+  let actionId: string;
   let timerInterval: ReturnType<typeof setInterval>;
 
   // Track emails that have active cooldowns
@@ -58,9 +59,14 @@
   const handleVerifyOtp = async ({ email, code }: { email: string; code: string }) => {
     try {
       loading = true;
+      const client = await myUserContext.getClient();
 
-      const user = await myUserContext.verifyMultiStepActionToken(actionId, code);
-      if (user) {
+      const listener = new SignInWithTokenListener('sign-in-with-token-listener', code, client);
+
+      client.operations.multiStepAction.addMultiStepActionListener(actionId, listener);
+
+      const result = await myUserContext.verifyMultiStepActionToken(actionId, code);
+      if (result) {
         await goto('/');
       } else {
         return Promise.reject(new Error('Invalid verification code'));
@@ -160,14 +166,14 @@
       />
     {:else}
       {#if error}
-        <Alert variant="destructive" class="mb-4 relative">
+        <Alert variant="destructive" class="relative mb-4">
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
           <Button
             variant="ghost"
             size="icon"
-            class="absolute top-2 right-2 h-6 w-6 p-0"
-            onclick={() => error = ''}
+            class="absolute right-2 top-2 h-6 w-6 p-0"
+            onclick={() => (error = '')}
           >
             <X class="h-4 w-4" />
             <span class="sr-only">Close</span>
@@ -178,7 +184,13 @@
         <div class="grid gap-4">
           <div class="grid gap-2">
             <Label for="email">Email or Username</Label>
-            <Input id="email" type="email" bind:value={identifier} placeholder="me@example.com, myusername" required />
+            <Input
+              id="email"
+              type="email"
+              bind:value={identifier}
+              placeholder="me@example.com, myusername"
+              required
+            />
           </div>
 
           {#if showPasswordInput}

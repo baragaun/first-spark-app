@@ -172,7 +172,7 @@ export class MyUserContext {
     } catch (err) {
       this.error = err instanceof Error ? err.message : 'Sign up failed';
       console.error('Error signing up:', err);
-      return {error: this.error};
+      return { error: this.error };
     } finally {
       this.isLoading = false;
     }
@@ -193,12 +193,10 @@ export class MyUserContext {
       this.myUser = null;
 
       return true;
-
     } catch (err) {
       this.error = err instanceof Error ? err.message : 'Sign out failed';
       console.error('Error signing out:', err);
       return false;
-
     } finally {
       this.isLoading = false;
     }
@@ -227,7 +225,7 @@ export class MyUserContext {
     } catch (err) {
       this.error = err instanceof Error ? err.message : 'Update failed';
       console.error('Error updating profile:', err);
-      return {error: this.error};
+      return { error: this.error };
     } finally {
       this.isLoading = false;
     }
@@ -250,7 +248,6 @@ export class MyUserContext {
 
   // todo
   async isUserIdentAvailable(ident: string, identType: UserIdentType) {
-
     if (!this.client) {
       return { error: 'Client not initialized' };
     }
@@ -265,34 +262,46 @@ export class MyUserContext {
   }
 
   // // todo
-  // async resetMyPassword(email: string) {
-  //   try {
-  //     this.isLoading = true;
-  //     this.error = null;
-  //     return await MyUserContext.resetMyPassword(email);
-  //   } catch (err) {
-  //     this.error = err instanceof Error ? err.message : 'Failed to reset password';
-  //     console.error('Error resetting password:', err);
-  //     return null;
-  //   } finally {
-  //     this.isLoading = false;
-  //   }
-  // }
-
-  // todo
-  async signInWithToken(userIdent: string) : Promise<{ response?: SidMultiStepActionProgress; error?: string }>{
+  async resetMyPassword(
+    email: string,
+  ): Promise<{ actionProgress?: SidMultiStepActionProgress; error?: string }> {
     if (!this.client) {
       return { error: 'Client not initialized' };
     }
     try {
       this.isLoading = true;
       this.error = null;
-      const response = await this.client.operations.myUser.signInWithToken(userIdent,{polling: {enabled: true, interval: 1000, timeout: 10000}});
-      return {response: response.object?.actionProgress};
+      const response = await this.client.operations.myUser.resetMyPassword(email, {
+        polling: { enabled: true, interval: 1000, timeout: 10000 },
+      });
+      return { actionProgress: response.object?.actionProgress };
+    } catch (err) {
+      this.error = err instanceof Error ? err.message : 'Failed to reset password';
+      console.error('Error Reset password:', err);
+      return { error: this.error };
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  // todo
+  async signInWithToken(
+    userIdent: string,
+  ): Promise<{ response?: SidMultiStepActionProgress; error?: string }> {
+    if (!this.client) {
+      return { error: 'Client not initialized' };
+    }
+    try {
+      this.isLoading = true;
+      this.error = null;
+      const response = await this.client.operations.myUser.signInWithToken(userIdent, {
+        polling: { enabled: true, interval: 1000, timeout: 10000 },
+      });
+      return { response: response.object?.actionProgress };
     } catch (err) {
       this.error = err instanceof Error ? err.message : 'Failed to sign in with token';
       console.error('Error signing in with token:', err);
-      return {error: this.error};
+      return { error: this.error };
     } finally {
       this.isLoading = false;
     }
@@ -300,7 +309,6 @@ export class MyUserContext {
 
   // // todo
   async verifyMultiStepActionToken(actionId: string, token: string, newPassword?: string) {
-
     if (!this.client) {
       return { error: 'Client not initialized' };
     }
@@ -308,7 +316,11 @@ export class MyUserContext {
     try {
       this.isLoading = true;
       this.error = null;
-      return await this.client.operations.multiStepAction.verifyMultiStepActionToken(actionId, token, newPassword);
+      return await this.client.operations.multiStepAction.verifyMultiStepActionToken(
+        actionId,
+        token,
+        newPassword,
+      );
     } catch (err) {
       this.error = err instanceof Error ? err.message : 'Failed to verify token';
       console.error('Error verifying token:', err);
@@ -319,7 +331,9 @@ export class MyUserContext {
   }
 
   // // todo
-  async verifyMyEmail(email: string): Promise<{ response?: SidMultiStepActionProgress; error?: string }> {
+  async verifyMyEmail(
+    email: string,
+  ): Promise<{ response?: SidMultiStepActionProgress; error?: string }> {
     if (!this.client) {
       return { error: 'Client not initialized' };
     }
@@ -327,15 +341,29 @@ export class MyUserContext {
     try {
       this.isLoading = true;
       this.error = null;
-      const response = await this.client.operations.myUser.verifyMyEmail(email, {polling: {enabled: true, interval: 1000, timeout: 10000}});
-      return {response: response.object?.actionProgress};
+      const response = await this.client.operations.myUser.verifyMyEmail(email, {
+        polling: { enabled: true, interval: 1000, timeout: 10000 },
+      });
+      return { response: response.object?.actionProgress };
     } catch (err) {
       this.error = err instanceof Error ? err.message : 'Failed to verify email';
       console.error('Error verifying email:', err);
-      return {error: this.error};;
+      return { error: this.error };
     } finally {
       this.isLoading = false;
     }
+  }
+
+  public async getClient(): Promise<BgNodeClient> {
+    if (!this.client) {
+      await this.initialize();
+    }
+
+    if (!this.client) {
+      throw new Error('Failed to initialize BgNodeClient');
+    }
+
+    return this.client;
   }
 }
 

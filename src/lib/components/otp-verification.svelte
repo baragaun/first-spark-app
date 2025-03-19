@@ -56,14 +56,14 @@
 
 <div class="space-y-4">
   {#if verificationError}
-    <Alert variant="destructive" class="mb-4 relative">
+    <Alert variant="destructive" class="relative mb-4">
       <AlertTitle>Error</AlertTitle>
       <AlertDescription>{verificationError}</AlertDescription>
       <Button
         variant="ghost"
         size="icon"
-        class="absolute top-2 right-2 h-6 w-6 p-0"
-        onclick={() => verificationError = ''}
+        class="absolute right-2 top-2 h-6 w-6 p-0"
+        onclick={() => (verificationError = '')}
       >
         <X class="h-4 w-4" />
         <span class="sr-only">Close</span>
@@ -92,15 +92,8 @@
       {loading ? verifyingText : verifyButtonText}
     </Button>
     <div class="flex justify-between text-sm">
-      <Button variant="link" class="px-0" onclick={onBack}>
-        Back
-      </Button>
-      <Button
-        variant="link"
-        class="px-0"
-        disabled={!canResend}
-        onclick={handleResendCode}
-      >
+      <Button variant="link" class="px-0" onclick={onBack}>Back</Button>
+      <Button variant="link" class="px-0" disabled={!canResend} onclick={handleResendCode}>
         {canResend ? 'Resend code' : `Resend in ${formatTime(resendTimer)}`}
       </Button>
     </div>

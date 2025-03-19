@@ -17,7 +17,7 @@
   export let showSkipButton = false;
 
   // Event callback props
-  export let onEmailSubmit = ( data: {email: string} ) => {};
+  export let onEmailSubmit = (data: { email: string }) => {};
   export let onVerify = (data: { code: string }) => {};
   export let onResend = (data: { email: string }) => {};
   export let onBack = (data: { step: string }) => {};
@@ -178,15 +178,15 @@
       {email}
       {resendTimer}
       {canResend}
-      verifyButtonText={verifyButtonText}
-      verifyingText={verifyingText}
+      {verifyButtonText}
+      {verifyingText}
       onVerify={({ code }) => onVerify({ code })}
       onResend={() => handleResendCode()}
       onBack={handleBack}
     />
 
     {#if showSkipButton}
-      <div class="flex justify-end mt-2">
+      <div class="mt-2 flex justify-end">
         <Button type="button" variant="link" class="text-sm" onclick={handleSkip}>
           Skip verification
         </Button>
