@@ -64,7 +64,7 @@ export class MyUserContext {
   }
 
   public async loadMyUser(queryOptions?: QueryOptions): Promise<MyUser | null> {
-    if (!this.client || !this.isSignedIn()) {
+    if (!this.client || !this.client.operations.myUser.isSignedIn()) {
       this.myUser = null;
       return null;
     }
@@ -88,7 +88,7 @@ export class MyUserContext {
     identType: UserIdentType | undefined,
     password: string,
   ): Promise<{ myUser?: MyUser, error?: string }> {
-    if (!this.client || this.isSignedIn()) {
+    if (!this.client || this.client.operations.myUser.isSignedIn()) {
       this.myUser = null;
 
       return { error: 'Client not initialized or already signed in' };
@@ -122,7 +122,7 @@ export class MyUserContext {
         return { error: this.error };
       }
 
-      await this.loadMyUser({ cachePolicy: CachePolicy.network });
+      await this.loadMyUser({ cachePolicy: CachePolicy.cache });
 
       if (!this.myUser) {
         this.error = 'Failed to load user after sign in';

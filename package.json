@@ -52,7 +52,7 @@
     "vitest": "^3.0.7"
   },
   "dependencies": {
-    "@baragaun/bg-node-client": "link:../bg-node-client",
+    "@baragaun/bg-node-client": "^0.0.10",
     "formsnap": "^2.0.0",
     "rxdb": "^16.8.1",
     "sveltekit-superforms": "^2.23.1",
