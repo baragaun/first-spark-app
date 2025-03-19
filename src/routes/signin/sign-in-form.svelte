@@ -3,6 +3,8 @@
   import { Input } from '$lib/components/ui/input';
   import { Label } from '@/components/ui/label';
   // import { PasswordInput } from '$lib/components/ui/password-input';
+  import * as Card from '$lib/components/ui/card';
+  import { myUserContext } from '@/context/my-user-context.svelte';
   import * as Card from "$lib/components/ui/card"
   import { goto } from '$app/navigation';
   import { UserIdentType } from '@baragaun/bg-node-client';
