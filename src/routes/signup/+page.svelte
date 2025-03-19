@@ -3,34 +3,15 @@
   import { Input } from '$lib/components/ui/input';
   import { writable } from 'svelte/store';
   import { goto } from '$app/navigation';
-  import { authStore } from '@/components/nav-bar/nav-bar.svelte';
   import { PasswordInput } from '$lib/components/ui/password-input';
   import EmailVerification from '$lib/components/email-verification.svelte';
   import AuthCard from '$lib/components/ui/auth-card.svelte';
-  import { getPasswordError, validatePassword } from '@/utils/validation';
+  import passwordHelpers from '$lib/helpers/password-helpers';
+  import { myUserContext } from '$lib/context/my-user-context.svelte';
+  import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert';
+  import X from 'lucide-svelte/icons/x';
 
-  
-  // This is not necessarily complete or correct, but takes into account the updated return value from `signup`
-  // 
-  // const onSignUp = async () => {
-  //   loading = true;
-  //   try {
-  //     const { myUser, error } = await myUserContext.signUp(email);
-
-  //     if (!myUser) {
-  //       throw new Error(error || 'Failed to create account');
-  //     }
-
-  //     await goto('/');
-  //   } catch (error) {
-  //     console.error('Error creating account:', error);
-  //   } finally {
-  //     loading = false;
-  //   }
-  // };
-
-
-
+  const { getPasswordError, validatePassword } = passwordHelpers;
 
   // Step management
   const STEPS = {
@@ -45,17 +26,63 @@
   let username = '';
   let password = '';
   let loading = false;
+  let error = '';
+  let actionId = '';
 
   // Handle email submission from the EmailVerification component
-  const handleEmailSubmit = (event: CustomEvent<{ email: string }>) => {
-    email = event.detail.email;
+  const handleEmailSubmit = async ({ email: userEmail }: { email: string }) => {
+    loading = true;
+    error = '';
+    try {
+      email = userEmail; // Update the email variable
+      console.log('Email submitted:', email);
+
+      // Call signUpUser from myUserContext
+      const response = await myUserContext.signUpUser(email);
+
+      if (response.error) {
+        error = response.error;
+        return;
+      }
+
+      const verifyResponse = await myUserContext.verifyMyEmail(email);
+
+      if (verifyResponse.error || !verifyResponse.response?.actionId) {
+        error = verifyResponse.error || 'Failed to send verification email';
+        return;
+      }
+
+      actionId = verifyResponse.response?.actionId;
+      currentStep.set(STEPS.VERIFY);
+    } catch (err) {
+      error = err instanceof Error ? err.message : 'Failed to sign up';
+      console.error('Error signing up:', err);
+    } finally {
+      loading = false;
+    }
   };
 
   // Handle verification callback
-  const handleVerify = async ({ email, code }: { email: string; code: string }) => {
-    // verificationCode = code;
-    // If verification is successful, move to credentials step
-    currentStep.set(STEPS.CREDENTIALS);
+  const handleVerify = async ({code }: {code: string }) => {
+    loading = true;
+    error = '';
+    try {
+      // Call verifyMultiStepActionToken from myUserContext
+      const result = await myUserContext.verifyMultiStepActionToken(actionId, code);
+
+      if (!result) {
+        error = 'Verification failed';
+        return;
+      }
+
+      console.log('Verification successful, moving to credentials step');
+      currentStep.set(STEPS.CREDENTIALS);
+    } catch (err) {
+      error = err instanceof Error ? err.message : 'Failed to verify code';
+      console.error('Error verifying code:', err);
+    } finally {
+      loading = false;
+    }
   };
 
   // Handle resend from the EmailVerification component
@@ -77,14 +104,14 @@
   // Handle final signup
   const handleSignupSubmit = async () => {
     loading = true;
+    error = '';
     try {
-      // TODO: Implement your signup logic here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-      localStorage.setItem('authToken', 'your-auth-token');
-      authStore.set({ isAuthenticated: true }); // Update auth store
+      // todo Need to write updateUser code here
+      // await myUserContext.updateMyUser({ userHandle: username, password: password });
       await goto('/');
-    } catch (error) {
-      console.error('Error creating account:', error);
+    } catch (err) {
+      error = err instanceof Error ? err.message : 'Failed to create account';
+      console.error('Error creating account:', err);
     } finally {
       loading = false;
     }
@@ -111,6 +138,21 @@
           ? 'By continuing, you agree to our User Agreement and acknowledge that you understand and agree to our Privacy Policy.'
           : `Enter the six digit code we sent to ${email}`}
       >
+        {#if error}
+          <Alert variant="destructive" class="mb-4 relative">
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+            <Button
+              variant="ghost"
+              size="icon"
+              class="absolute top-2 right-2 h-6 w-6 p-0"
+              onclick={() => error = ''}
+            >
+              <X class="h-4 w-4" />
+              <span class="sr-only">Close</span>
+            </Button>
+          </Alert>
+        {/if}
         <EmailVerification
           bind:email
           initialStep={$currentStep === STEPS.EMAIL ? 'email' : 'verify'}
@@ -119,7 +161,7 @@
           loadingText="Sending..."
           verifyingText="Verifying..."
           showSkipButton={true}
-          onEmailSubmit={() => handleEmailSubmit}
+          onEmailSubmit={handleEmailSubmit}
           onVerify={handleVerify}
           onResend={() => handleResend}
           onBack={() => handleBack}

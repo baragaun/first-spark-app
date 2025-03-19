@@ -4,16 +4,26 @@
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
   import { goto } from '$app/navigation';
   import { Languages, LogIn, LogOut, Moon, MoreHorizontal, Sun } from 'lucide-svelte';
-  import { authStore } from './nav-bar.svelte';
   import { toggleMode } from 'mode-watcher';
+  import { getContext } from 'svelte';
+  import type { MyUserContext } from '$lib/context/my-user-context.svelte';
 
-  const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    authStore.set({ isAuthenticated: false }); // Update auth store
+  const myUserContext = getContext<MyUserContext>('myUserContext');
+
+  const handleLogout = async () => {
+    await myUserContext.signMeOut();
     goto('/signin');
   };
 
-  $: isAuthenticated = $authStore?.isAuthenticated ?? false;
+  $: isAuthenticated = myUserContext?.isSignedIn ?? false;
+
+  // Add console logging to debug
+  console.log('Avatar menu rendering, auth state:', myUserContext?.isSignedIn);
+
+  // Make sure the context is properly received
+  $: if (!myUserContext) {
+    console.error('myUserContext is not available in AvatarMenu');
+  }
 </script>
 
 <DropdownMenu.Root>

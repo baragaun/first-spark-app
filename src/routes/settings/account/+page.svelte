@@ -8,8 +8,9 @@
   import { goto } from '$app/navigation';
   import { PasswordInput } from '$lib/components/ui/password-input';
   import { AlertDescription } from '$lib/components/ui/alert';
-  import { getPasswordError, validatePassword } from '@/utils/validation';
-  // import AlertDescription from '../ui/alert/alert-description.svelte';
+  import passwordHelpers from '$lib/helpers/password-helpers';
+
+  const { getPasswordError, validatePassword } = passwordHelpers;
 
   // State management using Svelte 5 runes
   let isLoading = $state(false);

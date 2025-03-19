@@ -45,7 +45,7 @@
 
     try {
       // TODO: Implement your reset password logic here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
+
 
       // Simulate email check
       if (identifier.includes('nonexistent')) {

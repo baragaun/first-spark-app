@@ -5,6 +5,7 @@
   import * as InputOTP from '$lib/components/ui/input-otp';
   import { onDestroy } from 'svelte';
   import { writable, get } from 'svelte/store';
+  import OtpVerification from '$lib/components/otp-verification.svelte';
 
   // Props
   export let email = '';
@@ -16,8 +17,8 @@
   export let showSkipButton = false;
 
   // Event callback props
-  export let onEmailSubmit = (data: { email: string }) => {};
-  export let onVerify = (data: { email: string; code: string }) => {};
+  export let onEmailSubmit = ( data: {email: string} ) => {};
+  export let onVerify = (data: { code: string }) => {};
   export let onResend = (data: { email: string }) => {};
   export let onBack = (data: { step: string }) => {};
   export let onSkip = () => {};
@@ -100,6 +101,7 @@
 
     loading = true;
     try {
+      console.log('handleEmailSubmit', email);
       onEmailSubmit({ email });
       currentStep.set(STEPS.VERIFY);
       startResendTimer(email);
@@ -116,7 +118,7 @@
     verificationError = '';
     try {
       // Use the onVerify prop instead of dispatching an event
-      await onVerify({ email, code: verificationCode });
+      onVerify({ code: verificationCode });
       // Note: The parent component will handle the navigation
     } catch (error) {
       console.error('Error verifying code:', error);
@@ -172,64 +174,23 @@
   </div>
 {:else if $currentStep === STEPS.VERIFY}
   <div class="space-y-4">
-    {#if verificationError}
-      <Alert variant="destructive" class="mb-4">
-        <AlertDescription>{verificationError}</AlertDescription>
-      </Alert>
+    <OtpVerification
+      {email}
+      {resendTimer}
+      {canResend}
+      verifyButtonText={verifyButtonText}
+      verifyingText={verifyingText}
+      onVerify={({ code }) => onVerify({ code })}
+      onResend={() => handleResendCode()}
+      onBack={handleBack}
+    />
+
+    {#if showSkipButton}
+      <div class="flex justify-end mt-2">
+        <Button type="button" variant="link" class="text-sm" onclick={handleSkip}>
+          Skip verification
+        </Button>
+      </div>
     {/if}
-    <div class="space-y-2">
-      <label for="verification-code" class="text-sm font-medium"> Enter verification code </label>
-      <InputOTP.Root maxlength={6} bind:value={verificationCode}>
-        {#snippet children({ cells })}
-          <InputOTP.Group>
-            {#each cells as cell}
-              <InputOTP.Slot {cell} />
-            {/each}
-          </InputOTP.Group>
-        {/snippet}
-      </InputOTP.Root>
-    </div>
-    <div class="flex flex-col gap-2">
-      <Button
-        type="submit"
-        class="w-full"
-        disabled={loading || verificationCode.length < 6}
-        onclick={handleVerifySubmit}
-      >
-        {loading ? verifyingText : verifyButtonText}
-      </Button>
-
-      <div class="text-center text-sm text-muted-foreground">
-        Didn't get an email?
-        {#if canResend}
-          <Button
-            variant="link"
-            class="px-1 font-normal"
-            onclick={handleResendCode}
-            disabled={loading}
-          >
-            Resend code
-          </Button>
-        {:else}
-          <span>Resend in {formatTime(resendTimer)}</span>
-        {/if}
-      </div>
-
-      <div class="flex items-center justify-between">
-        <button
-          type="button"
-          class="text-sm text-muted-foreground hover:text-primary"
-          on:click={handleBack}
-        >
-          Change email
-        </button>
-
-        {#if showSkipButton}
-          <Button type="button" variant="link" class="text-sm" onclick={handleSkip}>
-            Skip verification
-          </Button>
-        {/if}
-      </div>
-    </div>
   </div>
 {/if}
