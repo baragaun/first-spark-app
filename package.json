@@ -53,12 +53,13 @@
     "vitest": "^3.0.7"
   },
   "dependencies": {
-    "@baragaun/bg-node-client": "^0.0.10",
+    "@baragaun/bg-node-client": "^0.0.11",
     "formsnap": "^2.0.0",
-    "rxdb": "^16.8.1",
     "mode-watcher": "^0.5.1",
+    "rxdb": "^16.8.1",
     "sveltekit-superforms": "^2.23.1",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "zod": "^3.24.2"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

@@ -4,14 +4,19 @@
   import { Label } from '@/components/ui/label';
   // import { PasswordInput } from '$lib/components/ui/password-input';
   import * as Card from "$lib/components/ui/card"
-  import { myUserContext } from '@/context/my-user-context.svelte';
   import { goto } from '$app/navigation';
   import { UserIdentType } from '@baragaun/bg-node-client';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
 
   let identifier = ''; // either an email or a username
   let identType = UserIdentType.email; // either an email or a username
-  let password = '';
-  let loading = false;
+
+  let email = $state('');
+  let username = $state('');
+  let password = $state('');
+  let loading = $state(false);
+  let errorMessage = $state('');
+
   let error = '';
   let emailSent = false;
   let resendTimer = 30;
@@ -19,11 +24,11 @@
   let timerInterval: ReturnType<typeof setInterval>;
 
   // Track emails that have active cooldowns
-  const emailCooldowns = new Map<string, number>();
+  // const emailCooldowns = new Map<string, number>();
 
-  let showPasswordInput = false;
+  let showPasswordInput = $state(false);
   function togglePasswordInput() {
-    showPasswordInput = !showPasswordInput
+    showPasswordInput = !showPasswordInput;
   }
 
   const handleSignIn = async () => {
@@ -31,16 +36,20 @@
     error = '';
 
     try {
-      if (showPasswordInput && password) {
+      console.log('trying to sign in')
+      // if (showPasswordInput && password) {
+        console.log('signing in: ', identifier)
         const user = await myUserContext.signIn(identifier, identType, password);
-        if (user) {
+        console.log('handleSignIn.user: ', user);
+        if (user.myUser) {
           await goto('/');
         } else {
           error = 'Invalid credentials. Please try again.';
         }
-      } else {
-        await handleTokenSignIn();
-      }
+      // } else {
+        // console.log('handle token sign in')
+        // await handleTokenSignIn();
+      // }
     } catch (err) {
       console.error('Error signing in:', err);
       error = 'Invalid credentials. Please try again.';
@@ -49,52 +58,52 @@
     }
   };
 
-  const handleTokenSignIn = async () => {
-    // Check if this email has an active cooldown
-    if (emailCooldowns.has(identifier)) {
-      const cooldownEnd = emailCooldowns.get(identifier) || 0;
-      const remainingTime = Math.ceil((cooldownEnd - Date.now()) / 1000);
+  // const handleTokenSignIn = async () => {
+  //   // Check if this email has an active cooldown
+  //   if (emailCooldowns.has(identifier)) {
+  //     const cooldownEnd = emailCooldowns.get(identifier) || 0;
+  //     const remainingTime = Math.ceil((cooldownEnd - Date.now()) / 1000);
 
-      if (remainingTime > 0) {
-        // If same email and cooldown active, just show verification screen with current timer
-        resendTimer = remainingTime;
-        emailSent = true;
-        return;
-      }
-    }
+  //     if (remainingTime > 0) {
+  //       // If same email and cooldown active, just show verification screen with current timer
+  //       resendTimer = remainingTime;
+  //       emailSent = true;
+  //       return;
+  //     }
+  //   }
 
-    loading = true;
-    error = '';
+  //   loading = true;
+  //   error = '';
 
-    try {
-      // TODO: Implement your magic link email sending logic here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-      emailSent = true;
-      startResendTimer(identifier);
-    } catch (err) {
-      console.error('Error sending magic link:', err);
-      error = 'Failed to send magic link. Please try again.';
-      throw err;
-    } finally {
-      loading = false;
-    }
-  };
+  //   try {
+  //     // TODO: Implement your magic link email sending logic here
+  //     await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
+  //     emailSent = true;
+  //     startResendTimer(identifier);
+  //   } catch (err) {
+  //     console.error('Error sending magic link:', err);
+  //     error = 'Failed to send magic link. Please try again.';
+  //     throw err;
+  //   } finally {
+  //     loading = false;
+  //   }
+  // };
 
-  const startResendTimer = (emailAddress: string) => {
-    resendTimer = 30;
-    canResend = false;
-    emailCooldowns.set(emailAddress, Date.now() + resendTimer * 1000);
+  // const startResendTimer = (emailAddress: string) => {
+  //   resendTimer = 30;
+  //   canResend = false;
+  //   emailCooldowns.set(emailAddress, Date.now() + resendTimer * 1000);
 
-    clearInterval(timerInterval);
-    timerInterval = setInterval(() => {
-      resendTimer -= 1;
-      if (resendTimer <= 0) {
-        clearInterval(timerInterval);
-        canResend = true;
-        emailCooldowns.delete(emailAddress);
-      }
-    }, 1000);
-  };
+  //   clearInterval(timerInterval);
+  //   timerInterval = setInterval(() => {
+  //     resendTimer -= 1;
+  //     if (resendTimer <= 0) {
+  //       clearInterval(timerInterval);
+  //       canResend = true;
+  //       emailCooldowns.delete(emailAddress);
+  //     }
+  //   }, 1000);
+  // };
 </script>
 
 <Card.Root class="mx-auto max-w-sm">
@@ -106,7 +115,7 @@
 		<div class="grid gap-4">
 			<div class="grid gap-2">
 				<Label for="email">Email or Username</Label>
-				<Input id="email" type="email" placeholder="me@example.com, myusername" required />
+				<Input bind:value={identifier} id="email" type="email" placeholder="me@example.com, myusername" required />
 			</div>
 
       {#if showPasswordInput}

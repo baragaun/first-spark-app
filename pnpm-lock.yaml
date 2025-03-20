@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@baragaun/bg-node-client':
-        specifier: ^0.0.10
-        version: 0.0.10(prettier@3.5.3)
+        specifier: ^0.0.11
+        version: 0.0.11(prettier@3.5.3)
       formsnap:
         specifier: ^2.0.0
         version: 2.0.0(svelte@5.22.6)(sveltekit-superforms@2.24.0(@sveltejs/kit@2.19.0(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.22.6)(vite@6.2.1(@types/node@22.13.10)(jiti@1.21.7)(yaml@2.7.0)))(svelte@5.22.6)(vite@6.2.1(@types/node@22.13.10)(jiti@1.21.7)(yaml@2.7.0)))(@types/json-schema@7.0.15)(svelte@5.22.6)(typescript@5.8.2))
@@ -26,6 +26,9 @@ importers:
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.17)
+      zod:
+        specifier: ^3.24.2
+        version: 3.24.2
     devDependencies:
       '@eslint/compat':
         specifier: ^1.2.5
@@ -177,8 +180,8 @@ packages:
   '@babel/runtime@7.9.6':
     resolution: {integrity: sha512-64AF1xY3OAkFHqOb9s4jpgk1Mm5vDZ4L3acHvAml+53nO1XbXLuDodsVpO4OIUsmemlUHMxNdYMNJmsvOwLrvQ==}
 
-  '@baragaun/bg-node-client@0.0.10':
-    resolution: {integrity: sha512-8bWlQXdwqsvBF0bX3wxDWcZalpXQ/RJ3thds9yUUaN7Y83frnpXFSJpbLaKhKvoq1kONpSC3U1RU+BtwpwUlDw==}
+  '@baragaun/bg-node-client@0.0.11':
+    resolution: {integrity: sha512-hag9B7jbesf8i5PafuMvkZliiJPR1yPq8KtCzcgU5S44qvfZRuZkFU3xVf7raNuqNIAnDwQHpoJ/7OldF+Y5Hg==}
     engines: {node: '>= 20'}
 
   '@csstools/color-helpers@5.0.2':
@@ -3144,7 +3147,7 @@ snapshots:
     dependencies:
       regenerator-runtime: 0.13.11
 
-  '@baragaun/bg-node-client@0.0.10(prettier@3.5.3)':
+  '@baragaun/bg-node-client@0.0.11(prettier@3.5.3)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.10.0)
       '@opentelemetry/api': 1.9.0
