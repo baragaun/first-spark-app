@@ -1,8 +1,11 @@
+import { SignInWithTokenListener } from '@/context/listeners/sign-in-with-token-listener';
 import {
   AppEnvironment,
   BgNodeClient,
   CachePolicy,
   HttpHeaderName,
+  MultiStepActionEventType,
+  UserIdentType,
   type BgNodeClientConfig,
   type MultiStepActionListener,
   type MyUser,
@@ -10,10 +13,7 @@ import {
   type SidMultiStepActionProgress,
   type SignInUserInput,
   type SignUpUserInput,
-  MultiStepActionEventType,
-  UserIdentType,
 } from '@baragaun/bg-node-client';
-import { SignInWithTokenListener } from '@/context/listeners/sign-in-with-token-listener'
 
 export class MyUserContext {
   private myUser = $state<MyUser | null>(null);
@@ -236,7 +236,42 @@ export class MyUserContext {
     }
   }
 
-  // todo
+  async updateMyPassword(
+    oldPassword: string,
+    newPassword: string,
+  ): Promise<{ myUser?: MyUser; error?: string }> {
+    if (!this.client) {
+      return { error: 'Client not initialized' };
+    }
+
+    try {
+      this.isLoading = true;
+      this.error = null;
+
+      const response = await this.client.operations.myUser.updateMyPassword(
+        oldPassword,
+        newPassword,
+        { cachePolicy: CachePolicy.network },
+      );
+
+      if (!response || response.error || !response.object?.id) {
+        console.error('MyUserContext.updatePassword failed.', response.error);
+
+        return { error: response.error };
+      }
+
+      this.myUser = response.object;
+
+      return { myUser: this.myUser };
+    } catch (err) {
+      this.error = err instanceof Error ? err.message : 'Update failed';
+      console.error('Error updating profile:', err);
+      return { error: this.error };
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
   async findAvailableUserHandle(email: string) {
     if (!this.client) {
       return { error: 'Client not initialized' };
@@ -252,17 +287,21 @@ export class MyUserContext {
   }
 
   // todo
-  async isUserIdentAvailable(ident: string, identType: UserIdentType) {
+  async isUserIdentAvailable(
+    ident: string,
+    identType: UserIdentType,
+  ): Promise<{ isAvailable?: boolean; error?: string }> {
     if (!this.client) {
       return { error: 'Client not initialized' };
     }
 
     try {
-      return await this.client.operations.myUser.isUserIdentAvailable(ident, identType);
+      const response = await this.client.operations.myUser.isUserIdentAvailable(ident, identType);
+      return { isAvailable: response };
     } catch (err) {
       this.error = err instanceof Error ? err.message : 'Failed to check identity availability';
       console.error('Error checking identity availability:', err);
-      return null;
+      return { isAvailable: false, error: this.error };
     }
   }
 
@@ -289,9 +328,7 @@ export class MyUserContext {
     }
   }
 
-  async signInWithToken(
-    userIdent: string,
-  ): Promise<{ actionId?: string, error?: string }> {
+  async signInWithToken(userIdent: string): Promise<{ actionId?: string; error?: string }> {
     if (!this.client) {
       return { error: 'Client not initialized' };
     }
@@ -331,22 +368,27 @@ export class MyUserContext {
             action: SidMultiStepActionProgress,
           ): void | Promise<void> => {
             if (eventType === MultiStepActionEventType.notificationFailed) {
+              console.log('Notification failed.', action.result);
               return;
             }
 
             if (eventType === MultiStepActionEventType.notificationSent) {
+              console.log('Notification sent out.', action.result);
               return;
             }
 
             if (eventType === MultiStepActionEventType.tokenFailed) {
+              console.log('Token failed.', action.result);
               return;
             }
 
             if (eventType === MultiStepActionEventType.timedOut) {
+              console.log('Timed out.', action.result);
               return;
             }
 
             if (eventType === MultiStepActionEventType.failed) {
+              console.log('Failed.', action.result);
               return;
             }
 
@@ -436,8 +478,11 @@ export class MyUserContext {
     return {};
   }
 
-  // // todo
-  async verifyMultiStepActionToken(actionId: string, token: string, newPassword?: string) {
+  async verifyMultiStepActionToken(
+    actionId: string,
+    token: string,
+    newPassword?: string,
+  ): Promise<{ response?: SidMultiStepActionProgress; error?: string }> {
     if (!this.client) {
       return { error: 'Client not initialized' };
     }
@@ -445,15 +490,23 @@ export class MyUserContext {
     try {
       this.isLoading = true;
       this.error = null;
-      return await this.client.operations.multiStepAction.verifyMultiStepActionToken(
+
+      const response = await this.client.operations.multiStepAction.verifyMultiStepActionToken(
         actionId,
         token,
         newPassword,
       );
+
+      if (!response || response.error || !response.object?.actionId) {
+        console.error('MyUserContext.verifyMultiStepActionToken failed.', response.error);
+        return { error: response.error };
+      }
+
+      return { response: response?.object };
     } catch (err) {
       this.error = err instanceof Error ? err.message : 'Failed to verify token';
       console.error('Error verifying token:', err);
-      return false;
+      return { error: this.error };
     } finally {
       this.isLoading = false;
     }
@@ -494,6 +547,8 @@ export class MyUserContext {
 
     return this.client;
   }
+
+  public getMyUser = $derived(() => this.myUser);
 }
 
 // Create a singleton instance

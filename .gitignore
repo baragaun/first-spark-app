@@ -16,3 +16,6 @@ node_modules
 .svelte-kit
 /test-results
 .vscode
+
+# Repomix
+.repomix/bundles.json

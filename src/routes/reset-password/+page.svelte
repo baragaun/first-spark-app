@@ -15,19 +15,36 @@
   import passwordHelpers from '$lib/helpers/password-helpers';
   import { myUserContext } from '@/context/my-user-context.svelte';
   import { ResetMyPasswordListener } from '@/context/listeners/reset-my-password-listener';
+  import PasswordInput from '@/components/ui/password-input';
 
-  let identifier = ''; // for email or username
-  let loading = false;
-  let error = '';
-  let verificationCode = '';
-  let step = 'email'; // 'email' or 'verify'
-  let resendTimer = 30;
-  let canResend = false;
+  // State management with Svelte 5 runes
+  let identifier = $state(''); // for email or username
+  let loading = $state(false);
+  let error = $state('');
+  let verificationCode = $state('');
+  let step = $state('email'); // 'email' or 'verify'
+  let resendTimer = $state(30);
+  let canResend = $state(false);
   let timerInterval: ReturnType<typeof setInterval>;
-  let password = '';
-  let confirmPassword = '';
-  let resetActionId: string | undefined;
-  let resetExpireAt: Date | undefined;
+  let password = $state('');
+  let confirmPassword = $state('');
+  let resetActionId = $state<string | undefined>(undefined);
+  let resetExpireAt = $state<Date | undefined>(undefined);
+
+  // Derived state for remaining time display
+  const remainingTimeText = $derived.by(() => {
+    if (!resetExpireAt) return '';
+
+    const now = new Date();
+    const diffMs = resetExpireAt.getTime() - now.getTime();
+    const diffMins = Math.max(0, Math.ceil(diffMs / 60000));
+
+    return diffMins > 0
+      ? `Code expires in ${diffMins} minute${diffMins !== 1 ? 's' : ''}`
+      : 'Code expired';
+  });
+
+  const { getPasswordError, validatePassword } = passwordHelpers;
 
   const startResendTimer = () => {
     resendTimer = 30;
@@ -168,7 +185,7 @@
       {/if}
 
       {#if step === 'email'}
-        <form on:submit|preventDefault={handleSendCode} class="space-y-4">
+        <form onsubmit={handleSendCode} class="space-y-4">
           <div class="space-y-2">
             <Input type="text" placeholder="Email or username" bind:value={identifier} required />
           </div>
@@ -182,7 +199,7 @@
           </Button>
         </form>
       {:else if step === 'verify'}
-        <form on:submit|preventDefault={handleVerifyAndReset} class="space-y-4">
+        <form onsubmit={handleVerifyAndReset} class="space-y-4">
           <div class="space-y-2">
             <label for="verification-code" class="text-sm font-medium"> Verification code </label>
             <InputOTP.Root maxlength={6} bind:value={verificationCode}>
@@ -198,7 +215,7 @@
 
           <div class="relative space-y-2">
             <label for="confirm-password" class="text-sm font-medium"> New password </label>
-            <Input type="password" placeholder="New password" bind:value={password} required />
+            <PasswordInput bind:value={password} placeholder="Password" required />
             {#if password}
               <div class="space-y-2 text-xs">
                 <p class="text-muted-foreground">Password requirements:</p>
@@ -209,40 +226,16 @@
                   >
                     At least 8 characters
                   </li>
-                  <li
-                    class:text-destructive={!/[A-Z]/.test(password)}
-                    class:text-green-500={/[A-Z]/.test(password)}
-                  >
-                    One uppercase letter
-                  </li>
-                  <li
-                    class:text-destructive={!/[a-z]/.test(password)}
-                    class:text-green-500={/[a-z]/.test(password)}
-                  >
-                    One lowercase letter
-                  </li>
-                  <li
-                    class:text-destructive={!/[0-9]/.test(password)}
-                    class:text-green-500={/[0-9]/.test(password)}
-                  >
-                    One number
-                  </li>
-                  <li
-                    class:text-destructive={!/[!@#$%^&*(),.?":{}|<>]/.test(password)}
-                    class:text-green-500={/[!@#$%^&*(),.?":{}|<>]/.test(password)}
-                  >
-                    One special character
-                  </li>
                 </ul>
               </div>
             {/if}
-            {#if password && passwordHelpers.getPasswordError(password)}
-              <p class="text-xs text-destructive">{passwordHelpers.getPasswordError(password)}</p>
+            {#if password && getPasswordError(password)}
+              <p class="text-xs text-destructive">{getPasswordError(password)}</p>
             {/if}
           </div>
 
           <div class="space-y-2">
-            <label for="confirm-password" class="text-sm font-medium"> Confirm password </label>
+            <label for="confirm-password" class="text-sm font-medium"> Confirm new password </label>
             <Input
               id="confirm-password"
               type="password"
@@ -271,7 +264,12 @@
           <Button
             type="submit"
             class="w-full"
-            disabled={loading || verificationCode.length < 6 || !password || !confirmPassword}
+            disabled={loading ||
+              verificationCode.length < 6 ||
+              !password ||
+              !confirmPassword ||
+              password !== confirmPassword ||
+              !validatePassword(password).isValid}
           >
             {loading ? 'Resetting password...' : 'Verify and Reset Password'}
           </Button>
@@ -279,7 +277,7 @@
           <Button variant="outline" class="w-full" onclick={() => (step = 'email')}>Back</Button>
         </form>
       {:else if step === 'password'}
-        <form on:submit|preventDefault={handleVerifyAndReset} class="space-y-4">
+        <form onsubmit={handleVerifyAndReset} class="space-y-4">
           <div class="space-y-2">
             <Input type="password" placeholder="New password" bind:value={password} required />
           </div>

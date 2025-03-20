@@ -4,12 +4,9 @@
   import * as Sidebar from '$lib/components/ui/sidebar/index.js';
   import ThemeButton from '../theme-button.svelte';
   import LanguageButton from '../language-button.svelte';
-  import { getContext } from 'svelte';
-  import type { MyUserContext } from '$lib/context/my-user-context.svelte';
+  import { myUserContext } from '$lib/context/my-user-context.svelte';
   import { LogOut } from 'lucide-svelte';
   import { goto } from '$app/navigation';
-
-  const myUserContext = getContext<MyUserContext>('myUserContext');
 </script>
 
 <nav
@@ -33,7 +30,7 @@
       <ThemeButton class="hidden md:flex" />
       <LanguageButton class="hidden md:flex" />
       <div class="flex items-center gap-2">
-        {#if !myUserContext.isSignedIn}
+        {#if !myUserContext.getMyUser()}
           <Button
             variant="ghost"
             href="/signin"
@@ -45,11 +42,12 @@
             Sign Up
           </Button>
         {/if}
-        {#if myUserContext.isSignedIn}
+        {#if myUserContext.getMyUser()}
           <Button
             variant="ghost"
             onclick={async () => {
               await myUserContext.signMeOut();
+              console.log('Signed out', myUserContext.isSignedIn, myUserContext.getMyUser());
               goto('/signin');
             }}
             class="font-lexend flex items-center gap-2 shadow-sm hover:shadow-md"

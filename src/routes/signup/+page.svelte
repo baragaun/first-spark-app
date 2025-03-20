@@ -11,6 +11,7 @@
   import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert';
   import X from 'lucide-svelte/icons/x';
   import { VerifyMyEmailListener } from '@/context/listeners/verify-email-listener';
+  import { UserIdentType } from '@baragaun/bg-node-client';
 
   const { getPasswordError, validatePassword } = passwordHelpers;
 
@@ -19,26 +20,32 @@
     EMAIL: 'email',
     VERIFY: 'verify',
     CREDENTIALS: 'credentials',
-    SUCCESS: 'success',
   };
 
   let currentStep = writable(STEPS.EMAIL);
-  let email = '';
-  let username = '';
-  let password = '';
-  let loading = false;
-  let error = '';
-  let actionId = '';
+  let email = $state('');
+  let username = $state('');
+  let password = $state('');
+  let loading = $state(false);
+  let error = $state('');
+  let actionId = $state('');
+  let expiredAt = $state<Date | undefined>(undefined);
+  let checkingUsername = $state(false);
+  let usernameError = $state('');
+  let suggestedHandle = $state('');
+
+  $effect(() => {
+    const user = myUserContext.getMyUser();
+    if (user && user.userHandle) {
+      username = user.userHandle;
+    }
+  });
 
   // Handle email submission from the EmailVerification component
-  const handleEmailSubmit = async ({ email: userEmail }: { email: string }) => {
+  const handleEmailSubmit = async (email: string): Promise<void> => {
     loading = true;
     error = '';
     try {
-      email = userEmail; // Update the email variable
-      console.log('Email submitted:', email);
-
-      // Call signUpUser from myUserContext
       const response = await myUserContext.signUpUser(email);
 
       if (response.error) {
@@ -54,6 +61,9 @@
       }
 
       actionId = verifyResponse.response?.actionId;
+      expiredAt = verifyResponse.response?.expiresAt
+        ? new Date(verifyResponse.response.expiresAt)
+        : undefined;
       currentStep.set(STEPS.VERIFY);
     } catch (err) {
       error = err instanceof Error ? err.message : 'Failed to sign up';
@@ -64,7 +74,7 @@
   };
 
   // Handle verification callback
-  const handleVerify = async ({ code }: { code: string }) => {
+  const handleVerify = async (code: string) => {
     loading = true;
     error = '';
     try {
@@ -92,9 +102,19 @@
   };
 
   // Handle resend from the EmailVerification component
-  const handleResend = (event: CustomEvent<{ email: string }>) => {
-    // Any additional logic for resending
-    console.log('Resending code to:', event.detail.email);
+  const handleResend = async (email: string) => {
+    const verifyResponse = await myUserContext.verifyMyEmail(email);
+
+    if (verifyResponse.error || !verifyResponse.response?.actionId) {
+      error = verifyResponse.error || 'Failed to send verification email';
+      return;
+    }
+
+    actionId = verifyResponse.response?.actionId;
+    expiredAt = verifyResponse.response?.expiresAt
+      ? new Date(verifyResponse.response.expiresAt)
+      : undefined;
+    currentStep.set(STEPS.VERIFY);
   };
 
   // Handle back button from the EmailVerification component
@@ -112,8 +132,33 @@
     loading = true;
     error = '';
     try {
-      // todo Need to write updateUser code here
-      // await myUserContext.updateMyUser({ userHandle: username, password: password });
+      const client = await myUserContext.getClient();
+
+      // First check if we have a valid user
+      if (!client || !client.myUserId) {
+        error = 'User not found or not authenticated';
+        return;
+      }
+
+      // Update username first
+      const updateUserName = await myUserContext.updateMyUser({
+        id: client.myUserId,
+        userHandle: username,
+      });
+
+      if (updateUserName.error) {
+        error = updateUserName.error;
+        return;
+      }
+
+      // Then update password
+      const updatePassword = await myUserContext.updateMyPassword('', password);
+
+      if (updateUserName.error || updatePassword.error) {
+        error = updateUserName.error || updatePassword.error || 'Failed to create account';
+        return;
+      }
+
       await goto('/');
     } catch (err) {
       error = err instanceof Error ? err.message : 'Failed to create account';
@@ -121,6 +166,17 @@
     } finally {
       loading = false;
     }
+  };
+
+  // Calculate remaining time until expiration
+  const getRemainingTimeText = (expiryDate?: Date): string => {
+    if (!expiryDate) return '';
+
+    const now = new Date();
+    const diffMs = expiryDate.getTime() - now.getTime();
+    const diffMins = Math.max(0, Math.ceil(diffMs / 60000));
+
+    return `. Code expires in ${diffMins} minute${diffMins !== 1 ? 's' : ''}`;
   };
 </script>
 
@@ -142,7 +198,7 @@
         title={$currentStep === STEPS.EMAIL ? 'Sign Up' : 'Verify your email'}
         description={$currentStep === STEPS.EMAIL
           ? 'By continuing, you agree to our User Agreement and acknowledge that you understand and agree to our Privacy Policy.'
-          : `Enter the six digit code we sent to ${email}`}
+          : `Enter the six digit code we sent to ${email}${expiredAt ? getRemainingTimeText(expiredAt) : ''}`}
       >
         {#if error}
           <Alert variant="destructive" class="relative mb-4">
@@ -160,7 +216,7 @@
           </Alert>
         {/if}
         <EmailVerification
-          bind:email
+          {email}
           initialStep={$currentStep === STEPS.EMAIL ? 'email' : 'verify'}
           buttonText="Continue"
           verifyButtonText="Verify"
@@ -188,18 +244,40 @@
         showBackButton={true}
         onBack={() => currentStep.set(STEPS.VERIFY)}
       >
-        <form on:submit|preventDefault={handleSignupSubmit} class="space-y-4">
+        <form onsubmit={handleSignupSubmit} class="space-y-4">
           <div class="space-y-2">
             <Input
               type="text"
               placeholder="Username (e.g., CosmoExplorer, PixelPioneer)"
               bind:value={username}
               required
+              onblur={async () => {
+                if (username) {
+                  checkingUsername = true;
+                  usernameError = '';
+                  const isAvailable = await myUserContext.isUserIdentAvailable(
+                    username,
+                    UserIdentType.userHandle,
+                  );
+                  checkingUsername = false;
+
+                  if (!isAvailable) {
+                    usernameError = 'This username is unavailable.';
+                  }
+                }
+              }}
             />
-            <p class="text-xs text-muted-foreground">
-              Usernames are unique handles. We'll verify that yours is not already taken.
-            </p>
+            {#if checkingUsername}
+              <p class="text-xs text-muted-foreground">Checking username availability...</p>
+            {:else if usernameError}
+              <p class="text-xs text-destructive">{usernameError}</p>
+            {/if}
           </div>
+          {#if suggestedHandle}
+            <p class="text-xs text-muted-foreground">
+              Suggested username: {suggestedHandle}
+            </p>
+          {/if}
           <div class="relative space-y-2">
             <PasswordInput bind:value={password} placeholder="Password" required />
             {#if password}

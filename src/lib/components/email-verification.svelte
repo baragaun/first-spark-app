@@ -1,27 +1,27 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
-  import { Alert, AlertDescription } from '$lib/components/ui/alert';
-  import * as InputOTP from '$lib/components/ui/input-otp';
   import { onDestroy } from 'svelte';
   import { writable, get } from 'svelte/store';
   import OtpVerification from '$lib/components/otp-verification.svelte';
+  import { myUserContext } from '@/context/my-user-context.svelte';
+  import { UserIdentType } from '@baragaun/bg-node-client';
 
   // Props
-  export let email = '';
-  export let initialStep = 'email'; // 'email' or 'verify'
-  export let buttonText = 'Continue';
-  export let verifyButtonText = 'Verify';
-  export let loadingText = 'Sending...';
-  export let verifyingText = 'Verifying...';
-  export let showSkipButton = false;
-
-  // Event callback props
-  export let onEmailSubmit = (data: { email: string }) => {};
-  export let onVerify = (data: { code: string }) => {};
-  export let onResend = (data: { email: string }) => {};
-  export let onBack = (data: { step: string }) => {};
-  export let onSkip = () => {};
+  let {
+    email = '',
+    initialStep = 'email',
+    buttonText = 'Continue',
+    verifyButtonText = 'Verify',
+    loadingText = 'Sending...',
+    verifyingText = 'Verifying...',
+    showSkipButton = false,
+    onEmailSubmit = (email: string) => {},
+    onVerify = (code: string) => {},
+    onResend = (email: string) => {},
+    onBack = (step: string) => {},
+    onSkip = () => {},
+  } = $props();
 
   // Email validation function
   const isValidEmail = (email: string): boolean => {
@@ -36,17 +36,26 @@
   };
 
   let currentStep = writable(initialStep === 'verify' ? STEPS.VERIFY : STEPS.EMAIL);
-  let verificationCode = '';
-  let loading = false;
-  let verificationError = '';
-  let resendTimer = 30; // Timer in seconds
-  let canResend = false;
+  let loading = $state(false);
+  let resendTimer = $state(30); // Timer in seconds
+  let canResend = $state(false);
   let timerInterval: ReturnType<typeof setInterval>;
-
-  // Store the original email to detect changes
+  let checkingEmail = $state(false);
+  let emailError = $state('');
 
   // Track emails that have active cooldowns
   const emailCooldowns = new Map<string, number>();
+
+  // Check if email is available
+  const checkEmailAvailability = async (email: string): Promise<boolean> => {
+    try {
+      const result = await myUserContext.isUserIdentAvailable(email, UserIdentType.email);
+      return result.isAvailable ?? false;
+    } catch (error) {
+      console.error('Error checking email availability:', error);
+      return false;
+    }
+  };
 
   const startResendTimer = (emailAddress: string) => {
     resendTimer = 30;
@@ -62,12 +71,6 @@
         emailCooldowns.delete(emailAddress);
       }
     }, 1000);
-  };
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   const handleResendCode = async () => {
@@ -92,7 +95,6 @@
       const remainingTime = Math.ceil((cooldownEnd - Date.now()) / 1000);
 
       if (remainingTime > 0) {
-        // If same email and cooldown active, just show verification screen with current timer
         resendTimer = remainingTime;
         currentStep.set(STEPS.VERIFY);
         return;
@@ -101,28 +103,11 @@
 
     loading = true;
     try {
-      console.log('handleEmailSubmit', email);
-      onEmailSubmit({ email });
+      onEmailSubmit(email);
       currentStep.set(STEPS.VERIFY);
       startResendTimer(email);
     } catch (error) {
       console.error('Error sending verification code:', error);
-    } finally {
-      loading = false;
-    }
-  };
-
-  // Handle verification code submission
-  const handleVerifySubmit = async () => {
-    loading = true;
-    verificationError = '';
-    try {
-      // Use the onVerify prop instead of dispatching an event
-      onVerify({ code: verificationCode });
-      // Note: The parent component will handle the navigation
-    } catch (error) {
-      console.error('Error verifying code:', error);
-      verificationError = 'Invalid verification code. Please try again.';
     } finally {
       loading = false;
     }
@@ -139,9 +124,11 @@
   };
 
   // Start the timer when the component mounts and we're on verify step
-  $: if ($currentStep === STEPS.VERIFY && !timerInterval) {
-    startResendTimer(email);
-  }
+  $effect(() => {
+    if ($currentStep === STEPS.VERIFY && !timerInterval) {
+      startResendTimer(email);
+    }
+  });
 
   onDestroy(() => {
     clearInterval(timerInterval);
@@ -158,15 +145,33 @@
         pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2}"
         title="Please enter a valid email address"
         required
+        onblur={async () => {
+          if (email && isValidEmail(email)) {
+            checkingEmail = true;
+            const isAvailable = await checkEmailAvailability(email);
+            checkingEmail = false;
+            if (!isAvailable) {
+              emailError = 'This email address is already registered.';
+            } else {
+              emailError = '';
+            }
+          } else if (!email) {
+            // Clear error when input is empty
+            emailError = '';
+          }
+        }}
       />
       {#if email && !isValidEmail(email)}
         <p class="text-xs text-destructive">Please enter a valid email address</p>
+      {/if}
+      {#if emailError}
+        <p class="text-xs text-destructive">{emailError}</p>
       {/if}
     </div>
     <Button
       type="submit"
       class="w-full"
-      disabled={loading || !email || !isValidEmail(email)}
+      disabled={loading || checkingEmail || !email || !isValidEmail(email) || emailError !== ''}
       onclick={handleEmailSubmit}
     >
       {loading ? loadingText : buttonText}

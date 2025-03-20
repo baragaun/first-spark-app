@@ -11,21 +11,22 @@
   import X from 'lucide-svelte/icons/x';
   import { SignInWithTokenListener } from '@/context/listeners/sign-in-with-token-listener';
 
-  let identifier = ''; // either an email or a username
-  let identType = UserIdentType.email; // either an email or a username
-  let password = '';
-  let loading = false;
-  let error = '';
-  let emailSent = false;
-  let resendTimer = 30;
-  let canResend = false;
-  let actionId: string;
+  // State management with Svelte 5 runes
+  let identifier = $state(''); // either an email or a username
+  let identType = $state(UserIdentType.email); // either an email or a username
+  let password = $state('');
+  let loading = $state(false);
+  let error = $state('');
+  let emailSent = $state(false);
+  let resendTimer = $state(30);
+  let canResend = $state(false);
+  let actionId = $state<string | undefined>(undefined);
   let timerInterval: ReturnType<typeof setInterval>;
+  let showPasswordInput = $state(false);
 
   // Track emails that have active cooldowns
-  const emailCooldowns = new Map<string, number>();
+  const emailCooldowns = $state(new Map<string, number>());
 
-  let showPasswordInput = false;
   function togglePasswordInput() {
     showPasswordInput = !showPasswordInput;
   }
@@ -61,19 +62,30 @@
       loading = true;
       const client = await myUserContext.getClient();
 
+      if (!actionId) {
+        return;
+      }
+      const result = await myUserContext.verifyMultiStepActionToken(actionId, code);
+
       const listener = new SignInWithTokenListener('sign-in-with-token-listener', code, client);
 
-      client.operations.multiStepAction.addMultiStepActionListener(actionId, listener);
+      const listenerResponse = client.operations.multiStepAction.addMultiStepActionListener(
+        actionId,
+        listener,
+      );
 
-      const result = await myUserContext.verifyMultiStepActionToken(actionId, code);
-      if (result) {
-        await goto('/');
-      } else {
+      console.log('handleVerifyOtp', result, listenerResponse);
+
+      if (!result || result.error) {
+        error = 'Invalid verification code';
         return Promise.reject(new Error('Invalid verification code'));
       }
-    } catch (error) {
-      console.error('Error verifying OTP:', error);
-      return Promise.reject(error);
+
+      await goto('/');
+    } catch (err) {
+      console.error('Error verifying OTP:', err);
+      error = err instanceof Error ? err.message : 'Verification failed';
+      return Promise.reject(err);
     } finally {
       loading = false;
     }
@@ -111,10 +123,10 @@
     try {
       const signInWithTokenResponse = await myUserContext.signInWithToken(identifier);
 
-      if (!signInWithTokenResponse?.response?.actionId) {
+      if (!signInWithTokenResponse?.actionId) {
         throw new Error('Failed to get action ID from sign-in response');
       }
-      actionId = signInWithTokenResponse?.response?.actionId;
+      actionId = signInWithTokenResponse?.actionId;
       emailSent = true;
       startResendTimer(identifier);
     } catch (err) {
@@ -180,7 +192,7 @@
           </Button>
         </Alert>
       {/if}
-      <form on:submit|preventDefault={handleSignIn}>
+      <form onsubmit={handleSignIn}>
         <div class="grid gap-4">
           <div class="grid gap-2">
             <Label for="email">Email or Username</Label>
