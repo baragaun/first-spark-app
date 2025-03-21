@@ -61,38 +61,28 @@
   };
 
   const handleVerifyOtp = async ({ email, code }: { email: string; code: string }) => {
-    // todo: this needs to be rewritten
-    // try {
-    //   loading = true;
-    //   const client = await myUserContext.getClient();
-    //
-    //   if (!actionId) {
-    //     return;
-    //   }
-    //   const result = await myUserContext.verifyMultiStepActionToken(actionId, code);
-    //
-    //   const listener = new SignInWithTokenListener('sign-in-with-token-listener', code, client);
-    //
-    //   const listenerResponse = client.operations.multiStepAction.addMultiStepActionListener(
-    //     actionId,
-    //     listener,
-    //   );
-    //
-    //   console.log('handleVerifyOtp', result, listenerResponse);
-    //
-    //   if (!result || result.error) {
-    //     error = 'Invalid verification code';
-    //     return Promise.reject(new Error('Invalid verification code'));
-    //   }
-    //
-    //   await goto('/');
-    // } catch (err) {
-    //   console.error('Error verifying OTP:', err);
-    //   error = err instanceof Error ? err.message : 'Verification failed';
-    //   return Promise.reject(err);
-    // } finally {
-    //   loading = false;
-    // }
+    try {
+      loading = true;
+
+      if (!actionId) {
+        // todo: handle error
+        return;
+      }
+
+      const result = await myUserContext.verifyMultiStepActionToken(actionId, code);
+
+      if (!result || result.error) {
+        // todo: handle error
+        error = 'Invalid verification code. Please try again.';
+        return;
+      }
+    } catch (err) {
+      console.error('Error verifying OTP:', err);
+      error = err instanceof Error ? err.message : 'Verification failed';
+      return Promise.reject(err);
+    } finally {
+      loading = false;
+    }
   };
 
   const handleResendOtp = async ({ email }: { email: string }) => {
