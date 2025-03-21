@@ -10,7 +10,6 @@
   import { myUserContext } from '$lib/context/my-user-context.svelte';
   import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert';
   import X from 'lucide-svelte/icons/x';
-  import { VerifyMyEmailListener } from '@/context/listeners/verify-email-listener';
   import { UserIdentType } from '@baragaun/bg-node-client';
   import { MultiStepActionEventType, SidMultiStepActionProgress } from '@baragaun/bg-node-client'
 
@@ -36,12 +35,12 @@
   let suggestedHandle = $state('');
   let emailSent = false
 
-  $effect(() => {
-    const user = myUserContext.getMyUser();
-    if (user && user.userHandle) {
-      username = user.userHandle;
-    }
-  });
+  // $effect(() => {
+  //   const user = myUserContext.getMyUser();
+  //   if (user && user.userHandle) {
+  //     username = user.userHandle;
+  //   }
+  // });
 
   // Handle email submission from the EmailVerification component
   const handleEmailSubmit = async (email: string): Promise<void> => {
@@ -66,11 +65,10 @@
     }
   }
 
-  const startEmailConfirmation = async (email) => {
+  const startEmailConfirmation = async (email: string) => {
     loading = true
     error = ''
     try {
-      email = userEmail // Update the email variable
       console.log('Email submitted:', email)
 
       const response = await myUserContext.verifyMyEmail(email)
@@ -187,11 +185,11 @@
     loading = true;
     error = '';
     try {
-      const client = await myUserContext.getClient();
+      // const client = await myUserContext.getClient();
 
-      const listener = new VerifyMyEmailListener('verify-email-listener', actionId, client);
+      // const listener = new VerifyMyEmailListener('verify-email-listener', actionId, client);
 
-      client.operations.multiStepAction.addMultiStepActionListener(actionId, listener);
+      // client.operations.multiStepAction.addMultiStepActionListener(actionId, listener);
 
       const result = await myUserContext.verifyMultiStepActionToken(actionId, code);
 
@@ -214,14 +212,14 @@
   const handleResend = async (email: string) => {
     const verifyResponse = await myUserContext.verifyMyEmail(email);
 
-    if (verifyResponse.error || !verifyResponse.response?.actionId) {
+    if (verifyResponse.error || !verifyResponse?.object?.actionProgress?.actionId) {
       error = verifyResponse.error || 'Failed to send verification email';
       return;
     }
 
-    actionId = verifyResponse.response?.actionId;
-    expiredAt = verifyResponse.response?.expiresAt
-      ? new Date(verifyResponse.response.expiresAt)
+    actionId = verifyResponse?.object?.actionProgress?.actionId;
+    expiredAt = verifyResponse?.object?.actionProgress?.expiresAt
+      ? new Date(verifyResponse?.object?.actionProgress?.expiresAt)
       : undefined;
     currentStep.set(STEPS.VERIFY);
   };
@@ -241,17 +239,17 @@
     loading = true;
     error = '';
     try {
-      const client = await myUserContext.getClient();
+      const myUserId = myUserContext.myUserId;
 
       // First check if we have a valid user
-      if (!client || !client.myUserId) {
+      if (!myUserId) {
         error = 'User not found or not authenticated';
         return;
       }
 
       // Update username first
       const updateUserName = await myUserContext.updateMyUser({
-        id: client.myUserId,
+        id: myUserId,
         userHandle: username,
       });
 

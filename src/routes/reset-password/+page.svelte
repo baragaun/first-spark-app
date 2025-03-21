@@ -14,7 +14,6 @@
   import { goto } from '$app/navigation';
   import passwordHelpers from '$lib/helpers/password-helpers';
   import { myUserContext } from '@/context/my-user-context.svelte';
-  import { ResetMyPasswordListener } from '@/context/listeners/reset-my-password-listener';
   import PasswordInput from '@/components/ui/password-input';
 
   // State management with Svelte 5 runes
@@ -127,18 +126,18 @@
         throw new Error('Reset action ID is missing');
       }
 
-      const client = await myUserContext.getClient();
+      // const client = await myUserContext.getClient();
 
-      const listener = new ResetMyPasswordListener(
-        'reset-password-listener',
-        resetActionId,
-        client,
-        verificationCode,
-        password,
-        //todo add function for error
-      );
+      // const listener = new ResetMyPasswordListener(
+      //   'reset-password-listener',
+      //   resetActionId,
+      //   client,
+      //   verificationCode,
+      //   password,
+      //   //todo add function for error
+      // );
 
-      client.operations.multiStepAction.addMultiStepActionListener(resetActionId, listener);
+      // client.operations.multiStepAction.addMultiStepActionListener(resetActionId, listener);
 
       const result = await myUserContext.verifyMultiStepActionToken(
         resetActionId,
