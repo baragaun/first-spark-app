@@ -151,7 +151,7 @@ export class MyUserContext {
   }
 
   async signUpUser(email: string): Promise<{ myUser?: MyUser; error?: string }> {
-    if (!this.client) {
+    if (!this._isInitialized) {
       this.myUser = null;
 
       return { error: 'Client not initialized' };
@@ -194,7 +194,7 @@ export class MyUserContext {
   }
 
   async signMeOut(): Promise<boolean> {
-    if (!this.client) {
+    if (!this._isInitialized) {
       this.myUser = null;
       console.log('Client not initialized');
       return false;
@@ -218,7 +218,7 @@ export class MyUserContext {
   }
 
   async updateMyUser(changes: Partial<MyUser>): Promise<{ myUser?: MyUser; error?: string }> {
-    if (!this.client) {
+    if (!this._isInitialized) {
       return { error: 'Client not initialized' };
     }
 
@@ -250,7 +250,7 @@ export class MyUserContext {
     oldPassword: string,
     newPassword: string,
   ): Promise<{ myUser?: MyUser; error?: string }> {
-    if (!this.client) {
+    if (!this._isInitialized) {
       return { error: 'Client not initialized' };
     }
 
@@ -283,7 +283,7 @@ export class MyUserContext {
   }
 
   async findAvailableUserHandle(email: string) {
-    if (!this.client) {
+    if (!this._isInitialized) {
       return { error: 'Client not initialized' };
     }
 
@@ -301,7 +301,7 @@ export class MyUserContext {
     ident: string,
     identType: UserIdentType,
   ): Promise<{ isAvailable?: boolean; error?: string }> {
-    if (!this.client) {
+    if (!this._isInitialized) {
       return { error: 'Client not initialized' };
     }
 
@@ -319,7 +319,7 @@ export class MyUserContext {
   async resetMyPassword(
     email: string,
   ): Promise<{ actionProgress?: SidMultiStepActionProgress; error?: string }> {
-    if (!this.client) {
+    if (!this._isInitialized) {
       return { error: 'Client not initialized' };
     }
     try {
@@ -341,7 +341,7 @@ export class MyUserContext {
   async signInWithToken(
     userIdent: string,
   ): Promise<QueryResult<MultiStepActionProgressResult>> {
-    if (!this.client) {
+    if (!this._isInitialized) {
       return { error: 'Client not initialized' };
     }
 
@@ -362,7 +362,7 @@ export class MyUserContext {
   }
 
   async verifyMultiStepActionToken(actionId: string, token: string, newPassword?: string): Promise<{ error?: string }> {
-    if (!this.client) {
+    if (!this._isInitialized) {
       console.error('MyUserContext.verifyMultiStepActionToken: no client');
       return { error: 'system-error' };
     }
@@ -396,7 +396,7 @@ export class MyUserContext {
   async verifyMyEmail(
     email: string,
   ): Promise<QueryResult<MultiStepActionProgressResult>> {
-    if (!this.client) {
+    if (!this._isInitialized) {
       return { error: 'Client not initialized' };
     }
 
