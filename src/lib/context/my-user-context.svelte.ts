@@ -55,11 +55,18 @@ export class MyUserContext {
       config.appEnvironment = import.meta.env.VITE_APP_ENVIRONMENT as AppEnvironment;
     }
 
+    try {
+      this.client.init(config);
+    } catch (error) {
+      console.error('MyUserContext: Error initializing BgNodeClient:', { error });
+      this.isInitializing = false;
+      return;
+    }
+
     // if (import.meta.env.MOCK_DATA === 'true') {
     //   config.useMockData = true;
     // }
 
-    this.client.init(config);
 
     this.isInitialized = true;
 
@@ -86,7 +93,7 @@ export class MyUserContext {
     try {
       this.isLoading = true;
       this.error = null;
-      this.myUser = await this.client.operations.myUser.findMyUser();
+      this.myUser = await this.client.operations.myUser.findMyUser(queryOptions);
       return this.myUser;
     } catch (err) {
       this.error = err instanceof Error ? err.message : 'Failed to load user';
