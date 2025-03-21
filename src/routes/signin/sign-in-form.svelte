@@ -6,10 +6,13 @@
   import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert';
   import { myUserContext } from '@/context/my-user-context.svelte';
   import { goto } from '$app/navigation';
-  import { UserIdentType } from '@baragaun/bg-node-client';
   import OtpVerification from '$lib/components/otp-verification.svelte';
   import X from 'lucide-svelte/icons/x';
-  import { SignInWithTokenListener } from '@/context/listeners/sign-in-with-token-listener';
+  import {
+    MultiStepActionEventType,
+    SidMultiStepActionProgress,
+    UserIdentType,
+  } from '@baragaun/bg-node-client';
 
   // State management with Svelte 5 runes
   let identifier = $state(''); // either an email or a username
@@ -58,37 +61,38 @@
   };
 
   const handleVerifyOtp = async ({ email, code }: { email: string; code: string }) => {
-    try {
-      loading = true;
-      const client = await myUserContext.getClient();
-
-      if (!actionId) {
-        return;
-      }
-      const result = await myUserContext.verifyMultiStepActionToken(actionId, code);
-
-      const listener = new SignInWithTokenListener('sign-in-with-token-listener', code, client);
-
-      const listenerResponse = client.operations.multiStepAction.addMultiStepActionListener(
-        actionId,
-        listener,
-      );
-
-      console.log('handleVerifyOtp', result, listenerResponse);
-
-      if (!result || result.error) {
-        error = 'Invalid verification code';
-        return Promise.reject(new Error('Invalid verification code'));
-      }
-
-      await goto('/');
-    } catch (err) {
-      console.error('Error verifying OTP:', err);
-      error = err instanceof Error ? err.message : 'Verification failed';
-      return Promise.reject(err);
-    } finally {
-      loading = false;
-    }
+    // todo: this needs to be rewritten
+    // try {
+    //   loading = true;
+    //   const client = await myUserContext.getClient();
+    //
+    //   if (!actionId) {
+    //     return;
+    //   }
+    //   const result = await myUserContext.verifyMultiStepActionToken(actionId, code);
+    //
+    //   const listener = new SignInWithTokenListener('sign-in-with-token-listener', code, client);
+    //
+    //   const listenerResponse = client.operations.multiStepAction.addMultiStepActionListener(
+    //     actionId,
+    //     listener,
+    //   );
+    //
+    //   console.log('handleVerifyOtp', result, listenerResponse);
+    //
+    //   if (!result || result.error) {
+    //     error = 'Invalid verification code';
+    //     return Promise.reject(new Error('Invalid verification code'));
+    //   }
+    //
+    //   await goto('/');
+    // } catch (err) {
+    //   console.error('Error verifying OTP:', err);
+    //   error = err instanceof Error ? err.message : 'Verification failed';
+    //   return Promise.reject(err);
+    // } finally {
+    //   loading = false;
+    // }
   };
 
   const handleResendOtp = async ({ email }: { email: string }) => {
@@ -121,20 +125,94 @@
     error = '';
 
     try {
-      const signInWithTokenResponse = await myUserContext.signInWithToken(identifier);
+      const response = await myUserContext.signInWithToken(identifier)
 
-      if (!signInWithTokenResponse?.actionId) {
-        throw new Error('Failed to get action ID from sign-in response');
+      if (
+        !response ||
+        response?.error ||
+        !response.object ||
+        response.object.error ||
+        !response?.object.actionProgress?.actionId ||
+        !response?.object.run
+      ) {
+        error = 'Failed to send magic link. Please try again.'
+        return
       }
-      actionId = signInWithTokenResponse?.actionId;
-      emailSent = true;
-      startResendTimer(identifier);
+
+      startResendTimer(identifier)
+      actionId = response?.object.actionProgress?.actionId;
+
+      response.object.run.addListener({
+        id: 'SignInForm',
+
+        onEvent: async (
+          eventType: MultiStepActionEventType,
+          action: SidMultiStepActionProgress,
+        ): Promise<void> => {
+          if (eventType === MultiStepActionEventType.notificationFailed) {
+            // The notification failed to go out.
+            console.error(
+              'SignInPage.multiStepActionListener: Notification failed.',
+              action.notificationResult,
+            )
+            error = 'We could not send the verification token to your email. Please try again.';
+            return
+          }
+
+          if (eventType === MultiStepActionEventType.notificationSent) {
+            // The notification has been sent out.
+            console.log(
+              'SignInPage.multiStepActionListener: Notification sent out.',
+              action.notificationResult,
+            )
+            emailSent = true
+            // todo: Show the verification code input to the user.
+            return
+          }
+
+          if (eventType === MultiStepActionEventType.tokenFailed) {
+            console.error(
+              'SignInPage.multiStepActionListener: incorrect token.',
+              action.notificationResult,
+            )
+            error = 'We could not verify the token you entered. Please try again.';
+            return
+          }
+
+          if (eventType === MultiStepActionEventType.timedOut) {
+            console.error(
+              'SignInPage.multiStepActionListener: timeout.',
+              action.notificationResult,
+            )
+            error = 'The verification token has expired. Please request a new one.';
+            return
+          }
+
+          if (eventType === MultiStepActionEventType.failed) {
+            console.error(
+              'SignInPage.multiStepActionListener: error.',
+              action.notificationResult,
+            )
+            error = 'A system error has occurred. Please try again later.';
+            return
+          }
+
+          if (eventType === MultiStepActionEventType.success) {
+            // The token was accepted. The user is now signed in.
+            console.log(
+              'ResetMyPasswordListener.onNotificationSentOrFailed: success.',
+              action.notificationResult,
+            )
+            await goto('/')
+          }
+        }
+      })
     } catch (err) {
-      console.error('Error sending magic link:', err);
-      error = 'Failed to send magic link. Please try again.';
-      throw err;
+      console.error('Error sending magic link:', err)
+      error = 'Failed to send magic link. Please try again.'
+      throw err
     } finally {
-      loading = false;
+      loading = false
     }
   };
 
@@ -209,7 +287,8 @@
             <div class="grid gap-2">
               <div class="flex items-center">
                 <Label for="password">Password</Label>
-                <a href="/reset-password" class="ml-auto inline-block text-sm underline">
+                                <a href="/reset-password"
+                                   class="ml-auto inline-block text-sm underline">
                   Forgot your password?
                 </a>
               </div>

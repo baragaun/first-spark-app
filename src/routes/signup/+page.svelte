@@ -12,6 +12,7 @@
   import X from 'lucide-svelte/icons/x';
   import { VerifyMyEmailListener } from '@/context/listeners/verify-email-listener';
   import { UserIdentType } from '@baragaun/bg-node-client';
+  import { MultiStepActionEventType, SidMultiStepActionProgress } from '@baragaun/bg-node-client'
 
   const { getPasswordError, validatePassword } = passwordHelpers;
 
@@ -33,6 +34,7 @@
   let checkingUsername = $state(false);
   let usernameError = $state('');
   let suggestedHandle = $state('');
+  let emailSent = false
 
   $effect(() => {
     const user = myUserContext.getMyUser();
@@ -53,24 +55,131 @@
         return;
       }
 
-      const verifyResponse = await myUserContext.verifyMyEmail(email);
+      // todo: Verify that the sign up was successful
 
-      if (verifyResponse.error || !verifyResponse.response?.actionId) {
-        error = verifyResponse.error || 'Failed to send verification email';
-        return;
+      startEmailConfirmation(email);
+    } catch (err) {
+      error = err instanceof Error ? err.message : 'Failed to sign up'
+      console.error('Error signing up:', err)
+    } finally {
+      loading = false
+    }
+  }
+
+  const startEmailConfirmation = async (email) => {
+    loading = true
+    error = ''
+    try {
+      email = userEmail // Update the email variable
+      console.log('Email submitted:', email)
+
+      const response = await myUserContext.verifyMyEmail(email)
+
+      if (
+        !response ||
+        response?.error ||
+        !response.object ||
+        response.object.error ||
+        !response?.object.actionProgress?.actionId ||
+        !response?.object.run
+      ) {
+        error = 'Failed to send the verification token. Please try again.'
+        return
       }
 
-      actionId = verifyResponse.response?.actionId;
-      expiredAt = verifyResponse.response?.expiresAt
-        ? new Date(verifyResponse.response.expiresAt)
-        : undefined;
-      currentStep.set(STEPS.VERIFY);
+      actionId = response?.object.actionProgress?.actionId
+      currentStep.set(STEPS.VERIFY)
+
+      response.object.run.addListener({
+        id: 'SignUpForm',
+
+        onEvent: async (
+          eventType: MultiStepActionEventType,
+          action: SidMultiStepActionProgress,
+        ): Promise<void> => {
+          if (eventType === MultiStepActionEventType.notificationFailed) {
+            // The notification failed to go out.
+            console.error(
+              'SignUpPage.multiStepActionListener: Notification failed.',
+              action.notificationResult,
+            )
+            error = 'We could not send the verification token to your email. Please try again.'
+            return
+          }
+
+          if (eventType === MultiStepActionEventType.notificationSent) {
+            // The notification has been sent out.
+            console.log(
+              'SignUpPage.multiStepActionListener: Notification sent out.',
+              action.notificationResult,
+            )
+            emailSent = true
+            // todo: Show the verification code input to the user.
+            return
+          }
+
+          if (eventType === MultiStepActionEventType.tokenFailed) {
+            console.error(
+              'SignUpPage.multiStepActionListener: incorrect token.',
+              action.notificationResult,
+            )
+            error = 'We could not verify the token you entered. Please try again.'
+            return
+          }
+
+          if (eventType === MultiStepActionEventType.timedOut) {
+            console.error(
+              'SignUpPage.multiStepActionListener: timeout.',
+              action.notificationResult,
+            )
+            error = 'The verification token has expired. Please request a new one.'
+            return
+          }
+
+          if (eventType === MultiStepActionEventType.failed) {
+            console.error(
+              'SignUpPage.multiStepActionListener: error.',
+              action.notificationResult,
+            )
+            error = 'A system error has occurred. Please try again later.'
+            return
+          }
+
+          if (eventType === MultiStepActionEventType.success) {
+            // The token was accepted. The user is now signed in.
+            console.log(
+              'ResetMyPasswordListener.onNotificationSentOrFailed: success.',
+              action.notificationResult,
+            )
+            await goto('/')
+          }
+        }
+      })
     } catch (err) {
-      error = err instanceof Error ? err.message : 'Failed to sign up';
-      console.error('Error signing up:', err);
+      error = err instanceof Error ? err.message : 'Failed to sign up'
+      console.error('Error signing up:', err)
     } finally {
-      loading = false;
+      loading = false
     }
+    //
+    //   const verifyResponse = await myUserContext.verifyMyEmail(email);
+    //
+    //   if (verifyResponse.error || !verifyResponse.response?.actionId) {
+    //     error = verifyResponse.error || 'Failed to send verification email';
+    //     return;
+    //   }
+    //
+    //   actionId = verifyResponse.response?.actionId;
+    //   expiredAt = verifyResponse.response?.expiresAt
+    //     ? new Date(verifyResponse.response.expiresAt)
+    //     : undefined;
+    //   currentStep.set(STEPS.VERIFY);
+    // } catch (err) {
+    //   error = err instanceof Error ? err.message : 'Failed to sign up';
+    //   console.error('Error signing up:', err);
+    // } finally {
+    //   loading = false;
+    // }
   };
 
   // Handle verification callback
