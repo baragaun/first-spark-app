@@ -419,6 +419,10 @@ export class MyUserContext {
   public get isInitialized(): boolean {
     return this._isInitialized;
   }
+
+  public get myUserId(): string | undefined {
+    return this.client.myUserId;
+  }
 }
 
 // Create a singleton instance
