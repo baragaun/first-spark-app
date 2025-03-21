@@ -71,6 +71,12 @@
 
       const result = await myUserContext.verifyMultiStepActionToken(actionId, code);
 
+      // Here, we don't have to add another listener, since we already added one when
+      // we called `signInWithToken`. We do want to check the `result` object to
+      // make sure the `verifyMultiStepActionToken` call did not fail. But this
+      // function does not actually verify the token. For that, we are waiting for
+      // the listener to be called with the result of the token verification.
+
       if (!result || result.error) {
         // todo: handle error
         error = 'Invalid verification code. Please try again.';

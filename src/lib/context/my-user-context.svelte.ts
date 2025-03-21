@@ -14,11 +14,19 @@ import {
   UserIdentType,
 } from '@baragaun/bg-node-client';
 
+// todo: Implement the initialization of this context
+// @RaghvindYadav: This context was initialized (the client created) in the function
+//                 `getClient`. This context should not allow the direct access to `client`.
+//                 Also, the context should be initialized when the app starts.
 export class MyUserContext {
   private myUser = $state<MyUser | null>(null);
   private isLoading = $state(false);
   private error = $state<string | null>(null);
-  private client: BgNodeClient | undefined;
+  private client: BgNodeClient = new BgNodeClient();
+
+  // Non-state variables:
+  private isInitialized = false;
+  private isInitializing = false;
 
   // Derived state
   isAuthenticated = $derived(!!this.myUser);
@@ -26,10 +34,12 @@ export class MyUserContext {
   public async initialize(): Promise<void> {
     console.log('MyUserContext.init called.');
 
-    if (this.client) {
-      console.log('MyUserContext.init: client already exists.');
+    if (this.isInitialized || this.isInitializing) {
+      console.warn('MyUserContext.initialize: already initialized.');
       return;
     }
+
+    this.isInitializing = true;
 
     const config: BgNodeClientConfig = {
       inBrowser: true,
@@ -49,11 +59,9 @@ export class MyUserContext {
     //   config.useMockData = true;
     // }
 
-    this.client = await new BgNodeClient().init(config);
+    this.client.init(config);
 
-    if (!this.client) {
-      throw new Error('MyUserContext.init: Error initializing BgNodeClient');
-    }
+    this.isInitialized = true;
 
     // todo: Only fetch a fresh copy of the user if this code is not called too often
     // Ideally, this code is only called once per session. We may have to set a timer
@@ -61,6 +69,8 @@ export class MyUserContext {
     if (this.client.operations.myUser.isSignedIn()) {
       await this.client.operations.myUser.findMyUser({ cachePolicy: CachePolicy.networkFirst });
     }
+
+    this.isInitializing = false;
   }
 
   public get isSignedIn(): boolean {
