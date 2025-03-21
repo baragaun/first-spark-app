@@ -14,10 +14,6 @@ import {
   UserIdentType,
 } from '@baragaun/bg-node-client';
 
-// todo: Implement the initialization of this context
-// @RaghvindYadav: This context was initialized (the client created) in the function
-//                 `getClient`. This context should not allow the direct access to `client`.
-//                 Also, the context should be initialized when the app starts.
 export class MyUserContext {
   private myUser = $state<MyUser | null>(null);
   private isLoading = $state(false);
@@ -25,8 +21,8 @@ export class MyUserContext {
   private client: BgNodeClient = new BgNodeClient();
 
   // Non-state variables:
-  private isInitialized = false;
-  private isInitializing = false;
+  private _isInitialized = false;
+  private _isInitializing = false;
 
   // Derived state
   isAuthenticated = $derived(!!this.myUser);
@@ -34,12 +30,12 @@ export class MyUserContext {
   public async initialize(): Promise<void> {
     console.log('MyUserContext.init called.');
 
-    if (this.isInitialized || this.isInitializing) {
+    if (this._isInitialized || this._isInitializing) {
       console.warn('MyUserContext.initialize: already initialized.');
       return;
     }
 
-    this.isInitializing = true;
+    this._isInitializing = true;
 
     const config: BgNodeClientConfig = {
       inBrowser: true,
@@ -59,7 +55,7 @@ export class MyUserContext {
       this.client.init(config);
     } catch (error) {
       console.error('MyUserContext: Error initializing BgNodeClient:', { error });
-      this.isInitializing = false;
+      this._isInitializing = false;
       return;
     }
 
@@ -68,7 +64,7 @@ export class MyUserContext {
     // }
 
 
-    this.isInitialized = true;
+    this._isInitialized = true;
 
     // todo: Only fetch a fresh copy of the user if this code is not called too often
     // Ideally, this code is only called once per session. We may have to set a timer
@@ -77,7 +73,7 @@ export class MyUserContext {
       await this.client.operations.myUser.findMyUser({ cachePolicy: CachePolicy.networkFirst });
     }
 
-    this.isInitializing = false;
+    this._isInitializing = false;
   }
 
   public get isSignedIn(): boolean {
@@ -418,6 +414,10 @@ export class MyUserContext {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  public get isInitialized(): boolean {
+    return this._isInitialized;
   }
 }
 

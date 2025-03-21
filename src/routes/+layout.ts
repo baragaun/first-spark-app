@@ -1,14 +1,12 @@
 import { myUserContext } from '$lib/context/my-user-context.svelte';
 import type { LayoutLoad } from './$types';
 
-// Only initialize in browser environment
-export const ssr = false;
-
 export const load: LayoutLoad = async () => {
   try {
-    // Initialize the user context
-    await myUserContext.initialize();
-    console.log('MyUserContext initialized successfully');
+    if (!myUserContext.isInitialized) {
+      await myUserContext.initialize();
+      console.log('MyUserContext initialized successfully');
+    }
 
     return {
       initialized: true,
