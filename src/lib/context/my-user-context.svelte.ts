@@ -14,7 +14,8 @@ import {
   type SidMultiStepActionProgress,
   type SignInUserInput,
   type SignUpUserInput,
-  UserIdentType, SignInSignUpResponse,
+  UserIdentType,
+  type SignInSignUpResponse,
 } from '@baragaun/bg-node-client'
 import { AppUiMessage } from '@/types/enums'
 import translate from '@/helpers/language/translate'
@@ -127,6 +128,7 @@ export class MyUserContext {
 
       const input: SignInUserInput = {
         ident: userIdent,
+        identType,
         password,
       };
 
