@@ -13,6 +13,8 @@
     SidMultiStepActionProgress,
     UserIdentType,
   } from '@baragaun/bg-node-client';
+  import translate from '@/helpers/language/translate'
+  import { AppUiMessage } from '@/types/enums'
 
   // State management with Svelte 5 runes
   let identifier = $state(''); // either an email or a username
@@ -34,42 +36,52 @@
     showPasswordInput = !showPasswordInput;
   }
 
-  const handleSignIn = async () => {
+  const onSignIn = async () => {
+    if (!showPasswordInput || !password) {
+      await handleTokenSignIn();
+      return;
+    }
+
     loading = true;
     error = '';
 
-    console.log('handleSignIn', identifier, password);
+    console.log('SignInForm.onSignIn: sending', { identifier, password });
 
     try {
-      if (showPasswordInput && password) {
-        const user = await myUserContext.signInUser(identifier, identType, password);
-        console.log('handleSignIn', user);
-        if (user.myUser) {
-          await goto('/');
-        } else {
-          error = 'Invalid credentials. Please try again.';
-        }
-      } else {
-        await handleTokenSignIn();
+      const response = await myUserContext.signInUser(identifier, identType, password);
+
+      console.log('SignInForm.onSignIn: response received.', response);
+
+      if (
+        !response ||
+        (!response.object && !response.error) ||
+        !response.object?.myUser
+      ) {
+        console.error('SignInForm.onSignIn: incorrect response', { response });
+        error = translate(AppUiMessage.systemError);
+        return;
       }
-    } catch (err) {
-      console.error('Error signing in:', err);
-      error = 'Invalid credentials. Please try again.';
+
+      await goto('/');
+    } catch (error) {
+      console.error('SignInForm.onSignIn: error:', { error });
+      error = translate(AppUiMessage.systemError);
     } finally {
       loading = false;
     }
   };
 
-  const handleVerifyOtp = async ({ email, code }: { email: string; code: string }) => {
+  const handleVerifyOtp = async ({ email, code }: { email: string; code: string }): Promise<void> => {
     try {
       loading = true;
 
       if (!actionId) {
-        // todo: handle error
+        console.error('SignInForm.handleVerifyOtp: actionId missing:');
+        error = translate(AppUiMessage.systemError);
         return;
       }
 
-      const result = await myUserContext.verifyMultiStepActionToken(actionId, code);
+      const response = await myUserContext.verifyMultiStepActionToken(actionId, code);
 
       // Here, we don't have to add another listener, since we already added one when
       // we called `signInWithToken`. We do want to check the `result` object to
@@ -77,15 +89,21 @@
       // function does not actually verify the token. For that, we are waiting for
       // the listener to be called with the result of the token verification.
 
-      if (!result || result.error) {
-        // todo: handle error
-        error = 'Invalid verification code. Please try again.';
+      if (!response) {
+        console.error('SignInForm.handleVerifyOtp: invalid response:', { result: response });
+        error = translate(AppUiMessage.systemError);
         return;
       }
-    } catch (err) {
-      console.error('Error verifying OTP:', err);
-      error = err instanceof Error ? err.message : 'Verification failed';
-      return Promise.reject(err);
+
+      if (response.error) {
+        error = translate(AppUiMessage.systemError);
+        // todo: translate error?
+        error = response.error;
+        return;
+      }
+    } catch (error) {
+      console.error('SignInForm.handleVerifyOtp: error:', { error });
+      error = translate(AppUiMessage.systemError);
     } finally {
       loading = false;
     }
@@ -266,7 +284,7 @@
           </Button>
         </Alert>
       {/if}
-      <form onsubmit={handleSignIn}>
+      <form onsubmit={onSignIn}>
         <div class="grid gap-4">
           <div class="grid gap-2">
             <Label for="email">Email or Username</Label>

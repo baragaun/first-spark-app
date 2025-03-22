@@ -4,8 +4,9 @@ import type { LayoutLoad } from './$types';
 export const load: LayoutLoad = async () => {
   try {
     if (!myUserContext.isInitialized) {
+      console.log('LayoutLoad: Initializing MyUserContext');
       await myUserContext.initialize();
-      console.log('MyUserContext initialized successfully');
+      console.log('LayoutLoad initialized successfully');
     }
 
     return {
@@ -14,7 +15,7 @@ export const load: LayoutLoad = async () => {
     };
   } catch (err) {
     const error = err instanceof Error ? err : new Error('Failed to initialize client');
-    console.error('Failed to initialize:', error);
+    console.error('LayoutLoad: Failed to initialize:', error);
 
     return {
       initialized: false,

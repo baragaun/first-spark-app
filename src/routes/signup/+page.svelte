@@ -210,17 +210,12 @@
 
   // Handle resend from the EmailVerification component
   const handleResend = async (email: string) => {
-    const verifyResponse = await myUserContext.verifyMyEmail(email);
+    const response = await myUserContext.sendMultiStepActionNotification(actionId, email);
 
-    if (verifyResponse.error || !verifyResponse?.object?.actionProgress?.actionId) {
-      error = verifyResponse.error || 'Failed to send verification email';
+    if (!response || response.error) {
+      error = 'We failed to send the verification token. Please try again.';
       return;
     }
-
-    actionId = verifyResponse?.object?.actionProgress?.actionId;
-    expiredAt = verifyResponse?.object?.actionProgress?.expiresAt
-      ? new Date(verifyResponse?.object?.actionProgress?.expiresAt)
-      : undefined;
     currentStep.set(STEPS.VERIFY);
   };
 

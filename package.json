@@ -53,7 +53,8 @@
     "vitest": "^3.0.7"
   },
   "dependencies": {
-    "@baragaun/bg-node-client": "^0.0.12",
+    "@baragaun/bg-node-client": "link:../bg-node-client",
+    "dexie": "^4.0.10",
     "formsnap": "^2.0.0",
     "mode-watcher": "^0.5.1",
     "rxdb": "^16.8.1",
@@ -63,8 +64,13 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "@firebase/util",
+      "core-js",
       "esbuild",
-      "protobufjs"
-    ]
+      "protobufjs",
+      "rxdb"
+    ],
+    "overrides": {
+      "dexie": "4.0.10"
+    }
   }
 }
