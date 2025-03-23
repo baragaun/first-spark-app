@@ -58,6 +58,18 @@ export class MyUserContext {
     }
 
     try {
+      if (typeof window === 'undefined') {
+        console.error('MyUserContext.initialize: not running in the browser.');
+        this._isInitializing = false;
+        return;
+      }
+
+      if (!('indexedDB' in window)) {
+        console.error('MyUserContext.initialize: indexedDB is not supported in this browser.');
+        this._isInitializing = false;
+        return;
+      }
+
       await this.client.init(config);
     } catch (error) {
       console.error('MyUserContext: Error initializing BgNodeClient:', { error });
