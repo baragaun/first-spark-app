@@ -3,9 +3,24 @@
   import { Input } from '$lib/components/ui/input';
   import { onDestroy } from 'svelte';
   import { writable, get } from 'svelte/store';
-  import OtpVerification from '$lib/components/otp-verification.svelte';
+  import TokenForm from '$lib/components/token-form.svelte';
   import { myUserContext } from '@/context/my-user-context.svelte';
   import { UserIdentType } from '@baragaun/bg-node-client';
+
+  interface Props {
+    email?: string;
+    initialStep?: string;
+    buttonText?: string;
+    verifyButtonText?: string;
+    loadingText?: string;
+    verifyingText?: string;
+    showSkipButton?: boolean;
+    onEmailSubmit?: (email: string) => void;
+    onSendToken?: (token: string) => void;
+    onResend?: (email: string) => void;
+    onBack?: (step: string) => void;
+    onSkip?: () => void;
+  }
 
   // Props
   let {
@@ -17,11 +32,11 @@
     verifyingText = 'Verifying...',
     showSkipButton = false,
     onEmailSubmit = (email: string) => {},
-    onVerify = (code: string) => {},
+    onSendToken = (token: string) => {},
     onResend = (email: string) => {},
     onBack = (step: string) => {},
     onSkip = () => {},
-  } = $props();
+  }: Props = $props();
 
   // Email validation function
   const isValidEmail = (email: string): boolean => {
@@ -73,12 +88,12 @@
     }, 1000);
   };
 
-  const handleResendCode = async () => {
+  const onSendNotification = async () => {
     if (!canResend) return;
 
     loading = true;
     try {
-      onResend({ email });
+      onResend(email);
       startResendTimer(email);
     } catch (error) {
       console.error('Error resending code:', error);
@@ -115,7 +130,7 @@
 
   const handleBack = () => {
     const currentStepValue = get(currentStep);
-    onBack({ step: currentStepValue });
+    onBack(currentStepValue);
     currentStep.set(currentStepValue === STEPS.VERIFY ? STEPS.EMAIL : STEPS.VERIFY);
   };
 
@@ -179,14 +194,13 @@
   </div>
 {:else if $currentStep === STEPS.VERIFY}
   <div class="space-y-4">
-    <OtpVerification
-      {email}
+    <TokenForm
       {resendTimer}
       {canResend}
       {verifyButtonText}
       {verifyingText}
-      onVerify={({ code }) => onVerify({ code })}
-      onResend={() => handleResendCode()}
+      onSendToken={onSendToken}
+      onSendNotification={onSendNotification}
       onBack={handleBack}
     />
 

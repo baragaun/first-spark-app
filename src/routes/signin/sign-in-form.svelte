@@ -329,7 +329,6 @@
   <Card.Content>
     {#if formState === 'token'}
       <TokenForm
-        tokenStatus={tokenStatus}
         {resendTimer}
         {canResend}
         onSendToken={onSendToken}

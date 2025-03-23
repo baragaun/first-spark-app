@@ -11,7 +11,7 @@
   export let canResend = false;
 
   // Event callback props
-  export let onSendToken = (code: string): void => {};
+  export let onSendToken = (token: string): void => {};
   export let onSendNotification = (): void => {};
   export let onBack = (): void => {};
 
