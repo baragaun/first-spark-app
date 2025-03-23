@@ -2,10 +2,12 @@
 import type { LayoutLoad } from './$types';
 import { browser } from '$app/environment';
 
-export const ssr = false;
-
 export const load: LayoutLoad = async () => {
   try {
+    // todo: I think this here is not run in the browser. We have to initialize
+    //       the BgNodeClient in the browser, or it won't have access to IndexedDB.
+    //       I moved the initialization code to the provider at src/lib/context/my-user-provider.svelte
+
     if (!browser) {
       console.log('Layout.load: not running in browser, skipping initialization');
       return {

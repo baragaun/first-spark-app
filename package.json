@@ -53,7 +53,7 @@
     "vitest": "^3.0.7"
   },
   "dependencies": {
-    "@baragaun/bg-node-client": "link:../bg-node-client",
+    "@baragaun/bg-node-client": "^0.0.14",
     "dexie": "^4.0.10",
     "formsnap": "^2.0.0",
     "mode-watcher": "^0.5.1",
