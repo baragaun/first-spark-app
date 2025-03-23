@@ -108,7 +108,6 @@ export class MyUserContext {
 
   public async signInUser(
     userIdent: string,
-    identType: UserIdentType | undefined,
     password: string,
   ): Promise<MutationResult<SignInSignUpResponse>> {
     if (!this.client || this.client.isInitialized) {
@@ -128,7 +127,6 @@ export class MyUserContext {
 
       const input: SignInUserInput = {
         ident: userIdent,
-        identType,
         password,
       };
 

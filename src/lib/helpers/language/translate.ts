@@ -1,39 +1,51 @@
-import { AppUiMessage } from '@/types/enums'
-import {
-  translate as translateFromClient,
-  UiLanguage,
-  UiMessageType,
-} from '@baragaun/bg-node-client'
+import { AppUiMessage } from '@/types/enums';
+import { UiLanguage } from '@baragaun/bg-node-client';
 
-let appUiMessages: { [key: string]: { [key: string]: string }} = {
+type AppUiMessages = Partial<{
+  [key in UiLanguage]: {
+    [key in AppUiMessage]: string;
+  };
+}>;
+
+const appUiMessages: AppUiMessages = {
   [UiLanguage.en]: {
-    [AppUiMessage.systemError]: 'A system error occurred. Please try again later.',
+    [AppUiMessage.empty]: '',
+    [AppUiMessage.systemError]: 'An error occurred. Please try again later.',
+
+    [AppUiMessage.msaTokenFailed]: 'We could not verify the code you entered. Please try again.',
+    [AppUiMessage.msaTokenFailedToSend]: 'We could not send you the message. Please check the email you entered.',
+    [AppUiMessage.msaTokenSending]: 'Processing.',
+    [AppUiMessage.msaTokenSent]: 'The message has been sent. Please check your inbox.',
+    [AppUiMessage.msaTokenSuccess]: 'The code has been verified successfully.',
+    [AppUiMessage.msaTokenVerifying]: 'Verifying your code...',
+    [AppUiMessage.msaTimedOut]: 'The verification process timed out. Please try again.',
+  },
+  [UiLanguage.de]: {
+    [AppUiMessage.empty]: '',
+    [AppUiMessage.systemError]: 'Es ist ein Fehler aufgetreten. Bitte versuche es nochmals später.',
+
+    [AppUiMessage.msaTokenFailed]: 'We could not verify the code you entered. Please try again.',
+    [AppUiMessage.msaTokenFailedToSend]: 'We could not send you the message. Please check the email you entered.',
+    [AppUiMessage.msaTokenSending]: 'Processing.',
+    [AppUiMessage.msaTokenSent]: 'The message has been sent. Please check your inbox.',
+    [AppUiMessage.msaTokenSuccess]: 'The code has been verified successfully.',
+    [AppUiMessage.msaTokenVerifying]: 'Verifying your code...',
+    [AppUiMessage.msaTimedOut]: 'The verification process timed out. Please try again.',
   }
 }
 
 const translate = (
-  key: string,
-  uiMessageType?: UiMessageType,
-  language: UiLanguage = UiLanguage.en,
-  defaultKey: string = '',
+  key: AppUiMessage | string,
+  defaultKey: AppUiMessage | string = AppUiMessage.empty,
   defaultMessage = '',
+  language: UiLanguage = UiLanguage.en,
 ): string => {
-  if (uiMessageType === UiMessageType.appErrorCode) {
-    return appUiMessages[language]?.[key] ||
-      appUiMessages[UiLanguage.en]?.[key] ||
-      appUiMessages[language]?.[defaultKey] ||
-      appUiMessages[UiLanguage.en]?.[defaultKey] ||
-      defaultMessage ||
-      '';
-  }
-
-  return translateFromClient(
-    key,
-    uiMessageType,
-    language,
-    defaultKey,
-    defaultMessage,
-  );
+  return appUiMessages[language]?.[key as AppUiMessage] ||
+    appUiMessages[UiLanguage.en]?.[key as AppUiMessage] ||
+    appUiMessages[language]?.[defaultKey as AppUiMessage] ||
+    appUiMessages[UiLanguage.en]?.[defaultKey as AppUiMessage] ||
+    defaultMessage ||
+    '';
 }
 
 export default translate;
