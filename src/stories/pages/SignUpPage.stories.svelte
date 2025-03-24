@@ -1,6 +1,5 @@
 <script module>
   import { defineMeta } from '@storybook/addon-svelte-csf';
-  import * as Sidebar from '$lib/components/ui/sidebar/index.js';
   import SignUp from '../../routes/signup/+page.svelte';
   import { within, userEvent, expect, waitFor } from '@storybook/test';
 
@@ -14,25 +13,23 @@
 </script>
 
 <Story name="Default">
-  <Sidebar.Provider>
-    <SignUp
-      data={{
-        form: {
-          data: {
-            email: '',
-            emailOtp: '',
-            username: '',
-            password: '',
-          },
-          errors: {},
-          constraints: {},
-          id: '',
-          valid: false,
-          posted: false,
+  <SignUp
+    data={{
+      form: {
+        data: {
+          email: '',
+          emailOtp: '',
+          username: '',
+          password: '',
         },
-      }}
-    />
-  </Sidebar.Provider>
+        errors: {},
+        constraints: {},
+        id: '',
+        valid: false,
+        posted: false,
+      },
+    }}
+  />
 </Story>
 
 <!-- <Story name="Sign Up Process" play={async ({ canvasElement }) => {

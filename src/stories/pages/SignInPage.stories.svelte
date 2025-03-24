@@ -1,6 +1,5 @@
 <script module>
   import { defineMeta } from '@storybook/addon-svelte-csf';
-  import * as Sidebar from '$lib/components/ui/sidebar/index.js';
   import SignIn from '../../routes/signin/+page.svelte';
   import { within, userEvent, expect, waitFor } from '@storybook/test';
 
@@ -14,9 +13,7 @@
 </script>
 
 <Story name="Default">
-  <Sidebar.Provider>
-    <SignIn />
-  </Sidebar.Provider>
+  <SignIn />
 </Story>
 
 <Story

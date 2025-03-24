@@ -39,7 +39,7 @@ describe('NavBar', () => {
   });
 
   it('renders Sign Out button component when authenticated', async () => {
-    localStorage.setItem('authToken', 'your-auth-token');
+    // localStorage.setItem('authToken', 'your-auth-token');
     // authStore.set({ isAuthenticated: true });
     render(NavBar);
 
