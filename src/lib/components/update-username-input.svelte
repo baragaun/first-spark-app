@@ -81,6 +81,7 @@
   };
 
   // Function to get a suggested username
+  // TODO: update this to use findAvailableUserHandle
   const getSuggestedUsername = async () => {
     try {
       isGeneratingSuggestion = true;
@@ -106,6 +107,7 @@
   });
 
   // Dummy function to check username availability
+  // TODO: update this to use isUserIdentAvailable
   const checkUsernameAvailability = async (username: string): Promise<boolean> => {
     // Simulate API delay
     await new Promise((resolve) => setTimeout(resolve, 300));
@@ -164,7 +166,7 @@
   };
 </script>
 
-Update-username-input<button
+<button
   class="group flex w-full items-center justify-between rounded-lg py-2 hover:bg-muted/50"
   onclick={() => (showUsernameEdit = true)}
 >

@@ -11,7 +11,6 @@
   const myUser = $derived(myUserContext.getMyUser());
   const isAuthenticated = $derived(myUserContext.isAuthenticated);
   const isLoading = $derived(myUserContext.getIsLoading());
-
 </script>
 
 <nav

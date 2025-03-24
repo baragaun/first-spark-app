@@ -9,11 +9,10 @@
   import { PasswordInput } from '$lib/components/ui/password-input';
   import { AlertDescription } from '$lib/components/ui/alert';
   import passwordHelpers from '$lib/helpers/password-helpers';
-  import UpdateUsernameInput from '@/components/settings/account/update-username-input.svelte';
+  import UpdateUsernameInput from '../../../lib/components/update-username-input.svelte';
 
   const { getPasswordError, validatePassword } = passwordHelpers;
 
-  // State management using Svelte 5 runes
   let isLoading = $state(false);
   let showDeleteConfirm = $state(false);
   let showEmailEdit = $state(false);

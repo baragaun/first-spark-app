@@ -1,12 +1,12 @@
+import { fail, superValidate } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
 import type { Actions, PageServerLoad } from './$types';
-import { fail, message, superValidate } from "sveltekit-superforms";
-import { formSchema } from "./form/sign-up-form-schema.js";
-import { zod } from "sveltekit-superforms/adapters";
+import { formSchema } from './form/sign-up-form-schema.js';
 
 export const load: PageServerLoad = async () => {
- return {
-  form: await superValidate(zod(formSchema)),
- };
+  return {
+    form: await superValidate(zod(formSchema)),
+  };
 };
 
 export const actions: Actions = {

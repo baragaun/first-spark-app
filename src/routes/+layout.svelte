@@ -11,19 +11,17 @@
 </script>
 
 <MyUserProvider>
-    <div class="flex min-h-screen flex-col bg-background font-sans antialiased">
-      <ModeWatcher />
-      <Sidebar.Provider>
-        <AppSidebar />
-        <div class="flex flex-1 flex-col">
-          <NavBar />
-          <main class="flex flex-1 flex-col">
-            {@render children?.()}
-          </main>
-          <Footer />
-        </div>
-      </Sidebar.Provider>
-    </div>
-  <!-- {/if} -->
+  <div class="flex min-h-screen flex-col bg-background font-sans antialiased">
+    <ModeWatcher />
+    <Sidebar.Provider>
+      <AppSidebar />
+      <div class="flex flex-1 flex-col">
+        <NavBar />
+        <main class="flex flex-1 flex-col">
+          {@render children?.()}
+        </main>
+        <Footer />
+      </div>
+    </Sidebar.Provider>
+  </div>
 </MyUserProvider>
-
