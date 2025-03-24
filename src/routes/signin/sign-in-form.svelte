@@ -1,14 +1,14 @@
-<script lang='ts'>
+<script lang="ts">
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
   import { Label } from '@/components/ui/label';
   // import { PasswordInput } from '$lib/components/ui/password-input';
-  import * as Card from "$lib/components/ui/card"
+  import * as Card from '$lib/components/ui/card';
   import { goto } from '$app/navigation';
   import { UserIdentType } from '@baragaun/bg-node-client';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
 
-  let identifier = ''; // either an email or a username
+  let identifier = $state(''); // either an email or a username
   let identType = UserIdentType.email; // either an email or a username
 
   let email = $state('');
@@ -36,19 +36,19 @@
     error = '';
 
     try {
-      console.log('trying to sign in')
+      console.log('trying to sign in');
       // if (showPasswordInput && password) {
-        console.log('signing in: ', identifier)
-        const user = await myUserContext.signIn(identifier, identType, password);
-        console.log('handleSignIn.user: ', user);
-        if (user.myUser) {
-          await goto('/');
-        } else {
-          error = 'Invalid credentials. Please try again.';
-        }
+      console.log('signing in: ', identifier);
+      const user = await myUserContext.signIn(identifier, identType, password);
+      console.log('handleSignIn.user: ', user);
+      if (user.myUser) {
+        await goto('/');
+      } else {
+        error = 'Invalid credentials. Please try again.';
+      }
       // } else {
-        // console.log('handle token sign in')
-        // await handleTokenSignIn();
+      // console.log('handle token sign in')
+      // await handleTokenSignIn();
       // }
     } catch (err) {
       console.error('Error signing in:', err);
@@ -107,16 +107,22 @@
 </script>
 
 <Card.Root class="mx-auto max-w-sm">
-	<Card.Header>
-		<Card.Title class="text-2xl">Sign In</Card.Title>
-		<Card.Description>Enter your email below to login to your account</Card.Description>
-	</Card.Header>
-	<Card.Content>
-		<div class="grid gap-4">
-			<div class="grid gap-2">
-				<Label for="email">Email or Username</Label>
-				<Input bind:value={identifier} id="email" type="email" placeholder="me@example.com, myusername" required />
-			</div>
+  <Card.Header>
+    <Card.Title class="text-2xl">Sign In</Card.Title>
+    <Card.Description>Enter your email below to login to your account</Card.Description>
+  </Card.Header>
+  <Card.Content>
+    <div class="grid gap-4">
+      <div class="grid gap-2">
+        <Label for="email">Email or Username</Label>
+        <Input
+          bind:value={identifier}
+          id="email"
+          type="email"
+          placeholder="me@example.com, myusername"
+          required
+        />
+      </div>
 
       {#if showPasswordInput}
         <div class="grid gap-2">
@@ -130,38 +136,24 @@
         </div>
       {/if}
 
-      <Button
-        type="submit"
-        class="w-full"
-        onclick={handleSignIn}
-      >
-        Sign in
-      </Button>
+      <Button type="submit" class="w-full" onclick={handleSignIn}>Sign in</Button>
 
       {#if !showPasswordInput}
-        <Button
-          variant="outline"
-          class="w-full"
-          onclick={togglePasswordInput}
-        >
+        <Button variant="outline" class="w-full" onclick={togglePasswordInput}>
           Sign in with password
         </Button>
       {/if}
-		</div>
+    </div>
     {#if showPasswordInput}
       <div class="mt-4 text-center text-sm">
-        <Button
-        variant='link'
-        onclick={togglePasswordInput}
-        class="underline"
-        >
+        <Button variant="link" onclick={togglePasswordInput} class="underline">
           Sign in with your email
         </Button>
       </div>
     {/if}
-		<div class="mt-4 text-center text-sm">
-			Don't have an account?
-			<a href="/signup" class="underline"> Sign up </a>
-		</div>
-	</Card.Content>
+    <div class="mt-4 text-center text-sm">
+      Don't have an account?
+      <a href="/signup" class="underline"> Sign up </a>
+    </div>
+  </Card.Content>
 </Card.Root>

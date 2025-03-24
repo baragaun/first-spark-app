@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { PageData } from "./$types";
+  import type { PageData } from './$types';
   import SignUpForm from './form/sign-up-form.svelte';
   let { data }: { data: PageData } = $props();
 </script>

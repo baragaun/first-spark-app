@@ -10,9 +10,9 @@
   const isAuthenticated = $derived(myUserContext.isAuthenticated);
 
   const handleLogout = () => {
-  // TODO: Handle logout
+    // TODO: Handle logout
     console.error('called handleLogout');
-    myUserContext.signMeOut()
+    myUserContext.signMeOut();
     goto('/signin');
   };
 </script>
