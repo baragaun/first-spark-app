@@ -1,19 +1,11 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
-  import { writable } from 'svelte/store';
-  import { goto } from '$app/navigation';
-  import { PasswordInput } from '$lib/components/ui/password-input';
-  import EmailVerification from '$lib/components/email-verification.svelte';
   import AuthCard from '$lib/components/ui/auth-card.svelte';
-  import passwordHelpers from '$lib/helpers/password-helpers';
   import { myUserContext } from '$lib/context/my-user-context.svelte';
   import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert';
   import X from 'lucide-svelte/icons/x';
   import { UserIdentType } from '@baragaun/bg-node-client';
-  import { MultiStepActionEventType, SidMultiStepActionProgress } from '@baragaun/bg-node-client'
-
-  const { getPasswordError, validatePassword } = passwordHelpers;
 
   interface Props {
     loading: boolean;
@@ -28,6 +20,23 @@
 
   let email = $state('');
   let error = $state('');
+  let checkingEmail = $state(false);
+  let emailError = $state('');
+
+  const checkEmailAvailability = async (email: string): Promise<boolean> => {
+    try {
+      const result = await myUserContext.isUserIdentAvailable(email, UserIdentType.email);
+      return result.isAvailable ?? false;
+    } catch (error) {
+      console.error('Error checking email availability:', error);
+      return false;
+    }
+  };
+
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+  };
 </script>
 
 <div class="relative mx-auto flex h-screen items-center justify-center">
@@ -51,16 +60,47 @@
           </Button>
         </Alert>
       {/if}
-      <EmailVerification
-        {email}
-        initialStep="email"
-        buttonText="Continue"
-        verifyButtonText="Verify"
-        loadingText="Sending..."
-        verifyingText="Verifying..."
-        showSkipButton={true}
-        onEmailSubmit={onSubmit}
-      />
+      <div class="space-y-4">
+        <div class="space-y-2">
+          <Input
+            type="email"
+            placeholder="Enter your email"
+            bind:value={email}
+            pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2}"
+            title="Please enter a valid email address"
+            required
+            onblur={async () => {
+          if (email && isValidEmail(email)) {
+            checkingEmail = true;
+            const isAvailable = await checkEmailAvailability(email);
+            checkingEmail = false;
+            if (!isAvailable) {
+              emailError = 'This email address is already registered.';
+            } else {
+              emailError = '';
+            }
+          } else if (!email) {
+            // Clear error when input is empty
+            emailError = '';
+          }
+        }}
+          />
+          {#if email && !isValidEmail(email)}
+            <p class="text-xs text-destructive">Please enter a valid email address</p>
+          {/if}
+          {#if emailError}
+            <p class="text-xs text-destructive">{emailError}</p>
+          {/if}
+        </div>
+        <Button
+          type="submit"
+          class="w-full"
+          disabled={loading || checkingEmail || !email || !isValidEmail(email) || emailError !== ''}
+          onclick={() => onSubmit(email)}
+        >
+          {loading ? "loading" : "Submit"}
+        </Button>
+      </div>
 
       <div class="mt-4 text-center text-sm">
         <span class="text-muted-foreground">Already a have an account?</span>
