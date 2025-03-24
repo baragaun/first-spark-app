@@ -22,7 +22,7 @@
   let userIdent = $state(''); // either an email or a username
 
   // Indicators:
-  let loading = $state(false); // todo: show loading indicator using `loading`?
+  let loading = $state(false);
 
   // Messaging to user:
   let error = $state('');
@@ -46,7 +46,7 @@
       await startTokenSignIn();
       return;
     }
-    // console.log('SignInForm.onSignInWithPassword: sending', { identifier, password });
+    // console.log('SignInForm.onSignInWithPassword: sending', { userIdent, password });
 
     try {
       loading = true;
@@ -60,7 +60,7 @@
       }
 
       if (!response || !response.object || !response.object.myUser) {
-        console.error('SignInForm.onSignInWithPassword: incorrect response', { response });
+        // console.error('SignInForm.onSignInWithPassword: incorrect response', { response });
         error = translate(AppUiMessage.systemError);
         return;
       }

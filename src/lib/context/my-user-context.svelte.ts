@@ -121,7 +121,9 @@ export class MyUserContext {
     userIdent: string,
     password: string,
   ): Promise<MutationResult<SignInSignUpResponse>> {
-    if (!this.client || this.client.isInitialized) {
+
+    if (!this.client || !this._isInitialized) {
+      this.myUser = null;
       this.error = translate(AppUiMessage.systemError);
       return { operation: MutationType.update, error: this.error };
     }

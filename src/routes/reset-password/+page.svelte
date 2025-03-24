@@ -95,11 +95,13 @@
   };
 
   const handleResendCode = async () => {
-    if (!canResend) return;
+    if (!canResend || !resetActionId) return;
 
     loading = true;
     try {
-      await handleSendCode();
+      // await handleSendCode();
+      await myUserContext.sendMultiStepActionNotification(resetActionId, identifier);
+      // need to handle sendMultiStepActionNotification for identifier field because function expect this is an email only.
     } catch (error) {
       console.error('Error resending code:', error);
     } finally {
