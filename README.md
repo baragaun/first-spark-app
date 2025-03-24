@@ -49,7 +49,7 @@ You can preview the production build with `pnpm run preview`.
 
 ## Testing
 
-This project includes both unit tests and end-to-end (e2e) tests.
+This project includes unit tests, and end-to-end (e2e) tests and a Storybook instance.
 
 ### Unit Tests
 
@@ -82,6 +82,11 @@ To run both unit and e2e tests in sequence:
 
 ```shell
 pnpm run test:all
+```
+
+### Run Storybook
+```shell
+pnpm run storybook
 ```
 
 > To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
