@@ -13,7 +13,8 @@ const appUiMessages: AppUiMessages = {
     [AppUiMessage.systemError]: 'An error occurred. Please try again later.',
 
     [AppUiMessage.msaTokenFailed]: 'We could not verify the code you entered. Please try again.',
-    [AppUiMessage.msaTokenFailedToSend]: 'We could not send you the message. Please check the email you entered.',
+    [AppUiMessage.msaTokenFailedToSend]:
+      'We could not send you the message. Please check the email you entered.',
     [AppUiMessage.msaTokenSending]: 'Processing.',
     [AppUiMessage.msaTokenSent]: 'The message has been sent. Please check your inbox.',
     [AppUiMessage.msaTokenSuccess]: 'The code has been verified successfully.',
@@ -25,14 +26,15 @@ const appUiMessages: AppUiMessages = {
     [AppUiMessage.systemError]: 'Es ist ein Fehler aufgetreten. Bitte versuche es nochmals später.',
 
     [AppUiMessage.msaTokenFailed]: 'We could not verify the code you entered. Please try again.',
-    [AppUiMessage.msaTokenFailedToSend]: 'We could not send you the message. Please check the email you entered.',
+    [AppUiMessage.msaTokenFailedToSend]:
+      'We could not send you the message. Please check the email you entered.',
     [AppUiMessage.msaTokenSending]: 'Processing.',
     [AppUiMessage.msaTokenSent]: 'The message has been sent. Please check your inbox.',
     [AppUiMessage.msaTokenSuccess]: 'The code has been verified successfully.',
     [AppUiMessage.msaTokenVerifying]: 'Verifying your code...',
     [AppUiMessage.msaTimedOut]: 'The verification process timed out. Please try again.',
-  }
-}
+  },
+};
 
 const translate = (
   key: AppUiMessage | string,
@@ -40,12 +42,14 @@ const translate = (
   defaultMessage = '',
   language: UiLanguage = UiLanguage.en,
 ): string => {
-  return appUiMessages[language]?.[key as AppUiMessage] ||
+  return (
+    appUiMessages[language]?.[key as AppUiMessage] ||
     appUiMessages[UiLanguage.en]?.[key as AppUiMessage] ||
     appUiMessages[language]?.[defaultKey as AppUiMessage] ||
     appUiMessages[UiLanguage.en]?.[defaultKey as AppUiMessage] ||
     defaultMessage ||
-    '';
-}
+    ''
+  );
+};
 
 export default translate;

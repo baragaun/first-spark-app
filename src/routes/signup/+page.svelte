@@ -1,22 +1,14 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
-  import { Input } from '$lib/components/ui/input';
   import { writable } from 'svelte/store';
   import { goto } from '$app/navigation';
-  import { PasswordInput } from '$lib/components/ui/password-input';
-  import EmailVerification from '$lib/components/email-verification.svelte';
-  import AuthCard from '$lib/components/ui/auth-card.svelte';
-  import passwordHelpers from '$lib/helpers/password-helpers';
   import { myUserContext } from '$lib/context/my-user-context.svelte';
-  import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert';
-  import X from 'lucide-svelte/icons/x';
-  import { UserIdentType } from '@baragaun/bg-node-client';
-  import { MultiStepActionEventType, SidMultiStepActionProgress } from '@baragaun/bg-node-client'
-  import Step0 from './components/step0.svelte';
-  import Step1 from './components/step1.svelte';
-  import Step2 from './components/step2.svelte';
-
-  const { getPasswordError, validatePassword } = passwordHelpers;
+  import { MultiStepActionEventType, SidMultiStepActionProgress } from '@baragaun/bg-node-client';
+  import EmailVerification from '@/components/email-verification.svelte';
+  import TokenForm from '@/components/token-form.svelte';
+  import CredentialForm from '@/components/credential-form.svelte';
+  import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+  import { X } from 'lucide-svelte';
 
   let currentStep = writable(0);
   let email = $state('');
@@ -25,52 +17,43 @@
   let loading = $state(false);
   let error = $state('');
   let actionId = $state('');
-  let expiredAt = $state<Date | undefined>(undefined);
-  let checkingUsername = $state(false);
-  let usernameError = $state('');
-  let suggestedHandle = $state('');
-  let emailSent = false
-
-  // $effect(() => {
-  //   const user = myUserContext.getMyUser();
-  //   if (user && user.userHandle) {
-  //     username = user.userHandle;
-  //   }
-  // });
+  let emailSent = $state(false);
 
   // Handle email submission from the EmailVerification component
-  const onSubmitEmail = async (email: string): Promise<void> => {
+  const onEmailSubmit = async (email: string): Promise<void> => {
     loading = true;
     error = '';
     try {
       const response = await myUserContext.signUpUser(email);
 
-      if (response.error) {
-        error = response.error;
+      if (response.error || !response.myUser?.id) {
+        error = response.error || 'Failed to sign up';
         return;
       }
 
       // todo: Verify that the sign up was successful
+
+      currentStep.set(1);
 
       startEmailConfirmation(email).catch((error) => {
         console.error('Error starting email confirmation:', error);
         error = 'Failed to send verification email. Please try again.';
       });
     } catch (err) {
-      error = err instanceof Error ? err.message : 'Failed to sign up'
-      console.error('Error signing up:', err)
+      error = err instanceof Error ? err.message : 'Failed to sign up';
+      console.error('Error signing up:', err);
     } finally {
-      loading = false
+      loading = false;
     }
-  }
+  };
 
   const startEmailConfirmation = async (email: string) => {
-    loading = true
-    error = ''
+    loading = true;
+    error = '';
     try {
-      console.log('Email submitted:', email)
+      console.log('Email submitted:', email);
 
-      const response = await myUserContext.verifyMyEmail(email)
+      const response = await myUserContext.verifyMyEmail(email);
 
       if (
         !response ||
@@ -80,12 +63,12 @@
         !response?.object.actionProgress?.actionId ||
         !response?.object.run
       ) {
-        error = 'Failed to send the verification token. Please try again.'
-        return
+        error = 'Failed to send the verification token. Please try again.';
+        return;
       }
 
-      actionId = response?.object.actionProgress?.actionId
-      currentStep.set(1)
+      actionId = response?.object.actionProgress?.actionId;
+      currentStep.set(1);
 
       response.object.run.addListener({
         id: 'SignUpForm',
@@ -99,9 +82,9 @@
             console.error(
               'SignUpPage.multiStepActionListener: Notification failed.',
               action.notificationResult,
-            )
-            error = 'We could not send the verification token to your email. Please try again.'
-            return
+            );
+            error = 'We could not send the verification token to your email. Please try again.';
+            return;
           }
 
           if (eventType === MultiStepActionEventType.notificationSent) {
@@ -109,37 +92,34 @@
             console.log(
               'SignUpPage.multiStepActionListener: Notification sent out.',
               action.notificationResult,
-            )
-            emailSent = true
+            );
+            emailSent = true;
             // todo: Show the verification code input to the user.
-            return
+            return;
           }
 
           if (eventType === MultiStepActionEventType.tokenFailed) {
             console.error(
               'SignUpPage.multiStepActionListener: incorrect token.',
               action.notificationResult,
-            )
-            error = 'We could not verify the token you entered. Please try again.'
-            return
+            );
+            error = 'We could not verify the token you entered. Please try again.';
+            return;
           }
 
           if (eventType === MultiStepActionEventType.timedOut) {
             console.error(
               'SignUpPage.multiStepActionListener: timeout.',
               action.notificationResult,
-            )
-            error = 'The verification token has expired. Please request a new one.'
-            return
+            );
+            error = 'The verification token has expired. Please request a new one.';
+            return;
           }
 
           if (eventType === MultiStepActionEventType.failed) {
-            console.error(
-              'SignUpPage.multiStepActionListener: error.',
-              action.notificationResult,
-            )
-            error = 'A system error has occurred. Please try again later.'
-            return
+            console.error('SignUpPage.multiStepActionListener: error.', action.notificationResult);
+            error = 'A system error has occurred. Please try again later.';
+            return;
           }
 
           if (eventType === MultiStepActionEventType.success) {
@@ -147,16 +127,16 @@
             console.log(
               'ResetMyPasswordListener.onNotificationSentOrFailed: success.',
               action.notificationResult,
-            )
-            await goto('/')
+            );
+            await goto('/');
           }
-        }
-      })
+        },
+      });
     } catch (err) {
-      error = err instanceof Error ? err.message : 'Failed to sign up'
-      console.error('Error signing up:', err)
+      error = err instanceof Error ? err.message : 'Failed to sign up';
+      console.error('Error signing up:', err);
     } finally {
-      loading = false
+      loading = false;
     }
     //
     //   const verifyResponse = await myUserContext.verifyMyEmail(email);
@@ -207,20 +187,11 @@
     }
   };
 
-  // Handle resend from the EmailVerification component
-  const handleResend = async (email: string) => {
-    const response = await myUserContext.sendMultiStepActionNotification(actionId, email);
-
-    if (!response || response.error) {
-      error = 'We failed to send the verification token. Please try again.';
-      return;
-    }
-    currentStep.set(1);
-  };
-
   // Handle back button from the EmailVerification component
-  const handleBack = (event: CustomEvent) => {
-    // Any additional logic when going back
+  const handleBack = () => {
+    if ($currentStep > 0) {
+      currentStep.set($currentStep - 1);
+    }
   };
 
   // Handle skip verification
@@ -269,6 +240,16 @@
     }
   };
 
+  const handleResend = async () => {
+    const response = await myUserContext.sendMultiStepActionNotification(actionId, email);
+
+    if (!response || response.error) {
+      error = 'We failed to send the verification token. Please try again.';
+      return;
+    }
+    currentStep.set(1);
+  };
+
   // Calculate remaining time until expiration
   const getRemainingTimeText = (expiryDate?: Date): string => {
     if (!expiryDate) return '';
@@ -283,26 +264,29 @@
 
 <div class="relative mx-auto flex h-screen items-center justify-center">
   <div class="relative w-full max-w-md px-4">
-    {#if $currentStep > 0}
-      <Button
-        variant="ghost"
-        size="sm"
-        class="absolute -top-12 left-0"
-        onclick={() => currentStep.set($currentStep - 1)}
-      >
-        ← Back
-      </Button>
+    {#if $currentStep === 0}
+      <EmailVerification bind:email {onEmailSubmit} />
+    {:else if $currentStep === 1}
+      <TokenForm {email} onVerify={handleVerify} onResend={handleResend} onBack={handleBack} />
+    {:else if $currentStep === 2}
+      <CredentialForm onSubmit={handleSignupSubmit} onBack={handleBack} />
     {/if}
 
-    {#if $currentStep === 0}
-      <Step0
-        loading
-        onSubmit={onSubmitEmail}
-      />
-    {:else if $currentStep === 1}
-      <Step1 />
-    {:else}
-      <Step2 />
+    <!-- Alert for errors -->
+    {#if error}
+      <Alert variant="destructive" class="relative mt-4">
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>{error}</AlertDescription>
+        <Button
+          variant="ghost"
+          size="icon"
+          class="absolute right-2 top-2 h-6 w-6 p-0"
+          onclick={() => (error = '')}
+        >
+          <X class="h-4 w-4" />
+          <span class="sr-only">Close</span>
+        </Button>
+      </Alert>
     {/if}
   </div>
 </div>

@@ -1,24 +1,26 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
-  import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert';
   import * as InputOTP from '$lib/components/ui/input-otp';
-  import X from 'lucide-svelte/icons/x';
+  import AuthCard from './ui/auth-card.svelte';
 
-  // Props
-  export let verifyButtonText = 'Verify';
-  export let verifyingText = 'Verifying...';
-  export let resendTimer = 30;
-  export let canResend = false;
+  interface Props {
+    email: string;
+    onVerify: (code: string) => void;
+    onResend: () => void;
+    onBack?: () => void;
+  }
 
-  // Event callback props
-  export let onSendToken = (token: string): void => {};
-  export let onSendNotification = (): void => {};
-  export let onBack = (): void => {};
+  let { email, onResend, onVerify, onBack }: Props = $props();
 
   // Internal state
-  let token = '';
-  let loading = false;
-  let error = '';
+  let verificationCode = $state('');
+  let loading = $state(false);
+  let verificationError = $state('');
+  let resendTimer = $state(30);
+  let canResend = $state(false);
+
+  let timerInterval: ReturnType<typeof setInterval>;
+  //   const emailCooldowns = new Map<string, number>();
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -26,62 +28,87 @@
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const onSubmit = async () => {
+  const handleResendCode = async () => {
+    if (!canResend) return;
     loading = true;
-    error = '';
     try {
-      onSendToken(token);
+      onResend();
     } catch (error) {
-      console.error('Error verifying code:', error);
-      error = 'Invalid verification code. Please try again.';
+      console.error('Error resending code:', error);
     } finally {
       loading = false;
     }
   };
+
+  // Handle verification code submission
+  const handleVerifySubmit = async () => {
+    loading = true;
+    verificationError = '';
+    try {
+      onVerify(verificationCode);
+    } catch (error) {
+      console.error('Error verifying code:', error);
+      verificationError = 'Invalid verification code. Please try again.';
+    } finally {
+      loading = false;
+    }
+  };
+
+  const startResendTimer = () => {
+    resendTimer = 30;
+    canResend = false;
+    // emailCooldowns.set(email, Date.now() + resendTimer * 1000);
+
+    // after the signUp user will not able to signup again if the discard the process
+    // in the middle of account creation
+
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      resendTimer -= 1;
+      if (resendTimer <= 0) {
+        clearInterval(timerInterval);
+        canResend = true;
+        // emailCooldowns.delete(email);
+      }
+    }, 1000);
+  };
+
+  // Start the timer when component mounts
+  startResendTimer();
 </script>
 
-<div class="space-y-4">
-  {#if error}
-    <Alert variant="destructive" class="relative mb-4">
-      <AlertTitle>Error</AlertTitle>
-      <AlertDescription>{error}</AlertDescription>
+<AuthCard
+  title="Verify your email"
+  description={`Enter the six digit code we sent to your email : ${email}`}
+>
+  <div class="space-y-4">
+    <div class="space-y-2">
+      <label for="verification-code" class="text-sm font-medium">Enter verification code</label>
+      <InputOTP.Root maxlength={6} bind:value={verificationCode}>
+        {#snippet children({ cells })}
+          <InputOTP.Group>
+            {#each cells as cell}
+              <InputOTP.Slot {cell} />
+            {/each}
+          </InputOTP.Group>
+        {/snippet}
+      </InputOTP.Root>
+    </div>
+    <div class="flex flex-col gap-2">
       <Button
-        variant="ghost"
-        size="icon"
-        class="absolute right-2 top-2 h-6 w-6 p-0"
-        onclick={() => (error = '')}
+        type="button"
+        class="w-full"
+        disabled={loading || verificationCode.length < 6}
+        onclick={handleVerifySubmit}
       >
-        <X class="h-4 w-4" />
-        <span class="sr-only">Close</span>
+        {loading ? 'Verifying...' : 'Verify'}
       </Button>
-    </Alert>
-  {/if}
-  <div class="space-y-2">
-    <label for="verification-code" class="text-sm font-medium">Enter verification code</label>
-    <InputOTP.Root maxlength={6} bind:value={token}>
-      {#snippet children({ cells })}
-        <InputOTP.Group>
-          {#each cells as cell}
-            <InputOTP.Slot {cell} />
-          {/each}
-        </InputOTP.Group>
-      {/snippet}
-    </InputOTP.Root>
-  </div>
-  <div class="flex flex-col gap-2">
-    <Button
-      type="button"
-      class="w-full"
-      disabled={loading || token.length < 6}
-      onclick={onSubmit}
-    >
-      {loading ? verifyingText : verifyButtonText}
-    </Button>
-    <div class="flex justify-between text-sm">
-      <Button variant="link" class="px-0" onclick={onBack}>Back</Button>
-      <Button variant="link" class="px-0" disabled={!canResend} onclick={onSendNotification}>
-        {canResend ? 'Resend code' : `Resend in ${formatTime(resendTimer)}`}
-      </Button>
+      <div class="flex justify-between text-sm">
+        <Button variant="link" class="px-0" onclick={onBack}>Back</Button>
+        <Button variant="link" class="px-0" disabled={!canResend} onclick={handleResendCode}>
+          {canResend ? 'Resend code' : `Resend in ${formatTime(resendTimer)}`}
+        </Button>
+      </div>
     </div>
   </div>
-</div>
+</AuthCard>

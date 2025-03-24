@@ -1,16 +1,16 @@
 <script lang="ts">
-  import { Button } from '$lib/components/ui/button'
-  import { Input } from '$lib/components/ui/input'
-  import { Label } from '@/components/ui/label'
+  import { Button } from '$lib/components/ui/button';
+  import { Input } from '$lib/components/ui/input';
+  import { Label } from '@/components/ui/label';
   import * as Card from '$lib/components/ui/card';
-  import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert'
-  import { myUserContext } from '@/context/my-user-context.svelte'
-  import { goto } from '$app/navigation'
-  import TokenForm from '$lib/components/token-form.svelte'
-  import X from 'lucide-svelte/icons/x'
-  import { MultiStepActionEventType, SidMultiStepActionProgress, } from '@baragaun/bg-node-client'
-  import translate from '@/helpers/language/translate'
-  import { AppUiMessage, MsaTokenStatus } from '@/types/enums'
+  import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert';
+  import { myUserContext } from '@/context/my-user-context.svelte';
+  import { goto } from '$app/navigation';
+  import TokenForm from '@/components/token-form.svelte';
+  import X from 'lucide-svelte/icons/x';
+  import { MultiStepActionEventType, SidMultiStepActionProgress } from '@baragaun/bg-node-client';
+  import translate from '@/helpers/language/translate';
+  import { AppUiMessage, MsaTokenStatus } from '@/types/enums';
 
   type FormState = 'login' | 'token';
 
@@ -59,11 +59,7 @@
         return;
       }
 
-      if (
-        !response ||
-        !response.object ||
-        !response.object.myUser
-      ) {
+      if (!response || !response.object || !response.object.myUser) {
         console.error('SignInForm.onSignInWithPassword: incorrect response', { response });
         error = translate(AppUiMessage.systemError);
         return;
@@ -144,19 +140,19 @@
     }
 
     try {
-    loading = true;
-    error = '';
+      loading = true;
+      error = '';
 
-      const response = await myUserContext.sendMultiStepActionNotification(actionId, email)
+      const response = await myUserContext.sendMultiStepActionNotification(actionId, email);
 
       if (response?.error) {
         console.error('SignInForm.handleResendOtp: error:', { error: response.error });
         error = translate(AppUiMessage.systemError);
-        return
+        return;
       }
 
       tokenStatus = MsaTokenStatus.sending;
-      startResendTimer(userIdent)
+      startResendTimer(userIdent);
     } catch (error) {
       console.error('SignInForm.handleResendOtp: error:', { error });
       error = translate(AppUiMessage.systemError);
@@ -191,7 +187,7 @@
     error = '';
 
     try {
-      const response = await myUserContext.signInWithToken(userIdent)
+      const response = await myUserContext.signInWithToken(userIdent);
 
       if (
         !response ||
@@ -201,11 +197,11 @@
         !response?.object.actionProgress?.actionId ||
         !response?.object.run
       ) {
-        error = 'Failed to send magic link. Please try again.'
-        return
+        error = 'Failed to send magic link. Please try again.';
+        return;
       }
 
-      startResendTimer(userIdent)
+      startResendTimer(userIdent);
       actionId = response?.object.actionProgress?.actionId;
 
       response.object.run.addListener({
@@ -220,10 +216,10 @@
             console.error(
               'SignInPage.multiStepActionListener: Notification failed.',
               action.notificationResult,
-            )
+            );
             tokenStatus = MsaTokenStatus.sendingFailed;
             error = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError);
-            return
+            return;
           }
 
           if (eventType === MultiStepActionEventType.notificationSent) {
@@ -231,41 +227,38 @@
             console.log(
               'SignInPage.multiStepActionListener: Notification sent out.',
               action.notificationResult,
-            )
+            );
             // Switching to the token input for
             formState = 'token';
             tokenStatus = MsaTokenStatus.notificationSent;
             message = translate(AppUiMessage.msaTokenSent);
-            return
+            return;
           }
 
           if (eventType === MultiStepActionEventType.tokenFailed) {
             console.error(
               'SignInPage.multiStepActionListener: incorrect token.',
               action.notificationResult,
-            )
+            );
             error = 'We could not verify the token you entered. Please try again.';
-            return
+            return;
           }
 
           if (eventType === MultiStepActionEventType.timedOut) {
             console.error(
               'SignInPage.multiStepActionListener: timeout.',
               action.notificationResult,
-            )
+            );
             tokenStatus = MsaTokenStatus.sendingFailed;
             error = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError);
-            return
+            return;
           }
 
           if (eventType === MultiStepActionEventType.failed) {
-            console.error(
-              'SignInPage.multiStepActionListener: error.',
-              action.notificationResult,
-            )
+            console.error('SignInPage.multiStepActionListener: error.', action.notificationResult);
             tokenStatus = MsaTokenStatus.verificationFailed;
             error = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError);
-            return
+            return;
           }
 
           if (eventType === MultiStepActionEventType.success) {
@@ -273,19 +266,19 @@
             console.log(
               'ResetMyPasswordListener.onNotificationSentOrFailed: success.',
               action.notificationResult,
-            )
+            );
             tokenStatus = MsaTokenStatus.success;
             error = translate(AppUiMessage.msaTokenSuccess);
-            await goto('/')
+            await goto('/');
           }
-        }
-      })
+        },
+      });
     } catch (error) {
-      console.error('SignInForm.startTokenSignIn:', { error })
+      console.error('SignInForm.startTokenSignIn:', { error });
       tokenStatus = MsaTokenStatus.verificationFailed;
       error = translate(AppUiMessage.systemError);
     } finally {
-      loading = false
+      loading = false;
     }
   };
 
@@ -329,10 +322,9 @@
   <Card.Content>
     {#if formState === 'token'}
       <TokenForm
-        {resendTimer}
-        {canResend}
-        onSendToken={onSendToken}
-        onSendNotification={onSendNotification}
+        email = {userIdent}
+        onVerify = {onSendToken}
+        onResend = {onSendNotification}
         onBack={onSwitchToLogin}
       />
     {:else}

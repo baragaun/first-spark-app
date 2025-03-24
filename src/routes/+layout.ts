@@ -1,6 +1,6 @@
 // import { myUserContext } from '$lib/context/my-user-context.svelte';
-import type { LayoutLoad } from './$types';
 import { browser } from '$app/environment';
+import type { LayoutLoad } from './$types';
 
 export const load: LayoutLoad = async () => {
   try {
