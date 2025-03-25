@@ -99,7 +99,7 @@
       }
 
       tokenStatus = MsaTokenStatus.sending;
-      goto('/');
+
     } catch (error) {
       console.error('SignInForm.handleVerifyOtp: error:', { error });
       error = translate(AppUiMessage.systemError);
@@ -268,6 +268,7 @@
     resendTimer = 30;
     canResend = false;
     emailCooldowns.set(emailAddress, Date.now() + resendTimer * 1000);
+    //todo also need to store actionId!
 
     clearInterval(timerInterval);
     timerInterval = setInterval(() => {

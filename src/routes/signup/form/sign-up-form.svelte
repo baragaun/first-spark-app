@@ -173,7 +173,8 @@
               'ResetMyPasswordListener.onNotificationSentOrFailed: success.',
               action.notificationResult,
             );
-            await goto('/');
+            // await goto('/');
+            currentStep.set(2);
           }
         },
       });
@@ -223,7 +224,7 @@
       }
 
       console.log('Verification successful, moving to credentials step');
-      currentStep.set(2);
+
     } catch (err) {
       errorMessage = err instanceof Error ? err.message : 'Failed to verify code';
       console.error('Error verifying code:', err);

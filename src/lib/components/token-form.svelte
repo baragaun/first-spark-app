@@ -34,6 +34,7 @@
     loading = true;
     try {
       onResend();
+      startResendTimer();
     } catch (error) {
       console.error('Error resending code:', error);
     } finally {

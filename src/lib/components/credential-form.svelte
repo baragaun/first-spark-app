@@ -17,7 +17,7 @@
   const { getPasswordError, validatePassword } = passwordHelpers;
 
   // Check if email is available
-  const checkUserIdentityAvailability = async (email: string): Promise<boolean> => {
+  const checkUserIdentityAvailability = async (): Promise<boolean> => {
     try {
       const result = await myUserContext.isUserIdentAvailable(username, UserIdentType.userHandle);
       return result.isAvailable ?? false;
@@ -55,7 +55,7 @@
           if (username) {
             checkingUsername = true;
             usernameError = '';
-            const isAvailable = checkUserIdentityAvailability(username);
+            const isAvailable = checkUserIdentityAvailability();
             checkingUsername = false;
 
             if (!isAvailable) {
