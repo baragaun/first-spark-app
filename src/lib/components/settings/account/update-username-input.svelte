@@ -3,21 +3,35 @@
   import { Input } from '$lib/components/ui/input';
   import * as Dialog from '$lib/components/ui/dialog';
   import { ChevronRight, AlertCircle, Check, RefreshCw } from 'lucide-svelte';
+  import * as Form from '$lib/components/ui/form/index';
+  import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
+  import { zodClient } from 'sveltekit-superforms/adapters';
+  import { usernameSchema } from '../../../../routes/settings/account/account-settings-schema';
 
   interface UsernameInputProps {
     currentUsername: string;
     onSave: (newUsername: string) => Promise<void>;
+    usernameForm: SuperValidated<Infer<typeof usernameSchema>>;
   }
 
   // Props using the interface
-  let { currentUsername, onSave }: UsernameInputProps = $props();
+  let { currentUsername, onSave, usernameForm }: UsernameInputProps = $props();
+
+  // Initialize superForm
+  const form = superForm(usernameForm, {
+    validators: zodClient(usernameSchema),
+    dataType: 'json',
+  });
+
+  // Destructure form helpers
+  const { form: formData, enhance } = form;
 
   // Group related state variables
   let isLoading = $state(false);
   let showUsernameEdit = $state(false);
 
   // Username state
-  let newUsername = $state('');
+  let newUsername = $state(currentUsername || '');
   let suggestedUsername = $state('');
 
   // Validation state
@@ -26,10 +40,9 @@
   let isGeneratingSuggestion = $state(false);
 
   // Utility variables
-  let debounceTimer: number | null = null;
+  let debounceTimer: number | null = $state(null);
 
   // Constants at the top level for better readability
-
   // Dummy data - simulating a database of taken usernames
   const takenUsernames = ['admin', 'moderator', 'taken', 'username', 'system'];
 
@@ -46,6 +59,7 @@
     'calm',
     'bold',
   ];
+
   const nouns = [
     'panda',
     'tiger',
@@ -61,7 +75,6 @@
 
   // Dummy function to generate a random username
   const generateUsername = async (): Promise<string> => {
-    // Simulate API delay
     await new Promise((resolve) => setTimeout(resolve, 500));
 
     // Generate a random username
@@ -87,6 +100,7 @@
       const suggestion = await generateUsername();
       suggestedUsername = suggestion;
       newUsername = suggestion;
+      $formData.username = suggestion;
 
       // Since we know this is available (we just generated it)
       isAvailable = true;
@@ -109,10 +123,40 @@
   const checkUsernameAvailability = async (username: string): Promise<boolean> => {
     // Simulate API delay
     await new Promise((resolve) => setTimeout(resolve, 300));
-
     // Check against our dummy database
     return !takenUsernames.includes(username.toLowerCase());
   };
+
+  // Reset dialog state when closed
+  function resetDialogState() {
+    newUsername = currentUsername;
+    isAvailable = null;
+    isChecking = false;
+    suggestedUsername = '';
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+      debounceTimer = null;
+    }
+  }
+
+  // Handle username change
+  const handleUsernameChange = async () => {
+    if (!isAvailable) return;
+    try {
+      isLoading = true;
+      await onSave(newUsername);
+      showUsernameEdit = false;
+    } finally {
+      isLoading = false;
+    }
+  };
+
+  // Sync newUsername with form data
+  $effect(() => {
+    if ($formData.username) {
+      newUsername = $formData.username;
+    }
+  });
 
   // Check username availability with debounce
   $effect(() => {
@@ -120,6 +164,7 @@
     if (!newUsername || newUsername === currentUsername) {
       isAvailable = null;
       isChecking = false;
+      // isGeneratingSuggestion = false;
       return;
     }
 
@@ -127,6 +172,7 @@
     if (newUsername === suggestedUsername) {
       isAvailable = true;
       isChecking = false;
+      // isGeneratingSuggestion = false;
       return;
     }
 
@@ -148,23 +194,11 @@
         isChecking = false;
         debounceTimer = null;
       }
-    }, 200);
+    }, 500); // Increased debounce time for better UX
   });
-
-  const handleUsernameChange = async () => {
-    if (!isAvailable) return;
-
-    try {
-      isLoading = true;
-      await onSave(newUsername);
-      showUsernameEdit = false;
-    } finally {
-      isLoading = false;
-    }
-  };
 </script>
 
-Update-username-input<button
+<button
   class="group flex w-full items-center justify-between rounded-lg py-2 hover:bg-muted/50"
   onclick={() => (showUsernameEdit = true)}
 >
@@ -185,11 +219,7 @@ Update-username-input<button
   open={showUsernameEdit}
   onOpenChange={(open: boolean) => {
     showUsernameEdit = open;
-    if (!open) {
-      newUsername = '';
-      isAvailable = null;
-      suggestedUsername = '';
-    }
+    if (!open) resetDialogState();
   }}
 >
   <Dialog.Content class="sm:max-w-[425px]">
@@ -200,20 +230,22 @@ Update-username-input<button
       </Dialog.Description>
     </Dialog.Header>
 
-    <div class="grid gap-4 py-4">
+    <form method="POST" use:enhance class="grid gap-4 py-4">
       <div class="space-y-2">
         <label for="current-username" class="text-sm font-medium leading-none">
           Current Username
         </label>
         <Input id="current-username" value={currentUsername} disabled class="bg-muted" />
       </div>
-      <div class="space-y-2">
+
+      <Form.Field {form} name="username">
         <div class="flex items-center justify-between">
-          <label for="new-username" class="text-sm font-medium leading-none"> New Username </label>
-          <Button
+          <label for="username" class="text-sm font-medium leading-none">New Username</label>
+          <Form.Button
             variant="ghost"
             size="sm"
             class="h-8 px-2 text-xs"
+            type="button"
             disabled={isGeneratingSuggestion}
             onclick={getSuggestedUsername}
           >
@@ -224,49 +256,57 @@ Update-username-input<button
               <RefreshCw class="mr-1 h-3 w-3" />
               Suggest new
             {/if}
-          </Button>
+          </Form.Button>
         </div>
-        <div class="relative">
-          <Input
-            id="new-username"
-            type="text"
-            bind:value={newUsername}
-            class={isAvailable === false
-              ? 'border-red-500 pr-10 focus-visible:ring-red-500'
-              : 'pr-10'}
-            disabled={isGeneratingSuggestion}
-          />
-          {#if isGeneratingSuggestion}
-            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-              <div
-                class="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent"
-              ></div>
+        <Form.Control>
+          {#snippet children({ props })}
+            <div class="relative">
+              <Input
+                {...props}
+                id="username"
+                type="text"
+                bind:value={$formData.username}
+                class={isAvailable === false
+                  ? 'border-red-500 pr-10 focus-visible:ring-red-500'
+                  : 'pr-10'}
+                disabled={isGeneratingSuggestion}
+              />
+              {#if isGeneratingSuggestion}
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                  <div
+                    class="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent"
+                  ></div>
+                </div>
+              {:else if isChecking}
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                  <div
+                    class="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent"
+                  ></div>
+                </div>
+              {:else if isAvailable === false}
+                <div
+                  class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-red-500"
+                >
+                  <AlertCircle class="h-4 w-4" />
+                </div>
+              {:else if isAvailable === true}
+                <div
+                  class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-green-500"
+                >
+                  <Check class="h-4 w-4" />
+                </div>
+              {/if}
             </div>
-          {:else if isChecking}
-            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-              <div
-                class="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent"
-              ></div>
-            </div>
-          {:else if isAvailable === false}
-            <div
-              class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-red-500"
-            >
-              <AlertCircle class="h-4 w-4" />
-            </div>
-          {:else if isAvailable === true}
-            <div
-              class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-green-500"
-            >
-              <Check class="h-4 w-4" />
-            </div>
-          {/if}
-        </div>
+          {/snippet}
+        </Form.Control>
+        <Form.FieldErrors />
         {#if isAvailable === false}
           <p class="text-xs text-red-500">This username is already taken</p>
+        {:else if isAvailable === true}
+          <p class="text-xs text-green-500">This username is available!</p>
         {/if}
-      </div>
-    </div>
+      </Form.Field>
+    </form>
 
     <Dialog.Footer class="flex justify-end gap-2">
       <Button
@@ -274,8 +314,7 @@ Update-username-input<button
         disabled={isLoading}
         onclick={() => {
           showUsernameEdit = false;
-          newUsername = '';
-          suggestedUsername = '';
+          resetDialogState();
         }}
       >
         Cancel
