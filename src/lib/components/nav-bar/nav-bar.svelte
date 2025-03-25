@@ -30,7 +30,7 @@
       <ThemeButton class="hidden md:flex" />
       <LanguageButton class="hidden md:flex" />
       <div class="flex items-center gap-2">
-        {#if !myUserContext.getMyUser()}
+        {#if !myUserContext.myUserId}
           <Button
             variant="ghost"
             href="/signin"
@@ -42,12 +42,11 @@
             Sign Up
           </Button>
         {/if}
-        {#if myUserContext.getMyUser()}
+        {#if myUserContext.myUserId}
           <Button
             variant="ghost"
             onclick={async () => {
               await myUserContext.signMeOut();
-              console.log('Signed out', myUserContext.isSignedIn, myUserContext.getMyUser());
               goto('/signin');
             }}
             class="font-lexend flex items-center gap-2 shadow-sm hover:shadow-md"

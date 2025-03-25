@@ -12,13 +12,17 @@
   import X from 'lucide-svelte/icons/x';
   import { UserIdentType } from '@baragaun/bg-node-client';
   import { MultiStepActionEventType, SidMultiStepActionProgress } from '@baragaun/bg-node-client'
-  import Step0 from './components/step0.svelte';
-  import Step1 from './components/step1.svelte';
-  import Step2 from './components/step2.svelte';
 
   const { getPasswordError, validatePassword } = passwordHelpers;
 
-  let currentStep = writable(0);
+  // Step management
+  const STEPS = {
+    EMAIL: 'email',
+    VERIFY: 'verify',
+    FINISH: 'finish',
+  };
+
+  let currentStep = writable(STEPS.EMAIL);
   let email = $state('');
   let username = $state('');
   let password = $state('');
@@ -39,7 +43,7 @@
   // });
 
   // Handle email submission from the EmailVerification component
-  const onSubmitEmail = async (email: string): Promise<void> => {
+  const handleEmailSubmit = async (email: string): Promise<void> => {
     loading = true;
     error = '';
     try {
@@ -52,10 +56,7 @@
 
       // todo: Verify that the sign up was successful
 
-      startEmailConfirmation(email).catch((error) => {
-        console.error('Error starting email confirmation:', error);
-        error = 'Failed to send verification email. Please try again.';
-      });
+      startEmailConfirmation(email);
     } catch (err) {
       error = err instanceof Error ? err.message : 'Failed to sign up'
       console.error('Error signing up:', err)
@@ -85,7 +86,7 @@
       }
 
       actionId = response?.object.actionProgress?.actionId
-      currentStep.set(1)
+      currentStep.set(STEPS.VERIFY)
 
       response.object.run.addListener({
         id: 'SignUpForm',
@@ -198,7 +199,7 @@
       }
 
       console.log('Verification successful, moving to credentials step');
-      currentStep.set(2);
+      currentStep.set(STEPS.FINISH);
     } catch (err) {
       error = err instanceof Error ? err.message : 'Failed to verify code';
       console.error('Error verifying code:', err);
@@ -215,7 +216,7 @@
       error = 'We failed to send the verification token. Please try again.';
       return;
     }
-    currentStep.set(1);
+    currentStep.set(STEPS.VERIFY);
   };
 
   // Handle back button from the EmailVerification component
@@ -225,7 +226,7 @@
 
   // Handle skip verification
   const handleSkip = () => {
-    currentStep.set(2);
+    currentStep.set(STEPS.FINISH);
   };
 
   // Handle final signup
@@ -283,26 +284,130 @@
 
 <div class="relative mx-auto flex h-screen items-center justify-center">
   <div class="relative w-full max-w-md px-4">
-    {#if $currentStep > 0}
+    {#if $currentStep !== STEPS.EMAIL}
       <Button
         variant="ghost"
         size="sm"
         class="absolute -top-12 left-0"
-        onclick={() => currentStep.set($currentStep - 1)}
+        onclick={() => currentStep.set($currentStep === STEPS.VERIFY ? STEPS.EMAIL : STEPS.VERIFY)}
       >
         ← Back
       </Button>
     {/if}
 
-    {#if $currentStep === 0}
-      <Step0
-        loading
-        onSubmit={onSubmitEmail}
-      />
-    {:else if $currentStep === 1}
-      <Step1 />
-    {:else}
-      <Step2 />
+    {#if $currentStep === STEPS.EMAIL || $currentStep === STEPS.VERIFY}
+      <AuthCard
+        title={$currentStep === STEPS.EMAIL ? 'Sign Up' : 'Verify your email'}
+        description={$currentStep === STEPS.EMAIL
+          ? 'By continuing, you agree to our User Agreement and acknowledge that you understand and agree to our Privacy Policy.'
+          : `Enter the six digit code we sent to ${email}${expiredAt ? getRemainingTimeText(expiredAt) : ''}`}
+      >
+        {#if error}
+          <Alert variant="destructive" class="relative mb-4">
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+            <Button
+              variant="ghost"
+              size="icon"
+              class="absolute right-2 top-2 h-6 w-6 p-0"
+              onclick={() => (error = '')}
+            >
+              <X class="h-4 w-4" />
+              <span class="sr-only">Close</span>
+            </Button>
+          </Alert>
+        {/if}
+        <EmailVerification
+          {email}
+          initialStep={$currentStep === STEPS.EMAIL ? 'email' : 'verify'}
+          buttonText="Continue"
+          verifyButtonText="Verify"
+          loadingText="Sending..."
+          verifyingText="Verifying..."
+          showSkipButton={true}
+          onEmailSubmit={handleEmailSubmit}
+          onVerify={handleVerify}
+          onResend={() => handleResend}
+          onBack={() => handleBack}
+          onSkip={handleSkip}
+        />
+
+        {#if $currentStep === STEPS.EMAIL}
+          <div class="mt-4 text-center text-sm">
+            <span class="text-muted-foreground">Already a have an account?</span>
+            {' '}
+            <Button variant="link" class="px-1 font-normal" href="/signin">Log In</Button>
+          </div>
+        {/if}
+      </AuthCard>
+    {:else if $currentStep === STEPS.FINISH}
+      <AuthCard
+        title="Create your username and password"
+        showBackButton={true}
+        onBack={() => currentStep.set(STEPS.VERIFY)}
+      >
+        <form onsubmit={handleSignupSubmit} class="space-y-4">
+          <div class="space-y-2">
+            <Input
+              type="text"
+              placeholder="Username (e.g., CosmoExplorer, PixelPioneer)"
+              bind:value={username}
+              required
+              onblur={async () => {
+                if (username) {
+                  checkingUsername = true;
+                  usernameError = '';
+                  const isAvailable = await myUserContext.isUserIdentAvailable(
+                    username,
+                    UserIdentType.userHandle,
+                  );
+                  checkingUsername = false;
+
+                  if (!isAvailable) {
+                    usernameError = 'This username is unavailable.';
+                  }
+                }
+              }}
+            />
+            {#if checkingUsername}
+              <p class="text-xs text-muted-foreground">Checking username availability...</p>
+            {:else if usernameError}
+              <p class="text-xs text-destructive">{usernameError}</p>
+            {/if}
+          </div>
+          {#if suggestedHandle}
+            <p class="text-xs text-muted-foreground">
+              Suggested username: {suggestedHandle}
+            </p>
+          {/if}
+          <div class="relative space-y-2">
+            <PasswordInput bind:value={password} placeholder="Password" required />
+            {#if password}
+              <div class="space-y-2 text-xs">
+                <p class="text-muted-foreground">Password requirements:</p>
+                <ul class="list-inside list-disc space-y-1 pl-2">
+                  <li
+                    class:text-destructive={password.length < 8}
+                    class:text-green-500={password.length >= 8}
+                  >
+                    At least 8 characters
+                  </li>
+                </ul>
+              </div>
+            {/if}
+            {#if password && getPasswordError(password)}
+              <p class="text-xs text-destructive">{getPasswordError(password)}</p>
+            {/if}
+          </div>
+          <Button
+            type="submit"
+            class="w-full"
+            disabled={loading || !password || !validatePassword(password).isValid}
+          >
+            {loading ? 'Creating account...' : 'Create Account'}
+          </Button>
+        </form>
+      </AuthCard>
     {/if}
   </div>
 </div>

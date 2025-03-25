@@ -1,11 +1,11 @@
-import NavBar, { authStore } from '@/components/nav-bar/nav-bar.svelte';
+import NavBar from '@/components/nav-bar/nav-bar.svelte';
 import { render, screen } from '@testing-library/svelte';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('NavBar', () => {
   beforeEach(() => {
     // Reset auth store before each test
-    authStore.set({ isAuthenticated: false });
+    // authStore.set({ isAuthenticated: false });
   });
 
   const signUpButton = screen.queryByText('Sign Up');
@@ -25,14 +25,14 @@ describe('NavBar', () => {
   });
 
   it('renders signin button', async () => {
-    authStore.set({ isAuthenticated: false });
+    // authStore.set({ isAuthenticated: false });
     render(NavBar);
 
     expect(signInButton).toBeVisible();
   });
 
   it('renders signup button', async () => {
-    authStore.set({ isAuthenticated: false });
+    // authStore.set({ isAuthenticated: false });
     render(NavBar);
 
     expect(signUpButton).toBeVisible();
@@ -40,7 +40,7 @@ describe('NavBar', () => {
 
   it('renders Sign Out button component when authenticated', async () => {
     localStorage.setItem('authToken', 'your-auth-token');
-    authStore.set({ isAuthenticated: true });
+    // authStore.set({ isAuthenticated: true });
     render(NavBar);
 
     expect(signOutButton).toBeVisible();
