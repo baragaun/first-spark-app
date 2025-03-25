@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { Input } from '$lib/components/ui/input';
   import * as Card from '$lib/components/ui/card';
-  import * as Form from '$lib/components/ui/form/index';
-  import * as InputOTP from '$lib/components/ui/input-otp/index.js';
-  import { REGEXP_ONLY_DIGITS } from 'bits-ui';
-  import { UserIdentType } from '@baragaun/bg-node-client';
+  import {
+    MultiStepActionEventType,
+    SidMultiStepActionProgress,
+    UserIdentType,
+  } from '@baragaun/bg-node-client';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import {
     formSchema,
@@ -15,6 +15,13 @@
   } from './sign-up-form-schema';
   import SuperDebug, { type SuperValidated, type Infer, superForm } from 'sveltekit-superforms';
   import { zod, zodClient } from 'sveltekit-superforms/adapters';
+  import { writable } from 'svelte/store';
+  import EmailVerification from '@/components/email-verification.svelte';
+  import TokenForm from '@/components/token-form.svelte';
+  import CredentialForm from '@/components/credential-form.svelte';
+  import { goto } from '$app/navigation';
+  import DialogOverlay from '@/components/ui/dialog/dialog-overlay.svelte';
+  import ErrorAlert from '@/components/error-alert.svelte';
 
   let { data }: { data: { form: SuperValidated<Infer<FormSchema>> } } = $props();
 
@@ -45,235 +52,280 @@
 
   // let currentStep = $state(steps[0]);
   // let currentStep = $state(steps.EMAIL);
-  let currentStep = $state(1);
-
-  // const { form, errors, message, enhance, validateForm, options } = superForm(data.form, {
-  // 	// No need for hidden fields with dataType: 'json'
-  // 	dataType: 'json',
-  //   validators: zodClient(formSchema),
-  // 	async onSubmit({ cancel }) {
-  // 		// If on last step, make a normal request
-  // 		if (currentStep == steps.length) return;
-  // 		else cancel();
-
-  // 		// Make a manual client-side validation, since we have cancelled
-  // 		const result = await validateForm({ update: true });
-  // 		if (result.valid) currentStep = currentStep + 1;
-  // 	},
-
-  // 	async onUpdated({ form }) {
-  // 		if (form.valid) currentStep = 1;
-  // 	}
-  // });
 
   const { form: formData, enhance } = form;
+  let currentStep = writable(0);
   let email = $state('');
   let username = $state('');
-  let identIsAvailable = $state(true);
   let password = $state('');
   let loading = $state(false);
   let errorMessage = $state('');
+  let actionId = $state('');
+  let emailSent = $state(false);
 
-  const validateEmail = async (email: string) => {
-    const validFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    if (validFormat) {
-      identIsAvailable =
-        (await myUserContext.isUserIdentAvailable(email, UserIdentType.email)) || false;
-    }
-    return identIsAvailable;
-  };
-
-  // This is not necessarily complete or correct, but takes into account the updated return value from `signup`
-  const onSubmitEmail = async () => {
-    errorMessage = '';
-
-    // if (!validateEmail(email)) {
-    //   errorMessage = 'Please enter a valid email address.';
-    //   return;
-    // }
-
+  // Handle email submission from the EmailVerification component
+  const onEmailSubmit = async (email: string): Promise<void> => {
     loading = true;
-
+    errorMessage = '';
     try {
-      console.log('calling signup without data');
+      const response = await myUserContext.signUpUser(email);
 
-      // Actually sign up the User, then verify their email
-      // const { myUser, error } = await myUserContext.signUp(email);
+      if (response.error || !response.myUser?.id) {
+        errorMessage = response.error || 'Failed to sign up';
+        return;
+      }
 
-      // if (!myUser) {
-      //   throw new Error(error || 'Failed to create account');
-      // }
+      // todo: Verify that the sign up was successful
 
-      // TODO: we should be going to the email verication flow
-      // await goto('/');
-      // currentStep = steps.VERIFY;
-      currentStep = 2;
-    } catch (error) {
-      console.error('Error creating account:', error);
+      currentStep.set(1);
+
+      startEmailConfirmation(email).catch((error) => {
+        console.error('Error starting email confirmation:', error);
+        error = 'Failed to send verification email. Please try again.';
+      });
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : 'Failed to sign up';
+      console.error('Error signing up:', err);
     } finally {
       loading = false;
     }
   };
 
-  const onSubmitEmailOtp = async () => {
-    errorMessage = '';
-
-    // if (!validateEmail(email)) {
-    //   errorMessage = 'Please enter a valid email address.';
-    //   return;
-    // }
-
+  const startEmailConfirmation = async (email: string) => {
     loading = true;
-
+    errorMessage = '';
     try {
-      console.log('trying onSignUp');
+      console.log('Email submitted:', email);
 
-      // TODO: currently non functional until the flow is in place
+      const response = await myUserContext.verifyMyEmail(email);
 
-      // Actually sign up the User, then verify their email
-      // const { myUser, error } = await myUserContext.signUp(email);
+      if (
+        !response ||
+        response?.error ||
+        !response.object ||
+        response.object.error ||
+        !response?.object.actionProgress?.actionId ||
+        !response?.object.run
+      ) {
+        errorMessage = 'Failed to send the verification token. Please try again.';
+        return;
+      }
 
-      // if (!myUser) {
-      //   throw new Error(error || 'Failed to create account');
-      // }
+      actionId = response?.object.actionProgress?.actionId;
+      currentStep.set(1);
 
-      // TODO: we should be going to the username and password step
-      // currentStep = steps.CREDENTIALS;
-      currentStep = 3;
-    } catch (error) {
-      console.error('Error creating account:', error);
+      response.object.run.addListener({
+        id: 'SignUpForm',
+
+        onEvent: async (
+          eventType: MultiStepActionEventType,
+          action: SidMultiStepActionProgress,
+        ): Promise<void> => {
+          if (eventType === MultiStepActionEventType.notificationFailed) {
+            // The notification failed to go out.
+            console.error(
+              'SignUpPage.multiStepActionListener: Notification failed.',
+              action.notificationResult,
+            );
+            errorMessage =
+              'We could not send the verification token to your email. Please try again.';
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.notificationSent) {
+            // The notification has been sent out.
+            console.log(
+              'SignUpPage.multiStepActionListener: Notification sent out.',
+              action.notificationResult,
+            );
+            emailSent = true;
+            // todo: Show the verification code input to the user.
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.tokenFailed) {
+            console.error(
+              'SignUpPage.multiStepActionListener: incorrect token.',
+              action.notificationResult,
+            );
+            errorMessage = 'We could not verify the token you entered. Please try again.';
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.timedOut) {
+            console.error(
+              'SignUpPage.multiStepActionListener: timeout.',
+              action.notificationResult,
+            );
+            errorMessage = 'The verification token has expired. Please request a new one.';
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.failed) {
+            console.error('SignUpPage.multiStepActionListener: error.', action.notificationResult);
+            errorMessage = 'A system error has occurred. Please try again later.';
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.success) {
+            // The token was accepted. The user is now signed in.
+            console.log(
+              'ResetMyPasswordListener.onNotificationSentOrFailed: success.',
+              action.notificationResult,
+            );
+            await goto('/');
+          }
+        },
+      });
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : 'Failed to sign up';
+      console.error('Error signing up:', err);
+    } finally {
+      loading = false;
+    }
+    //
+    //   const verifyResponse = await myUserContext.verifyMyEmail(email);
+    //
+    //   if (verifyResponse.error || !verifyResponse.response?.actionId) {
+    //     error = verifyResponse.error || 'Failed to send verification email';
+    //     return;
+    //   }
+    //
+    //   actionId = verifyResponse.response?.actionId;
+    //   expiredAt = verifyResponse.response?.expiresAt
+    //     ? new Date(verifyResponse.response.expiresAt)
+    //     : undefined;
+    //   currentStep.set(STEPS.VERIFY);
+    // } catch (err) {
+    //   error = err instanceof Error ? err.message : 'Failed to sign up';
+    //   console.error('Error signing up:', err);
+    // } finally {
+    //   loading = false;
+    // }
+  };
+
+  // Handle verification callback
+  const handleVerify = async (code: string) => {
+    loading = true;
+    errorMessage = '';
+    try {
+      // const client = await myUserContext.getClient();
+
+      // const listener = new VerifyMyEmailListener('verify-email-listener', actionId, client);
+
+      // client.operations.multiStepAction.addMultiStepActionListener(actionId, listener);
+
+      const result = await myUserContext.verifyMultiStepActionToken(actionId, code);
+
+      if (!result) {
+        errorMessage = 'Verification failed';
+        return;
+      }
+
+      console.log('Verification successful, moving to credentials step');
+      currentStep.set(2);
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : 'Failed to verify code';
+      console.error('Error verifying code:', err);
     } finally {
       loading = false;
     }
   };
 
-  // // Handle verification callback
-  // const handleVerify = async ({ email, code }: { email: string; code: string }) => {
-  //   // verificationCode = code;
-  //   // If verification is successful, move to credentials step
-  //   currentStep.set(STEPS.CREDENTIALS);
-  // };
+  // Handle back button from the EmailVerification component
+  const handleBack = () => {
+    if ($currentStep > 0) {
+      currentStep.set($currentStep - 1);
+    }
+  };
 
-  // // Handle resend from the EmailVerification component
-  // const handleResend = (event: CustomEvent<{ email: string }>) => {
-  //   // Any additional logic for resending
-  //   console.log('Resending code to:', event.detail.email);
-  // };
-
-  // // Handle back button from the EmailVerification component
-  // const handleBack = (event: CustomEvent) => {
-  //   // Any additional logic when going back
-  // };
-
-  // // Handle skip verification
-  // const handleSkip = () => {
-  //   currentStep.set(STEPS.CREDENTIALS);
-  // };
+  // Handle skip verification
+  const handleSkip = () => {
+    currentStep.set(2);
+  };
 
   // Handle final signup
-  // const handleSignupSubmit = async () => {
-  //   loading = true;
-  //   try {
-  //     // TODO: Implement your signup logic here
-  //     await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-  //     localStorage.setItem('authToken', 'your-auth-token');
-  //     // authStore.set({ isAuthenticated: true }); // Update auth store
-  //     await goto('/');
-  //   } catch (error) {
-  //     console.error('Error creating account:', error);
-  //   } finally {
-  //     loading = false;
-  //   }
-  // };
+  const handleSignupSubmit = async () => {
+    loading = true;
+    errorMessage = '';
+    try {
+      const myUserId = myUserContext.myUserId;
+
+      // First check if we have a valid user
+      if (!myUserId) {
+        errorMessage = 'User not found or not authenticated';
+        return;
+      }
+
+      // Update username first
+      const updateUserName = await myUserContext.updateMyUser({
+        id: myUserId,
+        userHandle: username,
+      });
+
+      if (updateUserName.error) {
+        errorMessage = updateUserName.error;
+        return;
+      }
+
+      // Then update password
+      const updatePassword = await myUserContext.updateMyPassword('', password);
+
+      if (updateUserName.error || updatePassword.error) {
+        errorMessage = updateUserName.error || updatePassword.error || 'Failed to create account';
+        return;
+      }
+
+      await goto('/');
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : 'Failed to create account';
+      console.error('Error creating account:', err);
+    } finally {
+      loading = false;
+    }
+  };
+
+  const handleResend = async () => {
+    const response = await myUserContext.sendMultiStepActionNotification(actionId, email);
+
+    if (!response || response.error) {
+      errorMessage = 'We failed to send the verification token. Please try again.';
+      return;
+    }
+    currentStep.set(1);
+  };
+
+  // Calculate remaining time until expiration
+  const getRemainingTimeText = (expiryDate?: Date): string => {
+    if (!expiryDate) return '';
+
+    const now = new Date();
+    const diffMs = expiryDate.getTime() - now.getTime();
+    const diffMins = Math.max(0, Math.ceil(diffMs / 60000));
+
+    return `. Code expires in ${diffMins} minute${diffMins !== 1 ? 's' : ''}`;
+  };
 </script>
 
 <form method="POST" use:enhance>
-  <Card.Root class="mx-auto max-w-md">
-    {#if currentStep === 1}
-      <Card.Header>
-        <Card.Title class="text-2xl">Sign Up</Card.Title>
-      </Card.Header>
-      <Card.Content>
-        <div class="grid gap-4">
-          <Form.Field {form} name="email">
-            <Form.Control>
-              {#snippet children({ props })}
-                <Input
-                  {...props}
-                  id="email"
-                  type="email"
-                  placeholder="Email"
-                  required
-                  bind:value={$formData.email}
-                />
-              {/snippet}
-            </Form.Control>
-            <Form.FieldErrors />
-          </Form.Field>
-          <Card.Description>
-            By continuing, you agree to our User Agreement and acknowledge that you understand the
-            Privacy Policy.
-          </Card.Description>
-          <Form.Button
-            type="button"
-            class="w-full"
-            onclick={onSubmitEmail}
-            disabled={!$formData.email}
-          >
-            Continue
-          </Form.Button>
-          <div class="mt-4 text-center text-sm">
-            Already have an account?
-            <a href="/signin" class="underline"> Sign in </a>
-          </div>
-        </div>
-      </Card.Content>
-    {:else if currentStep === 2}
-      <Card.Header>
-        <Card.Title class="text-2xl">Sign Up</Card.Title>
-      </Card.Header>
-      <Card.Content>
-        <div class="grid gap-4">
-          <Form.Field {form} name="emailOtp">
-            <Form.Control>
-              {#snippet children({ props })}
-                <InputOTP.Root
-                  {...props}
-                  id="emailOtp"
-                  maxlength={6}
-                  pattern={REGEXP_ONLY_DIGITS}
-                  required
-                  bind:value={$formData.emailOtp}
-                >
-                  {#snippet children({ cells })}
-                    <InputOTP.Group>
-                      {#each cells as cell (cell)}
-                        <InputOTP.Slot {cell} />
-                      {/each}
-                    </InputOTP.Group>
-                  {/snippet}
-                </InputOTP.Root>
-              {/snippet}
-            </Form.Control>
-            <Form.Description>Enter the six digit code sent to your email.</Form.Description>
-            <Form.FieldErrors />
-          </Form.Field>
-          <Form.Button
-            type="button"
-            class="w-full"
-            onclick={onSubmitEmailOtp}
-            disabled={!$formData.emailOtp}
-          >
-            Continue
-          </Form.Button>
-          <div class="mt-4 text-center text-sm">
-            Already have an account?
-            <a href="/signin" class="underline"> Sign in </a>
-          </div>
-        </div>
-      </Card.Content>
+  <div class="mx-auto max-w-md">
+    {#if $currentStep === 0}
+      <EmailVerification bind:email={$formData.email} {onEmailSubmit} />
+    {:else if $currentStep === 1}
+      <TokenForm
+        email={$formData.email}
+        onVerify={handleVerify}
+        onResend={handleResend}
+        onBack={handleBack}
+      />
+    {:else if $currentStep === 2}
+      <CredentialForm onSubmit={handleSignupSubmit} onBack={handleBack} />
     {/if}
-  </Card.Root>
+    <!-- Alert for errors -->
+    {#if errorMessage}
+      <ErrorAlert bind:errorMessage />
+    {/if}
+  </div>
 
   <!-- <SuperDebug data={form} /> -->
 </form>

@@ -11,7 +11,7 @@
 
   const handleLogout = () => {
     // TODO: Handle logout
-    console.error('called handleLogout');
+    console.log('called handleLogout');
     myUserContext.signMeOut();
     goto('/signin');
   };

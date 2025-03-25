@@ -70,7 +70,7 @@
     "vitest": "^3.0.7"
   },
   "dependencies": {
-    "@baragaun/bg-node-client": "^0.0.11",
+    "@baragaun/bg-node-client": "^0.0.17",
     "formsnap": "^2.0.0",
     "mode-watcher": "^0.5.1",
     "rxdb": "^16.8.1",

@@ -1,41 +1,47 @@
+import translate from '@/helpers/language/translate';
+import { AppUiMessage } from '@/types/enums';
 import {
   AppEnvironment,
   BgNodeClient,
-  type BgNodeClientConfig,
   CachePolicy,
   HttpHeaderName,
+  MutationType,
+  NotificationMethod,
+  UserIdentType,
+  type BgNodeClientConfig,
+  type MultiStepActionProgressResult,
+  type MutationResult,
   type MyUser,
   type QueryOptions,
+  type QueryResult,
+  type SidMultiStepActionProgress,
+  type SignInSignUpResponse,
   type SignInUserInput,
   type SignUpUserInput,
-  UserIdentType,
 } from '@baragaun/bg-node-client';
-import { getContext, setContext } from 'svelte';
-
-const myUserContextKey = Symbol('myUser');
 
 export class MyUserContext {
   private myUser = $state<MyUser | null>(null);
   private isLoading = $state(false);
   private error = $state<string | null>(null);
-  private client: BgNodeClient | undefined;
+  private client: BgNodeClient = new BgNodeClient();
+
+  // Non-state variables:
+  private _isInitialized = false;
+  private _isInitializing = false;
 
   // Derived state
   isAuthenticated = $derived(!!this.myUser);
 
-  getMyUser = () => this.myUser;
-  getIsLoading = () => this.isLoading;
-  getError = () => this.error;
-
   public async initialize(): Promise<void> {
     console.log('MyUserContext.init called.');
 
-    if (this.client) {
-      console.log('MyUserContext.init: client already exists.');
+    if (this._isInitialized || this._isInitializing) {
+      console.warn('MyUserContext.initialize: already initialized.');
       return;
     }
 
-    this.isLoading = true;
+    this._isInitializing = true;
 
     const config: BgNodeClientConfig = {
       inBrowser: true,
@@ -51,44 +57,56 @@ export class MyUserContext {
       config.appEnvironment = import.meta.env.VITE_APP_ENVIRONMENT as AppEnvironment;
     }
 
+    try {
+      if (typeof window === 'undefined') {
+        console.error('MyUserContext.initialize: not running in the browser.');
+        this._isInitializing = false;
+        return;
+      }
+
+      if (!('indexedDB' in window)) {
+        console.error('MyUserContext.initialize: indexedDB is not supported in this browser.');
+        this._isInitializing = false;
+        return;
+      }
+
+      await this.client.init(config);
+    } catch (error) {
+      console.error('MyUserContext: Error initializing BgNodeClient:', { error });
+      this._isInitializing = false;
+      return;
+    }
+
     // if (import.meta.env.MOCK_DATA === 'true') {
     //   config.useMockData = true;
     // }
 
-    try {
-      this.client = await new BgNodeClient().init(config);
+    this._isInitialized = true;
 
-      if (!this.client) {
-        throw new Error('MyUserContext.init: Error initializing BgNodeClient');
-      }
-
-      console.log('MyUserContext: refreshing myUser.');
-      // Ideally, this code is only called once per session. We may have to set a timer
-      // todo: Only fetch a fresh copy of the user if this code is not called too often
-      // and make sure we don't fetch the user too often.
-
-      await this.loadMyUser({ cachePolicy: CachePolicy.network });
-    } catch (error) {
-      this.error = error instanceof Error ? error.message : 'Failed to initialize client';
-      console.error('Error initializing MyUserContext:', error);
-    } finally {
-      this.isLoading = false;
+    // todo: Only fetch a fresh copy of the user if this code is not called too often
+    // Ideally, this code is only called once per session. We may have to set a timer
+    // and make sure we don't fetch the user too often.
+    if (this.client.operations.myUser.isSignedIn()) {
+      await this.client.operations.myUser.findMyUser({ cachePolicy: CachePolicy.networkFirst });
     }
+
+    this._isInitializing = false;
+  }
+
+  public get isSignedIn(): boolean {
+    return this.client?.operations.myUser.isSignedIn() || false;
   }
 
   public async loadMyUser(queryOptions?: QueryOptions): Promise<MyUser | null> {
-    if (!this.client) {
+    if (!this.client || !this.client.operations.myUser.isSignedIn()) {
       this.myUser = null;
       return null;
     }
-
-    console.log('loading user');
 
     try {
       this.isLoading = true;
       this.error = null;
       this.myUser = await this.client.operations.myUser.findMyUser(queryOptions);
-      console.log(this.myUser);
       return this.myUser;
     } catch (err) {
       this.error = err instanceof Error ? err.message : 'Failed to load user';
@@ -99,46 +117,45 @@ export class MyUserContext {
     }
   }
 
-  public async isUserIdentAvailable(ident: string, identType: UserIdentType): Promise<boolean> {
-    // try {
-    //   return await MyUserContext.isUserIdentAvailable(ident, identType);
-    // } catch (err) {
-    //   this.error = err instanceof Error ? err.message : 'Failed to check identity availability';
-    //   console.error('Error checking identity availability:', err);
-    //   return null;
-    // }
-    if (!this.client) {
+  public async signInUser(
+    userIdent: string,
+    identType: UserIdentType,
+    password: string,
+  ): Promise<MutationResult<SignInSignUpResponse>> {
+    if (!this.client || !this._isInitialized) {
       this.myUser = null;
+      this.error = translate(AppUiMessage.systemError);
+      return { operation: MutationType.update, error: this.error };
+    }
 
-      // return { error: 'Client not initialized' };
-      return false;
+    if (!this.client || this.client.operations.myUser.isSignedIn()) {
+      console.error('MyUserContext.signInUser: already signed in');
+      this.error = translate(AppUiMessage.systemError);
+      return { operation: MutationType.update, error: this.error };
     }
 
     try {
       this.isLoading = true;
-      this.error = '';
+      this.error = null;
 
-      const response = await this.client.operations.myUser.isUserIdentAvailable(ident, identType);
-      console.log('isUserIdentAvail: ', response);
+      const input: SignInUserInput = {
+        ident: userIdent,
+        identType,
+        password,
+      };
 
-      if (!response) {
-        console.error('isUserIdentAvailable failed.', this.error);
-        // return { error: this.error || 'Error checking ident availability.' };
-        return false;
-      }
-
-      return response.valueOf();
-    } catch (err) {
-      this.error = err instanceof Error ? err.message : 'isUserIdentAvailable failed';
-      console.error('Error checking ident availability:', err);
-      return false;
+      return this.client.operations.myUser.signInUser(input);
+    } catch (error) {
+      console.error('MyUserContext.signInUser: error', { error });
+      this.error = translate(AppUiMessage.systemError);
+      return { operation: MutationType.update, error: this.error };
     } finally {
       this.isLoading = false;
     }
   }
 
-  public async signUp(email: string): Promise<{ myUser?: MyUser; error?: string }> {
-    if (!this.client) {
+  async signUpUser(email: string): Promise<{ myUser?: MyUser; error?: string }> {
+    if (!this._isInitialized) {
       this.myUser = null;
 
       return { error: 'Client not initialized' };
@@ -146,7 +163,7 @@ export class MyUserContext {
 
     try {
       this.isLoading = true;
-      this.error = '';
+      this.error = null;
 
       const input: SignUpUserInput = { email };
 
@@ -156,7 +173,6 @@ export class MyUserContext {
       }
 
       const response = await this.client.operations.myUser.signUpUser(input);
-      console.log('signup response: ', response);
 
       if (!response || response.error || !response.object?.userAuthResponse?.userId) {
         console.error('SignUpUser failed.', response.error);
@@ -175,76 +191,17 @@ export class MyUserContext {
     } catch (err) {
       this.error = err instanceof Error ? err.message : 'Sign up failed';
       console.error('Error signing up:', err);
-      return {};
-    } finally {
-      this.isLoading = false;
-    }
-  }
-
-  public async signIn(
-    userIdent: string,
-    identType: UserIdentType | undefined,
-    password: string,
-  ): Promise<{ myUser?: MyUser; error?: string }> {
-    if (!this.client || this.client.operations.myUser.isSignedIn()) {
-      this.myUser = null;
-
-      return { error: 'Client not initialized or already signed in' };
-    }
-
-    try {
-      this.isLoading = true;
-      this.error = null;
-
-      if (!identType) {
-        identType = userIdent.includes('@') ? UserIdentType.email : UserIdentType.userHandle;
-      }
-
-      const input: SignInUserInput = {
-        ident: userIdent,
-        identType,
-        password,
-      };
-
-      console.log('input: ', input);
-
-      const response = await this.client.operations.myUser.signInUser(input);
-
-      console.log('response: ', response);
-
-      if (!response || response.error || !response.object?.userAuthResponse?.userId) {
-        this.error = response.error || 'Failed to sign in';
-
-        return { error: this.error };
-      }
-
-      await this.loadMyUser({ cachePolicy: CachePolicy.cache });
-
-      if (!this.myUser) {
-        this.error = 'Failed to load user after sign in';
-        return { error: this.error };
-      }
-
-      return { myUser: this.myUser };
-    } catch (err) {
-      this.error = err instanceof Error ? err.message : 'Sign in failed';
-      console.error('Error signing in:', err);
       return { error: this.error };
     } finally {
       this.isLoading = false;
     }
   }
 
-  public get isSignedIn(): boolean {
-    return this.client?.operations.myUser.isSignedIn() || false;
-  }
-
-  // public async signMeOut(): Promise<{ result?: boolean; error?: string; }> {
-  public async signMeOut(): Promise<void> {
-    if (!this.client) {
+  async signMeOut(): Promise<boolean> {
+    if (!this._isInitialized) {
       this.myUser = null;
-      return;
-      // return  { result: false, error: 'Client not initialized' };
+      console.log('Client not initialized');
+      return false;
     }
 
     try {
@@ -253,274 +210,256 @@ export class MyUserContext {
 
       await this.client.operations.myUser.signMeOut();
       this.myUser = null;
-      console.error('Signed out:');
-      return;
-      // return {result: true};
+
+      return true;
     } catch (err) {
       this.error = err instanceof Error ? err.message : 'Sign out failed';
       console.error('Error signing out:', err);
-      return;
-      // return {result: false, error: this.error};
+      return false;
     } finally {
       this.isLoading = false;
     }
   }
-}
 
-export function createMyUserContext(): MyUserContext {
-  try {
-    return useMyUserContext();
-  } catch {
-    setContext(myUserContextKey, myUserContext);
+  async updateMyUser(changes: Partial<MyUser>): Promise<{ myUser?: MyUser; error?: string }> {
+    if (!this._isInitialized) {
+      return { error: 'Client not initialized' };
+    }
 
-    myUserContext.initialize().catch((err) => {
-      console.error('Failed to initialize myUserContext:', err);
-    });
+    try {
+      this.isLoading = true;
+      this.error = null;
 
-    return myUserContext;
+      const response = await this.client.operations.myUser.updateMyUser(changes);
+
+      if (!response || response.error || !response.object?.id) {
+        console.error('MyUserContext.updateMyUser failed.', response.error);
+
+        return { error: response.error };
+      }
+
+      this.myUser = response.object;
+
+      return { myUser: this.myUser };
+    } catch (err) {
+      this.error = err instanceof Error ? err.message : 'Update failed';
+      console.error('Error updating profile:', err);
+      return { error: this.error };
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  async updateMyPassword(
+    oldPassword: string,
+    newPassword: string,
+  ): Promise<{ myUser?: MyUser; error?: string }> {
+    if (!this._isInitialized) {
+      return { error: 'Client not initialized' };
+    }
+
+    try {
+      this.isLoading = true;
+      this.error = null;
+
+      const response = await this.client.operations.myUser.updateMyPassword(
+        oldPassword,
+        newPassword,
+        { cachePolicy: CachePolicy.network },
+      );
+
+      if (!response || response.error || !response.object?.id) {
+        console.error('MyUserContext.updatePassword failed.', response.error);
+
+        return { error: response.error };
+      }
+
+      this.myUser = response.object;
+
+      return { myUser: this.myUser };
+    } catch (err) {
+      this.error = err instanceof Error ? err.message : 'Update failed';
+      console.error('Error updating profile:', err);
+      return { error: this.error };
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  async findAvailableUserHandle(email: string) {
+    if (!this._isInitialized) {
+      return { error: 'Client not initialized' };
+    }
+
+    try {
+      return await this.client.operations.myUser.findAvailableUserHandle(email);
+    } catch (err) {
+      this.error = err instanceof Error ? err.message : 'Failed to find available handle';
+      console.error('Error finding available handle:', err);
+      return null;
+    }
+  }
+
+  // todo
+  async isUserIdentAvailable(
+    ident: string,
+    identType: UserIdentType,
+  ): Promise<{ isAvailable?: boolean; error?: string }> {
+    if (!this._isInitialized) {
+      return { error: 'Client not initialized' };
+    }
+
+    try {
+      const response = await this.client.operations.myUser.isUserIdentAvailable(ident, identType);
+      return { isAvailable: response };
+    } catch (err) {
+      this.error = err instanceof Error ? err.message : 'Failed to check identity availability';
+      console.error('Error checking identity availability:', err);
+      return { isAvailable: false, error: this.error };
+    }
+  }
+
+  // // todo
+  async resetMyPassword(
+    email: string,
+  ): Promise<{ actionProgress?: SidMultiStepActionProgress; error?: string }> {
+    if (!this._isInitialized) {
+      return { error: 'Client not initialized' };
+    }
+    try {
+      this.isLoading = true;
+      this.error = null;
+      const response = await this.client.operations.myUser.resetMyPassword(email, {
+        polling: { enabled: true, interval: 1000, timeout: 10000 },
+      });
+      return { actionProgress: response.object?.actionProgress };
+    } catch (err) {
+      this.error = err instanceof Error ? err.message : 'Failed to reset password';
+      console.error('Error Reset password:', err);
+      return { error: this.error };
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  async signInWithToken(userIdent: string): Promise<QueryResult<MultiStepActionProgressResult>> {
+    if (!this._isInitialized) {
+      return { error: 'Client not initialized' };
+    }
+
+    try {
+      this.isLoading = true;
+      this.error = null;
+      const response = await this.client.operations.myUser.signInWithToken(userIdent, {
+        polling: { enabled: true, interval: 1000, timeout: 10000 },
+      });
+      return response;
+    } catch (err) {
+      this.error = err instanceof Error ? err.message : 'Failed to sign in with token';
+      console.error('Error signing in with token:', err);
+      return { error: this.error };
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  async verifyMultiStepActionToken(
+    actionId: string,
+    token: string,
+    newPassword?: string,
+  ): Promise<{ error?: string }> {
+    if (!this._isInitialized) {
+      console.error('MyUserContext.verifyMultiStepActionToken: no client');
+      return { error: 'system-error' };
+    }
+
+    try {
+      this.isLoading = true;
+      this.error = null;
+      const response = await this.client.operations.multiStepAction.verifyMultiStepActionToken(
+        actionId,
+        token,
+        newPassword,
+      );
+
+      if (response.error || !response.object) {
+        console.error(
+          'MyUserContext.verifyMultiStepActionToken: failed calling client.verifyMultiStepActionToken',
+          response.error,
+        );
+        return { error: response.error || 'system-error' };
+      }
+
+      return {};
+    } catch (error) {
+      this.error = error instanceof Error ? error.message : 'Failed to send verify token';
+      console.error('MyUserContext.verifyMultiStepActionToken: error thrown.', { error });
+      return { error: this.error };
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  async verifyMyEmail(email: string): Promise<QueryResult<MultiStepActionProgressResult>> {
+    if (!this._isInitialized) {
+      return { error: 'Client not initialized' };
+    }
+
+    try {
+      this.isLoading = true;
+      this.error = null;
+      const response = await this.client.operations.myUser.verifyMyEmail(email, {
+        polling: { enabled: true, interval: 1000, timeout: 10000 },
+      });
+      return response;
+    } catch (err) {
+      this.error = err instanceof Error ? err.message : 'Failed to verify email';
+      console.error('Error verifying email:', err);
+      return { error: this.error };
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  async sendMultiStepActionNotification(
+    actionId: string,
+    email?: string,
+  ): Promise<MutationResult<string>> {
+    const returnValue: MutationResult<string> = {
+      operation: MutationType.update,
+    };
+
+    if (!this._isInitialized) {
+      console.error('MyUserContext.sendMultiStepActionNotification: not initialized.');
+      returnValue.error = 'system-error';
+      return returnValue;
+    }
+
+    try {
+      this.isLoading = true;
+      return this.client.operations.multiStepAction.sendMultiStepActionNotification(
+        actionId,
+        email,
+        undefined,
+        NotificationMethod.email,
+      );
+    } catch (error) {
+      console.error('MyUserContext.sendMultiStepActionNotification: error', { error });
+      returnValue.error = 'system-error';
+      return returnValue;
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  public get isInitialized(): boolean {
+    return this._isInitialized;
+  }
+
+  public get myUserId(): string | undefined {
+    return this.client.myUserId;
   }
 }
 
-export function useMyUserContext(): MyUserContext {
-  const context = getContext<MyUserContext>(myUserContextKey);
-
-  if (!context) {
-    throw new Error(
-      'useMyUserContext must be used within a component where createMyUserContext has been called',
-    );
-  }
-
-  return context;
-}
-
+// Create a singleton instance
 export const myUserContext = new MyUserContext();
-
-//   public async signIn(
-//     userIdent: string,
-//     identType: UserIdentType | undefined,
-//     password: string,
-//   ): Promise<{ myUser?: MyUser; error?: string }> {
-//     if (!this.client || this.client.operations.myUser.isSignedIn()) {
-//       this.myUser = null;
-
-//       return { error: 'Client not initialized or already signed in' };
-//     }
-
-//     try {
-//       this.isLoading = true;
-//       this.error = null;
-
-//       if (!identType) {
-//         identType = userIdent.startsWith('@') ? UserIdentType.email : UserIdentType.userHandle;
-//       }
-
-//       const input: SignInUserInput = {
-//         ident: userIdent,
-//         identType,
-//         password,
-//       };
-
-//       const response = await this.client.operations.myUser.signInUser(input);
-
-//       if (!response || response.error || !response.object?.userAuthResponse?.userId) {
-//         this.error = response.error || 'Failed to sign in';
-
-//         return { error: this.error };
-//       }
-
-//       await this.loadMyUser({ cachePolicy: CachePolicy.cache });
-
-//       if (!this.myUser) {
-//         this.error = 'Failed to load user after sign in';
-//         return { error: this.error };
-//       }
-
-//       return { myUser: this.myUser };
-//     } catch (err) {
-//       this.error = err instanceof Error ? err.message : 'Sign in failed';
-//       console.error('Error signing in:', err);
-//       return { error: this.error };
-//     } finally {
-//       this.isLoading = false;
-//     }
-//   }
-
-//   // async signUp(email: string): Promise<{ myUser?: MyUser; error?: string }> {
-//   //   if (!this.client) {
-//   //     this.myUser = null;
-
-//   //     return { error: 'Client not initialized' };
-//   //   }
-
-//   //   try {
-//   //     this.isLoading = true;
-//   //     this.error = null;
-
-//   //     const input: SignUpUserInput = { email };
-
-//   //     if (import.meta.env.VITE_APP_ENVIRONMENT === 'development') {
-//   //       input.isTestUser = true;
-//   //       input.source = 'testtoken=666666';
-//   //     }
-
-//   //     const response = await this.client.operations.myUser.signUpUser(input);
-
-//   //     if (!response || response.error || !response.object?.userAuthResponse?.userId) {
-//   //       console.error('SignUpUser failed.', response.error);
-
-//   //       return { error: response.error || 'Error signing up' };
-//   //     }
-
-//   //     await this.loadMyUser({ cachePolicy: CachePolicy.network });
-
-//   //     if (!this.myUser) {
-//   //       this.error = 'Failed to load user after sign in';
-//   //       return { error: this.error };
-//   //     }
-
-//   //     return { myUser: this.myUser };
-//   //   } catch (err) {
-//   //     this.error = err instanceof Error ? err.message : 'Sign up failed';
-//   //     console.error('Error signing up:', err);
-//   //     return {};
-//   //   } finally {
-//   //     this.isLoading = false;
-//   //   }
-//   // }
-
-//   async signUp(userInput: SignUpUserInput): Promise<UserAuthResponse> {
-//     try {
-//       this.loading = true;
-//       this.error = null;
-
-//       const response = await signUpUser(userInput);
-
-//       // Store the authentication token and user data
-//       if (response.token) {
-//         this.token = response.token;
-//       }
-
-//       if (response.user) {
-//         this.user = response.user;
-//       }
-
-//       return response;
-//     } catch (error) {
-//       this.error = error instanceof Error ? error : new Error(String(error));
-//       throw error;
-//     } finally {
-//       this.loading = false;
-//     }
-//   }
-
-// // todo
-// async updateMyUser(changes: Partial<MyUser>): Promise<{ myUser?: MyUser; error?: string }> {
-//   if (!this.client) {
-//     return { error: 'Client not initialized' };
-//   }
-
-//   try {
-//     this.isLoading = true;
-//     this.error = null;
-
-//     const response = await this.client.operations.myUser.updateMyUser(changes);
-
-//     if (!response || response.error || !response.object?.id) {
-//       console.error('MyUserContext.updateMyUser failed.', response.error);
-
-//       return { error: response.error };
-//     }
-
-//     this.myUser = response.object;
-
-//     return { myUser: this.myUser };
-//   } catch (err) {
-//     this.error = err instanceof Error ? err.message : 'Update failed';
-//     console.error('Error updating profile:', err);
-//     return null;
-//   } finally {
-//     this.isLoading = false;
-//   }
-// }
-
-// // todo
-// async findAvailableUserHandle(email: string) {
-//   try {
-//     return await MyUserContext.findAvailableUserHandle(email);
-//   } catch (err) {
-//     this.error = err instanceof Error ? err.message : 'Failed to find available handle';
-//     console.error('Error finding available handle:', err);
-//     return null;
-//   }
-// }
-
-// // todo
-// async isUserIdentAvailable(ident: string, identType: UserIdentType) {
-//   try {
-//     return await MyUserContext.isUserIdentAvailable(ident, identType);
-//   } catch (err) {
-//     this.error = err instanceof Error ? err.message : 'Failed to check identity availability';
-//     console.error('Error checking identity availability:', err);
-//     return null;
-//   }
-// }
-
-// // todo
-// async resetMyPassword(email: string) {
-//   try {
-//     this.isLoading = true;
-//     this.error = null;
-//     return await MyUserContext.resetMyPassword(email);
-//   } catch (err) {
-//     this.error = err instanceof Error ? err.message : 'Failed to reset password';
-//     console.error('Error resetting password:', err);
-//     return null;
-//   } finally {
-//     this.isLoading = false;
-//   }
-// }
-
-// // todo
-// async signInWithToken(userIdent: string) {
-//   try {
-//     this.isLoading = true;
-//     this.error = null;
-//     return await MyUserContext.signInWithToken(userIdent);
-//   } catch (err) {
-//     this.error = err instanceof Error ? err.message : 'Failed to sign in with token';
-//     console.error('Error signing in with token:', err);
-//     return null;
-//   } finally {
-//     this.isLoading = false;
-//   }
-// }
-
-// // todo
-// async verifyMultiStepActionToken(actionId: string, token: string, newPassword?: string) {
-//   try {
-//     this.isLoading = true;
-//     this.error = null;
-//     return await MyUserContext.verifyMultiStepActionToken(actionId, token, newPassword);
-//   } catch (err) {
-//     this.error = err instanceof Error ? err.message : 'Failed to verify token';
-//     console.error('Error verifying token:', err);
-//     return false;
-//   } finally {
-//     this.isLoading = false;
-//   }
-// }
-
-// // todo
-// async verifyMyEmail(email: string) {
-//   try {
-//     this.isLoading = true;
-//     this.error = null;
-//     return await MyUserContext.verifyMyEmail(email);
-//   } catch (err) {
-//     this.error = err instanceof Error ? err.message : 'Failed to verify email';
-//     console.error('Error verifying email:', err);
-//     return null;
-//   } finally {
-//     this.isLoading = false;
-//   }
-// }

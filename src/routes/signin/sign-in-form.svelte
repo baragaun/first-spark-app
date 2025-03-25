@@ -5,155 +5,389 @@
   // import { PasswordInput } from '$lib/components/ui/password-input';
   import * as Card from '$lib/components/ui/card';
   import { goto } from '$app/navigation';
-  import { UserIdentType } from '@baragaun/bg-node-client';
+  import {
+    MultiStepActionEventType,
+    SidMultiStepActionProgress,
+    UserIdentType,
+  } from '@baragaun/bg-node-client';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import translate from '@/helpers/language/translate';
+  import { AppUiMessage, MsaTokenStatus } from '@/types/enums';
+  import { writable } from 'svelte/store';
+  import TokenForm from '@/components/token-form.svelte';
+  import PasswordInput from '@/components/ui/password-input';
+  import ErrorAlert from '@/components/error-alert.svelte';
 
-  let identifier = $state(''); // either an email or a username
-  let identType = UserIdentType.email; // either an email or a username
-
-  let email = $state('');
-  let username = $state('');
+  let identifier = $state('');
+  let identType = $state(UserIdentType.email);
+  let actionId = $state<string | undefined>(undefined);
   let password = $state('');
   let loading = $state(false);
+  let tokenStatus = $state(MsaTokenStatus.unset);
   let errorMessage = $state('');
-
-  let error = '';
-  let emailSent = false;
-  let resendTimer = 30;
-  let canResend = false;
+  let message = $state('');
+  let resendTimer = $state(30);
+  let canResend = $state(false);
   let timerInterval: ReturnType<typeof setInterval>;
+  let currentStep = writable(0);
+  // 0 for token sign in, 1 for verification code, 2 for password sign in
 
   // Track emails that have active cooldowns
-  // const emailCooldowns = new Map<string, number>();
+  const emailCooldowns = $state(new Map<string, number>());
 
-  let showPasswordInput = $state(false);
-  function togglePasswordInput() {
-    showPasswordInput = !showPasswordInput;
-  }
-
-  const handleSignIn = async () => {
-    loading = true;
-    error = '';
+  const onSignInWithPassword = async () => {
+    // console.log('SignInForm.onSignInWithPassword: sending', { userIdent, password });
 
     try {
-      console.log('trying to sign in');
-      // if (showPasswordInput && password) {
-      console.log('signing in: ', identifier);
-      const user = await myUserContext.signIn(identifier, identType, password);
-      console.log('handleSignIn.user: ', user);
-      if (user.myUser) {
-        await goto('/');
-      } else {
-        error = 'Invalid credentials. Please try again.';
+      loading = true;
+      errorMessage = '';
+
+      const response = await myUserContext.signInUser(identifier, identType, password);
+
+      if (response?.error) {
+        errorMessage = translate(response.error, AppUiMessage.systemError);
+        return;
       }
-      // } else {
-      // console.log('handle token sign in')
-      // await handleTokenSignIn();
-      // }
-    } catch (err) {
-      console.error('Error signing in:', err);
-      error = 'Invalid credentials. Please try again.';
+
+      if (!response || !response.object || !response.object.myUser) {
+        // console.error('SignInForm.onSignInWithPassword: incorrect response', { response });
+        errorMessage = translate(AppUiMessage.systemError);
+        return;
+      }
+
+      await goto('/');
+    } catch (error) {
+      console.error('SignInForm.onSignInWithPassword: error:', { error });
+      errorMessage = translate(AppUiMessage.systemError);
     } finally {
       loading = false;
     }
   };
 
-  // const handleTokenSignIn = async () => {
-  //   // Check if this email has an active cooldown
-  //   if (emailCooldowns.has(identifier)) {
-  //     const cooldownEnd = emailCooldowns.get(identifier) || 0;
-  //     const remainingTime = Math.ceil((cooldownEnd - Date.now()) / 1000);
+  const onSendToken = async (token: string): Promise<void> => {
+    try {
+      if (!actionId) {
+        console.error('SignInForm.handleVerifyOtp: actionId missing:');
+        errorMessage = translate(AppUiMessage.systemError);
+        return;
+      }
 
-  //     if (remainingTime > 0) {
-  //       // If same email and cooldown active, just show verification screen with current timer
-  //       resendTimer = remainingTime;
-  //       emailSent = true;
-  //       return;
-  //     }
-  //   }
+      loading = true;
+      errorMessage = '';
 
-  //   loading = true;
-  //   error = '';
+      const response = await myUserContext.verifyMultiStepActionToken(actionId, token);
 
-  //   try {
-  //     // TODO: Implement your magic link email sending logic here
-  //     await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-  //     emailSent = true;
-  //     startResendTimer(identifier);
-  //   } catch (err) {
-  //     console.error('Error sending magic link:', err);
-  //     error = 'Failed to send magic link. Please try again.';
-  //     throw err;
-  //   } finally {
-  //     loading = false;
-  //   }
-  // };
+      // Here, we don't have to add another listener, since we already added one when
+      // we called `signInWithToken`. We do want to check the `result` object to
+      // make sure the `verifyMultiStepActionToken` call did not fail. But this
+      // function does not actually verify the token. For that, we are waiting for
+      // the listener to be called with the result of the token verification.
 
-  // const startResendTimer = (emailAddress: string) => {
-  //   resendTimer = 30;
-  //   canResend = false;
-  //   emailCooldowns.set(emailAddress, Date.now() + resendTimer * 1000);
+      if (!response) {
+        console.error('SignInForm.handleVerifyOtp: invalid response:', { result: response });
+        errorMessage = translate(AppUiMessage.systemError);
+        tokenStatus = MsaTokenStatus.unset;
+        return;
+      }
 
-  //   clearInterval(timerInterval);
-  //   timerInterval = setInterval(() => {
-  //     resendTimer -= 1;
-  //     if (resendTimer <= 0) {
-  //       clearInterval(timerInterval);
-  //       canResend = true;
-  //       emailCooldowns.delete(emailAddress);
-  //     }
-  //   }, 1000);
-  // };
+      if (response.error) {
+        errorMessage = translate(AppUiMessage.systemError);
+        // todo: translate error?
+        errorMessage = response.error;
+        tokenStatus = MsaTokenStatus.unset;
+        return;
+      }
+
+      tokenStatus = MsaTokenStatus.sending;
+      goto('/');
+    } catch (error) {
+      console.error('SignInForm.handleVerifyOtp: error:', { error });
+      error = translate(AppUiMessage.systemError);
+      tokenStatus = MsaTokenStatus.unset;
+    } finally {
+      loading = false;
+    }
+  };
+
+  const onSendNotification = async (email?: string) => {
+    tokenStatus = MsaTokenStatus.unset;
+
+    if (!actionId) {
+      console.error('SignInForm.handleResendOtp: actionId missing.');
+      errorMessage = translate(AppUiMessage.systemError);
+      return;
+    }
+
+    if (emailCooldowns.has(identifier)) {
+      const cooldownEnd = emailCooldowns.get(identifier) || 0;
+      const remainingTime = Math.ceil((cooldownEnd - Date.now()) / 1000);
+
+      if (remainingTime > 0) {
+        // If same email and cooldown active, just show verification screen with current timer
+        resendTimer = remainingTime;
+        tokenStatus = MsaTokenStatus.unset;
+        return;
+      }
+    }
+
+    try {
+      loading = true;
+      errorMessage = '';
+
+      const response = await myUserContext.sendMultiStepActionNotification(actionId, email);
+
+      if (response?.error) {
+        console.error('SignInForm.handleResendOtp: error:', { error: response.error });
+        errorMessage = translate(AppUiMessage.systemError);
+        return;
+      }
+
+      tokenStatus = MsaTokenStatus.sending;
+      startResendTimer(identifier);
+    } catch (error) {
+      console.error('SignInForm.handleResendOtp: error:', { error });
+      error = translate(AppUiMessage.systemError);
+    } finally {
+      loading = false;
+    }
+  };
+
+  const startTokenSignIn = async () => {
+    // Check if this email has an active cooldown
+    if (emailCooldowns.has(identifier)) {
+      const cooldownEnd = emailCooldowns.get(identifier) || 0;
+      const remainingTime = Math.ceil((cooldownEnd - Date.now()) / 1000);
+
+      if (remainingTime > 0) {
+        // If same email and cooldown active, just show verification screen with current timer
+        resendTimer = remainingTime;
+        return;
+      }
+    }
+
+    loading = true;
+    errorMessage = '';
+
+    try {
+      const response = await myUserContext.signInWithToken(identifier);
+
+      if (
+        !response ||
+        response?.error ||
+        !response.object ||
+        response.object.error ||
+        !response?.object.actionProgress?.actionId ||
+        !response?.object.run
+      ) {
+        errorMessage = 'Failed to send magic link. Please try again.';
+        return;
+      }
+
+      startResendTimer(identifier);
+      actionId = response?.object.actionProgress?.actionId;
+      currentStep.set(1); // get input for varification code
+
+      response.object.run.addListener({
+        id: 'SignInForm',
+
+        onEvent: async (
+          eventType: MultiStepActionEventType,
+          action: SidMultiStepActionProgress,
+        ): Promise<void> => {
+          if (eventType === MultiStepActionEventType.notificationFailed) {
+            // The notification failed to go out.
+            console.error(
+              'SignInPage.multiStepActionListener: Notification failed.',
+              action.notificationResult,
+            );
+            tokenStatus = MsaTokenStatus.sendingFailed;
+            errorMessage = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError);
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.notificationSent) {
+            // The notification has been sent out.
+            console.log(
+              'SignInPage.multiStepActionListener: Notification sent out.',
+              action.notificationResult,
+            );
+            // Switching to the token input for
+            tokenStatus = MsaTokenStatus.notificationSent;
+            message = translate(AppUiMessage.msaTokenSent);
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.tokenFailed) {
+            console.error(
+              'SignInPage.multiStepActionListener: incorrect token.',
+              action.notificationResult,
+            );
+            errorMessage = 'We could not verify the token you entered. Please try again.';
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.timedOut) {
+            console.error(
+              'SignInPage.multiStepActionListener: timeout.',
+              action.notificationResult,
+            );
+            tokenStatus = MsaTokenStatus.sendingFailed;
+            errorMessage = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError);
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.failed) {
+            console.error('SignInPage.multiStepActionListener: error.', action.notificationResult);
+            tokenStatus = MsaTokenStatus.verificationFailed;
+            errorMessage = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError);
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.success) {
+            // The token was accepted. The user is now signed in.
+            console.log(
+              'ResetMyPasswordListener.onNotificationSentOrFailed: success.',
+              action.notificationResult,
+            );
+            tokenStatus = MsaTokenStatus.success;
+            errorMessage = translate(AppUiMessage.msaTokenSuccess);
+            await goto('/');
+          }
+        },
+      });
+    } catch (error) {
+      console.error('SignInForm.startTokenSignIn:', { error });
+      tokenStatus = MsaTokenStatus.verificationFailed;
+      error = translate(AppUiMessage.systemError);
+    } finally {
+      loading = false;
+    }
+  };
+
+  const startResendTimer = (emailAddress: string) => {
+    resendTimer = 30;
+    canResend = false;
+    emailCooldowns.set(emailAddress, Date.now() + resendTimer * 1000);
+
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      resendTimer -= 1;
+      if (resendTimer <= 0) {
+        clearInterval(timerInterval);
+        canResend = true;
+        emailCooldowns.delete(emailAddress);
+      }
+    }, 1000);
+  };
+
+  const isNotificationSent = (): boolean => {
+    return tokenStatus === MsaTokenStatus.notificationSent;
+  };
+
+  const handleSignIn = async () => {
+    loading = true;
+    errorMessage = '';
+
+    try {
+      console.log('trying to sign in');
+      if ($currentStep === 1) {
+        // console.log('signing in: ', identifier);
+        await onSignInWithPassword();
+      } else {
+        // console.log('handle token sign in');
+        await startTokenSignIn();
+      }
+    } catch (err) {
+      console.error('Error signing in:', err);
+      errorMessage = 'Invalid credentials. Please try again.';
+    } finally {
+      loading = false;
+    }
+  };
 </script>
 
-<Card.Root class="mx-auto max-w-sm">
-  <Card.Header>
-    <Card.Title class="text-2xl">Sign In</Card.Title>
-    <Card.Description>Enter your email below to login to your account</Card.Description>
-  </Card.Header>
-  <Card.Content>
-    <div class="grid gap-4">
-      <div class="grid gap-2">
-        <Label for="email">Email or Username</Label>
-        <Input
-          bind:value={identifier}
-          id="email"
-          type="email"
-          placeholder="me@example.com, myusername"
-          required
-        />
-      </div>
-
-      {#if showPasswordInput}
-        <div class="grid gap-2">
-          <div class="flex items-center">
-            <Label for="password">Password</Label>
-            <a href="/reset-password" class="ml-auto inline-block text-sm underline">
-              Forgot your password?
-            </a>
+<div class="mx-auto max-w-sm">
+  {#if $currentStep === 1}
+    <TokenForm
+      email={identifier}
+      onVerify={onSendToken}
+      onResend={onSendNotification}
+      onBack={() => {
+        currentStep.set(0);
+      }}
+    />
+  {:else}
+    <Card.Root>
+      <Card.Header>
+        <Card.Title class="text-2xl">Sign In</Card.Title>
+        <Card.Description>Enter your email below to login to your account</Card.Description>
+      </Card.Header>
+      <Card.Content>
+        <div class="grid gap-4">
+          <div class="grid gap-2">
+            <Label for="email">Email or Username</Label>
+            <Input
+              bind:value={identifier}
+              id="email"
+              type="email"
+              placeholder="me@example.com, myusername"
+              required
+            />
           </div>
-          <Input id="password" type="password" required />
+
+          {#if $currentStep === 2}
+            <div class="grid gap-2">
+              <div class="flex items-center">
+                <Label for="password">Password</Label>
+                <a href="/reset-password" class="ml-auto inline-block text-sm underline">
+                  Forgot your password?
+                </a>
+              </div>
+              <PasswordInput id="password" bind:value={password} type="password" required />
+            </div>
+          {/if}
+
+          <Button
+            type="submit"
+            class="w-full"
+            disabled={loading || !identifier || ($currentStep === 2 && !password)}
+            onclick={handleSignIn}>Sign in</Button
+          >
+
+          {#if $currentStep === 0}
+            <Button
+              variant="outline"
+              class="w-full"
+              onclick={() => {
+                currentStep.set(2);
+              }}
+            >
+              Sign in with password
+            </Button>
+          {/if}
         </div>
-      {/if}
-
-      <Button type="submit" class="w-full" onclick={handleSignIn}>Sign in</Button>
-
-      {#if !showPasswordInput}
-        <Button variant="outline" class="w-full" onclick={togglePasswordInput}>
-          Sign in with password
-        </Button>
-      {/if}
-    </div>
-    {#if showPasswordInput}
-      <div class="mt-4 text-center text-sm">
-        <Button variant="link" onclick={togglePasswordInput} class="underline">
-          Sign in with your email
-        </Button>
-      </div>
-    {/if}
-    <div class="mt-4 text-center text-sm">
-      Don't have an account?
-      <a href="/signup" class="underline"> Sign up </a>
-    </div>
-  </Card.Content>
-</Card.Root>
+        {#if $currentStep === 2}
+          <div class="mt-4 text-center text-sm">
+            <Button
+              variant="link"
+              onclick={() => {
+                currentStep.set(0);
+              }}
+              class="underline"
+            >
+              Sign in with your email
+            </Button>
+          </div>
+        {/if}
+        <div class="mt-4 text-center text-sm">
+          Don't have an account?
+          <a href="/signup" class="underline"> Sign up </a>
+        </div>
+      </Card.Content>
+    </Card.Root>
+  {/if}
+  <!-- Alert for errors -->
+  {#if errorMessage}
+    <ErrorAlert bind:errorMessage />
+  {/if}
+</div>

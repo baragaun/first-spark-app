@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@baragaun/bg-node-client':
-        specifier: ^0.0.11
-        version: 0.0.11(prettier@3.5.3)
+        specifier: ^0.0.17
+        version: 0.0.17(prettier@3.5.3)
       formsnap:
         specifier: ^2.0.0
         version: 2.0.0(svelte@5.22.6)(sveltekit-superforms@2.24.0(@sveltejs/kit@2.19.0(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.22.6)(vite@6.2.1(@types/node@22.13.10)(jiti@1.21.7)(yaml@2.7.0)))(svelte@5.22.6)(vite@6.2.1(@types/node@22.13.10)(jiti@1.21.7)(yaml@2.7.0)))(@types/json-schema@7.0.15)(svelte@5.22.6)(typescript@5.8.2))
@@ -238,8 +238,8 @@ packages:
     resolution: {integrity: sha512-emqcG3vHrpxUKTrxcblR36dcrcoRDvKmnL/dCL6ZsHaShW80qxCAcNhzQZrpeM765VzEos+xOi4s+r4IXzTwdQ==}
     engines: {node: '>=6.9.0'}
 
-  '@baragaun/bg-node-client@0.0.11':
-    resolution: {integrity: sha512-hag9B7jbesf8i5PafuMvkZliiJPR1yPq8KtCzcgU5S44qvfZRuZkFU3xVf7raNuqNIAnDwQHpoJ/7OldF+Y5Hg==}
+  '@baragaun/bg-node-client@0.0.17':
+    resolution: {integrity: sha512-IRON8rZpHR6s9TwvNcER2/leELhV7ghWIcZ7kmyYsq2FXMfOeoBAiA5LtNfvMiiIBXASYefIGrf4yI9rHWFuFQ==}
     engines: {node: '>= 20'}
 
   '@bcoe/v8-coverage@1.0.2':
@@ -2833,6 +2833,10 @@ packages:
     resolution: {integrity: sha512-HfzEZa/67fAmRXchLv/sFGeZFF27TRf6kuNbuze2+Md+0M4xADoiUf7YColV9CMjlf2nIkFPnlXcpOTdtlhbPg==}
     engines: {node: '>= 14.0.0'}
 
+  nats@2.29.3:
+    resolution: {integrity: sha512-tOQCRCwC74DgBTk4pWZ9V45sk4d7peoE2njVprMRCBXrhJ5q5cYM7i6W+Uvw2qUrcfOSnuisrX7bEx3b3Wx4QA==}
+    engines: {node: '>= 14.0.0'}
+
   natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
 
@@ -4069,16 +4073,17 @@ snapshots:
       '@babel/helper-string-parser': 7.25.9
       '@babel/helper-validator-identifier': 7.25.9
 
-  '@baragaun/bg-node-client@0.0.11(prettier@3.5.3)':
+  '@baragaun/bg-node-client@0.0.17(prettier@3.5.3)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.10.0)
       '@opentelemetry/api': 1.9.0
       ajv: 8.17.1
       ajv-formats: 3.0.1(ajv@8.17.1)
       chance: 1.1.12
+      dexie: 4.0.10
       graffle: 8.0.0-next.157(@opentelemetry/api@1.9.0)(graphql@16.10.0)(prettier@3.5.3)
       graphql: 16.10.0
-      nats: 2.29.2
+      nats: 2.29.3
       rxdb: 16.8.1(rxjs@7.8.2)
       rxjs: 7.8.2
       tslib: 2.8.1
@@ -6935,6 +6940,10 @@ snapshots:
   nanoid@3.3.9: {}
 
   nats@2.29.2:
+    dependencies:
+      nkeys.js: 1.1.0
+
+  nats@2.29.3:
     dependencies:
       nkeys.js: 1.1.0
 

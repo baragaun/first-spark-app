@@ -1,23 +1,22 @@
 <script lang="ts">
+  import { setContext } from 'svelte';
+  import { myUserContext } from './my-user-context.svelte';
   import { onMount } from 'svelte';
-  import { createMyUserContext } from './my-user-context.svelte';
 
-  const myUserContext = createMyUserContext();
+  // Set the user context for child components to consume
+  setContext('myUserContext', myUserContext);
 
-  const myUser = $derived(myUserContext.getMyUser());
-  const loading = $derived(myUserContext.getIsLoading());
-  const error = $derived(myUserContext.getError());
-  const isAuthenticated = $derived(myUserContext.isAuthenticated);
-
-  let { children } = $props();
-
-  // Refresh user data on mount
-  onMount(async () => {
-    if (!loading) {
-      // myUserContext.loadMyUser();
-      return;
+  onMount(() => {
+    console.log('UserProvider.onMount called.');
+    if (!myUserContext.isInitialized) {
+      console.log('UserProvider.onMount: Initializing MyUserContext');
+      myUserContext.initialize().catch((error) => {
+        console.error('UserProvider.onMount: Error initializing MyUserContext:', error);
+      });
+      console.log('UserProvider.onMount: initialized successfully');
     }
   });
 </script>
 
-{@render children?.({ myUser, loading, error, isAuthenticated })}
+<slot />
+// todo change to render

@@ -4,13 +4,11 @@
   import * as Sidebar from '$lib/components/ui/sidebar/index.js';
   import ThemeButton from '../theme-button.svelte';
   import LanguageButton from '../language-button.svelte';
-  import { useMyUserContext } from '@/contexts/my-user-context.svelte';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { goto } from '$app/navigation';
 
-  const myUserContext = useMyUserContext();
-
-  const myUser = $derived(myUserContext.getMyUser());
+  const myUser = $derived(myUserContext.loadMyUser());
   const isAuthenticated = $derived(myUserContext.isAuthenticated);
-  const isLoading = $derived(myUserContext.getIsLoading());
 </script>
 
 <nav
@@ -42,10 +40,21 @@
           >
             Sign In
           </Button>
+          <Button variant="default" href="/signup" class="font-lexend shadow-sm hover:shadow-md">
+            Sign Up
+          </Button>
+        {:else}
+          <Button
+            variant="destructive"
+            class="font-lexend shadow-sm hover:shadow-md"
+            onclick={() => {
+              myUserContext.signMeOut();
+              goto('/signin');
+            }}
+          >
+            Sign Out
+          </Button>
         {/if}
-        <Button variant="default" href="/signup" class="font-lexend shadow-sm hover:shadow-md">
-          Sign Up
-        </Button>
         <AvatarMenu />
       </div>
     </div>
