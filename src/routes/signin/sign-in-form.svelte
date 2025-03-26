@@ -314,12 +314,9 @@
     errorMessage = '';
 
     try {
-      console.log('trying to sign in', $currentStep);
       if ($currentStep === 2) {
-        console.log('signing in: ', identifier);
         await onSignInWithPassword();
       } else {
-        console.log('handle token sign in');
         await startTokenSignIn();
       }
     } catch (err) {
