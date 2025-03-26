@@ -17,6 +17,7 @@
   import TokenForm from '@/components/token-form.svelte';
   import PasswordInput from '@/components/ui/password-input';
   import ErrorAlert from '@/components/error-alert.svelte';
+  import { z } from 'zod';
 
   let identifier = $state('');
   let identType = $state(UserIdentType.email);
@@ -34,10 +35,32 @@
 
   // Track emails that have active cooldowns
   const emailCooldowns = $state(new Map<string, number>());
+  // Define Zod schemas for validation
+  const emailSchema = z.string().email('Not a valid email address');
+  const handleSchema = z
+    .string()
+    .min(3, 'Must be at least 3 characters')
+    .max(30, 'Cannot exceed 30 characters');
+
+  // Function to determine identifier type using Zod
+  const determineIdentifierType = (value: string): UserIdentType => {
+    // Try to validate as email first
+    const emailResult = emailSchema.safeParse(value);
+    if (emailResult.success) {
+      return UserIdentType.email;
+    }
+
+    // Then try to validate as handle
+    const handleResult = handleSchema.safeParse(value);
+    if (handleResult.success) {
+      return UserIdentType.userHandle;
+    }
+
+    // Default to email if unclear (validation will catch errors later)
+    return UserIdentType.email;
+  };
 
   const onSignInWithPassword = async () => {
-    // console.log('SignInForm.onSignInWithPassword: sending', { userIdent, password });
-
     try {
       loading = true;
       errorMessage = '';
@@ -99,7 +122,6 @@
       }
 
       tokenStatus = MsaTokenStatus.sending;
-
     } catch (error) {
       console.error('SignInForm.handleVerifyOtp: error:', { error });
       error = translate(AppUiMessage.systemError);
@@ -290,7 +312,7 @@
     errorMessage = '';
 
     try {
-      console.log('trying to sign in');
+      // console.log('trying to sign in');
       if ($currentStep === 1) {
         // console.log('signing in: ', identifier);
         await onSignInWithPassword();
@@ -305,12 +327,39 @@
       loading = false;
     }
   };
+
+  const handleIdentifierChange = () => {
+    if (identifier) {
+      identType = determineIdentifierType(identifier);
+    }
+  };
+
+  $effect(() => {
+    if (identifier) {
+      handleIdentifierChange();
+    }
+  });
+
+  // Function to validate the current identifier based on its type
+  const validateIdentifier = (): boolean => {
+    if (!identifier) {
+      return false;
+    }
+
+    if (identType === UserIdentType.email) {
+      const result = emailSchema.safeParse(identifier);
+      return result.success;
+    } else {
+      const result = handleSchema.safeParse(identifier);
+      return result.success;
+    }
+  };
 </script>
 
 <div class="mx-auto max-w-sm">
   {#if $currentStep === 1}
     <TokenForm
-      email={identifier}
+      ident={identifier}
       onVerify={onSendToken}
       onResend={onSendNotification}
       onBack={() => {
@@ -332,6 +381,7 @@
               id="email"
               type="email"
               placeholder="me@example.com, myusername"
+              oninput={handleIdentifierChange}
               required
             />
           </div>
@@ -351,9 +401,10 @@
           <Button
             type="submit"
             class="w-full"
-            disabled={loading || !identifier || ($currentStep === 2 && !password)}
-            onclick={handleSignIn}>Sign in</Button
-          >
+            disabled={loading || !validateIdentifier() || ($currentStep === 2 && !password)}
+            onclick={handleSignIn}
+            >Sign in
+          </Button>
 
           {#if $currentStep === 0}
             <Button

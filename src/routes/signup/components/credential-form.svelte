@@ -3,9 +3,10 @@
   import { Input } from '$lib/components/ui/input';
   import { myUserContext } from '$lib/contexts/my-user-context.svelte';
   import { UserIdentType } from '@baragaun/bg-node-client';
-  import AuthCard from './ui/auth-card.svelte';
-  import PasswordInput from './ui/password-input';
+  import AuthCard from '$lib/components/auth-card.svelte';
+  import PasswordInput from '../../../lib/components/ui/password-input';
   import passwordHelpers from '@/helpers/password-helpers';
+  import { schemaStep3 } from '../form/sign-up-form-schema';
 
   let password = $state('');
   let username = $state('');
@@ -42,7 +43,12 @@
   });
 </script>
 
-<AuthCard title="Create your Username and Password" showBackButton={true} {onBack}>
+<AuthCard
+  title="Create your Username and Password"
+  description="Choose a unique username and a secure password to complete your account setup."
+  showBackButton={true}
+  {onBack}
+>
   <form onsubmit={onSubmit} class="space-y-4">
     <div class="space-y-2">
       <label for="username" class="text-sm font-medium">Username</label>
@@ -55,6 +61,12 @@
           if (username) {
             checkingUsername = true;
             usernameError = '';
+            const result = schemaStep3.shape.username.safeParse(username);
+
+            if (!result.success) {
+              usernameError = result.error.errors[0]?.message || 'Invalid username';
+              return;
+            }
             const isAvailable = checkUserIdentityAvailability();
             checkingUsername = false;
 

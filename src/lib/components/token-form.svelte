@@ -2,16 +2,16 @@
   import { Button } from '$lib/components/ui/button';
   import * as InputOTP from '$lib/components/ui/input-otp';
   import { REGEXP_ONLY_DIGITS } from 'bits-ui';
-  import AuthCard from './ui/auth-card.svelte';
+  import AuthCard from './auth-card.svelte';
 
   interface Props {
-    email: string;
+    ident: string;
     onVerify: (code: string) => void;
     onResend: () => void;
     onBack?: () => void;
   }
 
-  let { email, onResend, onVerify, onBack }: Props = $props();
+  let { ident, onResend, onVerify, onBack }: Props = $props();
 
   // Internal state
   let verificationCode = $state('');
@@ -81,7 +81,9 @@
 
 <AuthCard
   title="Verify your email"
-  description={`Enter the six digit code we sent to your email : ${email}`}
+  description={`Enter the six digit code we sent to ${ident}.`}
+  showBackButton={true}
+  {onBack}
 >
   <div class="space-y-4">
     <div class="space-y-2">
@@ -111,7 +113,6 @@
         {loading ? 'Verifying...' : 'Verify'}
       </Button>
       <div class="flex justify-between text-sm">
-        <Button variant="link" class="px-0" onclick={onBack}>Back</Button>
         <Button variant="link" class="px-0" disabled={!canResend} onclick={handleResendCode}>
           {canResend ? 'Resend code' : `Resend in ${formatTime(resendTimer)}`}
         </Button>

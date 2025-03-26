@@ -1,10 +1,5 @@
 <script lang="ts">
-  import * as Card from '$lib/components/ui/card';
-  import {
-    MultiStepActionEventType,
-    SidMultiStepActionProgress,
-    UserIdentType,
-  } from '@baragaun/bg-node-client';
+  import { MultiStepActionEventType, SidMultiStepActionProgress } from '@baragaun/bg-node-client';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import {
     formSchema,
@@ -16,11 +11,10 @@
   import SuperDebug, { type SuperValidated, type Infer, superForm } from 'sveltekit-superforms';
   import { zod, zodClient } from 'sveltekit-superforms/adapters';
   import { writable } from 'svelte/store';
-  import EmailVerification from '@/components/email-verification.svelte';
+  import EmailVerification from '../components/email-verification.svelte';
   import TokenForm from '@/components/token-form.svelte';
-  import CredentialForm from '@/components/credential-form.svelte';
+  import CredentialForm from '../components/credential-form.svelte';
   import { goto } from '$app/navigation';
-  import DialogOverlay from '@/components/ui/dialog/dialog-overlay.svelte';
   import ErrorAlert from '@/components/error-alert.svelte';
 
   let { data }: { data: { form: SuperValidated<Infer<FormSchema>> } } = $props();
@@ -184,25 +178,6 @@
     } finally {
       loading = false;
     }
-    //
-    //   const verifyResponse = await myUserContext.verifyMyEmail(email);
-    //
-    //   if (verifyResponse.error || !verifyResponse.response?.actionId) {
-    //     error = verifyResponse.error || 'Failed to send verification email';
-    //     return;
-    //   }
-    //
-    //   actionId = verifyResponse.response?.actionId;
-    //   expiredAt = verifyResponse.response?.expiresAt
-    //     ? new Date(verifyResponse.response.expiresAt)
-    //     : undefined;
-    //   currentStep.set(STEPS.VERIFY);
-    // } catch (err) {
-    //   error = err instanceof Error ? err.message : 'Failed to sign up';
-    //   console.error('Error signing up:', err);
-    // } finally {
-    //   loading = false;
-    // }
   };
 
   // Handle verification callback
@@ -210,12 +185,6 @@
     loading = true;
     errorMessage = '';
     try {
-      // const client = await myUserContext.getClient();
-
-      // const listener = new VerifyMyEmailListener('verify-email-listener', actionId, client);
-
-      // client.operations.multiStepAction.addMultiStepActionListener(actionId, listener);
-
       const result = await myUserContext.verifyMultiStepActionToken(actionId, code);
 
       if (!result) {
@@ -224,7 +193,6 @@
       }
 
       console.log('Verification successful, moving to credentials step');
-
     } catch (err) {
       errorMessage = err instanceof Error ? err.message : 'Failed to verify code';
       console.error('Error verifying code:', err);
@@ -293,18 +261,6 @@
       errorMessage = 'We failed to send the verification token. Please try again.';
       return;
     }
-    currentStep.set(1);
-  };
-
-  // Calculate remaining time until expiration
-  const getRemainingTimeText = (expiryDate?: Date): string => {
-    if (!expiryDate) return '';
-
-    const now = new Date();
-    const diffMs = expiryDate.getTime() - now.getTime();
-    const diffMins = Math.max(0, Math.ceil(diffMs / 60000));
-
-    return `. Code expires in ${diffMins} minute${diffMins !== 1 ? 's' : ''}`;
   };
 </script>
 
@@ -314,7 +270,7 @@
       <EmailVerification bind:email={$formData.email} {onEmailSubmit} />
     {:else if $currentStep === 1}
       <TokenForm
-        email={$formData.email}
+        ident={$formData.email}
         onVerify={handleVerify}
         onResend={handleResend}
         onBack={handleBack}

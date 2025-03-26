@@ -13,7 +13,7 @@ export const schemaStep2 = schemaStep1.extend({
 });
 
 export const schemaStep3 = schemaStep2.extend({
-  username: z.string().min(2).max(50),
+  username: z.string().min(3).max(30),
   password: z.string(),
 });
 
