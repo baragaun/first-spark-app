@@ -2,9 +2,10 @@
   import { defineMeta } from '@storybook/addon-svelte-csf';
   import SignUp from '../../routes/signup/+page.svelte';
   import { within, userEvent, expect, waitFor } from '@storybook/test';
+  import MockUserProvider from '../mocks/mock-user-provider.svelte';
 
   const { Story } = defineMeta({
-    title: 'Page/Sign Un',
+    title: 'Page/Sign Up',
     component: SignUp,
     parameters: {
       layout: 'fullscreen',
@@ -13,52 +14,92 @@
 </script>
 
 <Story name="Default">
-  <SignUp
-    data={{
-      form: {
-        data: {
-          email: '',
-          emailOtp: '',
-          username: '',
-          password: '',
+  <MockUserProvider>
+    <SignUp
+      data={{
+        form: {
+          data: {
+            email: '',
+            emailOtp: '',
+            username: '',
+            password: '',
+          },
+          errors: {},
+          constraints: {},
+          id: '',
+          valid: false,
+          posted: false,
         },
-        errors: {},
-        constraints: {},
-        id: '',
-        valid: false,
-        posted: false,
-      },
-    }}
-  />
+      }}
+    />
+  </MockUserProvider>
 </Story>
 
-<!-- <Story name="Sign Up Process" play={async ({ canvasElement }) => {
-      const canvas = within(canvasElement);
+<Story
+  name="Sign Up Process"
+  play={async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
 
-      // Fill in the email/username field
-      const identifierInput = canvas.getByLabelText(/Email or Username/i);
-      await userEvent.type(identifierInput, 'test@example.com');
+    // Step 1: Enter email
+    const emailInput = canvas.getByLabelText(/Email/i);
+    await userEvent.type(emailInput, 'test@example.com');
 
-      // Click the "Sign in with password" button to show password field
-      const showPasswordButton = canvas.getByRole('button', { name: /Sign in with password/i });
-      await userEvent.click(showPasswordButton);
+    // Click continue
+    const continueButton = canvas.getByRole('button', { name: /Continue/i });
+    await userEvent.click(continueButton);
 
-      // Fill in the password field
-      const passwordInput = canvas.getByLabelText(/Password/i);
-      await userEvent.type(passwordInput, 'password123');
+    // Step 2: Enter verification code
+    await waitFor(() => {
+      const codeInput = canvas.getByLabelText(/Verification code/i);
+      expect(codeInput).toBeInTheDocument();
+    });
 
-      // Click the sign in button
-      const signInButton = canvas.getByRole('button', { name: /Sign in$/i });
-      await userEvent.click(signInButton);
+    const codeInput = canvas.getByLabelText(/Verification code/i);
+    await userEvent.type(codeInput, '123456');
 
-      // Wait for the sign-in process (this is a mock, so we're just demonstrating the interaction)
-      // await waitFor(() => {
-      //   // In a real test, you might check for a success message or redirect
-      //   expect(canvas.getByText(/Sign In/i)).toBeInTheDocument();
-      // });
-    }}
-  />
+    // Click verify
+    const verifyButton = canvas.getByRole('button', { name: /Verify/i });
+    await userEvent.click(verifyButton);
 
+    // Step 3: Enter username and password
+    await waitFor(() => {
+      const usernameInput = canvas.getByLabelText(/Username/i);
+      expect(usernameInput).toBeInTheDocument();
+    });
 
+    const usernameInput = canvas.getByLabelText(/Username/i);
+    await userEvent.type(usernameInput, 'testuser');
 
- -->
+    const passwordInput = canvas.getByLabelText(/Password/i);
+    await userEvent.type(passwordInput, 'Password123!');
+
+    // Click sign up
+    const signUpButton = canvas.getByRole('button', { name: /Sign up/i });
+    await userEvent.click(signUpButton);
+
+    // Wait for sign up to complete
+    await waitFor(() => {
+      // Check for successful sign up
+    });
+  }}
+>
+  <MockUserProvider>
+    <SignUp
+      data={{
+        form: {
+          data: {
+            email: '',
+            emailOtp: '',
+            username: '',
+            password: '',
+          },
+          errors: {},
+          constraints: {},
+          id: '',
+          valid: false,
+          posted: false,
+        },
+      }}
+    />
+  </MockUserProvider>
+</Story>
