@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { setContext } from 'svelte';
+  import { setContext, type Snippet } from 'svelte';
   import { myUserContext } from './my-user-context.svelte';
   import { onMount } from 'svelte';
 
@@ -16,7 +16,12 @@
       console.log('UserProvider.onMount: initialized successfully');
     }
   });
+
+  interface Props {
+    children: Snippet;
+  }
+
+  const { children }: Props = $props();
 </script>
 
-<slot />
-// todo change to render
+{@render children?.()}

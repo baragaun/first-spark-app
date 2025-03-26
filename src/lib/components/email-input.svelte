@@ -1,8 +1,10 @@
 <script lang="ts">
   import { Input } from '$lib/components/ui/input';
-  import { myUserContext } from '$lib/contexts/my-user-context.svelte';
   import { UserIdentType } from '@baragaun/bg-node-client';
+  import type { MyUserContext } from '@/contexts/my-user-context.svelte';
+  import { getContext } from 'svelte';
 
+  const myUserContext = getContext<MyUserContext>('myUserContext');
   let loading = $state(false);
 
   const isValidEmail = (email: string): boolean => {

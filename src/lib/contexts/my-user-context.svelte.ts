@@ -300,7 +300,6 @@ export class MyUserContext {
     }
   }
 
-  // todo
   async isUserIdentAvailable(
     ident: string,
     identType: UserIdentType,
@@ -319,7 +318,6 @@ export class MyUserContext {
     }
   }
 
-  // // todo
   async resetMyPassword(
     email: string,
   ): Promise<{ actionProgress?: SidMultiStepActionProgress; error?: string }> {

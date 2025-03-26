@@ -2,7 +2,6 @@
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
   import { Label } from '@/components/ui/label';
-  // import { PasswordInput } from '$lib/components/ui/password-input';
   import * as Card from '$lib/components/ui/card';
   import { goto } from '$app/navigation';
   import {
@@ -10,7 +9,7 @@
     SidMultiStepActionProgress,
     UserIdentType,
   } from '@baragaun/bg-node-client';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { getContext } from 'svelte';
   import translate from '@/helpers/language/translate';
   import { AppUiMessage, MsaTokenStatus } from '@/types/enums';
   import { writable } from 'svelte/store';
@@ -18,6 +17,9 @@
   import PasswordInput from '@/components/ui/password-input';
   import ErrorAlert from '@/components/error-alert.svelte';
   import { z } from 'zod';
+  import type { MyUserContext } from '@/contexts/my-user-context.svelte';
+
+  const myUserContext = getContext<MyUserContext>('myUserContext');
 
   let identifier = $state('');
   let identType = $state(UserIdentType.email);
@@ -312,12 +314,12 @@
     errorMessage = '';
 
     try {
-      // console.log('trying to sign in');
-      if ($currentStep === 1) {
-        // console.log('signing in: ', identifier);
+      console.log('trying to sign in', $currentStep);
+      if ($currentStep === 2) {
+        console.log('signing in: ', identifier);
         await onSignInWithPassword();
       } else {
-        // console.log('handle token sign in');
+        console.log('handle token sign in');
         await startTokenSignIn();
       }
     } catch (err) {
@@ -394,7 +396,7 @@
                   Forgot your password?
                 </a>
               </div>
-              <PasswordInput id="password" bind:value={password} type="password" required />
+              <PasswordInput id="password" bind:value={password} required />
             </div>
           {/if}
 

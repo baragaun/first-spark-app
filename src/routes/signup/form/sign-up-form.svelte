@@ -1,6 +1,5 @@
 <script lang="ts">
   import { MultiStepActionEventType, SidMultiStepActionProgress } from '@baragaun/bg-node-client';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
   import {
     formSchema,
     schemaStep1,
@@ -16,7 +15,10 @@
   import CredentialForm from '../components/credential-form.svelte';
   import { goto } from '$app/navigation';
   import ErrorAlert from '@/components/error-alert.svelte';
+  import type { MyUserContext } from '@/contexts/my-user-context.svelte';
+  import { getContext } from 'svelte';
 
+  const myUserContext = getContext<MyUserContext>('myUserContext');
   let { data }: { data: { form: SuperValidated<Infer<FormSchema>> } } = $props();
 
   const form = superForm(data.form, {
