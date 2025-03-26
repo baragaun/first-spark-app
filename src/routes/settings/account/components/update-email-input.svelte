@@ -8,6 +8,7 @@
   import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
   import { zodClient } from 'sveltekit-superforms/adapters';
   import { emailSchema } from '../../../../routes/settings/account/account-settings-schema';
+  import { Label } from '@/components/ui/label';
 
   interface EmailInputProps {
     currentEmail: string;
@@ -124,8 +125,8 @@
         </div>
 
         <Form.Field {form} name="email">
-          <label for="new-email" class="mb-2 block text-sm font-medium leading-none"
-            >New Email Address</label
+          <Label for="new-email" class="mb-2 block text-sm font-medium leading-none"
+            >New Email Address</Label
           >
           <Form.Control>
             {#snippet children({ props })}
@@ -142,9 +143,7 @@
         </Form.Field>
 
         <Form.Field {form} name="currentPassword">
-          <label for="email-change-password" class="mb-2 block text-sm font-medium leading-none"
-            >Current Password</label
-          >
+          <Label class="mb-2 block text-sm font-medium leading-none">Current Password</Label>
           <Form.Control>
             {#snippet children({ props })}
               <PasswordInput

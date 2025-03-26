@@ -1,13 +1,12 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { Separator } from '$lib/components/ui/separator';
-  import UpdateUsernameInput from '$lib/components/settings/account/update-username-input.svelte';
-  import UpdateEmailInput from '$lib/components/settings/account/update-email-input.svelte';
-  import UpdatePasswordInput from '$lib/components/settings/account/update-password-input.svelte';
-  import DeleteAccountInput from '$lib/components/settings/account/delete-account-input.svelte';
-  import type { PageData } from './$types';
+  import UpdateUsernameInput from './update-username-input.svelte';
+  import UpdateEmailInput from './update-email-input.svelte';
+  import UpdatePasswordInput from './update-password-input.svelte';
+  import DeleteAccountInput from './delete-account-input.svelte';
+  import type { PageData } from '../$types';
 
-  // Get the form data from the page data
   let { data }: { data: PageData } = $props();
 
   let isLoading = $state(false);
@@ -20,7 +19,7 @@
     try {
       isLoading = true;
       // Call the API to update the username
-      await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate API delay
+      await new Promise((resolve) => setTimeout(resolve, 500));
       currentUsername = newUsername;
     } catch (error) {
       console.error('Error updating username:', error);
@@ -33,7 +32,7 @@
     try {
       isLoading = true;
       // Call the API to update the email
-      await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate API delay
+      await new Promise((resolve) => setTimeout(resolve, 500));
       currentEmail = newEmail;
       return true;
     } catch (error) {
@@ -51,7 +50,7 @@
     try {
       isLoading = true;
       // Call the API to update the password
-      await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate API delay
+      await new Promise((resolve) => setTimeout(resolve, 500));
       return true;
     } catch (error) {
       console.error('Error updating password:', error);
@@ -65,7 +64,7 @@
     try {
       isLoading = true;
       // Call the API to delete the account
-      await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate API delay
+      await new Promise((resolve) => setTimeout(resolve, 500));
       goto('/signup');
       return true;
     } catch (error) {

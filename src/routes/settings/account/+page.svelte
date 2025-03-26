@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { PageData } from './$types';
-  import AccountSettingsForm from './account-settings-form.svelte';
+  import AccountSettingsForm from './components/account-settings-menu.svelte';
   import { accountSettingsSchema, type AccountSettingsSchema } from './account-settings-schema';
   import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
 

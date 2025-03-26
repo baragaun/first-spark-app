@@ -8,7 +8,8 @@
   import * as Form from '$lib/components/ui/form/index';
   import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
   import { zodClient } from 'sveltekit-superforms/adapters';
-  import { deleteAccountSchema } from '../../../../routes/settings/account/account-settings-schema';
+  import { deleteAccountSchema } from '../account-settings-schema';
+  import Label from '@/components/ui/label/label.svelte';
 
   interface DeleteAccountProps {
     currentEmail: string;
@@ -22,6 +23,7 @@
   // Initialize superForm
   const form = superForm(deleteAccountForm, {
     validators: zodClient(deleteAccountSchema),
+    validationMethod: 'oninput',
     dataType: 'json',
   });
 
@@ -52,16 +54,18 @@
 </script>
 
 <button
-  class="group flex w-full items-center justify-between rounded-lg py-2 hover:bg-muted/50"
+  class="group flex w-full items-center justify-between rounded-lg py-2 text-destructive hover:bg-destructive/10"
   onclick={() => (showDeleteConfirm = true)}
 >
   <div class="flex flex-col text-left sm:flex-row sm:items-center sm:gap-2">
     <p class="text-sm font-medium">Delete Account</p>
-    <p class="text-xs text-muted-foreground">Permanently delete your account</p>
   </div>
   <div class="flex items-center gap-2">
+    <p class="text-right text-sm opacity-70 group-hover:text-foreground">
+      Permanently delete your account
+    </p>
     <ChevronRight
-      class="h-5 w-5 stroke-[2] text-muted-foreground transition-colors group-hover:text-foreground"
+      class="h-5 w-5 stroke-[2] opacity-70 transition-opacity group-hover:opacity-100"
     />
   </div>
 </button>
@@ -75,12 +79,20 @@
 >
   <Dialog.Content class="sm:max-w-[425px]">
     <Dialog.Header class="space-y-2">
-      <Dialog.Title class="text-xl font-semibold text-destructive">Delete account</Dialog.Title>
-      <Dialog.Description class="text-base text-muted-foreground">
+      <Dialog.Title class="text-lg font-semibold">Delete Account</Dialog.Title>
+      <Dialog.Description class="text-sm text-muted-foreground">
         This action cannot be undone. This will permanently delete your account and remove your data
         from our servers.
       </Dialog.Description>
     </Dialog.Header>
+
+    <Alert.Root variant="destructive" class="mt-4">
+      <AlertTriangle class="h-4 w-4" />
+      <Alert.Title>Are you absolutely sure?</Alert.Title>
+      <Alert.Description>
+        All your data will be permanently removed. This action cannot be undone.
+      </Alert.Description>
+    </Alert.Root>
 
     <form
       method="POST"
@@ -96,46 +108,35 @@
           }
         },
       }}
-      class="mt-6 space-y-4"
+      class="mt-4 space-y-4"
     >
-      <Alert.Root variant="destructive">
-        <AlertTriangle class="h-4 w-4" />
-        <Alert.Title>Warning</Alert.Title>
-        <AlertDescription>
-          All of your data will be permanently removed. This action cannot be undone.
-        </AlertDescription>
-      </Alert.Root>
-
       <Form.Field {form} name="confirmEmail">
-        <label for="confirm-email" class="mb-2 block text-sm font-medium leading-none"
-          >Email Confirmation</label
-        >
+        <Label>Type your email <span class="text-muted-foreground">({currentEmail})</span></Label>
         <Form.Control>
           {#snippet children({ props })}
             <Input
               {...props}
               id="confirm-email"
               type="email"
-              placeholder="Enter your email to confirm"
+              placeholder={currentEmail}
+              bind:value={$formData.confirmEmail}
             />
           {/snippet}
         </Form.Control>
-        <Form.Description>
-          Enter your email address ({currentEmail}) to confirm account deletion
-        </Form.Description>
         <Form.FieldErrors />
       </Form.Field>
 
-      <Dialog.Footer class="mt-6 flex justify-end gap-3">
+      <Dialog.Footer class="mt-6 flex justify-end gap-2">
         <Button variant="outline" type="button" onclick={() => (showDeleteConfirm = false)}>
           Cancel
         </Button>
         <Button
           variant="destructive"
           type="submit"
-          disabled={isLoading || $formData.confirmEmail !== currentEmail}
+          disabled={isLoading ||
+            $formData.confirmEmail.toLowerCase().trim() !== currentEmail.toLowerCase().trim()}
         >
-          {isLoading ? 'Deleting...' : 'Delete account'}
+          {isLoading ? 'Deleting...' : 'Delete Account'}
         </Button>
       </Dialog.Footer>
     </form>

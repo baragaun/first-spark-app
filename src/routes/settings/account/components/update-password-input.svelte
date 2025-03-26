@@ -19,16 +19,25 @@
   // Initialize superForm
   const form = superForm(passwordForm, {
     validators: zodClient(passwordSchema),
+    validationMethod: 'oninput',
     dataType: 'json',
   });
 
   // Destructure form helpers
   const { form: formData, enhance, errors } = form;
 
-  // State variables
   let isLoading = $state(false);
   let showPasswordEdit = $state(false);
   let showSuccess = $state(false);
+
+  // Derived state to check if form has values and is valid
+  let hasFormValues = $derived(
+    $formData.currentPassword &&
+      $formData.newPassword &&
+      $formData.confirmPassword &&
+      !$errors.newPassword &&
+      !$errors.confirmPassword,
+  );
 
   // Reset dialog state when closed
   function resetDialogState() {
@@ -112,6 +121,7 @@
               <PasswordInput
                 {...props}
                 id="current-password"
+                bind:value={$formData.currentPassword}
                 placeholder="Enter current password"
               />
             {/snippet}
@@ -125,7 +135,12 @@
           >
           <Form.Control>
             {#snippet children({ props })}
-              <PasswordInput {...props} id="new-password" placeholder="Enter new password" />
+              <PasswordInput
+                {...props}
+                id="new-password"
+                placeholder="Enter new password"
+                bind:value={$formData.newPassword}
+              />
             {/snippet}
           </Form.Control>
           <Form.FieldErrors />
@@ -137,7 +152,12 @@
           >
           <Form.Control>
             {#snippet children({ props })}
-              <PasswordInput {...props} id="confirm-password" placeholder="Confirm new password" />
+              <PasswordInput
+                {...props}
+                id="confirm-password"
+                placeholder="Confirm new password"
+                bind:value={$formData.confirmPassword}
+              />
             {/snippet}
           </Form.Control>
           <Form.FieldErrors />
@@ -147,7 +167,7 @@
           <Button variant="outline" type="button" onclick={() => (showPasswordEdit = false)}>
             Cancel
           </Button>
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading || !hasFormValues}>
             {isLoading ? 'Saving...' : 'Save changes'}
           </Button>
         </Dialog.Footer>
