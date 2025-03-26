@@ -10,7 +10,7 @@
   import SuperDebug, { type SuperValidated, type Infer, superForm } from 'sveltekit-superforms';
   import { zod, zodClient } from 'sveltekit-superforms/adapters';
   import { writable } from 'svelte/store';
-  import EmailVerification from '../components/email-verification.svelte';
+  import RegisterEmailForm from '../components/register-email-form.svelte';
   import TokenForm from '@/components/token-form.svelte';
   import CredentialForm from '../components/credential-form.svelte';
   import { goto } from '$app/navigation';
@@ -59,7 +59,7 @@
   let actionId = $state('');
   let emailSent = $state(false);
 
-  // Handle email submission from the EmailVerification component
+  // Handle email submission from the RegisterEmailForm component
   const onEmailSubmit = async (email: string): Promise<void> => {
     loading = true;
     errorMessage = '';
@@ -112,7 +112,6 @@
 
       response.object.run.addListener({
         id: 'SignUpForm',
-
         onEvent: async (
           eventType: MultiStepActionEventType,
           action: SidMultiStepActionProgress,
@@ -203,7 +202,7 @@
     }
   };
 
-  // Handle back button from the EmailVerification component
+  // Handle back button from the RegisterEmailForm component
   const handleBack = () => {
     if ($currentStep > 0) {
       currentStep.set($currentStep - 1);
@@ -269,7 +268,7 @@
 <form method="POST" use:enhance>
   <div class="mx-auto max-w-md">
     {#if $currentStep === 0}
-      <EmailVerification bind:email={$formData.email} {onEmailSubmit} />
+      <RegisterEmailForm bind:email={$formData.email} {onEmailSubmit} />
     {:else if $currentStep === 1}
       <TokenForm
         ident={$formData.email}

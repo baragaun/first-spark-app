@@ -31,7 +31,7 @@ export class MyUserContext {
   private _isInitializing = false;
 
   // Derived state
-  isAuthenticated = $derived(!this.myUser);
+  isAuthenticated = $derived(this.myUser);
 
   public async initialize(): Promise<void> {
     console.log('MyUserContext.init called.');
