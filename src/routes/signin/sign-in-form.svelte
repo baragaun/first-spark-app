@@ -126,14 +126,14 @@
       tokenStatus = MsaTokenStatus.sending;
     } catch (error) {
       console.error('SignInForm.handleVerifyOtp: error:', { error });
-      error = translate(AppUiMessage.systemError);
+      errorMessage = translate(AppUiMessage.systemError);
       tokenStatus = MsaTokenStatus.unset;
     } finally {
       loading = false;
     }
   };
 
-  const onSendNotification = async (email?: string) => {
+  const onSendNotification = async () => {
     tokenStatus = MsaTokenStatus.unset;
 
     if (!actionId) {
@@ -158,7 +158,8 @@
       loading = true;
       errorMessage = '';
 
-      const response = await myUserContext.sendMultiStepActionNotification(actionId, email);
+      //todo I will also like to send identifier type.
+      const response = await myUserContext.sendMultiStepActionNotification(actionId, identifier);
 
       if (response?.error) {
         console.error('SignInForm.handleResendOtp: error:', { error: response.error });
@@ -170,7 +171,7 @@
       startResendTimer(identifier);
     } catch (error) {
       console.error('SignInForm.handleResendOtp: error:', { error });
-      error = translate(AppUiMessage.systemError);
+      errorMessage = translate(AppUiMessage.systemError);
     } finally {
       loading = false;
     }
@@ -203,7 +204,7 @@
         !response?.object.actionProgress?.actionId ||
         !response?.object.run
       ) {
-        errorMessage = 'Failed to send magic link. Please try again.';
+        errorMessage = 'Failed to send verification code. Please try again.';
         return;
       }
 
@@ -282,7 +283,7 @@
     } catch (error) {
       console.error('SignInForm.startTokenSignIn:', { error });
       tokenStatus = MsaTokenStatus.verificationFailed;
-      error = translate(AppUiMessage.systemError);
+      errorMessage = translate(AppUiMessage.systemError);
     } finally {
       loading = false;
     }
@@ -374,11 +375,10 @@
       <Card.Content>
         <div class="grid gap-4">
           <div class="grid gap-2">
-            <Label for="email">Email or Username</Label>
+            <Label for="email or username">Email or Username</Label>
             <Input
               bind:value={identifier}
-              id="email"
-              type="email"
+              id="identifier"
               placeholder="me@example.com, myusername"
               oninput={handleIdentifierChange}
               required

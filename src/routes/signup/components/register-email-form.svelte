@@ -1,10 +1,15 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
-  import EmailInput from '@/components/email-input.svelte';
   import AuthCard from '@/components/auth-card.svelte';
+  import IdentInput from '@/components/ident-input.svelte';
 
   let loading = $state(false);
   let emailError = $state('');
+
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+  };
 
   interface Props {
     email: string;
@@ -19,11 +24,15 @@
   description="By continuing, you agree to our User Agreement and acknowledge that you understand and agree to our Privacy Policy."
 >
   <div class="space-y-4">
-    <EmailInput bind:email bind:emailError />
+    <IdentInput
+      bind:identifier={email}
+      bind:identError={emailError}
+      placeholder="Enter your email"
+    />
     <Button
       type="submit"
       class="w-full"
-      disabled={loading || !email || emailError !== ''}
+      disabled={loading || emailError !== '' || !email || !isValidEmail(email)}
       onclick={() => onEmailSubmit(email)}
     >
       Continue

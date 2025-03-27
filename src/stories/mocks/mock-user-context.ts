@@ -7,6 +7,7 @@ import {
   MultiStepActionType,
   MutationType,
   UserIdentType,
+  type MultiStepActionListener,
   type MultiStepActionProgressResult,
   type MutationResult,
   type MyUser,
@@ -36,7 +37,7 @@ export class MockMyUserContext {
   isInitialized = true;
   myUserId = '';
   // Add the missing _listeners property
-  private _listeners: Record<string, Array<any>> = {};
+  private _listeners: Record<string, Array<MultiStepActionListener>> = {};
 
   constructor() {
     // Initialize with no user by default
@@ -133,40 +134,6 @@ export class MockMyUserContext {
           },
           run: {
             addListener: (listener) => {
-              // Simulate successful token verification after a delay
-              setTimeout(() => {
-                // First simulate notification sent
-                listener.onEvent(MultiStepActionEventType.notificationSent, {
-                  actionId: 'mock-token-signin-action-123456',
-                  notificationResult: MultiStepActionSendNotificationResult.ok,
-                  userId: mockUser.id,
-                  actionType: MultiStepActionType.tokenSignIn,
-                  result: MultiStepActionResult.ok,
-                  attemptCount: 1,
-                  id: 'mock-progress-id',
-                  createdAt: new Date().toISOString(),
-                });
-
-                // Then simulate success when token is verified
-                if (listener.onEvent) {
-                  setTimeout(() => {
-                    this.myUser.set(mockUser);
-                    this.myUserId = mockUser.id;
-
-                    listener.onEvent(MultiStepActionEventType.success, {
-                      actionId: 'mock-token-signin-action-123456',
-                      notificationResult: MultiStepActionSendNotificationResult.ok,
-                      userId: mockUser.id,
-                      actionType: MultiStepActionType.tokenSignIn,
-                      result: MultiStepActionResult.ok,
-                      attemptCount: 1,
-                      id: 'mock-progress-id',
-                      createdAt: new Date().toISOString(),
-                    });
-                  }, 2000); // Simulate delay between notification and verification
-                }
-              }, 1000);
-
               return 'mock-listener-id';
             },
             removeListener: () => {},
@@ -207,28 +174,46 @@ export class MockMyUserContext {
     if (token === '123456') {
       console.log('Token verification successful:', token);
 
-      // Set a timeout to simulate the success event after verification
-      setTimeout(() => {
-        // Find any listeners for this action and notify them of success
-        if (this._listeners && this._listeners[actionId]) {
-          this._listeners[actionId].forEach((listener) => {
-            listener.onEvent(MultiStepActionEventType.success, {
+      // Check if this is a token sign-in or email verification
+      if (actionId.includes('token-signin')) {
+        // Trigger success event for token sign-in listeners
+        if (this._listeners['tokenSignIn']) {
+          this._listeners['tokenSignIn'].forEach((l) => {
+            l.onEvent(MultiStepActionEventType.success, {
               actionId: actionId,
               notificationResult: MultiStepActionSendNotificationResult.ok,
-              userId: mockUser.id,
+              userId: 'mock-user-id',
               actionType: MultiStepActionType.tokenSignIn,
               result: MultiStepActionResult.ok,
-              attemptCount: 1,
+              attemptCount: 0,
+              id: 'mock-token-signin-id',
+              createdAt: new Date().toISOString(),
+            });
+          });
+        }
+      } else {
+        // Trigger success event for email verification listeners
+        if (this._listeners['verifyEmail']) {
+          this._listeners['verifyEmail'].forEach((l) => {
+            l.onEvent(MultiStepActionEventType.success, {
+              actionId: actionId,
+              notificationResult: MultiStepActionSendNotificationResult.ok,
+              userId: 'mock-user-id',
+              actionType: MultiStepActionType.verifyEmail,
+              result: MultiStepActionResult.ok,
+              attemptCount: 0,
               id: 'mock-progress-id',
               createdAt: new Date().toISOString(),
             });
           });
         }
-      }, 1500);
+      }
 
+      // Set the user as signed in
       this.myUser.set(mockUser);
       this.myUserId = mockUser.id;
       this.isLoading.set(false);
+
       return true;
     }
 
@@ -268,24 +253,14 @@ export class MockMyUserContext {
     // Simulate API delay
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // Store the action ID for later reference
-    const actionId = 'mock-email-verification-action-123456';
-
-    // Initialize listeners array for this action if it doesn't exist
-    if (!this._listeners) {
-      this._listeners = {};
-    }
-    if (!this._listeners[actionId]) {
-      this._listeners[actionId] = [];
-    }
-
+    // Always return a valid response with required properties
     this.isLoading.set(false);
     return {
       object: {
         actionProgress: {
-          actionId: actionId,
+          actionId: 'mock-verify-email-action-123456',
           notificationResult: MultiStepActionSendNotificationResult.ok,
-          userId: mockUser.id,
+          userId: 'mock-user-id',
           actionType: MultiStepActionType.verifyEmail,
           result: MultiStepActionResult.ok,
           attemptCount: 0,
@@ -294,48 +269,62 @@ export class MockMyUserContext {
         },
         run: {
           addListener: (listener) => {
-            // Store the listener for later use
-            if (this._listeners && this._listeners[actionId]) {
-              this._listeners[actionId].push(listener);
+            // Store the listener to trigger events later
+            if (!this._listeners['verifyEmail']) {
+              this._listeners['verifyEmail'] = [];
             }
+            this._listeners['verifyEmail'].push(listener);
 
             // Simulate notification sent event after a short delay
             setTimeout(() => {
-              if (listener.onEvent) {
-                listener.onEvent(MultiStepActionEventType.notificationSent, {
-                  actionId: actionId,
-                  notificationResult: MultiStepActionSendNotificationResult.ok,
-                  userId: mockUser.id,
-                  actionType: MultiStepActionType.verifyEmail,
-                  result: MultiStepActionResult.ok,
-                  attemptCount: 1,
-                  id: 'mock-progress-id',
-                  createdAt: new Date().toISOString(),
+              if (this._listeners['verifyEmail']) {
+                this._listeners['verifyEmail'].forEach((l) => {
+                  l.onEvent(MultiStepActionEventType.notificationSent, {
+                    actionId: 'mock-verify-email-action-123456',
+                    notificationResult: MultiStepActionSendNotificationResult.ok,
+                    userId: 'mock-user-id',
+                    actionType: MultiStepActionType.verifyEmail,
+                    result: MultiStepActionResult.ok,
+                    attemptCount: 0,
+                    id: 'mock-progress-id',
+                    createdAt: new Date().toISOString(),
+                  });
                 });
               }
-            }, 1000);
+            }, 500);
+
+            // Simulate success event after a longer delay (after user enters code)
+            setTimeout(() => {
+              if (this._listeners['verifyEmail']) {
+                this._listeners['verifyEmail'].forEach((l) => {
+                  l.onEvent(MultiStepActionEventType.success, {
+                    actionId: 'mock-verify-email-action-123456',
+                    notificationResult: MultiStepActionSendNotificationResult.ok,
+                    userId: 'mock-user-id',
+                    actionType: MultiStepActionType.verifyEmail,
+                    result: MultiStepActionResult.ok,
+                    attemptCount: 0,
+                    id: 'mock-progress-id',
+                    createdAt: new Date().toISOString(),
+                  });
+                });
+              }
+            }, 3000); // Longer delay to allow time for code entry
 
             return 'mock-listener-id';
           },
-          removeListener: (listenerId: string) => {
-            // Implementation to remove a listener if needed
-            if (this._listeners && this._listeners[actionId]) {
-              this._listeners[actionId] = this._listeners[actionId].filter(
-                (l) => l.id !== listenerId,
-              );
-            }
-          },
-          actionId: actionId,
+          removeListener: () => {},
+          actionId: 'mock-verify-email-action-123456',
           listeners: new Map(),
           pollingOptions: { enabled: true, interval: 1000, timeout: 10000 },
           onEventReceived: function (eventType: MultiStepActionEventType): void {
-            // Not needed for mock
+            // Implementation not needed for mock
           },
           notifyListeners: function (event: MultiStepActionEventType): void {
-            // Not needed for mock
+            // Implementation not needed for mock
           },
           abort: function (): void {
-            // Not needed for mock
+            // Implementation not needed for mock
           },
           isStopped: function (): boolean {
             return false;
@@ -449,6 +438,37 @@ export class MockMyUserContext {
       console.error('Error checking identity availability:', err);
       this.isLoading.set(false);
       return { isAvailable: false, error: errorMsg };
+    }
+  }
+
+  async findAvailableUserHandle(email: string): Promise<string | { error: string } | null> {
+    this.isLoading.set(true);
+
+    // Simulate API delay
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    // Mock implementation logic
+    if (!this.isInitialized) {
+      this.isLoading.set(false);
+      return { error: 'Client not initialized' };
+    }
+
+    try {
+      // Generate a username based on the email
+      const username = email.split('@')[0];
+
+      // Add some random numbers to make it unique
+      const randomNum = Math.floor(Math.random() * 1000);
+      const suggestedHandle = `${username}${randomNum}`;
+
+      this.isLoading.set(false);
+      return suggestedHandle;
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to find available handle';
+      this.error.set(errorMsg);
+      console.error('Error finding available handle:', err);
+      this.isLoading.set(false);
+      return null;
     }
   }
 }

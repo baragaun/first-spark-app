@@ -1,12 +1,12 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
-  import { Input } from '$lib/components/ui/input';
-  import { myUserContext } from '$lib/contexts/my-user-context.svelte';
   import { UserIdentType } from '@baragaun/bg-node-client';
   import AuthCard from '$lib/components/auth-card.svelte';
   import PasswordInput from '../../../lib/components/ui/password-input';
   import passwordHelpers from '@/helpers/password-helpers';
-  import { schemaStep3 } from '../form/sign-up-form-schema';
+  import IdentInput from '@/components/ident-input.svelte';
+  import type { MyUserContext } from '@/contexts/my-user-context.svelte';
+  import { getContext } from 'svelte';
 
   let password = $state('');
   let username = $state('');
@@ -16,31 +16,43 @@
   let suggestedHandle = $state('');
 
   const { getPasswordError, validatePassword } = passwordHelpers;
+  const myUserContext = getContext<MyUserContext>('myUserContext');
 
-  // Check if email is available
-  const checkUserIdentityAvailability = async (): Promise<boolean> => {
+  // Get suggested username handle
+  const getSuggestedHandle = async () => {
+    if (!email) return;
+
+    if (myUserContext.myUserHanlde) {
+      username = myUserContext.myUserHanlde;
+      return;
+    }
+
     try {
-      const result = await myUserContext.isUserIdentAvailable(username, UserIdentType.userHandle);
-      return result.isAvailable ?? false;
+      checkingUsername = true;
+      const result = await myUserContext.findAvailableUserHandle(email);
+      if (typeof result === 'string') {
+        suggestedHandle = result;
+      }
     } catch (error) {
-      console.error('Error checking email availability:', error);
-      return false;
+      console.error('Error getting suggested handle:', error);
+    } finally {
+      checkingUsername = false;
     }
   };
 
+  $effect(() => {
+    if (email) {
+      getSuggestedHandle();
+    }
+  });
+
   interface Props {
-    currentUserName?: string;
+    email?: string;
     onSubmit?: () => void;
     onBack?: () => void;
   }
 
-  const { currentUserName, onSubmit, onBack }: Props = $props();
-
-  $effect(() => {
-    if (currentUserName) {
-      username = currentUserName;
-    }
-  });
+  const { email, onSubmit, onBack }: Props = $props();
 </script>
 
 <AuthCard
@@ -50,38 +62,12 @@
   {onBack}
 >
   <form onsubmit={onSubmit} class="space-y-4">
-    <div class="space-y-2">
-      <label for="username" class="text-sm font-medium">Username</label>
-      <Input
-        type="text"
-        placeholder="Username (e.g., CosmoExplorer, PixelPioneer)"
-        bind:value={username}
-        required
-        onblur={async () => {
-          if (username) {
-            checkingUsername = true;
-            usernameError = '';
-            const result = schemaStep3.shape.username.safeParse(username);
-
-            if (!result.success) {
-              usernameError = result.error.errors[0]?.message || 'Invalid username';
-              return;
-            }
-            const isAvailable = checkUserIdentityAvailability();
-            checkingUsername = false;
-
-            if (!isAvailable) {
-              usernameError = 'This username is unavailable.';
-            }
-          }
-        }}
-      />
-      {#if checkingUsername}
-        <p class="text-xs text-muted-foreground">Checking username availability...</p>
-      {:else if usernameError}
-        <p class="text-xs text-destructive">{usernameError}</p>
-      {/if}
-    </div>
+    <IdentInput
+      bind:identifier={username}
+      bind:identError={usernameError}
+      identType={UserIdentType.userHandle}
+      placeholder="Username (e.g., CosmoExplorer, PixelPioneer)"
+    />
     {#if suggestedHandle}
       <p class="text-xs text-muted-foreground">
         Suggested username: {suggestedHandle}
@@ -110,7 +96,11 @@
     <Button
       type="submit"
       class="w-full"
-      disabled={checkingUsername || loading || !password || !validatePassword(password).isValid}
+      disabled={checkingUsername ||
+        !!usernameError ||
+        loading ||
+        !password ||
+        !validatePassword(password).isValid}
     >
       {loading ? 'Creating account...' : 'Create Account'}
     </Button>

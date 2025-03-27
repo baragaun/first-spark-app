@@ -457,6 +457,10 @@ export class MyUserContext {
   public get myUserId(): string | undefined {
     return this.client.myUserId;
   }
+
+  public get myUserHanlde(): string | null | undefined {
+    return this.myUser?.userHandle;
+  }
 }
 
 // Create a singleton instance

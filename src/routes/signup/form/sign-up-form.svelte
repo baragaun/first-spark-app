@@ -106,7 +106,7 @@
         errorMessage = 'Failed to send the verification token. Please try again.';
         return;
       }
-
+      console.log('Email confirmation started:', response);
       actionId = response?.object.actionProgress?.actionId;
       currentStep.set(1);
 
@@ -168,7 +168,6 @@
               'ResetMyPasswordListener.onNotificationSentOrFailed: success.',
               action.notificationResult,
             );
-            // await goto('/');
             currentStep.set(2);
           }
         },
@@ -277,7 +276,7 @@
         onBack={handleBack}
       />
     {:else if $currentStep === 2}
-      <CredentialForm onSubmit={handleSignupSubmit} onBack={handleBack} />
+      <CredentialForm email={$formData.email} onSubmit={handleSignupSubmit} onBack={handleBack} />
     {/if}
     <!-- Alert for errors -->
     {#if errorMessage}
