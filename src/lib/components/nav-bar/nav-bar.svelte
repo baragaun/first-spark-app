@@ -5,8 +5,6 @@
   import ThemeButton from '../theme-button.svelte';
   import LanguageButton from '../language-button.svelte';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
-
-  const isAuthenticated = $derived(myUserContext.isAuthenticated);
 </script>
 
 <nav
@@ -30,7 +28,7 @@
       <ThemeButton class="hidden md:flex" />
       <LanguageButton class="hidden md:flex" />
       <div class="flex items-center gap-2">
-        {#if !isAuthenticated}
+        {#if !myUserContext.isAuthenticated}
           <Button
             variant="ghost"
             href="/signin"

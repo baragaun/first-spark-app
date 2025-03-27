@@ -265,7 +265,7 @@
 </script>
 
 <form method="POST" use:enhance>
-  <div class="mx-auto max-w-md">
+  <div class="mx-auto max-w-sm">
     {#if $currentStep === 0}
       <RegisterEmailForm bind:email={$formData.email} {onEmailSubmit} />
     {:else if $currentStep === 1}

@@ -7,19 +7,18 @@
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { toggleMode } from 'mode-watcher';
 
-  const isAuthenticated = $derived(myUserContext.isAuthenticated);
-
   const handleLogout = () => {
-    // TODO: Handle logout
-    myUserContext.signMeOut();
+    const a = myUserContext.signMeOut();
+    console.log('A: ', a)
     goto('/signin');
   };
+
 </script>
 
 <DropdownMenu.Root>
-  <DropdownMenu.Trigger class="ml-2 md:hidden">
+  <DropdownMenu.Trigger class={"ml-2"}>
     <Button variant="ghost" class="relative h-8 w-8 rounded-full">
-      {#if isAuthenticated}
+      {#if myUserContext.isAuthenticated}
         <Avatar.Root class="h-9 w-9">
           <Avatar.Image src="" alt="@shadcn" />
           <Avatar.Fallback>FS</Avatar.Fallback>
@@ -30,7 +29,7 @@
     </Button>
   </DropdownMenu.Trigger>
   <DropdownMenu.Content class="mt-2 w-56" align="end">
-    {#if isAuthenticated}
+    {#if myUserContext.isAuthenticated}
       <DropdownMenu.Label class="font-normal">
         <div class="flex flex-col space-y-1">
           <p class="text-sm font-medium leading-none">newstudent</p>
@@ -55,7 +54,7 @@
       </DropdownMenu.Item>
     </DropdownMenu.Group>
     <DropdownMenu.Separator />
-    {#if isAuthenticated}
+    {#if myUserContext.isAuthenticated}
       <DropdownMenu.Item
         onclick={handleLogout}
         class="bg-destructive text-white focus:bg-destructive focus:text-white"

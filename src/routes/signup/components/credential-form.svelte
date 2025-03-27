@@ -5,8 +5,7 @@
   import PasswordInput from '../../../lib/components/ui/password-input';
   import passwordHelpers from '@/helpers/password-helpers';
   import IdentInput from '@/components/ident-input.svelte';
-  import type { MyUserContext } from '@/contexts/my-user-context.svelte';
-  import { getContext } from 'svelte';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
 
   let password = $state('');
   let username = $state('');
@@ -16,14 +15,13 @@
   let suggestedHandle = $state('');
 
   const { getPasswordError, validatePassword } = passwordHelpers;
-  const myUserContext = getContext<MyUserContext>('myUserContext');
 
   // Get suggested username handle
   const getSuggestedHandle = async () => {
     if (!email) return;
 
-    if (myUserContext.myUserHanlde) {
-      username = myUserContext.myUserHanlde;
+    if (myUserContext.myUserHandle) {
+      username = myUserContext.myUserHandle;
       return;
     }
 

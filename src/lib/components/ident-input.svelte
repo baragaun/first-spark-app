@@ -1,11 +1,8 @@
 <script lang="ts">
   import { Input } from '$lib/components/ui/input';
   import { UserIdentType } from '@baragaun/bg-node-client';
-  import type { MyUserContext } from '@/contexts/my-user-context.svelte';
-  import { getContext } from 'svelte';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { z } from 'zod';
-
-  const myUserContext = getContext<MyUserContext>('myUserContext');
 
   // State variables
   let isChecking = $state(false);

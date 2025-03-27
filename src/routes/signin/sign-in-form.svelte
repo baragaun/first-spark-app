@@ -9,7 +9,6 @@
     SidMultiStepActionProgress,
     UserIdentType,
   } from '@baragaun/bg-node-client';
-  import { getContext } from 'svelte';
   import translate from '@/helpers/language/translate';
   import { AppUiMessage, MsaTokenStatus } from '@/types/enums';
   import { writable } from 'svelte/store';
@@ -17,9 +16,7 @@
   import PasswordInput from '@/components/ui/password-input';
   import ErrorAlert from '@/components/error-alert.svelte';
   import { z } from 'zod';
-  import type { MyUserContext } from '@/contexts/my-user-context.svelte';
-
-  const myUserContext = getContext<MyUserContext>('myUserContext');
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
 
   let identifier = $state('');
   let identType = $state(UserIdentType.email);
@@ -214,7 +211,6 @@
 
       response.object.run.addListener({
         id: 'SignInForm',
-
         onEvent: async (
           eventType: MultiStepActionEventType,
           action: SidMultiStepActionProgress,

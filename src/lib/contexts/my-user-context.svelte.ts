@@ -31,7 +31,7 @@ export class MyUserContext {
   private _isInitializing = false;
 
   // Derived state
-  isAuthenticated = $derived(this.myUser);
+  isAuthenticated = $derived(!!this.myUser);
 
   public async initialize(): Promise<void> {
     console.log('MyUserContext.init called.');
@@ -87,7 +87,8 @@ export class MyUserContext {
     // Ideally, this code is only called once per session. We may have to set a timer
     // and make sure we don't fetch the user too often.
     if (this.client.operations.myUser.isSignedIn()) {
-      await this.client.operations.myUser.findMyUser({ cachePolicy: CachePolicy.networkFirst });
+      const result = await this.client.operations.myUser.findMyUser({ cachePolicy: CachePolicy.networkFirst });
+      this.myUser = result
     }
 
     this._isInitializing = false;
@@ -458,7 +459,7 @@ export class MyUserContext {
     return this.client.myUserId;
   }
 
-  public get myUserHanlde(): string | null | undefined {
+  public get myUserHandle(): string | null | undefined {
     return this.myUser?.userHandle;
   }
 }
