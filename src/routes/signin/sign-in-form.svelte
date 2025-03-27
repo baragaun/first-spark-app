@@ -77,6 +77,7 @@
         return;
       }
 
+      myUserContext.loadMyUser();
       await goto('/');
     } catch (error) {
       console.error('SignInForm.onSignInWithPassword: error:', { error });
@@ -267,11 +268,12 @@
           if (eventType === MultiStepActionEventType.success) {
             // The token was accepted. The user is now signed in.
             console.log(
-              'ResetMyPasswordListener.onNotificationSentOrFailed: success.',
+              'SignInPage.multiStepActionListener: success.',
               action.notificationResult,
             );
             tokenStatus = MsaTokenStatus.success;
             errorMessage = translate(AppUiMessage.msaTokenSuccess);
+            myUserContext.loadMyUser();
             await goto('/');
           }
         },
@@ -314,6 +316,7 @@
       if ($currentStep === 2) {
         await onSignInWithPassword();
       } else {
+        console.log("starting token sign in")
         await startTokenSignIn();
       }
     } catch (err) {

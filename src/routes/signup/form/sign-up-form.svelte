@@ -165,7 +165,7 @@
           if (eventType === MultiStepActionEventType.success) {
             // The token was accepted. The user is now signed in.
             console.log(
-              'ResetMyPasswordListener.onNotificationSentOrFailed: success.',
+              'SignUpPage.multiStepActionListener: success.',
               action.notificationResult,
             );
             currentStep.set(2);
@@ -214,7 +214,8 @@
   };
 
   // Handle final signup
-  const handleSignupSubmit = async () => {
+  const handleSignupSubmit = async (credentials?: { username: string; password: string }, e?: SubmitEvent) => {
+    if (e) e.preventDefault();
     loading = true;
     errorMessage = '';
     try {
@@ -226,10 +227,13 @@
         return;
       }
 
+      const userHandle = credentials?.username || username;
+      const userPassword = credentials?.password || password;
+
       // Update username first
       const updateUserName = await myUserContext.updateMyUser({
         id: myUserId,
-        userHandle: username,
+        userHandle: userHandle,
       });
 
       if (updateUserName.error) {
@@ -238,7 +242,7 @@
       }
 
       // Then update password
-      const updatePassword = await myUserContext.updateMyPassword('', password);
+      const updatePassword = await myUserContext.updateMyPassword('', userPassword);
 
       if (updateUserName.error || updatePassword.error) {
         errorMessage = updateUserName.error || updatePassword.error || 'Failed to create account';

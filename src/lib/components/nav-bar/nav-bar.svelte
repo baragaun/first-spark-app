@@ -25,10 +25,9 @@
 
     <!-- Right side items -->
     <div class="flex flex-none items-center gap-2">
-      <ThemeButton class="hidden md:flex" />
-      <LanguageButton class="hidden md:flex" />
-      <div class="flex items-center gap-2">
         {#if !myUserContext.isAuthenticated}
+          <ThemeButton class="hidden md:flex" />
+          <LanguageButton class="hidden md:flex" />
           <Button
             variant="ghost"
             href="/signin"
@@ -41,7 +40,6 @@
           </Button>
         {/if}
         <AvatarMenu />
-      </div>
     </div>
   </div>
 </nav>

@@ -7,9 +7,12 @@
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { toggleMode } from 'mode-watcher';
 
+  const username = $derived(myUserContext.myUserHandle);
+  const email = $derived(myUserContext.myEmail);
+
   const handleLogout = () => {
-    const a = myUserContext.signMeOut();
-    console.log('A: ', a)
+    // TODO: add a confirmation dialog
+    myUserContext.signMeOut();
     goto('/signin');
   };
 
@@ -32,8 +35,8 @@
     {#if myUserContext.isAuthenticated}
       <DropdownMenu.Label class="font-normal">
         <div class="flex flex-col space-y-1">
-          <p class="text-sm font-medium leading-none">newstudent</p>
-          <p class="text-xs leading-none text-muted-foreground">newstudent@example.com</p>
+          <p class="text-sm font-medium leading-none">{username}</p>
+          <p class="text-xs leading-none text-muted-foreground">{email}</p>
         </div>
       </DropdownMenu.Label>
       <DropdownMenu.Separator />

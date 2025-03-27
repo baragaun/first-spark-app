@@ -46,11 +46,18 @@
 
   interface Props {
     email?: string;
-    onSubmit?: () => void;
+    onSubmit?: (credentials: { username: string; password: string }) => void;
     onBack?: () => void;
   }
 
   const { email, onSubmit, onBack }: Props = $props();
+
+  const handleSubmit = (e: SubmitEvent) => {
+    e.preventDefault();
+    if (onSubmit && validatePassword(password).isValid && !usernameError) {
+      onSubmit({ username, password });
+    }
+  };
 </script>
 
 <AuthCard
@@ -59,7 +66,7 @@
   showBackButton={true}
   {onBack}
 >
-  <form onsubmit={onSubmit} class="space-y-4">
+  <form onsubmit={handleSubmit} class="space-y-4">
     <IdentInput
       bind:identifier={username}
       bind:identError={usernameError}

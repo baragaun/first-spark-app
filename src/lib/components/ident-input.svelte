@@ -17,21 +17,38 @@
     .min(3, 'Must be at least 3 characters')
     .max(30, 'Cannot exceed 30 characters');
 
-  // Check if identifier is available
-  const checkIdentAvailability = async (ident: string, type: UserIdentType): Promise<boolean> => {
+  const checkIdentAvailability = async (
+    ident: string,
+    type: UserIdentType
+  ): Promise<{ isAvailable: boolean; isCurrentIdent: boolean }> => {
+    const isCurrentIdent = 
+      (type === UserIdentType.email && ident === myUserContext.myEmail) || 
+      (type === UserIdentType.userHandle && ident === myUserContext.myUserHandle);
+    
+    if (isCurrentIdent) {
+      return { isAvailable: true, isCurrentIdent: true };
+    }
+    
     try {
       const result = await myUserContext.isUserIdentAvailable(ident, type);
-      return result.isAvailable ?? false;
+      return { isAvailable: result.isAvailable ?? false, isCurrentIdent: false };
     } catch (error) {
       console.error('Error checking identifier availability:', error);
-      return false;
+      return { isAvailable: false, isCurrentIdent: false };
     }
   };
 
-  // Function to validate the current identifier based on its type
   const validateIdentifier = (ident: string): boolean => {
     if (!ident) {
       return false;
+    }
+
+    const isCurrentIdent = 
+      (identType === UserIdentType.email && ident === myUserContext.myEmail) || 
+      (identType === UserIdentType.userHandle && ident === myUserContext.myUserHandle);
+    
+    if (isCurrentIdent) {
+      return true;
     }
 
     if (identType === UserIdentType.email) {
@@ -78,13 +95,28 @@
       return;
     }
 
-    // Set up debounced availability check
+    const isCurrentIdent = 
+      (identType === UserIdentType.email && identifier === myUserContext.myEmail) || 
+      (identType === UserIdentType.userHandle && identifier === myUserContext.myUserHandle);
+    
+    if (isCurrentIdent) {
+      // Allow using the current identifier without showing errors
+      identError = '';
+      isChecking = false;
+      return;
+    }
+
     isChecking = true;
     debounceTimer = window.setTimeout(async () => {
       try {
-        const isAvailable = await checkIdentAvailability(identifier, identType);
-        if (!isAvailable) {
-          identError = `This ${identType === UserIdentType.email ? 'email address is already registered.' : 'username is unavailable.'}`;
+        const result = await checkIdentAvailability(identifier, identType);
+        
+        if (result.isCurrentIdent) {
+          identError = '';
+        } else if (!result.isAvailable) {
+          identError = `This ${identType === UserIdentType.email
+            ? 'email address is already registered.'
+            : 'username is unavailable.'}`;
         } else {
           identError = '';
         }
