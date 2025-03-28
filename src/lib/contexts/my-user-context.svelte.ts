@@ -51,6 +51,9 @@ export class MyUserContext {
         headers: {
           [HttpHeaderName.consumer]: 'first-spark-app',
         },
+        clientInfoStore: {
+          type: 'db',
+        }
       },
     };
 
