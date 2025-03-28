@@ -77,8 +77,7 @@
         return;
       }
 
-      myUserContext.loadMyUser();
-      await goto('/');
+      goto('/');
     } catch (error) {
       console.error('SignInForm.onSignInWithPassword: error:', { error });
       errorMessage = translate(AppUiMessage.systemError);
@@ -273,7 +272,7 @@
             );
             tokenStatus = MsaTokenStatus.success;
             errorMessage = translate(AppUiMessage.msaTokenSuccess);
-            myUserContext.loadMyUser();
+            await myUserContext.loadMyUser();
             await goto('/');
           }
         },

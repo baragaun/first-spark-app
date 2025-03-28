@@ -25,13 +25,15 @@ export class MyUserContext {
   private isLoading = $state(false);
   private error = $state<string | null>(null);
   private client: BgNodeClient = new BgNodeClient();
-
+  
   // Non-state variables:
   private _isInitialized = false;
   private _isInitializing = false;
-
+  
+  private _authState = $state(false)
   // Derived state
-  isAuthenticated = $derived(!!this.myUser);
+  isAuthenticated = $derived(this._authState);
+
 
   public async initialize(): Promise<void> {
     console.log('MyUserContext.init called.');
@@ -82,24 +84,24 @@ export class MyUserContext {
     // }
 
     this._isInitialized = true;
-
-    // todo: Only fetch a fresh copy of the user if this code is not called too often
-    // Ideally, this code is only called once per session. We may have to set a timer
-    // and make sure we don't fetch the user too often.
-    if (this.client.operations.myUser.isSignedIn()) {
-      const result = await this.client.operations.myUser.findMyUser({ cachePolicy: CachePolicy.networkFirst });
-      this.myUser = result
-    }
-
+    this._updateAuthState();
     this._isInitializing = false;
   }
 
+  private _updateAuthState(): void {
+    console.log('_updateAuthState called, currently:', this._authState);
+
+    this._authState = this.client.operations.myUser.isSignedIn() || false;
+
+    console.log('updated _authState, now:', this._authState);
+  }
+
   public get isSignedIn(): boolean {
-    return this.client?.operations.myUser.isSignedIn() || false;
+    return this._authState;
   }
 
   public async loadMyUser(queryOptions?: QueryOptions): Promise<MyUser | null> {
-    if (!this.client || !this.client.operations.myUser.isSignedIn()) {
+    if (!this.client || !this.isSignedIn) {
       this.myUser = null;
       return null;
     }
@@ -145,7 +147,15 @@ export class MyUserContext {
         password,
       };
 
-      return this.client.operations.myUser.signInUser(input);
+      const result = await this.client.operations.myUser.signInUser(input);
+      
+      this._updateAuthState();
+      
+      if (this._authState && !this.myUser) {
+        await this.loadMyUser({ cachePolicy: CachePolicy.network });
+      }
+      
+      return result;
     } catch (error) {
       console.error('MyUserContext.signInUser: error', { error });
       this.error = translate(AppUiMessage.systemError);
@@ -209,8 +219,15 @@ export class MyUserContext {
       this.isLoading = true;
       this.error = null;
 
-      await this.client.operations.myUser.signMeOut();
-      this.myUser = null;
+      
+      // The operation completes successfully, removing the authtoken. The UI fails to update as isSignedIn remains true
+      await this.client.operations.myUser.signMeOut()
+        .finally(() => {
+          this.myUser = null;
+          console.log('signMeOut.finally....')
+          this._updateAuthState()});
+      console.log('Auth state after logout:', this._authState);
+
 
       return true;
     } catch (err) {

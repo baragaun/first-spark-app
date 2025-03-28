@@ -5,6 +5,8 @@
   import ThemeButton from '../theme-button.svelte';
   import LanguageButton from '../language-button.svelte';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
+
+  // const isAuthenticated = $derived(myUserContext.isSignedIn);
 </script>
 
 <nav

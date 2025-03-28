@@ -7,9 +7,7 @@
   setContext('myUserContext', myUserContext);
 
   onMount(() => {
-    console.log('MockUserProvider.onMount called.');
     if (!myUserContext.isInitialized) {
-      console.log('MockUserProvider.onMount: Initializing MockMyUserContext');
       myUserContext.initialize().catch((error) => {
         console.error('MockUserProvider.onMount: Error initializing MockMyUserContext:', error);
       });

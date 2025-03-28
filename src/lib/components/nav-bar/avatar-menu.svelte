@@ -9,10 +9,13 @@
 
   const username = $derived(myUserContext.myUserHandle);
   const email = $derived(myUserContext.myEmail);
+  // const isAuthenticated = $derived(myUserContext.isSignedIn);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     // TODO: add a confirmation dialog
-    myUserContext.signMeOut();
+    const result = await myUserContext.signMeOut();
+
+    console.log('handleLogout result: ', result)
     goto('/signin');
   };
 
@@ -23,7 +26,7 @@
     <Button variant="ghost" class="relative h-8 w-8 rounded-full">
       {#if myUserContext.isAuthenticated}
         <Avatar.Root class="h-9 w-9">
-          <Avatar.Image src="" alt="@shadcn" />
+          <Avatar.Image src="" alt={`@${username}`} />
           <Avatar.Fallback>FS</Avatar.Fallback>
         </Avatar.Root>
       {:else}
@@ -34,9 +37,15 @@
   <DropdownMenu.Content class="mt-2 w-56" align="end">
     {#if myUserContext.isAuthenticated}
       <DropdownMenu.Label class="font-normal">
-        <div class="flex flex-col space-y-1">
-          <p class="text-sm font-medium leading-none">{username}</p>
-          <p class="text-xs leading-none text-muted-foreground">{email}</p>
+        <div class="flex items-center">
+          <Avatar.Root class="h-9 w-9 mr-2">
+            <Avatar.Image src="" alt="@shadcn" />
+            <Avatar.Fallback>🙃</Avatar.Fallback>
+          </Avatar.Root>
+          <div class="flex flex-col space-y-1">
+            <p class="text-sm font-medium leading-none">{username}</p>
+            <p class="text-xs leading-none text-muted-foreground">{email}</p>
+          </div>
         </div>
       </DropdownMenu.Label>
       <DropdownMenu.Separator />

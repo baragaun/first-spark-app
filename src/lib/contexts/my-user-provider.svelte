@@ -7,13 +7,10 @@
   setContext('myUserContext', myUserContext);
 
   onMount(() => {
-    console.log('UserProvider.onMount called.');
     if (!myUserContext.isInitialized) {
-      console.log('UserProvider.onMount: Initializing MyUserContext');
       myUserContext.initialize().catch((error) => {
         console.error('UserProvider.onMount: Error initializing MyUserContext:', error);
       });
-      console.log('UserProvider.onMount: initialized successfully');
     }
   });
 
