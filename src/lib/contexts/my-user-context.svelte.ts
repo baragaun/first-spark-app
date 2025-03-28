@@ -101,7 +101,7 @@ export class MyUserContext {
   }
 
   public async loadMyUser(queryOptions?: QueryOptions): Promise<MyUser | null> {
-    if (!this.client || !this.isSignedIn) {
+    if (!this.client) {
       this.myUser = null;
       return null;
     }
@@ -110,6 +110,7 @@ export class MyUserContext {
       this.isLoading = true;
       this.error = null;
       this.myUser = await this.client.operations.myUser.findMyUser(queryOptions);
+      this._updateAuthState();
       return this.myUser;
     } catch (err) {
       this.error = err instanceof Error ? err.message : 'Failed to load user';
