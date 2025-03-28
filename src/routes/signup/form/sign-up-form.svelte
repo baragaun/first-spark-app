@@ -181,7 +181,7 @@
   };
 
   // Handle verification callback
-  const handleVerify = async (code: string) => {
+  const handleEmailVerificationSubmit = async (code: string) => {
     loading = true;
     errorMessage = '';
     try {
@@ -275,7 +275,7 @@
     {:else if $currentStep === 1}
       <TokenForm
         ident={$formData.email}
-        onVerify={handleVerify}
+        onSubmit={handleEmailVerificationSubmit}
         onResend={handleResend}
         onBack={handleBack}
       />

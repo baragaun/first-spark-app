@@ -100,7 +100,7 @@
       const response = await myUserContext.verifyMultiStepActionToken(actionId, token);
 
       // Here, we don't have to add another listener, since we already added one when
-      // we called `signInWithToken`. We do want to check the `result` object to
+      // we called `signInUserWithToken`. We do want to check the `result` object to
       // make sure the `verifyMultiStepActionToken` call did not fail. But this
       // function does not actually verify the token. For that, we are waiting for
       // the listener to be called with the result of the token verification.
@@ -191,7 +191,7 @@
     errorMessage = '';
 
     try {
-      const response = await myUserContext.signInWithToken(identifier);
+      const response = await myUserContext.signInUserWithToken(identifier);
 
       if (
         !response ||
@@ -273,7 +273,7 @@
             tokenStatus = MsaTokenStatus.success;
             errorMessage = translate(AppUiMessage.msaTokenSuccess);
             await myUserContext.loadMyUser();
-            await goto('/');
+            goto('/')
           }
         },
       });
@@ -358,7 +358,7 @@
   {#if $currentStep === 1}
     <TokenForm
       ident={identifier}
-      onVerify={onSendToken}
+      onSubmit={onSendToken}
       onResend={onSendNotification}
       onBack={() => {
         currentStep.set(0);

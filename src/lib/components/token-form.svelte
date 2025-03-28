@@ -6,12 +6,12 @@
 
   interface Props {
     ident: string;
-    onVerify: (code: string) => void;
+    onSubmit: (code: string) => void;
     onResend: () => void;
     onBack?: () => void;
   }
 
-  let { ident, onResend, onVerify, onBack }: Props = $props();
+  let { ident, onResend, onSubmit, onBack }: Props = $props();
 
   // Internal state
   let verificationCode = $state('');
@@ -47,7 +47,7 @@
     loading = true;
     verificationError = '';
     try {
-      onVerify(verificationCode);
+      onSubmit(verificationCode);
     } catch (error) {
       console.error('Error verifying code:', error);
       verificationError = 'Invalid verification code. Please try again.';
