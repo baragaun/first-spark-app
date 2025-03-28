@@ -27,7 +27,7 @@
 
     <!-- Right side items -->
     <div class="flex flex-none items-center gap-2">
-      {#if !myUserContext.isAuthenticated}
+      {#if !myUserContext.isSignedIn()}
         <ThemeButton class="hidden md:flex" />
         <LanguageButton class="hidden md:flex" />
         <Button

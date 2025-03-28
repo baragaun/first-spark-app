@@ -27,13 +27,12 @@ export class MyUserContext {
   private error = $state<string | null>(null);
   private client: BgNodeClient = new BgNodeClient();
 
+  // Derived state variables:
+  isSignedIn = $derived(() => (this.client && this.client.operations.myUser.isSignedIn()) || false);
+
   // Non-state variables:
   private _isInitialized = false;
   private _isInitializing = false;
-
-  private _authState = $state(false);
-  // Derived state
-  isAuthenticated = $derived(this._authState);
 
   public async initialize(): Promise<void> {
     console.log('MyUserContext.init called.');
@@ -85,28 +84,10 @@ export class MyUserContext {
     // if (import.meta.env.MOCK_DATA === 'true') {
     //   config.useMockData = true;
     // }
+    // console.log('MyUserContext: BgNodeClient initialized:', { isSignedIn: this.isSignedIn() });
 
     this._isInitialized = true;
-    this._updateAuthState();
-    if (this._authState && !this.myUser) {
-      await this.loadMyUser({ cachePolicy: CachePolicy.network });
-    }
-
     this._isInitializing = false;
-  }
-
-  private _updateAuthState(): void {
-    console.log('_updateAuthState called, currently:', this._authState);
-
-    this._authState = this.client.operations.myUser.isSignedIn() || false;
-
-    if (this._authState === false) this.myUser = null;
-
-    console.log('updated _authState, now:', this._authState);
-  }
-
-  public get isSignedIn(): boolean {
-    return this._authState;
   }
 
   async signUpUser(email: string): Promise<{ myUser?: MyUser; error?: string }> {
@@ -162,7 +143,6 @@ export class MyUserContext {
       this.isLoading = true;
       this.error = null;
       this.myUser = await this.client.operations.myUser.findMyUser(queryOptions);
-      this._updateAuthState();
       return this.myUser;
     } catch (err) {
       this.error = err instanceof Error ? err.message : 'Failed to load user';
@@ -200,13 +180,7 @@ export class MyUserContext {
         password,
       };
 
-      const result = await this.client.operations.myUser.signInUser(input);
-      this._updateAuthState();
-      if (this._authState && !this.myUser) {
-        await this.loadMyUser({ cachePolicy: CachePolicy.network });
-      }
-
-      return result;
+      return this.client.operations.myUser.signInUser(input);
     } catch (error) {
       console.error('MyUserContext.signInUser: error', { error });
       this.error = translate(AppUiMessage.systemError);
@@ -252,13 +226,10 @@ export class MyUserContext {
       this.isLoading = true;
       this.error = null;
 
-      // The operation completes successfully, removing the authtoken. The UI fails to update as isSignedIn remains true
       await this.client.operations.myUser.signMeOut();
 
       console.log('myUser after logout:', this.myUser);
-      console.log('Auth state after logout:', this._authState);
 
-      // return true;
       return;
     } catch (err) {
       this.error = err instanceof Error ? err.message : 'Sign out failed';

@@ -60,6 +60,7 @@
   };
 
   const onSignInWithPassword = async () => {
+    // console.log('>>>>>>>>>>>>>>onSignInWithPassword called.');
     try {
       loading = true;
       errorMessage = '';
