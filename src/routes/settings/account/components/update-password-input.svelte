@@ -73,7 +73,9 @@
     <p class="text-sm font-medium">Password</p>
   </div>
   <div class="flex items-center gap-2">
-    <p class="text-right text-sm text-muted-foreground group-hover:text-foreground">••••••••</p>
+    <p class="text-right text-sm text-muted-foreground group-hover:text-foreground">
+      Change your password
+    </p>
     <ChevronRight
       class="h-5 w-5 stroke-[2] text-muted-foreground transition-colors group-hover:text-foreground"
     />

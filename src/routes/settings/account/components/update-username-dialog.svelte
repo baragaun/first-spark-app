@@ -8,40 +8,60 @@
   import { zodClient } from 'sveltekit-superforms/adapters';
   import { usernameSchema } from '../../../../routes/settings/account/account-settings-schema';
 
-  interface UsernameInputProps {
+  interface UpdateUsernameDialogProps {
     currentUsername: string;
     onSave: (newUsername: string) => Promise<void>;
     usernameForm: SuperValidated<Infer<typeof usernameSchema>>;
   }
 
   // Props using the interface
-  let { currentUsername, onSave, usernameForm }: UsernameInputProps = $props();
+  let { currentUsername, onSave, usernameForm }: UpdateUsernameDialogProps = $props();
 
   const form = superForm(usernameForm, {
     validators: zodClient(usernameSchema),
     validationMethod: 'oninput',
     dataType: 'json',
+    delayMs: 300, // Add 300ms debounce for all form validations
   });
 
-  const { form: formData } = form;
+  const { form: formData, errors } = form;
 
   let isLoading = $state(false);
   let showUsernameEdit = $state(false);
+  let isUsernameAvailable = $state(true);
 
   // Dummy data - simulating a database of taken usernames
   const takenUsernames = ['admin', 'moderator', 'taken', 'username', 'system'];
 
   // Dummy adjectives and nouns for username generation
   const adjectives = [
-    'happy', 'clever', 'swift', 'brave', 'mighty', 
-    'gentle', 'wise', 'wild', 'calm', 'bold',
+    'happy',
+    'clever',
+    'swift',
+    'brave',
+    'mighty',
+    'gentle',
+    'wise',
+    'wild',
+    'calm',
+    'bold',
   ];
 
   const nouns = [
-    'panda', 'tiger', 'eagle', 'wolf', 'dolphin', 
-    'falcon', 'turtle', 'fox', 'owl', 'bear',
+    'panda',
+    'tiger',
+    'eagle',
+    'wolf',
+    'dolphin',
+    'falcon',
+    'turtle',
+    'fox',
+    'owl',
+    'bear',
   ];
 
+  // Derived state to check if form has values and is valid
+  let hasFormValues = $derived($formData.username && !$errors.username && isUsernameAvailable);
   // Dummy function to generate a random username
   const generateUsername = async (): Promise<string> => {
     await new Promise((resolve) => setTimeout(resolve, 500));
@@ -61,7 +81,9 @@
   const checkUsernameAvailability = async (username: string): Promise<boolean> => {
     // Simulate API delay
     await new Promise((resolve) => setTimeout(resolve, 300));
-    return !takenUsernames.includes(username.toLowerCase());
+    const available = !takenUsernames.includes(username.toLowerCase());
+    isUsernameAvailable = available;
+    return available;
   };
 
   // Reset dialog state when closed
@@ -121,14 +143,14 @@
         <Input id="current-username" value={currentUsername} disabled class="bg-muted" />
       </div>
 
-      <UsernameInput 
+      <UsernameInput
         {form}
         name="username"
         label="New Username"
         placeholder="Enter username"
         {currentUsername}
         checkAvailability={checkUsernameAvailability}
-        generateUsername={generateUsername}
+        {generateUsername}
       />
     </form>
 
@@ -143,10 +165,7 @@
       >
         Cancel
       </Button>
-      <Button
-        disabled={isLoading || !$formData.username || $formData.username === currentUsername}
-        onclick={handleUsernameChange}
-      >
+      <Button type="submit" disabled={isLoading || !hasFormValues} onclick={handleUsernameChange}>
         {isLoading ? 'Saving...' : 'Save Changes'}
       </Button>
     </Dialog.Footer>

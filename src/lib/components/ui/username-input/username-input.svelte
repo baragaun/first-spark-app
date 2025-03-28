@@ -1,16 +1,18 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { Input } from '$lib/components/ui/input';
   import * as Form from '$lib/components/ui/form/index';
-  import { RefreshCw, AlertCircle, Check } from 'lucide-svelte';
-  import type { ComponentProps } from 'svelte';
+  import { Input } from '$lib/components/ui/input';
   import { cn } from '$lib/utils.js';
+  import { AlertCircle, Check, RefreshCw } from 'lucide-svelte';
+  import { onMount } from 'svelte';
   import type { SuperForm } from 'sveltekit-superforms';
 
-  type T = { username: string } & Record<string, any>;
+  interface FormData {
+    username: string;
+    [key: string]: any;
+  }
 
   interface UsernameInputProps {
-    form: SuperForm<T, any>;
+    form: SuperForm<FormData, any>;
     name?: string;
     label?: string;
     placeholder?: string;
@@ -28,7 +30,7 @@
     placeholder = 'Enter username',
     showSuggestionButton = true,
     checkAvailability = async () => true,
-    generateUsername = async () => `user${Math.floor(Math.random() * 10000)}`,
+    generateUsername = async () => '',
     currentUsername = '',
     class: className = '',
     ...restProps
@@ -69,10 +71,15 @@
 
   // Check username availability with debounce
   $effect(() => {
-  
     // Skip check if no username or same as current or has validation errors
     if (!$formData.username || $formData.username === currentUsername || $errors[name]) {
       isAvailable = null;
+      isChecking = false;
+      return;
+    }
+
+    if ($formData.username === suggestedUsername) {
+      isAvailable = true;
       isChecking = false;
       return;
     }
@@ -82,7 +89,7 @@
     const timer = window.setTimeout(async () => {
       try {
         isAvailable = await checkAvailability($formData.username);
-        suggestedUsername = $formData.username;
+        if (isAvailable === true) suggestedUsername = $formData.username;
       } catch (error) {
         console.error('Error checking username:', error);
         isAvailable = false;
@@ -98,7 +105,7 @@
   });
 </script>
 
-<Form.Field {form} name={name}>
+<Form.Field {form} {name}>
   <div class="flex items-center justify-between">
     <label for={name} class="text-sm font-medium leading-none">{label}</label>
     {#if showSuggestionButton}
@@ -128,11 +135,11 @@
           {...restProps}
           id={name}
           type="text"
-          placeholder={placeholder}
+          {placeholder}
           class={cn(
             'pr-10',
             isAvailable === false ? 'border-red-500 focus-visible:ring-red-500' : '',
-            className
+            className,
           )}
           disabled={isGeneratingSuggestion}
           bind:value={$formData.username}

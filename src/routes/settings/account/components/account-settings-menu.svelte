@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { Separator } from '$lib/components/ui/separator';
-  import UpdateUsernameInput from './update-username-input.svelte';
+  import UpdateUsernameInput from './update-username-dialog.svelte';
   import UpdateEmailInput from './update-email-input.svelte';
   import UpdatePasswordInput from './update-password-input.svelte';
   import DeleteAccountInput from './delete-account-input.svelte';
