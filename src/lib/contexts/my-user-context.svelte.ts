@@ -1,24 +1,25 @@
-import translate from '@/helpers/language/translate';
-import { AppUiMessage } from '@/types/enums';
+import translate from '@/helpers/language/translate'
+import { AppUiMessage } from '@/types/enums'
 import {
   AppEnvironment,
   BgNodeClient,
-  CachePolicy,
-  HttpHeaderName,
-  MutationType,
-  NotificationMethod,
-  UserIdentType,
   type BgNodeClientConfig,
+  CachePolicy,
+  ClientInfoStoreType,
+  HttpHeaderName,
   type MultiStepActionProgressResult,
   type MutationResult,
+  MutationType,
   type MyUser,
+  NotificationMethod,
   type QueryOptions,
   type QueryResult,
   type SidMultiStepActionProgress,
   type SignInSignUpResponse,
   type SignInUserInput,
   type SignUpUserInput,
-} from '@baragaun/bg-node-client';
+  UserIdentType,
+} from '@baragaun/bg-node-client'
 
 export class MyUserContext {
   private myUser = $state<MyUser | null>(null);
@@ -51,10 +52,10 @@ export class MyUserContext {
         headers: {
           [HttpHeaderName.consumer]: 'first-spark-app',
         },
-        clientInfoStore: {
-          type: 'db',
-        }
       },
+      clientInfoStore: {
+        type: ClientInfoStoreType.db,
+      }
     };
 
     if (import.meta.env.VITE_APP_ENVIRONMENT) {
