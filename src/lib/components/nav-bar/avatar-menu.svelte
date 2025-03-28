@@ -15,14 +15,13 @@
     // TODO: add a confirmation dialog
     const result = await myUserContext.signMeOut();
 
-    console.log('handleLogout result: ', result)
+    console.log('handleLogout result: ', result);
     goto('/signin');
   };
-
 </script>
 
 <DropdownMenu.Root>
-  <DropdownMenu.Trigger class={"ml-2"}>
+  <DropdownMenu.Trigger class={'ml-2'}>
     <Button variant="ghost" class="relative h-8 w-8 rounded-full">
       {#if myUserContext.isAuthenticated}
         <Avatar.Root class="h-9 w-9">
@@ -38,7 +37,7 @@
     {#if myUserContext.isAuthenticated}
       <DropdownMenu.Label class="font-normal">
         <div class="flex items-center">
-          <Avatar.Root class="h-9 w-9 mr-2">
+          <Avatar.Root class="mr-2 h-9 w-9">
             <Avatar.Image src="" alt="@shadcn" />
             <Avatar.Fallback>🙃</Avatar.Fallback>
           </Avatar.Root>

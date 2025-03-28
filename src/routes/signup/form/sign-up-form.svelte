@@ -164,10 +164,7 @@
 
           if (eventType === MultiStepActionEventType.success) {
             // The token was accepted. The user is now signed in.
-            console.log(
-              'SignUpPage.multiStepActionListener: success.',
-              action.notificationResult,
-            );
+            console.log('SignUpPage.multiStepActionListener: success.', action.notificationResult);
             currentStep.set(2);
           }
         },
@@ -214,7 +211,10 @@
   };
 
   // Handle final signup
-  const handleSignupSubmit = async (credentials?: { username: string; password: string }, e?: SubmitEvent) => {
+  const handleSignupSubmit = async (
+    credentials?: { username: string; password: string },
+    e?: SubmitEvent,
+  ) => {
     if (e) e.preventDefault();
     loading = true;
     errorMessage = '';

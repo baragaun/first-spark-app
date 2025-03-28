@@ -17,14 +17,14 @@
 
     <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
       {#if !myUserContext.isAuthenticated}
-      <Button
-        variant="default"
-        size="lg"
-        class="shadow-lg transition-all hover:scale-105 hover:shadow-primary/25 active:scale-100"
-        href="/signup"
-      >
-        Get Started
-      </Button>
+        <Button
+          variant="default"
+          size="lg"
+          class="shadow-lg transition-all hover:scale-105 hover:shadow-primary/25 active:scale-100"
+          href="/signup"
+        >
+          Get Started
+        </Button>
       {/if}
     </div>
   </div>

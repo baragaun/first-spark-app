@@ -1,14 +1,15 @@
 <script lang="ts">
   import { Input } from '$lib/components/ui/input';
   import { UserIdentType } from '@baragaun/bg-node-client';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { MyUserContext } from '@/contexts/my-user-context.svelte';
   import { z } from 'zod';
+  import { getContext } from 'svelte';
 
   // State variables
   let isChecking = $state(false);
   let debounceTimer: number | null = null;
-  // let identType = $state(UserIdentType.email);
   const DEBOUNCE_DELAY = 300; // ms
+  const myUserContext = getContext<MyUserContext>('myUserContext');
 
   // Define Zod schemas for validation
   const emailSchema = z.string().email('Not a valid email address');
@@ -19,16 +20,16 @@
 
   const checkIdentAvailability = async (
     ident: string,
-    type: UserIdentType
+    type: UserIdentType,
   ): Promise<{ isAvailable: boolean; isCurrentIdent: boolean }> => {
-    const isCurrentIdent = 
-      (type === UserIdentType.email && ident === myUserContext.myEmail) || 
+    const isCurrentIdent =
+      (type === UserIdentType.email && ident === myUserContext.myEmail) ||
       (type === UserIdentType.userHandle && ident === myUserContext.myUserHandle);
-    
+
     if (isCurrentIdent) {
       return { isAvailable: true, isCurrentIdent: true };
     }
-    
+
     try {
       const result = await myUserContext.isUserIdentAvailable(ident, type);
       return { isAvailable: result.isAvailable ?? false, isCurrentIdent: false };
@@ -43,10 +44,10 @@
       return false;
     }
 
-    const isCurrentIdent = 
-      (identType === UserIdentType.email && ident === myUserContext.myEmail) || 
+    const isCurrentIdent =
+      (identType === UserIdentType.email && ident === myUserContext.myEmail) ||
       (identType === UserIdentType.userHandle && ident === myUserContext.myUserHandle);
-    
+
     if (isCurrentIdent) {
       return true;
     }
@@ -95,10 +96,10 @@
       return;
     }
 
-    const isCurrentIdent = 
-      (identType === UserIdentType.email && identifier === myUserContext.myEmail) || 
+    const isCurrentIdent =
+      (identType === UserIdentType.email && identifier === myUserContext.myEmail) ||
       (identType === UserIdentType.userHandle && identifier === myUserContext.myUserHandle);
-    
+
     if (isCurrentIdent) {
       // Allow using the current identifier without showing errors
       identError = '';
@@ -110,13 +111,15 @@
     debounceTimer = window.setTimeout(async () => {
       try {
         const result = await checkIdentAvailability(identifier, identType);
-        
+
         if (result.isCurrentIdent) {
           identError = '';
         } else if (!result.isAvailable) {
-          identError = `This ${identType === UserIdentType.email
-            ? 'email address is already registered.'
-            : 'username is unavailable.'}`;
+          identError = `This ${
+            identType === UserIdentType.email
+              ? 'email address is already registered.'
+              : 'username is unavailable.'
+          }`;
         } else {
           identError = '';
         }

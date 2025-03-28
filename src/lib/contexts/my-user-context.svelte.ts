@@ -19,22 +19,20 @@ import {
   type SignInUserInput,
   type SignUpUserInput,
 } from '@baragaun/bg-node-client';
-import { tick } from 'svelte';
 
 export class MyUserContext {
   private myUser = $state<MyUser | null>(null);
   private isLoading = $state(false);
   private error = $state<string | null>(null);
   private client: BgNodeClient = new BgNodeClient();
-  
+
   // Non-state variables:
   private _isInitialized = false;
   private _isInitializing = false;
-  
-  private _authState = $state(false)
+
+  private _authState = $state(false);
   // Derived state
   isAuthenticated = $derived(this._authState);
-
 
   public async initialize(): Promise<void> {
     console.log('MyUserContext.init called.');
@@ -98,7 +96,7 @@ export class MyUserContext {
 
     this._authState = this.client.operations.myUser.isSignedIn() || false;
 
-    if (this._authState === false) this.myUser = null; 
+    if (this._authState === false) this.myUser = null;
 
     console.log('updated _authState, now:', this._authState);
   }
@@ -203,7 +201,7 @@ export class MyUserContext {
       if (this._authState && !this.myUser) {
         await this.loadMyUser({ cachePolicy: CachePolicy.network });
       }
-      
+
       return result;
     } catch (error) {
       console.error('MyUserContext.signInUser: error', { error });
@@ -214,7 +212,9 @@ export class MyUserContext {
     }
   }
 
-  async signInUserWithToken(userIdent: string): Promise<QueryResult<MultiStepActionProgressResult>> {
+  async signInUserWithToken(
+    userIdent: string,
+  ): Promise<QueryResult<MultiStepActionProgressResult>> {
     if (!this._isInitialized) {
       return { error: 'Client not initialized' };
     }
@@ -223,7 +223,8 @@ export class MyUserContext {
       this.isLoading = true;
       this.error = null;
       const response = await this.client.operations.myUser.signInWithToken(userIdent, {
-        polling: { enabled: true, interval: 1000, timeout: 10000 },
+        polling: { enabled: true, interval: 1000, timeout: 100000 },
+        // Timeout should parallel to token expiry time, for now it is 1.5 mins it enought to user to verify and send another token.
       });
 
       return response;
@@ -246,10 +247,9 @@ export class MyUserContext {
     try {
       this.isLoading = true;
       this.error = null;
-      
+
       // The operation completes successfully, removing the authtoken. The UI fails to update as isSignedIn remains true
-      await this.client.operations.myUser.signMeOut()
-      this._updateAuthState()
+      await this.client.operations.myUser.signMeOut();
 
       console.log('myUser after logout:', this.myUser);
       console.log('Auth state after logout:', this._authState);
@@ -372,7 +372,7 @@ export class MyUserContext {
       this.isLoading = true;
       this.error = null;
       const response = await this.client.operations.myUser.resetMyPassword(email, {
-        polling: { enabled: true, interval: 1000, timeout: 10000 },
+        polling: { enabled: true, interval: 1000, timeout: 100000 },
       });
       return { actionProgress: response.object?.actionProgress };
     } catch (err) {
@@ -393,7 +393,7 @@ export class MyUserContext {
       this.isLoading = true;
       this.error = null;
       const response = await this.client.operations.myUser.verifyMyEmail(email, {
-        polling: { enabled: true, interval: 1000, timeout: 10000 },
+        polling: { enabled: true, interval: 1000, timeout: 100000 },
       });
       return response;
     } catch (err) {
