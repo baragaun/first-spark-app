@@ -81,6 +81,9 @@ export class MyUserContext {
         topic: BgListenerTopic.myUser,
         onSignedIn: () => isSignedIn.set(true),
         onSignedOut: () => isSignedIn.set(false),
+        onMyUserUpdated: (myUser) => {
+          this.myUser = myUser;
+        }
       } as BgMyUserListener);
 
       isSignedIn.set(this.client.isSignedIn);
