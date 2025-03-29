@@ -1,17 +1,20 @@
-import translate from '@/helpers/language/translate'
-import { AppUiMessage } from '@/types/enums'
+import { writable } from 'svelte/store';
+import translate from '@/helpers/language/translate';
+import { AppUiMessage } from '@/types/enums';
 import {
   AppEnvironment,
+  BgListenerTopic,
   BgNodeClient,
-  type BgNodeClientConfig,
   CachePolicy,
   ClientInfoStoreType,
   HttpHeaderName,
+  MutationType,
+  NotificationMethod,
+  type BgMyUserListener,
+  type BgNodeClientConfig,
   type MultiStepActionProgressResult,
   type MutationResult,
-  MutationType,
   type MyUser,
-  NotificationMethod,
   type QueryOptions,
   type QueryResult,
   type SidMultiStepActionProgress,
@@ -19,25 +22,22 @@ import {
   type SignInUserInput,
   type SignUpUserInput,
   UserIdentType,
-} from '@baragaun/bg-node-client'
+} from '@baragaun/bg-node-client';
+
+export const isSignedIn = writable(false);
 
 export class MyUserContext {
+  private client: BgNodeClient = new BgNodeClient();
   private myUser = $state<MyUser | null>(null);
   private isLoading = $state(false);
   private error = $state<string | null>(null);
-  private client: BgNodeClient = new BgNodeClient();
 
-  // Derived state variables:
-  isSignedIn = $derived(() => (this.client && this.client.operations.myUser.isSignedIn()) || false);
-
-  // Non-state variables:
-  private _isInitialized = false;
   private _isInitializing = false;
 
   public async initialize(): Promise<void> {
     console.log('MyUserContext.init called.');
 
-    if (this._isInitialized || this._isInitializing) {
+    if (this.client.isInitialized || this._isInitializing) {
       console.warn('MyUserContext.initialize: already initialized.');
       return;
     }
@@ -75,6 +75,15 @@ export class MyUserContext {
       }
 
       await this.client.init(config);
+
+      this.client.addListener({
+        id: 'MyUserContext',
+        topic: BgListenerTopic.myUser,
+        onSignedIn: () => isSignedIn.set(true),
+        onSignedOut: () => isSignedIn.set(false),
+      } as BgMyUserListener);
+
+      isSignedIn.set(this.client.isSignedIn);
     } catch (error) {
       console.error('MyUserContext: Error initializing BgNodeClient:', { error });
       this._isInitializing = false;
@@ -84,14 +93,13 @@ export class MyUserContext {
     // if (import.meta.env.MOCK_DATA === 'true') {
     //   config.useMockData = true;
     // }
-    // console.log('MyUserContext: BgNodeClient initialized:', { isSignedIn: this.isSignedIn() });
+    // console.log('MyUserContext: BgNodeClient initialized:', { isSignedIn: this.client.isSignedIn });
 
-    this._isInitialized = true;
     this._isInitializing = false;
   }
 
   async signUpUser(email: string): Promise<{ myUser?: MyUser; error?: string }> {
-    if (!this._isInitialized) {
+    if (!this.client.isInitialized) {
       this.myUser = null;
 
       return { error: 'Client not initialized' };
@@ -105,7 +113,7 @@ export class MyUserContext {
 
       if (import.meta.env.VITE_APP_ENVIRONMENT === 'development') {
         input.isTestUser = true;
-        input.source = 'testtoken=666666';
+        input.source = '{"msaToken":"666666"}';
       }
 
       const response = await this.client.operations.myUser.signUpUser(input);
@@ -158,13 +166,13 @@ export class MyUserContext {
     identType: UserIdentType,
     password: string,
   ): Promise<MutationResult<SignInSignUpResponse>> {
-    if (!this.client || !this._isInitialized) {
+    if (!this.client.isInitialized) {
       this.myUser = null;
       this.error = translate(AppUiMessage.systemError);
       return { operation: MutationType.update, error: this.error };
     }
 
-    if (!this.client || this.client.operations.myUser.isSignedIn()) {
+    if (this.client.isSignedIn) {
       console.error('MyUserContext.signInUser: already signed in');
       this.error = translate(AppUiMessage.systemError);
       return { operation: MutationType.update, error: this.error };
@@ -192,31 +200,38 @@ export class MyUserContext {
 
   async signInUserWithToken(
     userIdent: string,
-  ): Promise<QueryResult<MultiStepActionProgressResult>> {
-    if (!this._isInitialized) {
-      return { error: 'Client not initialized' };
+  ): Promise<MutationResult<MultiStepActionProgressResult>> {
+    if (!this.client.isInitialized) {
+      return { operation: MutationType.update, error: 'Client not initialized' };
+    }
+
+    if (this.client.isSignedIn) {
+      console.error('MyUserContext.signInUser: already signed in');
+      this.error = translate(AppUiMessage.systemError);
+      return { operation: MutationType.update, error: this.error };
     }
 
     try {
       this.isLoading = true;
       this.error = null;
-      const response = await this.client.operations.myUser.signInWithToken(userIdent, {
+      return this.client.operations.myUser.signInWithToken(userIdent, {
         polling: { enabled: true, interval: 1000, timeout: 100000 },
         // Timeout should parallel to token expiry time, for now it is 1.5 mins it enought to user to verify and send another token.
       });
-
-      return response;
     } catch (err) {
       this.error = err instanceof Error ? err.message : 'Failed to sign in with token';
       console.error('Error signing in with token:', err);
-      return { error: this.error };
+      return {
+        operation: MutationType.update,
+        error: this.error,
+      };
     } finally {
       this.isLoading = false;
     }
   }
 
   async signMeOut(): Promise<void> {
-    if (!this._isInitialized) {
+    if (!this.client.isInitialized) {
       this.myUser = null;
       console.log('Client not initialized');
       return;
@@ -227,21 +242,16 @@ export class MyUserContext {
       this.error = null;
 
       await this.client.operations.myUser.signMeOut();
-
-      console.log('myUser after logout:', this.myUser);
-
-      return;
     } catch (err) {
       this.error = err instanceof Error ? err.message : 'Sign out failed';
       console.error('Error signing out:', err);
-      return;
     } finally {
       this.isLoading = false;
     }
   }
 
   async updateMyUser(changes: Partial<MyUser>): Promise<{ myUser?: MyUser; error?: string }> {
-    if (!this._isInitialized) {
+    if (!this.client.isInitialized) {
       return { error: 'Client not initialized' };
     }
 
@@ -273,7 +283,7 @@ export class MyUserContext {
     oldPassword: string,
     newPassword: string,
   ): Promise<{ myUser?: MyUser; error?: string }> {
-    if (!this._isInitialized) {
+    if (!this.client.isInitialized) {
       return { error: 'Client not initialized' };
     }
 
@@ -306,7 +316,7 @@ export class MyUserContext {
   }
 
   async findAvailableUserHandle(email: string) {
-    if (!this._isInitialized) {
+    if (!this.client.isInitialized) {
       return { error: 'Client not initialized' };
     }
 
@@ -323,7 +333,7 @@ export class MyUserContext {
     ident: string,
     identType: UserIdentType,
   ): Promise<{ isAvailable?: boolean; error?: string }> {
-    if (!this._isInitialized) {
+    if (!this.client.isInitialized) {
       return { error: 'Client not initialized' };
     }
 
@@ -340,7 +350,7 @@ export class MyUserContext {
   async resetMyPassword(
     email: string,
   ): Promise<{ actionProgress?: SidMultiStepActionProgress; error?: string }> {
-    if (!this._isInitialized) {
+    if (!this.client.isInitialized) {
       return { error: 'Client not initialized' };
     }
     try {
@@ -360,7 +370,7 @@ export class MyUserContext {
   }
 
   async verifyMyEmail(email: string): Promise<QueryResult<MultiStepActionProgressResult>> {
-    if (!this._isInitialized) {
+    if (!this.client.isInitialized) {
       return { error: 'Client not initialized' };
     }
 
@@ -385,7 +395,7 @@ export class MyUserContext {
     token: string,
     newPassword?: string,
   ): Promise<{ error?: string }> {
-    if (!this._isInitialized) {
+    if (!this.client.isInitialized) {
       console.error('MyUserContext.verifyMultiStepActionToken: no client');
       return { error: 'system-error' };
     }
@@ -425,7 +435,7 @@ export class MyUserContext {
       operation: MutationType.update,
     };
 
-    if (!this._isInitialized) {
+    if (!this.client.isInitialized) {
       console.error('MyUserContext.sendMultiStepActionNotification: not initialized.');
       returnValue.error = 'system-error';
       return returnValue;
@@ -449,7 +459,7 @@ export class MyUserContext {
   }
 
   public get isInitialized(): boolean {
-    return this._isInitialized;
+    return this.client.isInitialized;
   }
 
   public get myUserId(): string | undefined {

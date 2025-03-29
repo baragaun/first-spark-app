@@ -6,6 +6,7 @@
   import { Languages, LogIn, LogOut, Moon, MoreHorizontal, Sun } from 'lucide-svelte';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { toggleMode } from 'mode-watcher';
+  import { isSignedIn } from '@/contexts/my-user-context.svelte';
 
   const username = $derived(myUserContext.myUserHandle);
   const email = $derived(myUserContext.myEmail);
@@ -13,8 +14,6 @@
   const handleLogout = async () => {
     // TODO: add a confirmation dialog
     const result = await myUserContext.signMeOut();
-
-    console.log('handleLogout result: ', result);
     goto('/signin');
   };
 </script>
@@ -22,7 +21,7 @@
 <DropdownMenu.Root>
   <DropdownMenu.Trigger class={'ml-2'}>
     <Button variant="ghost" class="relative h-8 w-8 rounded-full">
-      {#if myUserContext.isSignedIn()}
+      {#if $isSignedIn}
         <Avatar.Root class="h-9 w-9">
           <Avatar.Image src="" alt={`@${username}`} />
           <Avatar.Fallback>FS</Avatar.Fallback>
@@ -33,7 +32,7 @@
     </Button>
   </DropdownMenu.Trigger>
   <DropdownMenu.Content class="mt-2 w-56" align="end">
-    {#if myUserContext.isSignedIn()}
+    {#if $isSignedIn}
       <DropdownMenu.Label class="font-normal">
         <div class="flex items-center">
           <Avatar.Root class="mr-2 h-9 w-9">
@@ -64,7 +63,7 @@
       </DropdownMenu.Item>
     </DropdownMenu.Group>
     <DropdownMenu.Separator />
-    {#if myUserContext.isSignedIn()}
+    {#if $isSignedIn}
       <DropdownMenu.Item
         onclick={handleLogout}
         class="bg-destructive text-white focus:bg-destructive focus:text-white"

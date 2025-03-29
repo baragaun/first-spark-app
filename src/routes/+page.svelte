@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { isSignedIn } from '@/contexts/my-user-context.svelte';
 </script>
 
 <div class="grid flex-1 place-items-center">
@@ -14,7 +14,7 @@
     </p>
 
     <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
-      {#if !myUserContext.isSignedIn()}
+      {#if !$isSignedIn}
         <Button
           variant="default"
           size="lg"

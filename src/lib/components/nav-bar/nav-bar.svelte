@@ -4,9 +4,7 @@
   import * as Sidebar from '$lib/components/ui/sidebar/index.js';
   import ThemeButton from '../theme-button.svelte';
   import LanguageButton from '../language-button.svelte';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
-
-  // const isAuthenticated = $derived(myUserContext.isSignedIn);
+  import { isSignedIn } from '@/contexts/my-user-context.svelte';
 </script>
 
 <nav
@@ -27,9 +25,11 @@
 
     <!-- Right side items -->
     <div class="flex flex-none items-center gap-2">
-      {#if !myUserContext.isSignedIn()}
-        <ThemeButton class="hidden md:flex" />
-        <LanguageButton class="hidden md:flex" />
+      <ThemeButton class="hidden md:flex" />
+      <LanguageButton class="hidden md:flex" />
+      {#if $isSignedIn}
+        <AvatarMenu />
+      {:else}
         <Button
           variant="ghost"
           href="/signin"
@@ -41,7 +41,6 @@
           Sign Up
         </Button>
       {/if}
-      <AvatarMenu />
     </div>
   </div>
 </nav>
