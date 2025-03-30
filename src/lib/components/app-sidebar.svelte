@@ -5,7 +5,7 @@
   import BookUser from 'lucide-svelte/icons/book-user';
   import MessageSquare from 'lucide-svelte/icons/message-square';
 
-  const items = [
+  const allItems = [
     {
       title: 'Home',
       url: '/',
@@ -30,6 +30,7 @@
       title: 'Settings',
       url: '/settings',
       icon: Settings,
+      requiresAuth: true,
     },
   ];
 </script>
@@ -38,6 +39,7 @@
   import * as Sidebar from '$lib/components/ui/sidebar/index.js';
   import type { ComponentProps } from 'svelte';
   import { page } from '$app/state';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
 
   function isItemActive(itemUrl: string, currentPath: string): boolean {
     if (itemUrl === '/') {
@@ -52,6 +54,11 @@
     collapsible = 'icon',
     ...restProps
   }: ComponentProps<typeof Sidebar.Root> = $props();
+
+  // Using $derived rune for reactive computation
+  let items = $derived(
+    allItems.filter((item) => !item.requiresAuth || myUserContext.isAuthenticated),
+  );
 </script>
 
 <Sidebar.Root bind:ref {collapsible} {...restProps}>
