@@ -9,7 +9,6 @@ import {
   UserIdentType,
   type MultiStepActionListener,
   type MultiStepActionProgressResult,
-  type MutationResult,
   type MyUser,
   type QueryResult,
   type SignInSignUpResponse,
@@ -60,7 +59,7 @@ export class MockMyUserContext {
     userIdent: string,
     identType: UserIdentType,
     password: string,
-  ): Promise<MutationResult<SignInSignUpResponse>> {
+  ): Promise<QueryResult<SignInSignUpResponse>> {
     this.isLoading.set(true);
 
     console.log('mocked signInUser called with:', { userIdent, identType, password });
@@ -335,7 +334,7 @@ export class MockMyUserContext {
   async updateMyUser(userData: {
     id: string;
     userHandle: string;
-  }): Promise<MutationResult<MyUser>> {
+  }): Promise<QueryResult<MyUser>> {
     this.isLoading.set(true);
 
     // Simulate API delay
@@ -350,13 +349,10 @@ export class MockMyUserContext {
     this.myUser.set(updatedUser);
     this.isLoading.set(false);
 
-    return {
-      operation: MutationType.update,
-      object: updatedUser,
-    };
+    return { object: updatedUser };
   }
 
-  async updateMyPassword(oldPassword: string, newPassword: string): Promise<MutationResult<void>> {
+  async updateMyPassword(currentPassword: string, newPassword: string): Promise<QueryResult<void>> {
     this.isLoading.set(true);
 
     // Simulate API delay
@@ -380,19 +376,6 @@ export class MockMyUserContext {
     this.isLoading.set(false);
 
     return true;
-  }
-
-  async loadMyUser(options?: { cachePolicy: CachePolicy }): Promise<void> {
-    this.isLoading.set(true);
-
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    if (this.myUserId) {
-      this.myUser.set(mockUser);
-    }
-
-    this.isLoading.set(false);
   }
 
   async isUserIdentAvailable(

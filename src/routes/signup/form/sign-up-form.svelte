@@ -219,40 +219,20 @@
     loading = true;
     errorMessage = '';
     try {
-      const myUserId = myUserContext.myUserId;
-
-      // First check if we have a valid user
-      if (!myUserId) {
-        errorMessage = 'User not found or not authenticated';
-        return;
-      }
-
-      const userHandle = credentials?.username || username;
-      const userPassword = credentials?.password || password;
-
-      // Update username first
-      const updateUserName = await myUserContext.updateMyUser({
-        id: myUserId,
-        userHandle: userHandle,
+      const { error } = await myUserContext.updateMyUser({
+        userHandle: credentials?.username || username,
+        newPassword: credentials?.password || password,
       });
 
-      if (updateUserName.error) {
-        errorMessage = updateUserName.error;
-        return;
-      }
-
-      // Then update password
-      const updatePassword = await myUserContext.updateMyPassword('', userPassword);
-
-      if (updateUserName.error || updatePassword.error) {
-        errorMessage = updateUserName.error || updatePassword.error || 'Failed to create account';
+      if (error) {
+        errorMessage = error;
         return;
       }
 
       await goto('/');
-    } catch (err) {
-      errorMessage = err instanceof Error ? err.message : 'Failed to create account';
-      console.error('Error creating account:', err);
+    } catch (error) {
+      errorMessage = error instanceof Error ? error.message : 'Failed to create account';
+      console.error('Error creating account:', error);
     } finally {
       loading = false;
     }

@@ -5,37 +5,30 @@ import {
   AppEnvironment,
   BgListenerTopic,
   BgNodeClient,
-  CachePolicy,
   ClientInfoStoreType,
   HttpHeaderName,
-  MutationType,
+  MyUserChanges,
   NotificationMethod,
-  type BgMyUserListener,
   type BgNodeClientConfig,
   type MultiStepActionProgressResult,
-  type MutationResult,
   type MyUser,
-  type QueryOptions,
+  type MyUserListener,
   type QueryResult,
-  type SidMultiStepActionProgress,
-  type SignInSignUpResponse,
   type SignInUserInput,
   type SignUpUserInput,
   UserIdentType,
 } from '@baragaun/bg-node-client';
 
 export const isSignedIn = writable(false);
+export const isLoading = writable(false);
 
 export class MyUserContext {
   private client: BgNodeClient = new BgNodeClient();
-  private myUser = $state<MyUser | null>(null);
-  private isLoading = $state(false);
-  private error = $state<string | null>(null);
-
+  private myUser: MyUser | undefined;
   private _isInitializing = false;
 
   public async initialize(): Promise<void> {
-    console.log('MyUserContext.init called.');
+    console.log('MyUserContext.initialize called.');
 
     if (this.client.isInitialized || this._isInitializing) {
       console.warn('MyUserContext.initialize: already initialized.');
@@ -52,9 +45,7 @@ export class MyUserContext {
           [HttpHeaderName.consumer]: 'first-spark-app',
         },
       },
-      clientInfoStore: {
-        type: ClientInfoStoreType.db,
-      }
+      clientInfoStoreType: ClientInfoStoreType.db,
     };
 
     if (import.meta.env.VITE_APP_ENVIRONMENT) {
@@ -84,7 +75,7 @@ export class MyUserContext {
         onMyUserUpdated: (myUser) => {
           this.myUser = myUser;
         }
-      } as BgMyUserListener);
+      } as MyUserListener);
 
       isSignedIn.set(this.client.isSignedIn);
     } catch (error) {
@@ -101,17 +92,24 @@ export class MyUserContext {
     this._isInitializing = false;
   }
 
-  async signUpUser(email: string): Promise<{ myUser?: MyUser; error?: string }> {
+  /**
+   * Sign up a new user
+   * @param email The user's email address
+   * @return Promise<true | string> Returns true on success or an error message on failure
+   */
+  async signUpUser(email: string): Promise<true | string> {
     if (!this.client.isInitialized) {
-      this.myUser = null;
+      console.error('MyUserContext.signUpUser: not initialized.');
+      return translate(AppUiMessage.systemError);
+    }
 
-      return { error: 'Client not initialized' };
+    if (this.client.isSignedIn) {
+      console.error('MyUserContext.signUpUser: already signed in');
+      return translate(AppUiMessage.systemError);
     }
 
     try {
-      this.isLoading = true;
-      this.error = null;
-
+      isLoading.set(true);
       const input: SignUpUserInput = { email };
 
       if (import.meta.env.VITE_APP_ENVIRONMENT === 'development') {
@@ -122,213 +120,210 @@ export class MyUserContext {
       const response = await this.client.operations.myUser.signUpUser(input);
 
       if (!response || response.error || !response.object?.userAuthResponse?.userId) {
-        console.error('SignUpUser failed.', response.error);
+        console.error('SignUpUser: received error.', { response });
 
-        return { error: response.error || 'Error signing up' };
+        return response.error || translate(AppUiMessage.systemError);
       }
 
-      await this.loadMyUser({ cachePolicy: CachePolicy.network });
-
-      if (!this.myUser) {
-        this.error = 'Failed to load user after sign in';
-        return { error: this.error };
-      }
-
-      return { myUser: this.myUser };
-    } catch (err) {
-      this.error = err instanceof Error ? err.message : 'Sign up failed';
-      console.error('Error signing up:', err);
-      return { error: this.error };
+      return true;
+    } catch (error) {
+      console.error('signUpUser: error', { error: (error as Error).message, stack: (error as Error).stack });
+      return translate(AppUiMessage.systemError);
     } finally {
-      this.isLoading = false;
+      isLoading.set(false);
     }
   }
 
-  public async loadMyUser(queryOptions?: QueryOptions): Promise<MyUser | null> {
-    if (!this.client) {
-      this.myUser = null;
-      return null;
-    }
-
-    try {
-      this.isLoading = true;
-      this.error = null;
-      this.myUser = await this.client.operations.myUser.findMyUser(queryOptions);
-      return this.myUser;
-    } catch (err) {
-      this.error = err instanceof Error ? err.message : 'Failed to load user';
-      console.error('Error loading user:', err);
-      return null;
-    } finally {
-      this.isLoading = false;
-    }
-  }
-
-  public async signInUser(
+  /**
+   * Sign in a user with email and password
+   * @param userIdent The user's identifier (email or username)
+   * @param identType The type of identifier (UserIdentType.email or UserIdentType.username)
+   * @param password The user's password
+   * @return Promise<true | string> Returns true on success or an error message on failure
+   */
+  public async signMeInWithPassword(
     userIdent: string,
-    identType: UserIdentType,
+    identType: UserIdentType | undefined,
     password: string,
-  ): Promise<MutationResult<SignInSignUpResponse>> {
+  ): Promise<true | string> {
     if (!this.client.isInitialized) {
-      this.myUser = null;
-      this.error = translate(AppUiMessage.systemError);
-      return { operation: MutationType.update, error: this.error };
+      console.error('MyUserContext.signMeInWithPassword: not initialized.');
+      return translate(AppUiMessage.systemError);
     }
 
     if (this.client.isSignedIn) {
-      console.error('MyUserContext.signInUser: already signed in');
-      this.error = translate(AppUiMessage.systemError);
-      return { operation: MutationType.update, error: this.error };
+      console.error('MyUserContext.signMeInWithPassword: already signed in');
+      return translate(AppUiMessage.systemError);
     }
 
     try {
-      this.isLoading = true;
-      this.error = null;
-
+      isLoading.set(true);
       const input: SignInUserInput = {
         ident: userIdent,
         identType,
         password,
       };
 
-      return this.client.operations.myUser.signInUser(input);
+      const response = await this.client.operations.myUser.signInUser(input);
+
+      if (response.error) {
+        console.error('MyUserContext.signMeInWithPassword: received error.', { response });
+        return translate(response.error, AppUiMessage.systemError);
+      }
+
+      return true;
     } catch (error) {
-      console.error('MyUserContext.signInUser: error', { error });
-      this.error = translate(AppUiMessage.systemError);
-      return { operation: MutationType.update, error: this.error };
+      console.error('MyUserContext.signMeInWithPassword: error', { error: (error as Error).message, stack: (error as Error).stack });
+      return translate((error as Error).message, AppUiMessage.systemError);
     } finally {
-      this.isLoading = false;
+      isLoading.set(false);
     }
   }
 
-  async signInUserWithToken(
+  async signMeInWithToken(
     userIdent: string,
-  ): Promise<MutationResult<MultiStepActionProgressResult>> {
+  ): Promise<true | string> {
     if (!this.client.isInitialized) {
-      return { operation: MutationType.update, error: 'Client not initialized' };
+      console.error('MyUserContext.signMeInWithToken: not initialized.');
+      return translate(AppUiMessage.systemError);
     }
 
     if (this.client.isSignedIn) {
-      console.error('MyUserContext.signInUser: already signed in');
-      this.error = translate(AppUiMessage.systemError);
-      return { operation: MutationType.update, error: this.error };
+      console.error('MyUserContext.signMeInWithToken: already signed in');
+      return translate(AppUiMessage.systemError);
     }
 
     try {
-      this.isLoading = true;
-      this.error = null;
-      return this.client.operations.myUser.signInWithToken(userIdent, {
+      isLoading.set(true);
+      const response = await this.client.operations.myUser.signInWithToken(userIdent, {
         polling: { enabled: true, interval: 1000, timeout: 100000 },
         // Timeout should parallel to token expiry time, for now it is 1.5 mins it enought to user to verify and send another token.
       });
-    } catch (err) {
-      this.error = err instanceof Error ? err.message : 'Failed to sign in with token';
-      console.error('Error signing in with token:', err);
-      return {
-        operation: MutationType.update,
-        error: this.error,
-      };
+
+      if (response.error) {
+        console.error('MyUserContext.signMeInWithToken: received error.', { response });
+        return translate(response.error, AppUiMessage.systemError);
+      }
+
+      return true;
+    } catch (error) {
+      console.error('MyUserContext.signMeInWithToken: error', { error: (error as Error).message, stack: (error as Error).stack });
+      return translate((error as Error).message, AppUiMessage.systemError);
     } finally {
-      this.isLoading = false;
+      isLoading.set(false);
     }
   }
 
-  async signMeOut(): Promise<void> {
+  /**
+   * Sign out the current user
+   * @returns Promise<true | string> Returns true on successful sign out or an error message on failure
+   */
+  async signMeOut(): Promise<true | string> {
     if (!this.client.isInitialized) {
-      this.myUser = null;
-      console.log('Client not initialized');
-      return;
+      console.error('MyUserContext.signMeOut: not initialized.');
+      return translate(AppUiMessage.systemError);
+    }
+
+    if (this.client.isSignedIn) {
+      console.error('MyUserContext.signMeOut: already signed in');
+      return translate(AppUiMessage.systemError);
     }
 
     try {
-      this.isLoading = true;
-      this.error = null;
+      isLoading.set(true);
+      const response = await this.client.operations.myUser.signMeOut();
+      if (response.error) {
+        console.error('MyUserContext.signMeOut: received error.', { response });
+        return translate(response.error, AppUiMessage.systemError);
+      }
 
-      await this.client.operations.myUser.signMeOut();
-    } catch (err) {
-      this.error = err instanceof Error ? err.message : 'Sign out failed';
-      console.error('Error signing out:', err);
+      return true;
+    } catch (error) {
+      console.error('MyUserContext.signMeOut: error', { error: (error as Error).message, stack: (error as Error).stack });
+      return translate((error as Error).message, AppUiMessage.systemError);
     } finally {
-      this.isLoading = false;
+      isLoading.set(false);
     }
   }
 
-  async updateMyUser(changes: Partial<MyUser>): Promise<{ myUser?: MyUser; error?: string }> {
+  async updateMyUser(
+    changes: Partial<MyUserChanges>,
+  ): Promise<{ myUser?: MyUser | null; error?: string }> {
     if (!this.client.isInitialized) {
-      return { error: 'Client not initialized' };
+      console.error('MyUserContext.updateMyUser: not initialized.');
+      return { error: translate(AppUiMessage.systemError) };
+    }
+
+    if (this.client.isSignedIn) {
+      console.error('MyUserContext.updateMyUser: already signed in');
+      return { error: translate(AppUiMessage.systemError) };
     }
 
     try {
-      this.isLoading = true;
-      this.error = null;
+      isLoading.set(true);
 
       const response = await this.client.operations.myUser.updateMyUser(changes);
 
-      if (!response || response.error || !response.object?.id) {
-        console.error('MyUserContext.updateMyUser failed.', response.error);
-
-        return { error: response.error };
+      if (response.error) {
+        console.error('MyUserContext.updateMyUser: received error.', { response });
+        return { error: translate(response.error, AppUiMessage.systemError) };
       }
 
-      this.myUser = response.object;
-
-      return { myUser: this.myUser };
-    } catch (err) {
-      this.error = err instanceof Error ? err.message : 'Update failed';
-      console.error('Error updating profile:', err);
-      return { error: this.error };
+      return { myUser: response.object };
+    } catch (error) {
+      console.error('MyUserContext.updateMyUser: error', { error: (error as Error).message, stack: (error as Error).stack });
+      return { error: translate((error as Error).message, AppUiMessage.systemError) };
     } finally {
-      this.isLoading = false;
+      isLoading.set(false);
     }
   }
 
   async updateMyPassword(
-    oldPassword: string,
+    currentPassword: string,
     newPassword: string,
-  ): Promise<{ myUser?: MyUser; error?: string }> {
+  ): Promise<true | string> {
     if (!this.client.isInitialized) {
-      return { error: 'Client not initialized' };
+      console.error('MyUserContext.updateMyPassword: not initialized.');
+      return translate(AppUiMessage.systemError);
+    }
+
+    if (this.client.isSignedIn) {
+      console.error('MyUserContext.updateMyPassword: already signed in');
+      return translate(AppUiMessage.systemError);
     }
 
     try {
-      this.isLoading = true;
-      this.error = null;
-
+      isLoading.set(true);
       const response = await this.client.operations.myUser.updateMyPassword(
-        oldPassword,
+        currentPassword,
         newPassword,
-        { cachePolicy: CachePolicy.network },
       );
 
-      if (!response || response.error || !response.object?.id) {
-        console.error('MyUserContext.updatePassword failed.', response.error);
-
-        return { error: response.error };
+      if (response.error) {
+        console.error('MyUserContext.updateMyPassword: received error.', { response });
+        return translate(response.error, AppUiMessage.systemError);
       }
 
-      this.myUser = response.object;
-
-      return { myUser: this.myUser };
-    } catch (err) {
-      this.error = err instanceof Error ? err.message : 'Update failed';
-      console.error('Error updating profile:', err);
-      return { error: this.error };
+      return true;
+    } catch (error) {
+      console.error('MyUserContext.updateMyPassword: error', { error: (error as Error).message, stack: (error as Error).stack });
+      return translate((error as Error).message, AppUiMessage.systemError);
     } finally {
-      this.isLoading = false;
+      isLoading.set(false);
     }
   }
 
   async findAvailableUserHandle(email: string) {
     if (!this.client.isInitialized) {
-      return { error: 'Client not initialized' };
+      console.error('MyUserContext.findAvailableUserHandle: not initialized.');
+      return translate(AppUiMessage.systemError);
     }
 
     try {
       return await this.client.operations.myUser.findAvailableUserHandle(email);
-    } catch (err) {
-      this.error = err instanceof Error ? err.message : 'Failed to find available handle';
-      console.error('Error finding available handle:', err);
-      return null;
+    } catch (error) {
+      console.error('MyUserContext.updateMyPassword: error', { error: (error as Error).message, stack: (error as Error).stack });
+      return translate((error as Error).message, AppUiMessage.systemError);
     }
   }
 
@@ -342,33 +337,34 @@ export class MyUserContext {
 
     try {
       const response = await this.client.operations.myUser.isUserIdentAvailable(ident, identType);
-      return { isAvailable: response };
-    } catch (err) {
-      this.error = err instanceof Error ? err.message : 'Failed to check identity availability';
-      console.error('Error checking identity availability:', err);
-      return { isAvailable: false, error: this.error };
+
+      if (response.error) {
+        console.error('MyUserContext.isUserIdentAvailable: received error.', { response });
+        return { error: response.error };
+      }
+      return { isAvailable: !!response.object };
+    } catch (error) {
+      console.error('isUserIdentAvailable: error:', { error });
+      return { isAvailable: false, error: (error as Error).message };
     }
   }
 
   async resetMyPassword(
     email: string,
-  ): Promise<{ actionProgress?: SidMultiStepActionProgress; error?: string }> {
+  ): Promise<QueryResult<MultiStepActionProgressResult>> {
     if (!this.client.isInitialized) {
       return { error: 'Client not initialized' };
     }
     try {
-      this.isLoading = true;
-      this.error = null;
-      const response = await this.client.operations.myUser.resetMyPassword(email, {
+      isLoading.set(true);
+      return this.client.operations.myUser.resetMyPassword(email, {
         polling: { enabled: true, interval: 1000, timeout: 100000 },
       });
-      return { actionProgress: response.object?.actionProgress };
-    } catch (err) {
-      this.error = err instanceof Error ? err.message : 'Failed to reset password';
-      console.error('Error Reset password:', err);
-      return { error: this.error };
+    } catch (error) {
+      console.error('resetMyPassword: error', { error });
+      return { error: (error as Error).message };
     } finally {
-      this.isLoading = false;
+      isLoading.set(false);
     }
   }
 
@@ -378,18 +374,15 @@ export class MyUserContext {
     }
 
     try {
-      this.isLoading = true;
-      this.error = null;
-      const response = await this.client.operations.myUser.verifyMyEmail(email, {
+      isLoading.set(true);
+      return this.client.operations.myUser.verifyMyEmail(email, {
         polling: { enabled: true, interval: 1000, timeout: 100000 },
       });
-      return response;
-    } catch (err) {
-      this.error = err instanceof Error ? err.message : 'Failed to verify email';
-      console.error('Error verifying email:', err);
-      return { error: this.error };
+    } catch (error) {
+      console.error('verifyMyEmail: error', { error });
+      return { error: (error as Error).message };
     } finally {
-      this.isLoading = false;
+      isLoading.set(false);
     }
   }
 
@@ -397,15 +390,14 @@ export class MyUserContext {
     actionId: string,
     token: string,
     newPassword?: string,
-  ): Promise<{ error?: string }> {
+  ): Promise<true | string> {
     if (!this.client.isInitialized) {
       console.error('MyUserContext.verifyMultiStepActionToken: no client');
-      return { error: 'system-error' };
+      return 'system-error';
     }
 
     try {
-      this.isLoading = true;
-      this.error = null;
+      isLoading.set(true);
       const response = await this.client.operations.multiStepAction.verifyMultiStepActionToken(
         actionId,
         token,
@@ -413,51 +405,48 @@ export class MyUserContext {
       );
 
       if (response.error || !response.object) {
-        console.error(
-          'MyUserContext.verifyMultiStepActionToken: failed calling client.verifyMultiStepActionToken',
-          response.error,
-        );
-        return { error: response.error || 'system-error' };
+        console.error('MyUserContext.verifyMultiStepActionToken: failed calling client.verifyMultiStepActionToken',
+          { response });
+        return response.error || 'system-error';
       }
 
-      return {};
+      return true;
     } catch (error) {
-      this.error = error instanceof Error ? error.message : 'Failed to send verify token';
-      console.error('MyUserContext.verifyMultiStepActionToken: error thrown.', { error });
-      return { error: this.error };
+      console.error('verifyMultiStepActionToken: error', { error });
+      return (error as Error).message;
     } finally {
-      this.isLoading = false;
+      isLoading.set(false);
     }
   }
 
   async sendMultiStepActionNotification(
     actionId: string,
     email?: string,
-  ): Promise<MutationResult<string>> {
-    const returnValue: MutationResult<string> = {
-      operation: MutationType.update,
-    };
-
+  ): Promise<true | string> {
     if (!this.client.isInitialized) {
       console.error('MyUserContext.sendMultiStepActionNotification: not initialized.');
-      returnValue.error = 'system-error';
-      return returnValue;
+      return 'system-error';
     }
 
     try {
-      this.isLoading = true;
-      return this.client.operations.multiStepAction.sendMultiStepActionNotification(
+      isLoading.set(true);
+      const response = await this.client.operations.multiStepAction.sendMultiStepActionNotification(
         actionId,
         email,
         undefined,
         NotificationMethod.email,
       );
+
+      if (response.error) {
+        return response.error;
+      }
+
+      return true;
     } catch (error) {
       console.error('MyUserContext.sendMultiStepActionNotification: error', { error });
-      returnValue.error = 'system-error';
-      return returnValue;
+      return 'system-error';
     } finally {
-      this.isLoading = false;
+      isLoading.set(false);
     }
   }
 

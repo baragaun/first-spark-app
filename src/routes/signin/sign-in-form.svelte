@@ -59,28 +59,22 @@
     return UserIdentType.email;
   };
 
-  const onSignInWithPassword = async () => {
-    // console.log('>>>>>>>>>>>>>>onSignInWithPassword called.');
+  const signMeInWithPassword = async () => {
     try {
       loading = true;
       errorMessage = '';
 
-      const response = await myUserContext.signInUser(identifier, identType, password);
+      const response = await myUserContext.signMeInWithPassword(identifier, identType, password);
 
-      if (response?.error) {
-        errorMessage = translate(response.error, AppUiMessage.systemError);
+      if (response !== true) {
+        // `response` is already translated
+        errorMessage = response;
         return;
       }
 
-      if (!response || !response.object || !response.object.myUser) {
-        // console.error('SignInForm.onSignInWithPassword: incorrect response', { response });
-        errorMessage = translate(AppUiMessage.systemError);
-        return;
-      }
-
-      goto('/');
+      await goto('/');
     } catch (error) {
-      console.error('SignInForm.onSignInWithPassword: error:', { error });
+      console.error('SignInForm.signMeInWithPassword: error:', { error });
       errorMessage = translate(AppUiMessage.systemError);
     } finally {
       loading = false;
@@ -101,7 +95,7 @@
       const response = await myUserContext.verifyMultiStepActionToken(actionId, token);
 
       // Here, we don't have to add another listener, since we already added one when
-      // we called `signInUserWithToken`. We do want to check the `result` object to
+      // we called `signMeInWithToken`. We do want to check the `result` object to
       // make sure the `verifyMultiStepActionToken` call did not fail. But this
       // function does not actually verify the token. For that, we are waiting for
       // the listener to be called with the result of the token verification.
@@ -192,7 +186,7 @@
     errorMessage = '';
 
     try {
-      const response = await myUserContext.signInUserWithToken(identifier);
+      const response = await myUserContext.signMeInWithToken(identifier);
 
       if (
         !response ||
@@ -269,8 +263,8 @@
             // The token was accepted. The user is now signed in.
             console.log('SignInPage.multiStepActionListener: success.', action.notificationResult);
             tokenStatus = MsaTokenStatus.success;
+            // todo: don't use `errorMessage` as it's rendered as an error (red color)
             errorMessage = translate(AppUiMessage.msaTokenSuccess);
-            await myUserContext.loadMyUser();
             goto('/');
           }
         },
@@ -311,7 +305,7 @@
 
     try {
       if ($currentStep === 2) {
-        await onSignInWithPassword();
+        await signMeInWithPassword();
       } else {
         console.log('starting token sign in');
         await startTokenSignIn();
