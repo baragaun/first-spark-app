@@ -6,14 +6,15 @@
   import UpdatePasswordInput from './update-password-input.svelte';
   import DeleteAccountInput from './delete-account-input.svelte';
   import type { PageData } from '../$types';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
 
   let { data }: { data: PageData } = $props();
 
   let isLoading = $state(false);
 
   // User data (would come from API in real implementation)
-  let currentUsername = $state(data.currentUsername || 'johndoe');
-  let currentEmail = $state(data.emails?.[0] || 'primary@example.com');
+  let currentUsername = $state(data.currentUsername || myUserContext.myUserHandle || '');
+  let currentEmail = $state(data.email || myUserContext.myEmail || '');
 
   const handleUsernameChange = async (newUsername: string): Promise<void> => {
     try {

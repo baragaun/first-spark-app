@@ -7,6 +7,8 @@
   import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
   import { zodClient } from 'sveltekit-superforms/adapters';
   import { usernameSchema } from '../../../../routes/settings/account/account-settings-schema';
+  import { UserIdentType } from '@baragaun/bg-node-client';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
 
   interface UpdateUsernameDialogProps {
     currentUsername: string;
@@ -34,56 +36,85 @@
   const takenUsernames = ['admin', 'moderator', 'taken', 'username', 'system'];
 
   // Dummy adjectives and nouns for username generation
-  const adjectives = [
-    'happy',
-    'clever',
-    'swift',
-    'brave',
-    'mighty',
-    'gentle',
-    'wise',
-    'wild',
-    'calm',
-    'bold',
-  ];
+  // const adjectives = [
+  //   'happy',
+  //   'clever',
+  //   'swift',
+  //   'brave',
+  //   'mighty',
+  //   'gentle',
+  //   'wise',
+  //   'wild',
+  //   'calm',
+  //   'bold',
+  // ];
 
-  const nouns = [
-    'panda',
-    'tiger',
-    'eagle',
-    'wolf',
-    'dolphin',
-    'falcon',
-    'turtle',
-    'fox',
-    'owl',
-    'bear',
-  ];
+  // const nouns = [
+  //   'panda',
+  //   'tiger',
+  //   'eagle',
+  //   'wolf',
+  //   'dolphin',
+  //   'falcon',
+  //   'turtle',
+  //   'fox',
+  //   'owl',
+  //   'bear',
+  // ];
+
+  // // Dummy function to generate a random username
+  // const getSuggestedHandle = async (): Promise<string> => {
+  //   await new Promise((resolve) => setTimeout(resolve, 500));
+  //   const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+  //   const noun = nouns[Math.floor(Math.random() * nouns.length)];
+  //   const randomNum = Math.floor(Math.random() * 1000);
+  //   const suggestion = `${adjective}${noun}${randomNum}`;
+  //   if (takenUsernames.includes(suggestion.toLowerCase())) {
+  //     return getSuggestedHandle();
+  //   }
+  //   return suggestion;
+  // };
 
   // Derived state to check if form has values and is valid
   let hasFormValues = $derived($formData.username && !$errors.username && isUsernameAvailable);
-  // Dummy function to generate a random username
-  const generateUsername = async (): Promise<string> => {
+
+  // userContext function integration to find available User-handle
+  const getSuggestedHandle = async (): Promise<string> => {
     await new Promise((resolve) => setTimeout(resolve, 500));
-    const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
-    const noun = nouns[Math.floor(Math.random() * nouns.length)];
-    const randomNum = Math.floor(Math.random() * 1000);
-
-    const suggestion = `${adjective}${noun}${randomNum}`;
-
-    if (takenUsernames.includes(suggestion.toLowerCase())) {
-      return generateUsername();
+    try {
+      const result = await myUserContext.findAvailableUserHandle(currentUsername);
+      console.log('getSuggestedHandle', result);
+      if (typeof result === 'string') {
+        return result;
+      }
+    } catch (error) {
+      console.error('Error getting suggested handle:', error);
     }
-
-    return suggestion;
+    return '';
   };
 
-  const checkUsernameAvailability = async (username: string): Promise<boolean> => {
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    const available = !takenUsernames.includes(username.toLowerCase());
-    isUsernameAvailable = available;
-    return available;
+  const checkUsernameAvailability = async (
+    ident: string,
+    type: UserIdentType,
+  ): Promise<{ isAvailable: boolean; isCurrentIdent: boolean }> => {
+    const isCurrentIdent =
+      type === UserIdentType.userHandle && ident === myUserContext.myUserHandle;
+
+    if (isCurrentIdent) {
+      console.log('isCurrentIdent', { isCurrentIdent });
+      isUsernameAvailable = false;
+      return { isAvailable: isUsernameAvailable, isCurrentIdent: true };
+    }
+
+    try {
+      const result = await myUserContext.isUserIdentAvailable(ident, type);
+      isUsernameAvailable = result.isAvailable ?? false;
+      console.log('checkUsernameAvailability', result.isAvailable);
+      return { isAvailable: isUsernameAvailable, isCurrentIdent: false };
+    } catch (error) {
+      console.error('Error checking identifier availability:', error);
+      return { isAvailable: false, isCurrentIdent: false };
+    }
   };
 
   // Reset dialog state when closed
@@ -150,7 +181,7 @@
         placeholder="Enter username"
         {currentUsername}
         checkAvailability={checkUsernameAvailability}
-        {generateUsername}
+        generateUsername={getSuggestedHandle}
       />
     </form>
 

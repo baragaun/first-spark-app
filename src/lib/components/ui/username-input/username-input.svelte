@@ -2,22 +2,26 @@
   import * as Form from '$lib/components/ui/form/index';
   import { Input } from '$lib/components/ui/input';
   import { cn } from '$lib/utils.js';
+  import { UserIdentType } from '@baragaun/bg-node-client';
   import { AlertCircle, Check, RefreshCw } from 'lucide-svelte';
   import { onMount } from 'svelte';
   import type { SuperForm } from 'sveltekit-superforms';
 
   interface FormData {
     username: string;
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   interface UsernameInputProps {
-    form: SuperForm<FormData, any>;
+    form: SuperForm<FormData, unknown>;
     name?: string;
     label?: string;
     placeholder?: string;
     showSuggestionButton?: boolean;
-    checkAvailability?: (username: string) => Promise<boolean>;
+    checkAvailability?: (
+      ident: string,
+      type: UserIdentType,
+    ) => Promise<{ isAvailable: boolean; isCurrentIdent: boolean }>;
     generateUsername?: () => Promise<string>;
     currentUsername?: string;
     class?: string;
@@ -29,7 +33,9 @@
     label = 'Username',
     placeholder = 'Enter username',
     showSuggestionButton = true,
-    checkAvailability = async () => true,
+    checkAvailability = async () => {
+      return { isAvailable: true, isCurrentIdent: false };
+    },
     generateUsername = async () => '',
     currentUsername = '',
     class: className = '',
@@ -71,8 +77,8 @@
 
   // Check username availability with debounce
   $effect(() => {
-    // Skip check if no username or same as current or has validation errors
-    if (!$formData.username || $formData.username === currentUsername || $errors[name]) {
+    // Skip check if no username or has validation errors
+    if (!$formData.username || $errors[name]) {
       isAvailable = null;
       isChecking = false;
       return;
@@ -88,7 +94,15 @@
 
     const timer = window.setTimeout(async () => {
       try {
-        isAvailable = await checkAvailability($formData.username);
+        const result = await checkAvailability($formData.username, UserIdentType.userHandle);
+        isAvailable = result.isAvailable;
+
+        if (result.isCurrentIdent) {
+          isAvailable = null;
+          isChecking = false;
+          return;
+        }
+
         if (isAvailable === true) suggestedUsername = $formData.username;
       } catch (error) {
         console.error('Error checking username:', error);
