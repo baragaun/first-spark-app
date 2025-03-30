@@ -46,6 +46,7 @@ export class MyUserContext {
         },
       },
       clientInfoStoreType: ClientInfoStoreType.db,
+      logLevel: 'debug',
     };
 
     if (import.meta.env.VITE_APP_ENVIRONMENT) {
@@ -224,8 +225,8 @@ export class MyUserContext {
       return translate(AppUiMessage.systemError);
     }
 
-    if (this.client.isSignedIn) {
-      console.error('MyUserContext.signMeOut: already signed in');
+    if (!this.client.isSignedIn) {
+      console.error('MyUserContext.signMeOut: already signed out.');
       return translate(AppUiMessage.systemError);
     }
 
@@ -254,8 +255,8 @@ export class MyUserContext {
       return { error: translate(AppUiMessage.systemError) };
     }
 
-    if (this.client.isSignedIn) {
-      console.error('MyUserContext.updateMyUser: already signed in');
+    if (!this.client.isSignedIn) {
+      console.error('MyUserContext.updateMyUser: not signed in.');
       return { error: translate(AppUiMessage.systemError) };
     }
 
@@ -376,7 +377,7 @@ export class MyUserContext {
     try {
       isLoading.set(true);
       return this.client.operations.myUser.verifyMyEmail(email, {
-        polling: { enabled: true, interval: 1000, timeout: 100000 },
+        polling: { enabled: true, interval: 1000, timeout: 15 * 10 * 1000 },
       });
     } catch (error) {
       console.error('verifyMyEmail: error', { error });

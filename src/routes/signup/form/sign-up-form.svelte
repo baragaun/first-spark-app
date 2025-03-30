@@ -66,19 +66,18 @@
     try {
       const response = await myUserContext.signUpUser(email);
 
-      if (response.error || !response.myUser?.id) {
-        errorMessage = response.error || 'Failed to sign up';
+      if (response === true) {
+        currentStep.set(1);
+
+        startEmailConfirmation(email).catch((error) => {
+          console.error('Error starting email confirmation:', error);
+          error = 'Failed to send verification email. Please try again.';
+        });
+
         return;
       }
 
-      // todo: Verify that the sign up was successful
-
-      currentStep.set(1);
-
-      startEmailConfirmation(email).catch((error) => {
-        console.error('Error starting email confirmation:', error);
-        error = 'Failed to send verification email. Please try again.';
-      });
+      errorMessage = response || 'Failed to sign up';
     } catch (err) {
       errorMessage = err instanceof Error ? err.message : 'Failed to sign up';
       console.error('Error signing up:', err);
@@ -184,12 +183,10 @@
     try {
       const result = await myUserContext.verifyMultiStepActionToken(actionId, code);
 
-      if (!result) {
-        errorMessage = 'Verification failed';
+      if (result !== true) {
+        errorMessage = result;
         return;
       }
-
-      console.log('Verification successful, moving to credentials step');
     } catch (err) {
       errorMessage = err instanceof Error ? err.message : 'Failed to verify code';
       console.error('Error verifying code:', err);
@@ -241,8 +238,8 @@
   const handleResend = async () => {
     const response = await myUserContext.sendMultiStepActionNotification(actionId, email);
 
-    if (!response || response.error) {
-      errorMessage = 'We failed to send the verification token. Please try again.';
+    if (response !== true) {
+      errorMessage = response || 'We failed to send the verification token. Please try again.';
       return;
     }
   };
