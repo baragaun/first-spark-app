@@ -12,7 +12,7 @@ import { vi } from 'vitest';
 // } as Storage;
 
 // Mock matchMedia
-global.matchMedia = vi.fn().mockImplementation((query) => ({
+window.matchMedia = vi.fn().mockImplementation((query) => ({
   matches: false,
   media: query,
   onchange: null,
