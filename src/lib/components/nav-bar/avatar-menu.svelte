@@ -20,7 +20,7 @@
 
 <DropdownMenu.Root>
   <DropdownMenu.Trigger class={'ml-2'}>
-    <Button variant="ghost" class="relative h-8 w-8 rounded-full">
+    <Button variant="ghost" data-testid="avatar-menu-trigger" class="relative h-8 w-8 rounded-full">
       {#if $isSignedIn}
         <Avatar.Root class="h-9 w-9">
           <Avatar.Image src="" alt={`@${username}`} />

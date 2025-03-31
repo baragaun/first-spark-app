@@ -5,6 +5,7 @@
   import ThemeButton from '../theme-button.svelte';
   import LanguageButton from '../language-button.svelte';
   import { isSignedIn } from '@/contexts/my-user-context.svelte';
+  import { goto } from '$app/navigation';
 </script>
 
 <nav
@@ -32,14 +33,22 @@
       {:else}
         <Button
           variant="ghost"
-          href="/signin"
+          onclick={() => goto('/signin')}
+          aria-label="Sign In"
           class="font-lexend hidden text-muted-foreground hover:text-foreground md:flex"
         >
           Sign In
         </Button>
-        <Button variant="default" href="/signup" class="font-lexend shadow-sm hover:shadow-md">
+        <span class="sr-only">Sign In</span>
+        <Button
+          variant="default"
+          onclick={() => goto('/signup')}
+          aria-label="Sign Up"
+          class="font-lexend shadow-sm hover:shadow-md"
+        >
           Sign Up
         </Button>
+        <span class="sr-only">Sign Up</span>
       {/if}
     </div>
   </div>

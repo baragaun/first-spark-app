@@ -1,16 +1,35 @@
 import NavBar from '@/components/nav-bar/nav-bar.svelte';
 import { render, screen } from '@testing-library/svelte';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 describe('NavBar', () => {
-  beforeEach(() => {
-    // Reset auth store before each test
-    // authStore.set({ isAuthenticated: false });
+  // beforeEach(() => {
+  //   // Reset auth store before each test
+  //   // authStore.set({ isAuthenticated: false });
+  // });
+
+  const originalInnerWidth = window.innerWidth;
+  const originalInnerHeight = window.innerHeight;
+
+  afterEach(() => {
+    // Reset window dimensions after each test
+    Object.defineProperty(window, 'innerWidth', {
+      writable: true,
+      configurable: true,
+      value: originalInnerWidth,
+    });
+
+    Object.defineProperty(window, 'innerHeight', {
+      writable: true,
+      configurable: true,
+      value: originalInnerHeight,
+    });
+
+    // Reset any matchMedia mocks
+    window.matchMedia = originalMatchMedia;
   });
 
-  const signUpButton = screen.queryByText('Sign Up');
-  const signInButton = screen.queryByText('Sign In');
-  const signOutButton = screen.queryByText('Sign Out');
+  const originalMatchMedia = window.matchMedia;
 
   it('renders theme toggle button', async () => {
     render(NavBar);
@@ -24,25 +43,41 @@ describe('NavBar', () => {
     expect(languageButton).toBeVisible();
   });
 
-  it('renders signin button', async () => {
-    // authStore.set({ isAuthenticated: false });
+  it('renders sign in button when not authenticated', async () => {
     render(NavBar);
-
+    const signInButton = screen.getByRole('button', { name: /sign in/i });
     expect(signInButton).toBeVisible();
   });
 
-  it('renders signup button', async () => {
-    // authStore.set({ isAuthenticated: false });
+  it('renders sign up button when not authenticated', async () => {
     render(NavBar);
-
+    const signUpButton = screen.getByRole('button', { name: /sign up/i });
     expect(signUpButton).toBeVisible();
   });
 
-  it('renders Sign Out button component when authenticated', async () => {
-    // localStorage.setItem('authToken', 'your-auth-token');
-    // authStore.set({ isAuthenticated: true });
-    render(NavBar);
+  it('renders the avatarMenu when viewport is small and unauthenticated', async () => {
+    Object.defineProperty(window, 'innerWidth', {
+      writable: true,
+      configurable: true,
+      value: 375,
+    });
 
-    expect(signOutButton).toBeVisible();
+    window.matchMedia = (query) => ({
+      matches: query.includes('max-width') && query.includes('768px'),
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    });
+
+    // Trigger resize event
+    window.dispatchEvent(new Event('resize'));
+
+    render(NavBar);
+    const avatarMenuButton = screen.getByTestId('avatar-menu-trigger');
+    expect(avatarMenuButton).toBeVisible();
   });
 });
