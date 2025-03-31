@@ -165,6 +165,18 @@ export class MyUserContext {
     // }
     // console.log('MyUserContext: BgNodeClient initialized:', { isSignedIn: this.client.isSignedIn });
 
+    // After successful initialization, check if user is signed in and restore user data
+    if (this.client.isSignedIn) {
+      try {
+        const userResponse = await this.client.operations.myUser.findMyUser();
+        if (userResponse.object) {
+          this.myUser = userResponse.object;
+        }
+      } catch (error) {
+        console.error('Failed to restore user data:', error);
+      }
+    }
+
     this._isInitializing = false;
   }
 

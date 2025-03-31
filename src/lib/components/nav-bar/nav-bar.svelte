@@ -5,7 +5,7 @@
   import ThemeButton from '../theme-button.svelte';
   import LanguageButton from '../language-button.svelte';
   import { isSignedIn } from '@/contexts/my-user-context.svelte';
-  console.log('>>>>>>>>isSignedIn:', $isSignedIn);
+
 </script>
 
 <nav
