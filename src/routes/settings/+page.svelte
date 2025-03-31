@@ -1,10 +1,10 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { isSignedIn } from '@/contexts/my-user-context.svelte';
   import { onMount } from 'svelte';
 
   onMount(() => {
-    if (!myUserContext.isAuthenticated) {
+    if (!isSignedIn) {
       goto('/signin', { replaceState: true });
     }
     goto('/settings/account', { replaceState: true });

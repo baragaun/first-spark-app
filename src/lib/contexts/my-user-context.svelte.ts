@@ -412,12 +412,16 @@ export class MyUserContext {
 
     try {
       isLoading.set(true);
-
       const response = await this.client.operations.myUser.updateMyUser(changes);
 
       if (response.error) {
         console.error('MyUserContext.updateMyUser: received error.', { response });
         return { error: translate(response.error, AppUiMessage.systemError) };
+      }
+
+      // Refresh the myUser object after successful update
+      if (response.object) {
+        this.myUser = response.object;
       }
 
       return { myUser: response.object };

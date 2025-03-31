@@ -1,9 +1,9 @@
 <script lang="ts" module>
+  import BookUser from 'lucide-svelte/icons/book-user';
   import House from 'lucide-svelte/icons/house';
   import Inbox from 'lucide-svelte/icons/inbox';
-  import Settings from 'lucide-svelte/icons/settings';
-  import BookUser from 'lucide-svelte/icons/book-user';
   import MessageSquare from 'lucide-svelte/icons/message-square';
+  import Settings from 'lucide-svelte/icons/settings';
 
   const allItems = [
     {
@@ -36,10 +36,10 @@
 </script>
 
 <script lang="ts">
-  import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-  import type { ComponentProps } from 'svelte';
   import { page } from '$app/state';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+  import { isSignedIn } from '@/contexts/my-user-context.svelte';
+  import type { ComponentProps } from 'svelte';
 
   function isItemActive(itemUrl: string, currentPath: string): boolean {
     if (itemUrl === '/') {
@@ -56,9 +56,7 @@
   }: ComponentProps<typeof Sidebar.Root> = $props();
 
   // Using $derived rune for reactive computation
-  let items = $derived(
-    allItems.filter((item) => !item.requiresAuth || myUserContext.isAuthenticated),
-  );
+  let items = $derived(allItems.filter((item) => !item.requiresAuth || $isSignedIn));
 </script>
 
 <Sidebar.Root bind:ref {collapsible} {...restProps}>

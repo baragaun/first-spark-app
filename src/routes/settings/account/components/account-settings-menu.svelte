@@ -7,23 +7,32 @@
   import DeleteAccountInput from './delete-account-input.svelte';
   import type { PageData } from '../$types';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { onMount } from 'svelte';
 
   let { data }: { data: PageData } = $props();
 
   let isLoading = $state(false);
 
-  // User data (would come from API in real implementation)
-  let currentUsername = $state(data.currentUsername || myUserContext.myUserHandle || '');
-  let currentEmail = $state(data.email || myUserContext.myEmail || '');
+  let currentUsername = $state('');
+  let currentEmail = $state('');
 
-  const handleUsernameChange = async (newUsername: string): Promise<void> => {
+  function updateUserData() {
+    currentUsername = data.currentUsername || myUserContext.myUserHandle || '';
+    currentEmail = data.email || myUserContext.myEmail || '';
+  }
+
+  onMount(() => {
+    updateUserData();
+  });
+
+  const handleUsernameChange = async () => {
     try {
       isLoading = true;
-      // Call the API to update the username
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      currentUsername = newUsername;
+      updateUserData();
+      return true;
     } catch (error) {
       console.error('Error updating username:', error);
+      return false;
     } finally {
       isLoading = false;
     }
@@ -84,7 +93,9 @@
       {currentUsername}
       {currentEmail}
       usernameForm={data.usernameForm}
-      onSave={handleUsernameChange}
+      onSave={async () => {
+        await handleUsernameChange();
+      }}
     />
 
     <UpdateEmailInput

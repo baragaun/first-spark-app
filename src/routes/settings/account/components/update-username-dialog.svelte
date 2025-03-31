@@ -9,16 +9,17 @@
   import { usernameSchema } from '../../../../routes/settings/account/account-settings-schema';
   import { UserIdentType } from '@baragaun/bg-node-client';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import ErrorAlert from '@/components/error-alert.svelte';
 
   interface UpdateUsernameDialogProps {
     currentUsername: string;
     currentEmail: string;
-    onSave: (newUsername: string) => Promise<void>;
+    onSave: () => Promise<void>;
     usernameForm: SuperValidated<Infer<typeof usernameSchema>>;
   }
 
   // Props using the interface
-  let { currentUsername, currentEmail, onSave, usernameForm }: UpdateUsernameDialogProps = $props();
+  let { currentUsername, onSave, currentEmail, usernameForm }: UpdateUsernameDialogProps = $props();
 
   const form = superForm(usernameForm, {
     validators: zodClient(usernameSchema),
@@ -32,49 +33,7 @@
   let isLoading = $state(false);
   let showUsernameEdit = $state(false);
   let isUsernameAvailable = $state(true);
-
-  // Dummy data - simulating a database of taken usernames
-  const takenUsernames = ['admin', 'moderator', 'taken', 'username', 'system'];
-
-  // Dummy adjectives and nouns for username generation
-  // const adjectives = [
-  //   'happy',
-  //   'clever',
-  //   'swift',
-  //   'brave',
-  //   'mighty',
-  //   'gentle',
-  //   'wise',
-  //   'wild',
-  //   'calm',
-  //   'bold',
-  // ];
-
-  // const nouns = [
-  //   'panda',
-  //   'tiger',
-  //   'eagle',
-  //   'wolf',
-  //   'dolphin',
-  //   'falcon',
-  //   'turtle',
-  //   'fox',
-  //   'owl',
-  //   'bear',
-  // ];
-
-  // // Dummy function to generate a random username
-  // const getSuggestedHandle = async (): Promise<string> => {
-  //   await new Promise((resolve) => setTimeout(resolve, 500));
-  //   const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
-  //   const noun = nouns[Math.floor(Math.random() * nouns.length)];
-  //   const randomNum = Math.floor(Math.random() * 1000);
-  //   const suggestion = `${adjective}${noun}${randomNum}`;
-  //   if (takenUsernames.includes(suggestion.toLowerCase())) {
-  //     return getSuggestedHandle();
-  //   }
-  //   return suggestion;
-  // };
+  let errorMessage = $state('');
 
   // Derived state to check if form has values and is valid
   let hasFormValues = $derived($formData.username && !$errors.username && isUsernameAvailable);
@@ -82,11 +41,33 @@
   // userContext function integration to find available User-handle
   const getSuggestedHandle = async (): Promise<string> => {
     await new Promise((resolve) => setTimeout(resolve, 300));
+    console.log('currentEmail', currentEmail);
     try {
       const result = await myUserContext.findAvailableUserHandle(currentEmail);
       console.log('getSuggestedHandle', result);
+
+      // Check if result is an object with an 'object' property
+      if (result && typeof result === 'object' && 'object' in result) {
+        return result.object ?? '';
+      }
+
+      // Fallback for string result
       if (typeof result === 'string') {
         return result;
+      }
+
+      // If we can't determine the structure, try to stringify it
+      if (result) {
+        const stringified = JSON.stringify(result);
+        console.log('Stringified result:', stringified);
+        try {
+          const parsed = JSON.parse(stringified);
+          if (parsed && typeof parsed === 'object' && 'object' in parsed) {
+            return parsed.object;
+          }
+        } catch (e) {
+          console.error('Error parsing result:', e);
+        }
       }
     } catch (error) {
       console.error('Error getting suggested handle:', error);
@@ -118,17 +99,45 @@
     }
   };
 
+  const handleUsernameChange = async (userHanndle?: { username: string }, e?: SubmitEvent) => {
+    if (e) e.preventDefault();
+    isLoading = true;
+    errorMessage = '';
+    try {
+      const result = await myUserContext.updateMyUser({
+        userHandle: userHanndle?.username,
+      });
+      if (result.error) {
+        errorMessage = result.error;
+        return false;
+      }
+      return true;
+    } catch (error) {
+      errorMessage = error instanceof Error ? error.message : 'Failed to update username';
+      console.error('Error updating username:', error);
+      return false;
+    } finally {
+      isLoading = false;
+    }
+  };
+
   // Reset dialog state when closed
   function resetDialogState() {
     $formData.username = currentUsername;
   }
 
   // Handle username change
-  const handleUsernameChange = async () => {
+  const onSave1 = async () => {
     try {
       isLoading = true;
-      await onSave($formData.username);
-      showUsernameEdit = false;
+      const success = await handleUsernameChange({ username: $formData.username });
+      if (success) {
+        // Call the parent's onSave callback if provided
+        if (typeof onSave === 'function') {
+          await onSave();
+        }
+        showUsernameEdit = false;
+      }
     } finally {
       isLoading = false;
     }
@@ -197,9 +206,13 @@
       >
         Cancel
       </Button>
-      <Button type="submit" disabled={isLoading || !hasFormValues} onclick={handleUsernameChange}>
+      <Button type="submit" disabled={isLoading || !hasFormValues} onclick={onSave1}>
         {isLoading ? 'Saving...' : 'Save Changes'}
       </Button>
     </Dialog.Footer>
+    <!-- Alert for errors -->
+    {#if errorMessage}
+      <ErrorAlert bind:errorMessage />
+    {/if}
   </Dialog.Content>
 </Dialog.Root>
