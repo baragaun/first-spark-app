@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
+  import { isSignedIn } from '@/contexts/my-user-context.svelte';
 </script>
 
 <div class="grid flex-1 place-items-center">
@@ -13,13 +14,16 @@
     </p>
 
     <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
-      <Button
-        variant="default"
-        size="lg"
-        class="shadow-lg transition-all hover:scale-105 hover:shadow-primary/25 active:scale-100"
-      >
-        Get Started
-      </Button>
+      {#if !$isSignedIn}
+        <Button
+          variant="default"
+          size="lg"
+          class="shadow-lg transition-all hover:scale-105 hover:shadow-primary/25 active:scale-100"
+          href="/signup"
+        >
+          Get Started
+        </Button>
+      {/if}
     </div>
   </div>
 </div>
