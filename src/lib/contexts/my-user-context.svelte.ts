@@ -1,4 +1,3 @@
-import { writable } from 'svelte/store';
 import translate from '@/helpers/language/translate';
 import { AppUiMessage } from '@/types/enums';
 import {
@@ -7,18 +6,29 @@ import {
   BgNodeClient,
   ClientInfoStoreType,
   HttpHeaderName,
+  MultiStepActionEventType,
   MyUserChanges,
   NotificationMethod,
+  SidMultiStepActionProgress,
+  UserIdentType,
   type BgNodeClientConfig,
   type MultiStepActionProgressResult,
   type MyUser,
   type MyUserListener,
+  type QueryPollingOptions,
   type QueryResult,
   type SignInUserInput,
   type SignUpUserInput,
-  UserIdentType,
 } from '@baragaun/bg-node-client';
+import { writable } from 'svelte/store';
 
+// Add these new types and stores
+export type UserContextEvent = {
+  type: string;
+  message?: string;
+};
+
+export const userContextEvents = writable<UserContextEvent | null>(null);
 export const isSignedIn = writable(false);
 export const isLoading = writable(false);
 
@@ -26,6 +36,71 @@ export class MyUserContext {
   private client: BgNodeClient = new BgNodeClient();
   private myUser: MyUser | undefined;
   private _isInitializing = false;
+  private actionId: string | undefined;
+  private eventListeners: Map<string, ((event: UserContextEvent) => void)[]> = new Map();
+  private polling: QueryPollingOptions = {
+    enabled: true,
+    interval: 1000,
+    timeout: 15 * 10 * 1000,
+    // Timeout should parallel to token expiry time, for now it is 1.5 mins it enought to user to verify and send another token.
+  };
+  // Add these methods for event handling
+  public addEventListener(eventType: string, callback: (event: UserContextEvent) => void): void {
+    if (!this.eventListeners.has(eventType)) {
+      this.eventListeners.set(eventType, []);
+    }
+    this.eventListeners.get(eventType)?.push(callback);
+  }
+
+  public removeEventListener(eventType: string, callback: (event: UserContextEvent) => void): void {
+    const listeners = this.eventListeners.get(eventType);
+    if (listeners) {
+      const index = listeners.indexOf(callback);
+      if (index !== -1) {
+        listeners.splice(index, 1);
+      }
+    }
+  }
+
+  protected emitEvent(type: string): void {
+    const event: UserContextEvent = { type };
+    userContextEvents.set(event);
+
+    // Call direct listeners
+    const listeners = this.eventListeners.get(type);
+    if (listeners) {
+      listeners.forEach((callback) => callback(event));
+    }
+
+    // Call wildcard listeners
+    const wildcardListeners = this.eventListeners.get('*');
+    if (wildcardListeners) {
+      wildcardListeners.forEach((callback) => callback(event));
+    }
+  }
+
+  protected emitError(type: string, message: string): void {
+    const event: UserContextEvent = { type: `error:${type}`, message };
+    userContextEvents.set(event);
+
+    // Call direct error listeners
+    const listeners = this.eventListeners.get(`error:${type}`);
+    if (listeners) {
+      listeners.forEach((callback) => callback(event));
+    }
+
+    // Call general error listeners
+    const errorListeners = this.eventListeners.get('error');
+    if (errorListeners) {
+      errorListeners.forEach((callback) => callback(event));
+    }
+
+    // Call wildcard listeners
+    const wildcardListeners = this.eventListeners.get('*');
+    if (wildcardListeners) {
+      wildcardListeners.forEach((callback) => callback(event));
+    }
+  }
 
   public async initialize(): Promise<void> {
     console.log('MyUserContext.initialize called.');
@@ -75,7 +150,7 @@ export class MyUserContext {
         onSignedOut: () => isSignedIn.set(false),
         onMyUserUpdated: (myUser) => {
           this.myUser = myUser;
-        }
+        },
       } as MyUserListener);
 
       isSignedIn.set(this.client.isSignedIn);
@@ -128,7 +203,10 @@ export class MyUserContext {
 
       return true;
     } catch (error) {
-      console.error('signUpUser: error', { error: (error as Error).message, stack: (error as Error).stack });
+      console.error('signUpUser: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
       return translate(AppUiMessage.systemError);
     } finally {
       isLoading.set(false);
@@ -174,16 +252,17 @@ export class MyUserContext {
 
       return true;
     } catch (error) {
-      console.error('MyUserContext.signMeInWithPassword: error', { error: (error as Error).message, stack: (error as Error).stack });
+      console.error('MyUserContext.signMeInWithPassword: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
       return translate((error as Error).message, AppUiMessage.systemError);
     } finally {
       isLoading.set(false);
     }
   }
 
-  async signMeInWithToken(
-    userIdent: string,
-  ): Promise<true | string> {
+  async signMeInWithToken(userIdent: string): Promise<true | string> {
     if (!this.client.isInitialized) {
       console.error('MyUserContext.signMeInWithToken: not initialized.');
       return translate(AppUiMessage.systemError);
@@ -197,8 +276,7 @@ export class MyUserContext {
     try {
       isLoading.set(true);
       const response = await this.client.operations.myUser.signInWithToken(userIdent, {
-        polling: { enabled: true, interval: 1000, timeout: 100000 },
-        // Timeout should parallel to token expiry time, for now it is 1.5 mins it enought to user to verify and send another token.
+        polling: this.polling,
       });
 
       if (response.error) {
@@ -206,9 +284,66 @@ export class MyUserContext {
         return translate(response.error, AppUiMessage.systemError);
       }
 
+      this.actionId = response.object?.actionProgress?.actionId;
+      if (response.object?.run) {
+        response.object.run.addListener({
+          id: 'SignInWithToken',
+          onEvent: async (
+            eventType: MultiStepActionEventType,
+            action: SidMultiStepActionProgress,
+          ): Promise<void> => {
+            if (eventType === MultiStepActionEventType.notificationFailed) {
+              console.error(
+                'MyUserContext.signMeInWithToken: Notification failed.',
+                action.notificationResult,
+              );
+              // Emit an event that consumers can subscribe to
+              this.emitError(
+                'notification-failed',
+                'We could not send the verification token to your email.',
+              );
+            } else if (eventType === MultiStepActionEventType.notificationSent) {
+              console.log(
+                'MyUserContext.signMeInWithToken: Notification sent.',
+                action.notificationResult,
+              );
+              // Emit a success event
+              this.emitEvent('notification-sent');
+            } else if (eventType === MultiStepActionEventType.tokenFailed) {
+              console.error(
+                'MyUserContext.signMeInWithToken: Token verification failed.',
+                action.notificationResult,
+              );
+              this.emitError('token-failed', 'We could not verify the token you entered.');
+            } else if (eventType === MultiStepActionEventType.timedOut) {
+              console.error(
+                'MyUserContext.signMeInWithToken: Action timed out.',
+                action.notificationResult,
+              );
+              this.emitError('timeout', 'The verification token has expired.');
+            } else if (eventType === MultiStepActionEventType.failed) {
+              console.error(
+                'MyUserContext.signMeInWithToken: Action failed.',
+                action.notificationResult,
+              );
+              this.emitError('action-failed', 'A system error has occurred.');
+            } else if (eventType === MultiStepActionEventType.success) {
+              console.log(
+                'MyUserContext.signMeInWithToken: Action succeeded.',
+                action.notificationResult,
+              );
+              this.emitEvent('verification-success');
+            }
+          },
+        });
+      }
+
       return true;
     } catch (error) {
-      console.error('MyUserContext.signMeInWithToken: error', { error: (error as Error).message, stack: (error as Error).stack });
+      console.error('MyUserContext.signMeInWithToken: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
       return translate((error as Error).message, AppUiMessage.systemError);
     } finally {
       isLoading.set(false);
@@ -240,7 +375,10 @@ export class MyUserContext {
 
       return true;
     } catch (error) {
-      console.error('MyUserContext.signMeOut: error', { error: (error as Error).message, stack: (error as Error).stack });
+      console.error('MyUserContext.signMeOut: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
       return translate((error as Error).message, AppUiMessage.systemError);
     } finally {
       isLoading.set(false);
@@ -272,17 +410,17 @@ export class MyUserContext {
 
       return { myUser: response.object };
     } catch (error) {
-      console.error('MyUserContext.updateMyUser: error', { error: (error as Error).message, stack: (error as Error).stack });
+      console.error('MyUserContext.updateMyUser: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
       return { error: translate((error as Error).message, AppUiMessage.systemError) };
     } finally {
       isLoading.set(false);
     }
   }
 
-  async updateMyPassword(
-    currentPassword: string,
-    newPassword: string,
-  ): Promise<true | string> {
+  async updateMyPassword(currentPassword: string, newPassword: string): Promise<true | string> {
     if (!this.client.isInitialized) {
       console.error('MyUserContext.updateMyPassword: not initialized.');
       return translate(AppUiMessage.systemError);
@@ -307,7 +445,10 @@ export class MyUserContext {
 
       return true;
     } catch (error) {
-      console.error('MyUserContext.updateMyPassword: error', { error: (error as Error).message, stack: (error as Error).stack });
+      console.error('MyUserContext.updateMyPassword: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
       return translate((error as Error).message, AppUiMessage.systemError);
     } finally {
       isLoading.set(false);
@@ -323,7 +464,10 @@ export class MyUserContext {
     try {
       return await this.client.operations.myUser.findAvailableUserHandle(email);
     } catch (error) {
-      console.error('MyUserContext.updateMyPassword: error', { error: (error as Error).message, stack: (error as Error).stack });
+      console.error('MyUserContext.updateMyPassword: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
       return translate((error as Error).message, AppUiMessage.systemError);
     }
   }
@@ -350,16 +494,14 @@ export class MyUserContext {
     }
   }
 
-  async resetMyPassword(
-    email: string,
-  ): Promise<QueryResult<MultiStepActionProgressResult>> {
+  async resetMyPassword(email: string): Promise<QueryResult<MultiStepActionProgressResult>> {
     if (!this.client.isInitialized) {
       return { error: 'Client not initialized' };
     }
     try {
       isLoading.set(true);
       return this.client.operations.myUser.resetMyPassword(email, {
-        polling: { enabled: true, interval: 1000, timeout: 100000 },
+        polling: this.polling,
       });
     } catch (error) {
       console.error('resetMyPassword: error', { error });
@@ -369,45 +511,121 @@ export class MyUserContext {
     }
   }
 
-  async verifyMyEmail(email: string): Promise<QueryResult<MultiStepActionProgressResult>> {
+  async verifyMyEmail(email: string): Promise<true | string> {
     if (!this.client.isInitialized) {
-      return { error: 'Client not initialized' };
+      console.error('MyUserContext.verifyMyEmail: not initialized.');
+      return translate(AppUiMessage.systemError);
     }
+
+    // if (this.client.isSignedIn) {
+    //   console.error('MyUserContext.verifyMyEmail: already signed in');
+    //   return translate(AppUiMessage.systemError);
+    // }
+
+    // It is understood that user would be signed in for verify email.
 
     try {
       isLoading.set(true);
-      return this.client.operations.myUser.verifyMyEmail(email, {
-        polling: { enabled: true, interval: 1000, timeout: 15 * 10 * 1000 },
+      const response = await this.client.operations.myUser.verifyMyEmail(email, {
+        polling: this.polling,
       });
+
+      if (response.error) {
+        console.error('MyUserContext.verifyMyEmail: received error.', { response });
+        return translate(response.error, AppUiMessage.systemError);
+      }
+
+      this.actionId = response.object?.actionProgress?.actionId;
+
+      if (response.object?.run) {
+        response.object.run.addListener({
+          id: 'VerifyMyEmail',
+          onEvent: async (
+            eventType: MultiStepActionEventType,
+            action: SidMultiStepActionProgress,
+          ): Promise<void> => {
+            if (eventType === MultiStepActionEventType.notificationFailed) {
+              console.error(
+                'MyUserContext.verifyMyEmail: Notification failed.',
+                action.notificationResult,
+              );
+              // Emit an event that consumers can subscribe to
+              this.emitError(
+                'notification-failed',
+                'We could not send the verification token to your email.',
+              );
+            } else if (eventType === MultiStepActionEventType.notificationSent) {
+              console.log(
+                'MyUserContext.verifyMyEmail: Notification sent.',
+                action.notificationResult,
+              );
+              // Emit a success event
+              this.emitEvent('notification-sent');
+            } else if (eventType === MultiStepActionEventType.tokenFailed) {
+              console.error(
+                'MyUserContext.verifyMyEmail: Token verification failed.',
+                action.notificationResult,
+              );
+              this.emitError('token-failed', 'We could not verify the token you entered.');
+            } else if (eventType === MultiStepActionEventType.timedOut) {
+              console.error(
+                'MyUserContext.verifyMyEmail: Action timed out.',
+                action.notificationResult,
+              );
+              this.emitError('timeout', 'The verification token has expired.');
+            } else if (eventType === MultiStepActionEventType.failed) {
+              console.error(
+                'MyUserContext.verifyMyEmail: Action failed.',
+                action.notificationResult,
+              );
+              this.emitError('action-failed', 'A system error has occurred.');
+            } else if (eventType === MultiStepActionEventType.success) {
+              console.log(
+                'MyUserContext.verifyMyEmail: Action succeeded.',
+                action.notificationResult,
+              );
+              this.emitEvent('verification-success');
+            }
+          },
+        });
+      }
+
+      return true;
     } catch (error) {
-      console.error('verifyMyEmail: error', { error });
-      return { error: (error as Error).message };
+      console.error('MyUserContext.verifyMyEmail: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return translate((error as Error).message, AppUiMessage.systemError);
     } finally {
       isLoading.set(false);
     }
   }
 
-  async verifyMultiStepActionToken(
-    actionId: string,
-    token: string,
-    newPassword?: string,
-  ): Promise<true | string> {
+  async verifyMultiStepActionToken(token: string, newPassword?: string): Promise<true | string> {
     if (!this.client.isInitialized) {
       console.error('MyUserContext.verifyMultiStepActionToken: no client');
+      return 'system-error';
+    }
+
+    if (!this.actionId) {
+      console.error('MyUserContext.verifyMultiStepActionToken: no actionId');
       return 'system-error';
     }
 
     try {
       isLoading.set(true);
       const response = await this.client.operations.multiStepAction.verifyMultiStepActionToken(
-        actionId,
+        this.actionId,
         token,
         newPassword,
       );
 
       if (response.error || !response.object) {
-        console.error('MyUserContext.verifyMultiStepActionToken: failed calling client.verifyMultiStepActionToken',
-          { response });
+        console.error(
+          'MyUserContext.verifyMultiStepActionToken: failed calling client.verifyMultiStepActionToken',
+          { response },
+        );
         return response.error || 'system-error';
       }
 
@@ -420,19 +638,21 @@ export class MyUserContext {
     }
   }
 
-  async sendMultiStepActionNotification(
-    actionId: string,
-    email?: string,
-  ): Promise<true | string> {
+  async sendMultiStepActionNotification(email?: string): Promise<true | string> {
     if (!this.client.isInitialized) {
       console.error('MyUserContext.sendMultiStepActionNotification: not initialized.');
+      return 'system-error';
+    }
+
+    if (!this.actionId) {
+      console.error('MyUserContext.sendMultiStepActionNotification: no actionId');
       return 'system-error';
     }
 
     try {
       isLoading.set(true);
       const response = await this.client.operations.multiStepAction.sendMultiStepActionNotification(
-        actionId,
+        this.actionId,
         email,
         undefined,
         NotificationMethod.email,

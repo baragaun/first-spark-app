@@ -7,11 +7,13 @@ This document explains why we use Svelte's Context API (`getContext`) for access
 ## Approach Comparison
 
 ### Direct Import (Not Recommended)
+
 ```typescript
 import { myUserContext } from '@/contexts/my-user-context.svelte';
 ```
 
 ### Context API (Recommended)
+
 ```typescript
 import { getContext } from 'svelte';
 const myUserContext = getContext<MyUserContext>('myUserContext');
@@ -20,6 +22,7 @@ const myUserContext = getContext<MyUserContext>('myUserContext');
 ## Why Context API is Better
 
 1. **Testing and Storybook Integration**
+
    - Using the Context API allows us to easily mock the context in Storybook and tests
    - We can provide different context implementations without modifying component code
    - Our `mock-user-provider.svelte` can inject a mock context that components consume
@@ -32,6 +35,7 @@ const myUserContext = getContext<MyUserContext>('myUserContext');
 ## Implementation Example
 
 In components:
+
 ```typescript
 import { getContext } from 'svelte';
 import type { MyUserContext } from '@/contexts/my-user-context.svelte';
@@ -40,6 +44,7 @@ const myUserContext = getContext<MyUserContext>('myUserContext');
 ```
 
 In Storybook:
+
 ```typescript
 // In mock-user-provider.svelte
 import { setContext } from 'svelte';

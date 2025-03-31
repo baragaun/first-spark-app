@@ -1,6 +1,5 @@
 import {
   AuthType,
-  CachePolicy,
   MultiStepActionEventType,
   MultiStepActionResult,
   MultiStepActionSendNotificationResult,
@@ -331,10 +330,7 @@ export class MockMyUserContext {
     };
   }
 
-  async updateMyUser(userData: {
-    id: string;
-    userHandle: string;
-  }): Promise<QueryResult<MyUser>> {
+  async updateMyUser(userData: { id: string; userHandle: string }): Promise<QueryResult<MyUser>> {
     this.isLoading.set(true);
 
     // Simulate API delay
