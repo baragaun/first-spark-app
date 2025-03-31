@@ -3,13 +3,11 @@ import { render, screen } from '@testing-library/svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 describe('NavBar', () => {
-  // beforeEach(() => {
-  //   // Reset auth store before each test
-  //   // authStore.set({ isAuthenticated: false });
-  // });
+  // beforeEach(() => {});
 
   const originalInnerWidth = window.innerWidth;
   const originalInnerHeight = window.innerHeight;
+  const originalMatchMedia = window.matchMedia;
 
   afterEach(() => {
     // Reset window dimensions after each test
@@ -28,8 +26,6 @@ describe('NavBar', () => {
     // Reset any matchMedia mocks
     window.matchMedia = originalMatchMedia;
   });
-
-  const originalMatchMedia = window.matchMedia;
 
   it('renders theme toggle button', async () => {
     render(NavBar);

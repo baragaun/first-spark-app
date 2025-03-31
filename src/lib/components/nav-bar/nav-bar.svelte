@@ -26,30 +26,31 @@
 
     <!-- Right side items -->
     <div class="flex flex-none items-center gap-2">
-      <ThemeButton class="hidden md:flex" />
-      <LanguageButton class="hidden md:flex" />
-      {#if $isSignedIn}
-        <AvatarMenu />
-      {:else}
-        <Button
-          variant="ghost"
-          onclick={() => goto('/signin')}
-          aria-label="Sign In"
-          class="font-lexend hidden text-muted-foreground hover:text-foreground md:flex"
-        >
-          Sign In
-        </Button>
-        <span class="sr-only">Sign In</span>
-        <Button
-          variant="default"
-          onclick={() => goto('/signup')}
-          aria-label="Sign Up"
-          class="font-lexend shadow-sm hover:shadow-md"
-        >
-          Sign Up
-        </Button>
-        <span class="sr-only">Sign Up</span>
+      {#if !$isSignedIn}
+        <div class="flex flex-none items-center gap-2">
+          <ThemeButton class="hidden md:flex" />
+          <LanguageButton class="hidden md:flex" />
+            <Button
+              variant="ghost"
+              onclick={() => goto('/signin')}
+              aria-label="Sign In"
+              class="font-lexend hidden text-muted-foreground hover:text-foreground md:flex"
+            >
+              Sign In
+            </Button>
+            <span class="sr-only">Sign In</span>
+            <Button
+              variant="default"
+              onclick={() => goto('/signup')}
+              aria-label="Sign Up"
+              class="font-lexend shadow-sm hover:shadow-md"
+            >
+              Sign Up
+            </Button>
+            <span class="sr-only">Sign Up</span>
+        </div>
       {/if}
+      <AvatarMenu />
     </div>
   </div>
 </nav>
