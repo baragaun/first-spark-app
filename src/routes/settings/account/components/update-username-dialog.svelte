@@ -12,12 +12,13 @@
 
   interface UpdateUsernameDialogProps {
     currentUsername: string;
+    currentEmail: string;
     onSave: (newUsername: string) => Promise<void>;
     usernameForm: SuperValidated<Infer<typeof usernameSchema>>;
   }
 
   // Props using the interface
-  let { currentUsername, onSave, usernameForm }: UpdateUsernameDialogProps = $props();
+  let { currentUsername, currentEmail, onSave, usernameForm }: UpdateUsernameDialogProps = $props();
 
   const form = superForm(usernameForm, {
     validators: zodClient(usernameSchema),
@@ -80,9 +81,9 @@
 
   // userContext function integration to find available User-handle
   const getSuggestedHandle = async (): Promise<string> => {
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 300));
     try {
-      const result = await myUserContext.findAvailableUserHandle(currentUsername);
+      const result = await myUserContext.findAvailableUserHandle(currentEmail);
       console.log('getSuggestedHandle', result);
       if (typeof result === 'string') {
         return result;

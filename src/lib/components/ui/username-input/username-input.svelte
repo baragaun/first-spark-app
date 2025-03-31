@@ -9,11 +9,11 @@
 
   interface FormData {
     username: string;
-    [key: string]: unknown;
+    [key: string]: any;
   }
 
   interface UsernameInputProps {
-    form: SuperForm<FormData, unknown>;
+    form: SuperForm<FormData, any>;
     name?: string;
     label?: string;
     placeholder?: string;

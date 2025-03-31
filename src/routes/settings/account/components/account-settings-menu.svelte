@@ -82,6 +82,7 @@
   <div class="space-y-4 px-4">
     <UpdateUsernameInput
       {currentUsername}
+      {currentEmail}
       usernameForm={data.usernameForm}
       onSave={handleUsernameChange}
     />
