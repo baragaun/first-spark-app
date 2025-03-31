@@ -1,42 +1,79 @@
-import NavBar, { authStore } from '$lib/components/nav-bar.svelte';
+import NavBar from '@/components/nav-bar/nav-bar.svelte';
 import { render, screen } from '@testing-library/svelte';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 describe('NavBar', () => {
-  beforeEach(() => {
-    // Reset auth store before each test
-    authStore.set({ isAuthenticated: false });
+  // beforeEach(() => {});
+
+  const originalInnerWidth = window.innerWidth;
+  const originalInnerHeight = window.innerHeight;
+  const originalMatchMedia = window.matchMedia;
+
+  afterEach(() => {
+    // Reset window dimensions after each test
+    Object.defineProperty(window, 'innerWidth', {
+      writable: true,
+      configurable: true,
+      value: originalInnerWidth,
+    });
+
+    Object.defineProperty(window, 'innerHeight', {
+      writable: true,
+      configurable: true,
+      value: originalInnerHeight,
+    });
+
+    // Reset any matchMedia mocks
+    window.matchMedia = originalMatchMedia;
   });
 
   it('renders theme toggle button', async () => {
     render(NavBar);
     const themeToggleButton = screen.getByRole('button', { name: /toggle theme/i });
-    await expect(themeToggleButton).toBeVisible();
+    expect(themeToggleButton).toBeVisible();
   });
 
-  it('renders login and signup buttons when not authenticated', async () => {
-    authStore.set({ isAuthenticated: false });
+  it('renders language selection button', async () => {
     render(NavBar);
-
-    const signUpButton = screen.getByText('Sign Up');
-    const logInButton = screen.getByText('Log In');
-
-    await expect(logInButton).toBeVisible();
-    await expect(signUpButton).toBeVisible();
+    const languageButton = screen.getByRole('button', { name: /change language/i });
+    expect(languageButton).toBeVisible();
   });
 
-  it('renders UserNav component when authenticated', async () => {
-    // Set authenticated state
-    localStorage.setItem('authToken', 'your-auth-token');
-    authStore.set({ isAuthenticated: true });
-    await render(NavBar);
+  it('renders sign in button when not authenticated', async () => {
+    render(NavBar);
+    const signInButton = screen.getByRole('button', { name: /sign in/i });
+    expect(signInButton).toBeVisible();
+  });
 
-    // Verify login/signup buttons are not present when authenticated
-    const signUpButton = screen.queryByText('Sign Up');
-    const logInButton = screen.queryByText('Log In');
+  it('renders sign up button when not authenticated', async () => {
+    render(NavBar);
+    const signUpButton = screen.getByRole('button', { name: /sign up/i });
+    expect(signUpButton).toBeVisible();
+  });
 
-    //await expect(logInButton).toBeVisible();
-    await expect(signUpButton).not.toBeInTheDocument();
-    await expect(logInButton).not.toBeInTheDocument();
+  it('renders the avatarMenu when viewport is small and unauthenticated', async () => {
+    Object.defineProperty(window, 'innerWidth', {
+      writable: true,
+      configurable: true,
+      value: 375,
+    });
+
+    window.matchMedia = (query) => ({
+      matches: query.includes('max-width') && query.includes('768px'),
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    });
+
+    // Trigger resize event
+    window.dispatchEvent(new Event('resize'));
+
+    render(NavBar);
+    const avatarMenuButton = screen.getByTestId('avatar-menu-trigger');
+    expect(avatarMenuButton).toBeVisible();
   });
 });
