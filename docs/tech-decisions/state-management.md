@@ -48,7 +48,6 @@ export class MyUserContext {
   user = $state<MyUser | null>(null);
   isLoading = $state(false);
   error = $state<string | null>(null);
-  isAuthenticated = $derived(!!this.user);
 
   // Methods...
 }

@@ -6,12 +6,18 @@
     CardHeader,
     CardTitle,
   } from '$lib/components/ui/card';
-  import Button from './button/button.svelte';
+  import type { Snippet } from 'svelte';
+  import Button from './ui/button/button.svelte';
 
-  export let title: string;
-  export let description: string | undefined = undefined;
-  export let showBackButton: boolean = false;
-  export let onBack: (() => void) | undefined = undefined;
+  interface Props {
+    children?: Snippet;
+    title: string;
+    description?: string;
+    showBackButton?: boolean;
+    onBack?: () => void;
+  }
+
+  let { title, description, showBackButton = false, onBack, children }: Props = $props();
 </script>
 
 {#if showBackButton && onBack}
@@ -28,6 +34,6 @@
     {/if}
   </CardHeader>
   <CardContent>
-    <slot />
+    {@render children?.()}
   </CardContent>
 </Card>

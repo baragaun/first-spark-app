@@ -1,23 +1,15 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { createMyUserContext } from './my-user-context.svelte';
+  import { setContext, type Snippet } from 'svelte';
+  import { myUserContext } from './my-user-context.svelte';
 
-  const myUserContext = createMyUserContext();
+  // Set the user context for child components to consume
+  setContext('myUserContext', myUserContext);
 
-  const myUser = $derived(myUserContext.getMyUser());
-  const loading = $derived(myUserContext.getIsLoading());
-  const error = $derived(myUserContext.getError());
-  const isAuthenticated = $derived(myUserContext.isAuthenticated);
+  interface Props {
+    children: Snippet;
+  }
 
-  let { children } = $props();
-
-  // Refresh user data on mount
-  onMount(async () => {
-    if (!loading) {
-      // myUserContext.loadMyUser();
-      return;
-    }
-  });
+  const { children }: Props = $props();
 </script>
 
-{@render children?.({ myUser, loading, error, isAuthenticated })}
+{@render children?.()}

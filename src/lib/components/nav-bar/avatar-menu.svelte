@@ -6,23 +6,24 @@
   import { Languages, LogIn, LogOut, Moon, MoreHorizontal, Sun } from 'lucide-svelte';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { toggleMode } from 'mode-watcher';
+  import { isSignedIn } from '@/contexts/my-user-context.svelte';
 
-  const isAuthenticated = $derived(myUserContext.isAuthenticated);
+  const username = $derived(myUserContext.myUserHandle);
+  const email = $derived(myUserContext.myEmail);
 
-  const handleLogout = () => {
-    // TODO: Handle logout
-    console.error('called handleLogout');
-    myUserContext.signMeOut();
+  const handleLogout = async () => {
+    // TODO: add a confirmation dialog
+    const result = await myUserContext.signMeOut();
     goto('/signin');
   };
 </script>
 
 <DropdownMenu.Root>
-  <DropdownMenu.Trigger class="ml-2 md:hidden">
+  <DropdownMenu.Trigger class={'ml-2'}>
     <Button variant="ghost" class="relative h-8 w-8 rounded-full">
-      {#if isAuthenticated}
+      {#if $isSignedIn}
         <Avatar.Root class="h-9 w-9">
-          <Avatar.Image src="" alt="@shadcn" />
+          <Avatar.Image src="" alt={`@${username}`} />
           <Avatar.Fallback>FS</Avatar.Fallback>
         </Avatar.Root>
       {:else}
@@ -31,11 +32,17 @@
     </Button>
   </DropdownMenu.Trigger>
   <DropdownMenu.Content class="mt-2 w-56" align="end">
-    {#if isAuthenticated}
+    {#if $isSignedIn}
       <DropdownMenu.Label class="font-normal">
-        <div class="flex flex-col space-y-1">
-          <p class="text-sm font-medium leading-none">newstudent</p>
-          <p class="text-xs leading-none text-muted-foreground">newstudent@example.com</p>
+        <div class="flex items-center">
+          <Avatar.Root class="mr-2 h-9 w-9">
+            <Avatar.Image src="" alt="@shadcn" />
+            <Avatar.Fallback>🙃</Avatar.Fallback>
+          </Avatar.Root>
+          <div class="flex flex-col space-y-1">
+            <p class="text-sm font-medium leading-none">{username}</p>
+            <p class="text-xs leading-none text-muted-foreground">{email}</p>
+          </div>
         </div>
       </DropdownMenu.Label>
       <DropdownMenu.Separator />
@@ -56,7 +63,7 @@
       </DropdownMenu.Item>
     </DropdownMenu.Group>
     <DropdownMenu.Separator />
-    {#if isAuthenticated}
+    {#if $isSignedIn}
       <DropdownMenu.Item
         onclick={handleLogout}
         class="bg-destructive text-white focus:bg-destructive focus:text-white"
