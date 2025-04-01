@@ -107,12 +107,14 @@
 
             if (import.meta.env.VITE_APP_ENVIRONMENT === 'development') {
               // We can ignore the failure to send the email in development.
+              errorMessage = '';
               currentStep.set(1);
               return;
+            } else {
+              errorMessage =
+                'We could not send the verification token to your email. Please try again.';
             }
 
-            errorMessage =
-              'We could not send the verification token to your email. Please try again.';
             return;
           }
 
