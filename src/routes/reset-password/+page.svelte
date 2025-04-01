@@ -58,11 +58,8 @@
 
       actionId = response.object.actionProgress.actionId;
 
-      currentStep.set(1);
-      startResendTimer();
-
       response.object.run.addListener({
-        id: 'RestPassword',
+        id: 'ResetPassword',
         onEvent: async (
           eventType: MultiStepActionEventType,
           action: SidMultiStepActionProgress,
@@ -70,9 +67,17 @@
           if (eventType === MultiStepActionEventType.notificationFailed) {
             // The notification failed to go out.
             console.error(
-              'SignInPage.multiStepActionListener: Notification failed.',
+              'ResetPasswordPage.multiStepActionListener: Notification failed.',
               action.notificationResult,
             );
+
+            if (import.meta.env.VITE_APP_ENVIRONMENT === 'development') {
+              // We can ignore the failure to send the email in development.
+              currentStep.set(1);
+              startResendTimer();
+              return;
+            }
+
             tokenStatus = MsaTokenStatus.sendingFailed;
             errorMessage = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError);
             return;
@@ -81,9 +86,13 @@
           if (eventType === MultiStepActionEventType.notificationSent) {
             // The notification has been sent out.
             console.log(
-              'SignInPage.multiStepActionListener: Notification sent out.',
+              'ResetPasswordPage.multiStepActionListener: Notification sent out.',
               action.notificationResult,
             );
+
+            currentStep.set(1);
+            startResendTimer();
+
             // Switching to the token input for
             tokenStatus = MsaTokenStatus.notificationSent;
             message = translate(AppUiMessage.msaTokenSent);
@@ -92,7 +101,7 @@
 
           if (eventType === MultiStepActionEventType.tokenFailed) {
             console.error(
-              'SignInPage.multiStepActionListener: incorrect token.',
+              'ResetPasswordPage.multiStepActionListener: incorrect token.',
               action.notificationResult,
             );
             errorMessage = 'We could not verify the token you entered. Please try again.';
@@ -101,7 +110,7 @@
 
           if (eventType === MultiStepActionEventType.timedOut) {
             console.error(
-              'SignInPage.multiStepActionListener: timeout.',
+              'ResetPasswordPage.multiStepActionListener: timeout.',
               action.notificationResult,
             );
             tokenStatus = MsaTokenStatus.sendingFailed;
@@ -110,7 +119,10 @@
           }
 
           if (eventType === MultiStepActionEventType.failed) {
-            console.error('SignInPage.multiStepActionListener: error.', action.notificationResult);
+            console.error(
+              'ResetPasswordPage.multiStepActionListener: error.',
+              action.notificationResult,
+            );
             tokenStatus = MsaTokenStatus.verificationFailed;
             errorMessage = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError);
             return;
@@ -118,7 +130,10 @@
 
           if (eventType === MultiStepActionEventType.success) {
             // The token was accepted. The user is now signed in.
-            console.log('SignInPage.multiStepActionListener: success.', action.notificationResult);
+            console.log(
+              'ResetPasswordPage.multiStepActionListener: success.',
+              action.notificationResult,
+            );
             tokenStatus = MsaTokenStatus.success;
             // todo: don't use `errorMessage` as it's rendered as an error (red color)
             message = translate(AppUiMessage.msaTokenSuccess);

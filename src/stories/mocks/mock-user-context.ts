@@ -158,12 +158,44 @@ export class MockMyUserContext {
     };
   }
 
-  async verifyMultiStepActionToken(actionId: string, token: string): Promise<boolean> {
+  async verifyMultiStepActionToken(
+    actionId: string,
+    token: string,
+    newPassword?: string,
+  ): Promise<boolean> {
     this.isLoading.set(true);
 
     // Simulate API delay
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
+    // Check if this is a reset password action
+    if (actionId.includes('reset-password')) {
+      // Trigger success event for reset password listeners
+      if (this._listeners['resetPassword']) {
+        this._listeners['resetPassword'].forEach((l) => {
+          l.onEvent(MultiStepActionEventType.success, {
+            actionId: actionId,
+            notificationResult: MultiStepActionSendNotificationResult.ok,
+            userId: 'mock-user-id',
+            actionType: MultiStepActionType.resetPassword,
+            result: MultiStepActionResult.ok,
+            attemptCount: 0,
+            id: 'mock-progress-id',
+            createdAt: new Date().toISOString(),
+          });
+        });
+      }
+
+      // If a new password was provided, update the user's password
+      if (newPassword) {
+        console.log('Password reset successful with new password:', newPassword);
+      }
+
+      this.isLoading.set(false);
+      return true;
+    }
+
+    // Handle other action types (existing code)
     // Mock successful verification if token is '123456'
     if (token === '123456') {
       console.log('Token verification successful:', token);
@@ -445,6 +477,107 @@ export class MockMyUserContext {
       this.isLoading.set(false);
       return null;
     }
+  }
+
+  async resetMyPassword(email: string): Promise<QueryResult<MultiStepActionProgressResult>> {
+    this.isLoading.set(true);
+
+    // Simulate API delay
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // Always return a valid response with required properties
+    this.isLoading.set(false);
+    return {
+      object: {
+        actionProgress: {
+          actionId: 'mock-reset-password-action-123456',
+          notificationResult: MultiStepActionSendNotificationResult.ok,
+          userId: 'mock-user-id',
+          actionType: MultiStepActionType.resetPassword,
+          result: MultiStepActionResult.ok,
+          attemptCount: 0,
+          id: 'mock-progress-id',
+          createdAt: new Date().toISOString(),
+        },
+        run: {
+          addListener: (listener) => {
+            // Store the listener to trigger events later
+            if (!this._listeners['resetPassword']) {
+              this._listeners['resetPassword'] = [];
+            }
+            this._listeners['resetPassword'].push(listener);
+
+            // Simulate notification sent event after a short delay
+            setTimeout(() => {
+              if (this._listeners['resetPassword']) {
+                this._listeners['resetPassword'].forEach((l) => {
+                  l.onEvent(MultiStepActionEventType.notificationSent, {
+                    actionId: 'mock-reset-password-action-123456',
+                    notificationResult: MultiStepActionSendNotificationResult.ok,
+                    userId: 'mock-user-id',
+                    actionType: MultiStepActionType.resetPassword,
+                    result: MultiStepActionResult.ok,
+                    attemptCount: 0,
+                    id: 'mock-progress-id',
+                    createdAt: new Date().toISOString(),
+                  });
+                });
+              }
+            }, 500);
+
+            return 'mock-listener-id';
+          },
+          removeListener: () => {},
+          actionId: 'mock-reset-password-action-123456',
+          listeners: new Map(),
+          pollingOptions: { enabled: true, interval: 1000, timeout: 10000 },
+          onEventReceived: function (eventType: MultiStepActionEventType): void {
+            // Implementation not needed for mock
+          },
+          notifyListeners: function (event: MultiStepActionEventType): void {
+            // Implementation not needed for mock
+          },
+          abort: function (): void {
+            // Implementation not needed for mock
+          },
+          isStopped: function (): boolean {
+            return false;
+          },
+        },
+        id: 'resetMyPassword-mock-id',
+        createdAt: Date.now().toString(),
+      },
+    };
+  }
+
+  async sendMultiStepActionNotification(email: string): Promise<boolean> {
+    this.isLoading.set(true);
+
+    // Simulate API delay
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // Simulate notification sent event for any active listeners
+    const actionTypes = ['resetPassword', 'verifyEmail', 'tokenSignIn'];
+
+    actionTypes.forEach((type) => {
+      if (this._listeners[type]) {
+        this._listeners[type].forEach((l) => {
+          l.onEvent(MultiStepActionEventType.notificationSent, {
+            actionId: `mock-${type}-action-123456`,
+            notificationResult: MultiStepActionSendNotificationResult.ok,
+            userId: 'mock-user-id',
+            actionType: MultiStepActionType[type as keyof typeof MultiStepActionType],
+            result: MultiStepActionResult.ok,
+            attemptCount: 0,
+            id: 'mock-progress-id',
+            createdAt: new Date().toISOString(),
+          });
+        });
+      }
+    });
+
+    this.isLoading.set(false);
+    return true;
   }
 }
 

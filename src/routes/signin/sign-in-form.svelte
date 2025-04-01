@@ -194,7 +194,6 @@
 
       startResendTimer(identifier);
       mfaActionId = response.object.actionProgress.actionId;
-      currentStep.set(1);
 
       response.object.run.addListener({
         id: 'SignInForm',
@@ -208,6 +207,13 @@
               'SignInPage.multiStepActionListener: Notification failed.',
               action.notificationResult,
             );
+
+            if (import.meta.env.VITE_APP_ENVIRONMENT === 'development') {
+              // We can ignore the failure to send the email in development.
+              currentStep.set(1);
+              return;
+            }
+
             tokenStatus = MsaTokenStatus.sendingFailed;
             errorMessage = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError);
             return;
@@ -222,6 +228,7 @@
             // Switching to the token input for
             tokenStatus = MsaTokenStatus.notificationSent;
             message = translate(AppUiMessage.msaTokenSent);
+            currentStep.set(1);
             return;
           }
 
