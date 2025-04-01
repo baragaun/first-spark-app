@@ -32,7 +32,7 @@
     name = 'username',
     label = 'Username',
     placeholder = 'Enter username',
-    showSuggestionButton = true,
+    showSuggestionButton = false,
     checkAvailability = async () => {
       return { isAvailable: true, isCurrentIdent: false };
     },
@@ -70,8 +70,19 @@
 
   // Generate a username suggestion on mount if showSuggestionButton is true
   onMount(() => {
-    if (showSuggestionButton && !$formData.username) {
+    if (!$formData.username) {
       getSuggestedUsername();
+    }
+  });
+
+  $effect(() => {
+    if (isAvailable === true) {
+      showSuggestionButton = false;
+    } else if (isAvailable === false) {
+      showSuggestionButton = true;
+    }
+    if ($errors[name]) {
+      showSuggestionButton = true;
     }
   });
 
@@ -103,7 +114,9 @@
           return;
         }
 
-        if (isAvailable === true) suggestedUsername = $formData.username;
+        if (isAvailable === true) {
+          suggestedUsername = $formData.username;
+        }
       } catch (error) {
         console.error('Error checking username:', error);
         isAvailable = false;

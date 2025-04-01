@@ -41,36 +41,23 @@
   // userContext function integration to find available User-handle
   const getSuggestedHandle = async (): Promise<string> => {
     await new Promise((resolve) => setTimeout(resolve, 300));
-    console.log('currentEmail', currentEmail);
     try {
       const result = await myUserContext.findAvailableUserHandle(currentEmail);
-      console.log('getSuggestedHandle', result);
 
       // Check if result is an object with an 'object' property
       if (result && typeof result === 'object' && 'object' in result) {
+        isUsernameAvailable = true;
         return result.object ?? '';
       }
 
       // Fallback for string result
       if (typeof result === 'string') {
+        isUsernameAvailable = true;
         return result;
-      }
-
-      // If we can't determine the structure, try to stringify it
-      if (result) {
-        const stringified = JSON.stringify(result);
-        console.log('Stringified result:', stringified);
-        try {
-          const parsed = JSON.parse(stringified);
-          if (parsed && typeof parsed === 'object' && 'object' in parsed) {
-            return parsed.object;
-          }
-        } catch (e) {
-          console.error('Error parsing result:', e);
-        }
       }
     } catch (error) {
       console.error('Error getting suggested handle:', error);
+      isUsernameAvailable = false;
     }
     return '';
   };
