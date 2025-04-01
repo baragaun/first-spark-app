@@ -15,8 +15,10 @@
   import CredentialForm from '../components/credential-form.svelte';
   import { goto } from '$app/navigation';
   import ErrorAlert from '@/components/error-alert.svelte';
-  import { userContextEvents, type MyUserContext } from '@/contexts/my-user-context.svelte';
-  import { getContext, onDestroy, onMount } from 'svelte';
+  import { type MyUserContext } from '@/contexts/my-user-context.svelte';
+  import { getContext } from 'svelte';
+  import translate from '@/helpers/language/translate'
+  import { AppUiMessage } from '@/types/enums'
 
   const myUserContext = getContext<MyUserContext>('myUserContext');
   let { data }: { data: { form: SuperValidated<Infer<FormSchema>> } } = $props();
@@ -56,88 +58,134 @@
   let password = $state('');
   let loading = $state(false);
   let errorMessage = $state('');
-  let unsubscribe: () => void;
-
-  onMount(() => {
-    // Subscribe to events from the context
-    unsubscribe = userContextEvents.subscribe((event) => {
-      if (!event) return;
-
-      if (event.type === 'verification-success') {
-        currentStep.set(2);
-      } else if (event.type.startsWith('error:')) {
-        errorMessage = event.message || 'An error occurred';
-      }
-    });
-  });
-
-  onDestroy(() => {
-    if (unsubscribe) unsubscribe();
-  });
+  let mfaActionId: string | undefined; // <- no need to make it a state variable
 
   // Handle email submission from the RegisterEmailForm component
   const onEmailSubmit = async (email: string): Promise<void> => {
-    loading = true;
-    errorMessage = '';
     try {
-      const response = await myUserContext.signUpUser(email);
+      loading = true;
+      errorMessage = '';
 
-      if (response === true) {
-        currentStep.set(1);
+      const signUpResponse = await myUserContext.signUpUser(email);
 
-        startEmailConfirmation(email).catch((error) => {
-          console.error('Error starting email confirmation:', error);
-          error = 'Failed to send verification email. Please try again.';
-        });
-
+      if (signUpResponse !== true) {
+        console.error('SignUpForm.onEmailSubmit: signUpUser failed.', { signUpResponse })
+        errorMessage = signUpResponse; // <-- might have to translate this
         return;
       }
 
-      errorMessage = response || 'Failed to sign up';
-    } catch (err) {
-      errorMessage = err instanceof Error ? err.message : 'Failed to sign up';
-      console.error('Error signing up:', err);
-    } finally {
-      loading = false;
-    }
-  };
+      const verifyMyEmailResponse = await myUserContext.verifyMyEmail(email);
 
-  const startEmailConfirmation = async (email: string) => {
-    loading = true;
-    errorMessage = '';
-    try {
-      console.log('Email submitted:', email);
-
-      const response = await myUserContext.verifyMyEmail(email);
-
-      if (!response) {
-        errorMessage = 'Failed to send the verification token. Please try again.';
+      if (
+        !verifyMyEmailResponse ||
+        verifyMyEmailResponse?.error ||
+        !verifyMyEmailResponse.object ||
+        verifyMyEmailResponse.object.error ||
+        !verifyMyEmailResponse?.object.actionProgress?.actionId ||
+        !verifyMyEmailResponse?.object.run
+      ) {
+        console.error('SignUpForm.onEmailSubmit: verifyMyEmail failed.', { signUpResponse })
+        errorMessage = verifyMyEmailResponse.error || AppUiMessage.systemError; // todo: translate?
         return;
       }
-      console.log('Email confirmation started:', response);
+
+      console.log('Email confirmation started:', verifyMyEmailResponse);
+      mfaActionId = verifyMyEmailResponse?.object.actionProgress?.actionId;
       currentStep.set(1);
+
+      verifyMyEmailResponse.object.run.addListener({
+        id: 'SignUpForm',
+        onEvent: async (
+          eventType: MultiStepActionEventType,
+          action: SidMultiStepActionProgress,
+        ): Promise<void> => {
+          if (eventType === MultiStepActionEventType.notificationFailed) {
+            console.error(
+              'SignUpPage.multiStepActionListener: Notification failed.',
+              action.notificationResult,
+            );
+
+            if (import.meta.env.VITE_APP_ENVIRONMENT === 'development') {
+              // We can ignore the failure to send the email in development.
+              currentStep.set(1);
+              return;
+            }
+
+            errorMessage = 'We could not send the verification token to your email. Please try again.';
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.notificationSent) {
+            console.log(
+              'SignUpPage.multiStepActionListener: Notification sent out.',
+              action.notificationResult,
+            );
+            currentStep.set(1);
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.tokenFailed) {
+            console.error(
+              'SignUpPage.multiStepActionListener: incorrect token.',
+              action.notificationResult,
+            );
+            errorMessage = 'We could not verify the token you entered. Please try again.';
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.timedOut) {
+            console.error(
+              'SignUpPage.multiStepActionListener: timeout.',
+              action.notificationResult,
+            );
+            errorMessage = 'The verification token has expired. Please request a new one.';
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.failed) {
+            console.error('SignUpPage.multiStepActionListener: error.', action.notificationResult);
+            errorMessage = 'A system error has occurred. Please try again later.';
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.success) {
+            // The token was accepted. The user is now signed in.
+            console.log('SignUpPage.multiStepActionListener: success.', action.notificationResult);
+            currentStep.set(2);
+          }
+        },
+      });
     } catch (err) {
       errorMessage = err instanceof Error ? err.message : 'Failed to sign up';
       console.error('Error signing up:', err);
+      errorMessage = translate(AppUiMessage.systemError);
     } finally {
       loading = false;
     }
   };
 
-  // Handle verification callback
   const handleEmailVerificationSubmit = async (code: string) => {
-    loading = true;
-    errorMessage = '';
     try {
-      const result = await myUserContext.verifyMultiStepActionToken(code);
+      loading = true;
+      errorMessage = '';
 
-      if (result !== true) {
-        errorMessage = result;
+      if (!mfaActionId) {
+        console.error('SignUpForm.handleEmailVerificationSubmit: no mfaActionId.');
+        errorMessage = translate(AppUiMessage.systemError);
         return;
       }
-    } catch (err) {
-      errorMessage = err instanceof Error ? err.message : 'Failed to verify code';
-      console.error('Error verifying code:', err);
+
+      const response = await myUserContext.verifyMultiStepActionToken(mfaActionId, code);
+
+      if (response !== true) {
+        console.error('SignUpForm.handleEmailVerificationSubmit: verifyMultiStepActionToken failed.', {
+          result: response,
+        });
+        errorMessage = response; // <-- might have to translate this
+      }
+    } catch (error) {
+      console.error('Error verifying code:', error);
+      errorMessage = translate(AppUiMessage.systemError);
     } finally {
       loading = false;
     }
@@ -151,9 +199,10 @@
   };
 
   // Handle skip verification
-  const handleSkip = () => {
-    currentStep.set(2);
-  };
+  // (currently not supported?)
+  // const handleSkip = () => {
+  //   currentStep.set(2);
+  // };
 
   // Handle final signup
   const handleSignupSubmit = async (
@@ -176,18 +225,24 @@
 
       await goto('/');
     } catch (error) {
-      errorMessage = error instanceof Error ? error.message : 'Failed to create account';
       console.error('Error creating account:', error);
+      errorMessage = translate(AppUiMessage.systemError);
     } finally {
       loading = false;
     }
   };
 
   const handleResend = async () => {
-    const response = await myUserContext.sendMultiStepActionNotification(email);
+    if (!mfaActionId) {
+      console.error('SignUpForm.handleResend: no mfaActionId.');
+      errorMessage = translate(AppUiMessage.systemError);
+      return;
+    }
+
+    const response = await myUserContext.sendMultiStepActionNotification(mfaActionId, email);
 
     if (response !== true) {
-      errorMessage = response || 'We failed to send the verification token. Please try again.';
+      errorMessage = response; // <-- might have to translate this
       return;
     }
   };

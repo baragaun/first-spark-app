@@ -4,7 +4,11 @@
   import { Label } from '@/components/ui/label';
   import * as Card from '$lib/components/ui/card';
   import { goto } from '$app/navigation';
-  import { UserIdentType } from '@baragaun/bg-node-client';
+  import {
+    MultiStepActionEventType,
+    SidMultiStepActionProgress,
+    UserIdentType,
+  } from '@baragaun/bg-node-client';
   import translate from '@/helpers/language/translate';
   import { AppUiMessage, MsaTokenStatus } from '@/types/enums';
   import { writable } from 'svelte/store';
@@ -12,16 +16,16 @@
   import PasswordInput from '@/components/ui/password-input';
   import ErrorAlert from '@/components/error-alert.svelte';
   import { z } from 'zod';
-  import { myUserContext, userContextEvents } from '@/contexts/my-user-context.svelte';
-  import { onDestroy, onMount } from 'svelte';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
 
   let identifier = $state('');
   let identType = $state(UserIdentType.email);
-  // let actionId = $state<string | undefined>(undefined);
+  let mfaActionId = $state<string | undefined>(undefined);
   let password = $state('');
   let loading = $state(false);
   let tokenStatus = $state(MsaTokenStatus.unset);
   let errorMessage = $state('');
+  let message = $state('');
   let resendTimer = $state(30);
   let canResend = $state(false);
   let timerInterval: ReturnType<typeof setInterval>;
@@ -55,24 +59,6 @@
     return UserIdentType.email;
   };
 
-  let unsubscribe: () => void;
-
-  onMount(() => {
-    // Subscribe to events from the context
-    unsubscribe = userContextEvents.subscribe((event) => {
-      if (!event) return;
-      if (event.type === 'verification-success') {
-        goto('/');
-      } else if (event.type.startsWith('error:')) {
-        errorMessage = event.message || 'An error occurred';
-      }
-    });
-  });
-
-  onDestroy(() => {
-    if (unsubscribe) unsubscribe();
-  });
-
   const signMeInWithPassword = async () => {
     try {
       loading = true;
@@ -97,10 +83,16 @@
 
   const onSendToken = async (token: string): Promise<void> => {
     try {
+      if (!mfaActionId) {
+        console.error('SignInForm.handleVerifyOtp: actionId missing:');
+        errorMessage = translate(AppUiMessage.systemError);
+        return;
+      }
+
       loading = true;
       errorMessage = '';
 
-      const response = await myUserContext.verifyMultiStepActionToken(token);
+      const response = await myUserContext.verifyMultiStepActionToken(mfaActionId, token);
 
       // Here, we don't have to add another listener, since we already added one when
       // we called `signMeInWithToken`. We do want to check the `result` object to
@@ -108,16 +100,10 @@
       // function does not actually verify the token. For that, we are waiting for
       // the listener to be called with the result of the token verification.
 
-      if (!response) {
+      if (response !== true) {
         console.error('SignInForm.handleVerifyOtp: invalid response:', { result: response });
-        errorMessage = translate(AppUiMessage.systemError);
+        errorMessage = translate(AppUiMessage.systemError); // todo: translate?
         tokenStatus = MsaTokenStatus.unset;
-        return;
-      }
-
-      if (typeof response === 'string') {
-        console.error('SignInForm.handleVerifyOtp: error:', { response });
-        errorMessage = translate(AppUiMessage.systemError);
         return;
       }
 
@@ -133,6 +119,12 @@
 
   const onSendNotification = async () => {
     tokenStatus = MsaTokenStatus.unset;
+
+    if (!mfaActionId) {
+      console.error('SignInForm.handleResendOtp: actionId missing.');
+      errorMessage = translate(AppUiMessage.systemError); // todo: translate?
+      return;
+    }
 
     if (emailCooldowns.has(identifier)) {
       const cooldownEnd = emailCooldowns.get(identifier) || 0;
@@ -188,24 +180,87 @@
     try {
       const response = await myUserContext.signMeInWithToken(identifier);
 
-      if (typeof response === 'string') {
-        // If response is a string, it's an error message
-        errorMessage = response;
-        return;
-      }
-
-      if (!response) {
+      if (
+        !response ||
+        response?.error ||
+        !response.object ||
+        response.object.error ||
+        !response?.object.actionProgress?.actionId ||
+        !response?.object.run
+      ) {
         errorMessage = 'Failed to send verification code. Please try again.';
         return;
       }
 
-      // At this point, response is true and the action was successful
       startResendTimer(identifier);
-      currentStep.set(1); // get input for verification code
+      mfaActionId = response.object.actionProgress.actionId;
+      currentStep.set(1);
 
-      // Note: Since the response type has changed, we can't access response.object anymore
-      // The actionId and listener setup would need to be handled differently
-      // This might require changes to the API or how the token verification flow works
+      response.object.run.addListener({
+        id: 'SignInForm',
+        onEvent: async (
+          eventType: MultiStepActionEventType,
+          action: SidMultiStepActionProgress,
+        ): Promise<void> => {
+          if (eventType === MultiStepActionEventType.notificationFailed) {
+            // The notification failed to go out.
+            console.error(
+              'SignInPage.multiStepActionListener: Notification failed.',
+              action.notificationResult,
+            );
+            tokenStatus = MsaTokenStatus.sendingFailed;
+            errorMessage = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError);
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.notificationSent) {
+            // The notification has been sent out.
+            console.log(
+              'SignInPage.multiStepActionListener: Notification sent out.',
+              action.notificationResult,
+            );
+            // Switching to the token input for
+            tokenStatus = MsaTokenStatus.notificationSent;
+            message = translate(AppUiMessage.msaTokenSent);
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.tokenFailed) {
+            console.error(
+              'SignInPage.multiStepActionListener: incorrect token.',
+              action.notificationResult,
+            );
+            errorMessage = 'We could not verify the token you entered. Please try again.';
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.timedOut) {
+            console.error(
+              'SignInPage.multiStepActionListener: timeout.',
+              action.notificationResult,
+            );
+            tokenStatus = MsaTokenStatus.sendingFailed;
+            errorMessage = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError);
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.failed) {
+            console.error('SignInPage.multiStepActionListener: error.', action.notificationResult);
+            tokenStatus = MsaTokenStatus.verificationFailed;
+            errorMessage = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError);
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.success) {
+            // The token was accepted. The user is now signed in.
+            console.log('SignInPage.multiStepActionListener: success.', action.notificationResult);
+            tokenStatus = MsaTokenStatus.success;
+            // todo: don't use `errorMessage` as it's rendered as an error (red color)
+            errorMessage = translate(AppUiMessage.msaTokenSuccess);
+            goto('/');
+          }
+        },
+      });
     } catch (error) {
       console.error('SignInForm.startTokenSignIn:', { error });
       tokenStatus = MsaTokenStatus.verificationFailed;
