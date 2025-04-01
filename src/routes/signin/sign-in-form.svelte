@@ -143,7 +143,7 @@
       errorMessage = '';
 
       //todo I will also like to send identifier type.
-      const response = await myUserContext.sendMultiStepActionNotification(identifier);
+      const response = await myUserContext.sendMultiStepActionNotification(mfaActionId, identifier);
 
       if (typeof response === 'string') {
         console.error('SignInForm.handleResendOtp: error:', { error: response });
@@ -256,7 +256,7 @@
             console.log('SignInPage.multiStepActionListener: success.', action.notificationResult);
             tokenStatus = MsaTokenStatus.success;
             // todo: don't use `errorMessage` as it's rendered as an error (red color)
-            errorMessage = translate(AppUiMessage.msaTokenSuccess);
+            message = translate(AppUiMessage.msaTokenSuccess);
             goto('/');
           }
         },
@@ -342,6 +342,7 @@
       onResend={onSendNotification}
       onBack={() => {
         currentStep.set(0);
+        errorMessage = '';
       }}
     />
   {:else}

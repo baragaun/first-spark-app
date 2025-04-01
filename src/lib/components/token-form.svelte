@@ -3,25 +3,30 @@
   import * as InputOTP from '$lib/components/ui/input-otp';
   import { REGEXP_ONLY_DIGITS } from 'bits-ui';
   import AuthCard from './auth-card.svelte';
+  import { PasswordInput } from '$lib/components/ui/password-input';
+  import passwordHelpers from '@/helpers/password-helpers';
 
   interface Props {
     ident: string;
-    onSubmit: (code: string) => void;
+    onSubmit: (code: string, password?: string) => void;
     onResend: () => void;
     onBack?: () => void;
+    showPasswordField?: boolean;
   }
 
-  let { ident, onResend, onSubmit, onBack }: Props = $props();
+  let { ident, onResend, onSubmit, onBack, showPasswordField = false }: Props = $props();
 
   // Internal state
   let verificationCode = $state('');
+  let password = $state('');
   let loading = $state(false);
   let verificationError = $state('');
   let resendTimer = $state(30);
   let canResend = $state(false);
 
   let timerInterval: ReturnType<typeof setInterval>;
-  //   const emailCooldowns = new Map<string, number>();
+
+  const { getPasswordError, validatePassword } = passwordHelpers;
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -47,7 +52,11 @@
     loading = true;
     verificationError = '';
     try {
-      onSubmit(verificationCode);
+      if (showPasswordField && !validatePassword(password, ident).isValid) {
+        verificationError = 'Please enter a valid password';
+        return;
+      }
+      onSubmit(verificationCode, showPasswordField ? password : undefined);
     } catch (error) {
       console.error('Error verifying code:', error);
       verificationError = 'Invalid verification code. Please try again.';
@@ -103,11 +112,46 @@
         {/snippet}
       </InputOTP.Root>
     </div>
+
+    {#if showPasswordField}
+      <div class="space-y-2">
+        <label for="password" class="text-sm font-medium">Password</label>
+        <PasswordInput
+          id="password"
+          bind:value={password}
+          placeholder="Enter your password"
+          required
+        />
+        {#if password}
+          <div class="space-y-2 text-xs">
+            <p class="text-muted-foreground">Password requirements:</p>
+            <ul class="list-inside list-disc space-y-1 pl-2">
+              <li
+                class:text-destructive={password.length < passwordHelpers.minLength}
+                class:text-green-500={password.length >= passwordHelpers.minLength}
+              >
+                At least {passwordHelpers.minLength} characters
+              </li>
+            </ul>
+          </div>
+        {/if}
+        {#if password && getPasswordError(password)}
+          <p class="text-xs text-destructive">{getPasswordError(password)}</p>
+        {/if}
+      </div>
+    {/if}
+
+    {#if verificationError}
+      <p class="text-xs text-destructive">{verificationError}</p>
+    {/if}
+
     <div class="flex flex-col gap-2">
       <Button
         type="button"
         class="w-full"
-        disabled={loading || verificationCode.length < 6}
+        disabled={loading ||
+          verificationCode.length < 6 ||
+          (showPasswordField && (!password || !validatePassword(password, ident).isValid))}
         onclick={handleVerifySubmit}
       >
         {loading ? 'Verifying...' : 'Verify'}

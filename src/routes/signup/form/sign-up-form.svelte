@@ -17,8 +17,8 @@
   import ErrorAlert from '@/components/error-alert.svelte';
   import { type MyUserContext } from '@/contexts/my-user-context.svelte';
   import { getContext } from 'svelte';
-  import translate from '@/helpers/language/translate'
-  import { AppUiMessage } from '@/types/enums'
+  import translate from '@/helpers/language/translate';
+  import { AppUiMessage } from '@/types/enums';
 
   const myUserContext = getContext<MyUserContext>('myUserContext');
   let { data }: { data: { form: SuperValidated<Infer<FormSchema>> } } = $props();
@@ -69,7 +69,7 @@
       const signUpResponse = await myUserContext.signUpUser(email);
 
       if (signUpResponse !== true) {
-        console.error('SignUpForm.onEmailSubmit: signUpUser failed.', { signUpResponse })
+        console.error('SignUpForm.onEmailSubmit: signUpUser failed.', { signUpResponse });
         errorMessage = signUpResponse; // <-- might have to translate this
         return;
       }
@@ -84,7 +84,7 @@
         !verifyMyEmailResponse?.object.actionProgress?.actionId ||
         !verifyMyEmailResponse?.object.run
       ) {
-        console.error('SignUpForm.onEmailSubmit: verifyMyEmail failed.', { signUpResponse })
+        console.error('SignUpForm.onEmailSubmit: verifyMyEmail failed.', { signUpResponse });
         errorMessage = verifyMyEmailResponse.error || AppUiMessage.systemError; // todo: translate?
         return;
       }
@@ -111,7 +111,8 @@
               return;
             }
 
-            errorMessage = 'We could not send the verification token to your email. Please try again.';
+            errorMessage =
+              'We could not send the verification token to your email. Please try again.';
             return;
           }
 
@@ -178,9 +179,12 @@
       const response = await myUserContext.verifyMultiStepActionToken(mfaActionId, code);
 
       if (response !== true) {
-        console.error('SignUpForm.handleEmailVerificationSubmit: verifyMultiStepActionToken failed.', {
-          result: response,
-        });
+        console.error(
+          'SignUpForm.handleEmailVerificationSubmit: verifyMultiStepActionToken failed.',
+          {
+            result: response,
+          },
+        );
         errorMessage = response; // <-- might have to translate this
       }
     } catch (error) {
@@ -195,7 +199,10 @@
   const handleBack = () => {
     if ($currentStep > 0) {
       currentStep.set($currentStep - 1);
+    } else {
+      currentStep.set(0);
     }
+    errorMessage = '';
   };
 
   // Handle skip verification

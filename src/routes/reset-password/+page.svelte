@@ -1,22 +1,26 @@
 <script lang="ts">
-  import { Button } from '$lib/components/ui/button';
-  import { Input } from '$lib/components/ui/input';
-  import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-  } from '$lib/components/ui/card';
-  import { Alert, AlertDescription } from '$lib/components/ui/alert';
-  import Mail from 'lucide-svelte/icons/mail';
+  import * as Card from '$lib/components/ui/card';
+  import { onDestroy } from 'svelte';
+  import IdentInput from '@/components/ident-input.svelte';
+  import { writable } from 'svelte/store';
+  import TokenForm from '@/components/token-form.svelte';
+  import ErrorAlert from '@/components/error-alert.svelte';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import Button from '@/components/ui/button/button.svelte';
+  import translate from '@/helpers/language/translate';
+  import { AppUiMessage, MsaTokenStatus } from '@/types/enums';
+  import { MultiStepActionEventType, SidMultiStepActionProgress } from '@baragaun/bg-node-client';
 
-  let identifier = ''; // for email or username
-  let loading = false;
-  let error = '';
-  let emailSent = false;
-  let resendTimer = 30;
-  let canResend = false;
+  let currentStep = writable(0);
+  let identifier = $state('');
+  let actionId = $state('');
+  let loading = $state(false);
+  let errorMessage = $state('');
+  let message = $state('');
+  let identError = $state('');
+  let resendTimer = $state(30);
+  let canResend = $state(false);
+  let tokenStatus = $state(MsaTokenStatus.unset);
   let timerInterval: ReturnType<typeof setInterval>;
 
   const startResendTimer = () => {
@@ -33,30 +37,98 @@
     }, 1000);
   };
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
   const handleResetPassword = async () => {
     loading = true;
-    error = '';
+    errorMessage = '';
 
     try {
-      // TODO: Implement your reset password logic here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
+      const response = await myUserContext.resetMyPassword(identifier);
 
-      // Simulate email check
-      if (identifier.includes('nonexistent')) {
-        throw new Error('No account found with this email address');
+      if (
+        !response ||
+        response?.error ||
+        !response.object ||
+        response.object.error ||
+        !response?.object.actionProgress?.actionId ||
+        !response?.object.run
+      ) {
+        errorMessage = 'Failed to send verification code. Please try again.';
+        return;
       }
 
-      emailSent = true;
+      actionId = response.object.actionProgress.actionId;
+
+      currentStep.set(1);
       startResendTimer();
+
+      response.object.run.addListener({
+        id: 'RestPassword',
+        onEvent: async (
+          eventType: MultiStepActionEventType,
+          action: SidMultiStepActionProgress,
+        ): Promise<void> => {
+          if (eventType === MultiStepActionEventType.notificationFailed) {
+            // The notification failed to go out.
+            console.error(
+              'SignInPage.multiStepActionListener: Notification failed.',
+              action.notificationResult,
+            );
+            tokenStatus = MsaTokenStatus.sendingFailed;
+            errorMessage = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError);
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.notificationSent) {
+            // The notification has been sent out.
+            console.log(
+              'SignInPage.multiStepActionListener: Notification sent out.',
+              action.notificationResult,
+            );
+            // Switching to the token input for
+            tokenStatus = MsaTokenStatus.notificationSent;
+            message = translate(AppUiMessage.msaTokenSent);
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.tokenFailed) {
+            console.error(
+              'SignInPage.multiStepActionListener: incorrect token.',
+              action.notificationResult,
+            );
+            errorMessage = 'We could not verify the token you entered. Please try again.';
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.timedOut) {
+            console.error(
+              'SignInPage.multiStepActionListener: timeout.',
+              action.notificationResult,
+            );
+            tokenStatus = MsaTokenStatus.sendingFailed;
+            errorMessage = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError);
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.failed) {
+            console.error('SignInPage.multiStepActionListener: error.', action.notificationResult);
+            tokenStatus = MsaTokenStatus.verificationFailed;
+            errorMessage = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError);
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.success) {
+            // The token was accepted. The user is now signed in.
+            console.log('SignInPage.multiStepActionListener: success.', action.notificationResult);
+            tokenStatus = MsaTokenStatus.success;
+            // todo: don't use `errorMessage` as it's rendered as an error (red color)
+            message = translate(AppUiMessage.msaTokenSuccess);
+            currentStep.set(2);
+          }
+        },
+      });
     } catch (err) {
       console.error('Error resetting password:', err);
-      error =
+      errorMessage =
         err instanceof Error ? err.message : 'Unable to process your request. Please try again.';
     } finally {
       loading = false;
@@ -68,89 +140,102 @@
 
     loading = true;
     try {
-      // TODO: Implement resend logic here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
+      // Use the sendMultiStepActionNotification method to resend the email
+      const response = await myUserContext.sendMultiStepActionNotification(identifier);
+
+      if (response !== true) {
+        errorMessage =
+          typeof response === 'string' ? response : 'Failed to resend verification code';
+        return;
+      }
+
       startResendTimer();
     } catch (error) {
       console.error('Error resending email:', error);
+      errorMessage = 'Failed to resend verification code. Please try again.';
     } finally {
       loading = false;
     }
   };
 
-  import { onDestroy } from 'svelte';
+  const handleVerifyToken = async (token: string, newPassword?: string) => {
+    if (!token || (newPassword === undefined && $currentStep === 1)) {
+      errorMessage = 'Verification code and new password are required';
+      return;
+    }
+
+    loading = true;
+    errorMessage = '';
+
+    try {
+      const result = await myUserContext.verifyMultiStepActionToken(actionId, token, newPassword);
+
+      if (result !== true) {
+        errorMessage = typeof result === 'string' ? result : 'Failed to verify code';
+        return;
+      }
+
+      currentStep.set(2);
+    } catch (err) {
+      console.error('Error verifying reset code:', err);
+      errorMessage =
+        err instanceof Error ? err.message : 'Failed to verify code. Please try again.';
+    } finally {
+      loading = false;
+    }
+  };
+
   onDestroy(() => {
     clearInterval(timerInterval);
   });
 </script>
 
-<div class="relative mx-auto flex h-screen items-center justify-center">
-  <Card class="relative w-full max-w-md">
-    {#if !emailSent}
-      <CardHeader>
-        <CardTitle class="text-2xl">Reset your password</CardTitle>
-        <CardDescription
-          >We will email you a verification code if we can find this email address.</CardDescription
+<div class="mx-auto max-w-sm py-40">
+  <Card.Root>
+    {#if $currentStep === 0}
+      <Card.Header>
+        <Card.Title class="text-2xl">Reset your password</Card.Title>
+        <Card.Description
+          >We will email you a verification code if we can find this email address.</Card.Description
         >
-      </CardHeader>
-      <CardContent>
-        {#if error}
-          <Alert variant="destructive" class="mb-4">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        {/if}
-        <form on:submit|preventDefault={handleResetPassword} class="space-y-4">
-          <div class="space-y-2">
-            <Input type="text" placeholder="Email or username" bind:value={identifier} required />
-          </div>
-
-          <Button type="submit" class="w-full" disabled={loading}>
+      </Card.Header>
+      <Card.Content>
+        <form onsubmit={handleResetPassword} class="space-y-4">
+          <IdentInput
+            bind:identifier
+            skipAvailabilityCheck={true}
+            autoDetect={true}
+            bind:identError
+          />
+          <Button type="submit" class="w-full" disabled={loading || !identifier || !!identError}>
             {loading ? 'Sending email...' : 'Send email'}
           </Button>
           <div class="flex items-center justify-between">
             <Button variant="link" class="px-0 font-normal" href="/support">Need help?</Button>
           </div>
         </form>
-      </CardContent>
+      </Card.Content>
+    {:else if $currentStep === 1}
+      <TokenForm
+        ident={identifier}
+        showPasswordField={true}
+        onSubmit={handleVerifyToken}
+        onResend={handleResendEmail}
+        onBack={() => currentStep.set(0)}
+      />
     {:else}
-      <CardHeader>
-        <CardTitle class="text-2xl">Check your inbox</CardTitle>
-        <CardDescription>
-          We've sent a verification code to {identifier}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div class="flex flex-col items-center space-y-4">
-          <!-- Email waiting illustration -->
-          <div class="mb-4 h-32 w-32">
-            <Mail class="h-full w-full text-muted-foreground" />
-          </div>
-
-          <Alert class="mb-4">
-            <AlertDescription>
-              Note: The verification code will expire in 10 minutes.
-            </AlertDescription>
-          </Alert>
-
-          <div class="text-center text-sm text-muted-foreground">
-            Didn't get an email?
-            {#if canResend}
-              <Button
-                variant="link"
-                class="px-1 font-normal"
-                onclick={handleResendEmail}
-                disabled={loading}
-              >
-                Resend email
-              </Button>
-            {:else}
-              <span>Resend in {formatTime(resendTimer)}</span>
-            {/if}
-          </div>
-
-          <Button variant="outline" class="mt-4 w-full" href="/signin">Back to Log In</Button>
-        </div>
-      </CardContent>
+      <Card.Header>
+        <Card.Title class="text-2xl">Password Reset Complete</Card.Title>
+        <Card.Description>
+          Your password has been successfully reset. You can now sign in with your new password.
+        </Card.Description>
+      </Card.Header>
+      <Card.Content>
+        <Button href="/" class="w-full">Go Home</Button>
+      </Card.Content>
     {/if}
-  </Card>
+  </Card.Root>
+  {#if errorMessage}
+    <ErrorAlert bind:errorMessage />
+  {/if}
 </div>

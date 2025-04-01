@@ -79,6 +79,17 @@ export class MyUserContext {
       } as MyUserListener);
 
       isSignedIn.set(this.client.isSignedIn);
+
+      if (this.client.isSignedIn) {
+        try {
+          const userResponse = await this.client.operations.myUser.findMyUser();
+          if (userResponse.object) {
+            this.myUser = userResponse.object;
+          }
+        } catch (error) {
+          console.error('Failed to restore user data:', error);
+        }
+      }
     } catch (error) {
       console.error('MyUserContext: Error initializing BgNodeClient:', { error });
       this._isInitializing = false;
@@ -444,10 +455,7 @@ export class MyUserContext {
     }
   }
 
-  async sendMultiStepActionNotification(
-    actionId: string,
-    email?: string,
-  ): Promise<true | string> {
+  async sendMultiStepActionNotification(actionId: string, email?: string): Promise<true | string> {
     if (!this.client.isInitialized) {
       console.error('MyUserContext.sendMultiStepActionNotification: not initialized.');
       return 'system-error';
