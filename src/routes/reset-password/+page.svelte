@@ -73,9 +73,13 @@
 
             if (import.meta.env.VITE_APP_ENVIRONMENT === 'development') {
               // We can ignore the failure to send the email in development.
+              errorMessage = '';
               currentStep.set(1);
               startResendTimer();
               return;
+            } else {
+              errorMessage =
+                'We could not send the verification token to your email. Please try again.';
             }
 
             tokenStatus = MsaTokenStatus.sendingFailed;
