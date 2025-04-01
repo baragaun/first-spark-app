@@ -5,6 +5,9 @@
   const { Story } = defineMeta({
     title: 'Components/Footer',
     component: Footer,
+    parameters: {
+      layout: 'centered',
+    },
   });
 </script>
 

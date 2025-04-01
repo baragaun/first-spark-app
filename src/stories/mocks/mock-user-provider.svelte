@@ -1,7 +1,38 @@
 <script lang="ts">
   import { setContext, type Snippet } from 'svelte';
-  import { mockMyUserContext as myUserContext } from './mock-user-context';
+  import { MockMyUserContext } from './mock-user-context';
   import { onMount } from 'svelte';
+
+  interface Props {
+    children?: Snippet;
+    signedIn?: boolean;
+  }
+
+  const { children, signedIn = false }: Props = $props();
+
+  // Create a new instance of the mock context
+  const myUserContext = new MockMyUserContext();
+
+  // Set the user's signed-in state based on the prop
+  if (signedIn) {
+    // Set the mock user
+    myUserContext.myUser.set({
+      id: '1234567890',
+      email: 'test@example.com',
+      userHandle: 'testuser',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isEmailVerified: true,
+      spokenLanguagesTextIds: [],
+      roles: [],
+      trustLevel: 0,
+    });
+    myUserContext.myUserId = '1234567890';
+  } else {
+    // Clear the user
+    myUserContext.myUser.set(null);
+    myUserContext.myUserId = '';
+  }
 
   // Set the mock user context for child components to consume
   setContext('myUserContext', myUserContext);
@@ -13,11 +44,6 @@
       });
     }
   });
-  interface Props {
-    children?: Snippet;
-  }
-
-  const { children }: Props = $props();
 </script>
 
 {@render children?.()}

@@ -115,11 +115,11 @@
 
     {#if showPasswordField}
       <div class="space-y-2">
-        <label for="password" class="text-sm font-medium">Password</label>
+        <label for="password" class="text-sm font-medium">New Password</label>
         <PasswordInput
-          id="password"
+          id="new-password"
           bind:value={password}
-          placeholder="Enter your password"
+          placeholder="Enter your new password"
           required
         />
         {#if password}
