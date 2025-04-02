@@ -18,82 +18,67 @@
     usernameForm: SuperValidated<Infer<typeof usernameSchema>>;
   }
 
-  // Props using the interface
   let { currentUsername, onSave, currentEmail, usernameForm }: UpdateUsernameDialogProps = $props();
 
   const form = superForm(usernameForm, {
     validators: zodClient(usernameSchema),
     validationMethod: 'oninput',
     dataType: 'json',
-    delayMs: 300, // Add 300ms debounce for all form validations
   });
 
   const { form: formData, errors } = form;
 
   let isLoading = $state(false);
   let showUsernameEdit = $state(false);
-  let isUsernameAvailable = $state(true);
+  let isUsernameAvailable = $state<boolean | null>(null);
   let errorMessage = $state('');
 
-  // Derived state to check if form has values and is valid
-  let hasFormValues = $derived($formData.username && !$errors.username && isUsernameAvailable);
+  let hasFormValues = $derived(
+    $formData.username &&
+      !$errors.username &&
+      isUsernameAvailable &&
+      $formData.username !== currentUsername,
+  );
 
-  // userContext function integration to find available User-handle
   const getSuggestedHandle = async (): Promise<string> => {
-    await new Promise((resolve) => setTimeout(resolve, 300));
     try {
       const result = await myUserContext.findAvailableUserHandle(currentEmail);
 
-      // Check if result is an object with an 'object' property
       if (result && typeof result === 'object' && 'object' in result) {
         isUsernameAvailable = true;
         return result.object ?? '';
       }
 
-      // Fallback for string result
       if (typeof result === 'string') {
         isUsernameAvailable = true;
         return result;
       }
+      return '';
     } catch (error) {
       console.error('Error getting suggested handle:', error);
       isUsernameAvailable = false;
+      return '';
     }
-    return '';
   };
 
-  const checkUsernameAvailability = async (
-    ident: string,
-    type: UserIdentType,
-  ): Promise<{ isAvailable: boolean; isCurrentIdent: boolean }> => {
-    const isCurrentIdent =
-      type === UserIdentType.userHandle && ident === myUserContext.myUserHandle;
-
-    if (isCurrentIdent) {
-      console.log('isCurrentIdent', { isCurrentIdent });
-      isUsernameAvailable = false;
-      return { isAvailable: isUsernameAvailable, isCurrentIdent: true };
-    }
-
+  const checkUsernameAvailability = async (ident: string, type: UserIdentType): Promise<void> => {
     try {
       const result = await myUserContext.isUserIdentAvailable(ident, type);
       isUsernameAvailable = result.isAvailable ?? false;
-      console.log('checkUsernameAvailability', result.isAvailable);
-      return { isAvailable: isUsernameAvailable, isCurrentIdent: false };
+      return;
     } catch (error) {
       console.error('Error checking identifier availability:', error);
-      return { isAvailable: false, isCurrentIdent: false };
+      isUsernameAvailable = false;
     }
   };
 
-  const handleUsernameChange = async (userHanndle?: { username: string }, e?: SubmitEvent) => {
-    if (e) e.preventDefault();
-    isLoading = true;
+  const handleUsernameChange = async (): Promise<boolean> => {
     errorMessage = '';
     try {
       const result = await myUserContext.updateMyUser({
-        userHandle: userHanndle?.username,
+        userHandle: $formData.username,
       });
+
       if (result.error) {
         errorMessage = result.error;
         return false;
@@ -103,23 +88,19 @@
       errorMessage = error instanceof Error ? error.message : 'Failed to update username';
       console.error('Error updating username:', error);
       return false;
-    } finally {
-      isLoading = false;
     }
   };
 
-  // Reset dialog state when closed
   function resetDialogState() {
     $formData.username = currentUsername;
+    errorMessage = '';
   }
 
-  // Handle username change
-  const onSave1 = async () => {
+  const saveUsername = async () => {
     try {
       isLoading = true;
-      const success = await handleUsernameChange({ username: $formData.username });
+      const success = await handleUsernameChange();
       if (success) {
-        // Call the parent's onSave callback if provided
         if (typeof onSave === 'function') {
           await onSave();
         }
@@ -172,8 +153,8 @@
       </div>
 
       <UsernameInput
-        {form}
-        name="username"
+        bind:username={$formData.username}
+        bind:isUsernameAvailable
         label="New Username"
         placeholder="Enter username"
         {currentUsername}
@@ -193,11 +174,10 @@
       >
         Cancel
       </Button>
-      <Button type="submit" disabled={isLoading || !hasFormValues} onclick={onSave1}>
+      <Button type="submit" disabled={isLoading || !hasFormValues} onclick={saveUsername}>
         {isLoading ? 'Saving...' : 'Save Changes'}
       </Button>
     </Dialog.Footer>
-    <!-- Alert for errors -->
     {#if errorMessage}
       <ErrorAlert bind:errorMessage />
     {/if}

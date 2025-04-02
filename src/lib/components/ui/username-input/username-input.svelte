@@ -1,66 +1,54 @@
 <script lang="ts">
-  import * as Form from '$lib/components/ui/form/index';
   import { Input } from '$lib/components/ui/input';
   import { cn } from '$lib/utils.js';
   import { UserIdentType } from '@baragaun/bg-node-client';
   import { AlertCircle, Check, RefreshCw } from 'lucide-svelte';
   import { onMount } from 'svelte';
-  import type { SuperForm } from 'sveltekit-superforms';
-
-  interface FormData {
-    username: string;
-    [key: string]: any;
-  }
+  import { z } from 'zod';
 
   interface UsernameInputProps {
-    form: SuperForm<FormData, any>;
-    name?: string;
+    username: string;
     label?: string;
     placeholder?: string;
     showSuggestionButton?: boolean;
-    checkAvailability?: (
-      ident: string,
-      type: UserIdentType,
-    ) => Promise<{ isAvailable: boolean; isCurrentIdent: boolean }>;
-    generateUsername?: () => Promise<string>;
+    isUsernameAvailable?: boolean | null;
+    checkAvailability?: (ident: string, type: UserIdentType) => Promise<void>;
+    generateUsername?: () => Promise<string | null>;
     currentUsername?: string;
     class?: string;
   }
 
+  const handleSchema = z
+    .string()
+    .min(3, 'Must be at least 3 characters')
+    .max(30, 'Cannot exceed 30 characters');
+
   let {
-    form,
-    name = 'username',
+    username = $bindable(''),
     label = 'Username',
     placeholder = 'Enter username',
-    showSuggestionButton = false,
-    checkAvailability = async () => {
-      return { isAvailable: true, isCurrentIdent: false };
-    },
-    generateUsername = async () => '',
+    isUsernameAvailable = $bindable(true),
+    showSuggestionButton = $bindable(false),
+    checkAvailability = async () => {},
+    generateUsername = async () => null,
     currentUsername = '',
     class: className = '',
     ...restProps
   }: UsernameInputProps = $props();
 
-  // Extract form components
-  const { form: formData, errors } = form;
-
-  // States
   let isChecking = $state(false);
-  let isAvailable = $state<boolean | null>(null);
   let isGeneratingSuggestion = $state(false);
-  let suggestedUsername = $state('');
 
-  // Generate a username suggestion
   const getSuggestedUsername = async () => {
+    if (isGeneratingSuggestion) return;
+
     try {
       isGeneratingSuggestion = true;
       const suggestion = await generateUsername();
-      suggestedUsername = suggestion;
-      $formData.username = suggestion;
-
-      // Since we know this is available (we just generated it)
-      isAvailable = true;
+      if (suggestion) {
+        isUsernameAvailable = true;
+        username = suggestion;
+      }
     } catch (error) {
       console.error('Error generating username suggestion:', error);
     } finally {
@@ -68,35 +56,27 @@
     }
   };
 
-  // Generate a username suggestion on mount if showSuggestionButton is true
   onMount(() => {
-    if (!$formData.username) {
+    if (!username) {
       getSuggestedUsername();
     }
   });
 
   $effect(() => {
-    if (isAvailable === true) {
-      showSuggestionButton = false;
-    } else if (isAvailable === false) {
-      showSuggestionButton = true;
-    }
-    if ($errors[name]) {
-      showSuggestionButton = true;
-    }
+    showSuggestionButton = isUsernameAvailable === false;
   });
 
-  // Check username availability with debounce
   $effect(() => {
     // Skip check if no username or has validation errors
-    if (!$formData.username || $errors[name]) {
-      isAvailable = null;
+    if (!username || username === currentUsername) {
+      isUsernameAvailable = null;
       isChecking = false;
       return;
     }
 
-    if ($formData.username === suggestedUsername) {
-      isAvailable = true;
+    // Skip check if username doesn't meet basic requirements
+    if (handleSchema.safeParse(username).success === false) {
+      isUsernameAvailable = null;
       isChecking = false;
       return;
     }
@@ -105,42 +85,55 @@
 
     const timer = window.setTimeout(async () => {
       try {
-        const result = await checkAvailability($formData.username, UserIdentType.userHandle);
-        isAvailable = result.isAvailable;
-
-        if (result.isCurrentIdent) {
-          isAvailable = null;
-          isChecking = false;
-          return;
-        }
-
-        if (isAvailable === true) {
-          suggestedUsername = $formData.username;
-        }
+        await checkAvailability(username, UserIdentType.userHandle);
       } catch (error) {
         console.error('Error checking username:', error);
-        isAvailable = false;
+        isUsernameAvailable = false;
       } finally {
         isChecking = false;
       }
-    }, 500);
+    }, 300);
 
-    // Clean up the previous timer when the effect reruns
-    return () => {
-      clearTimeout(timer);
-    };
+    return () => clearTimeout(timer);
   });
+
+  const validateIdentifier = (ident: string) => {
+    const result = {
+      isValid: false,
+      message: '',
+    };
+
+    if (!ident) return result;
+
+    if (ident === currentUsername) return { ...result, isValid: true };
+
+    const parsed = handleSchema.safeParse(ident);
+    if (!parsed.success) {
+      return { ...result, message: 'Username must be 3-30 characters' };
+    }
+
+    if (isUsernameAvailable === false) {
+      return {
+        ...result,
+        message: 'This username is already taken',
+      };
+    }
+
+    // Valid username
+    return {
+      isValid: true,
+      message: 'This username is available',
+    };
+  };
 </script>
 
-<Form.Field {form} {name}>
+<div class="space-y-2">
   <div class="flex items-center justify-between">
-    <label for={name} class="text-sm font-medium leading-none">{label}</label>
+    <label for="username" class="text-sm font-medium leading-none">{label}</label>
     {#if showSuggestionButton}
-      <Form.Button
-        variant="ghost"
-        size="sm"
-        class="h-8 px-2 text-xs"
+      <button
         type="button"
+        class="inline-flex h-8 items-center justify-center rounded-md px-2 text-xs font-medium ring-offset-background transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
         disabled={isGeneratingSuggestion}
         onclick={getSuggestedUsername}
       >
@@ -151,52 +144,48 @@
           <RefreshCw class="mr-1 h-3 w-3" />
           Suggest new
         {/if}
-      </Form.Button>
+      </button>
     {/if}
   </div>
-  <Form.Control>
-    {#snippet children({ props })}
-      <div class="relative">
-        <Input
-          {...props}
-          {...restProps}
-          id={name}
-          type="text"
-          {placeholder}
-          class={cn(
-            'pr-10',
-            isAvailable === false ? 'border-red-500 focus-visible:ring-red-500' : '',
-            className,
-          )}
-          disabled={isGeneratingSuggestion}
-          bind:value={$formData.username}
-        />
-        {#if isGeneratingSuggestion || isChecking}
-          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-            <div
-              class="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent"
-            ></div>
-          </div>
-        {:else if isAvailable === false}
-          <div
-            class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-red-500"
-          >
-            <AlertCircle class="h-4 w-4" />
-          </div>
-        {:else if isAvailable === true}
-          <div
-            class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-green-500"
-          >
-            <Check class="h-4 w-4" />
-          </div>
-        {/if}
+  <div class="relative">
+    <Input
+      {...restProps}
+      id="username"
+      type="text"
+      {placeholder}
+      class={cn(
+        'pr-10',
+        isUsernameAvailable === false ? 'border-red-500 focus-visible:ring-red-500' : '',
+        className,
+      )}
+      disabled={isGeneratingSuggestion}
+      bind:value={username}
+    />
+    {#if isGeneratingSuggestion || isChecking}
+      <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+        <div
+          class="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent"
+        ></div>
       </div>
-    {/snippet}
-  </Form.Control>
-  <Form.FieldErrors />
-  {#if isAvailable === false}
-    <p class="text-xs text-red-500">This username is already taken</p>
-  {:else if isAvailable === true}
-    <p class="text-xs text-green-500">This username is available!</p>
-  {/if}
-</Form.Field>
+    {:else if isUsernameAvailable === false}
+      <div
+        class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-red-500"
+      >
+        <AlertCircle class="h-4 w-4" />
+      </div>
+    {:else if isUsernameAvailable === true}
+      <div
+        class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-green-500"
+      >
+        <Check class="h-4 w-4" />
+      </div>
+    {/if}
+  </div>
+
+  {#key username}
+    {@const validation = validateIdentifier(username)}
+    <p class="text-xs {validation.isValid ? 'text-green-500' : 'text-red-500'}">
+      {validation.message}
+    </p>
+  {/key}
+</div>
