@@ -22,6 +22,10 @@ export default ts.config(
       },
     },
     rules: {
+      'comma-dangle': ['error', 'always-multiline'],
+      'no-nested-ternary': 'error',
+      'quotes': ['error', 'single'],
+      'semi': ['error', 'always'],
       '@typescript-eslint/no-unused-vars': 'off',
     },
   },
