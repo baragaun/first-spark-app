@@ -550,7 +550,7 @@ export class MockMyUserContext {
     };
   }
 
-  async sendMultiStepActionNotification(email: string): Promise<boolean> {
+  async sendMultiStepActionNotification(actionId: string, email?: string): Promise<boolean> {
     this.isLoading.set(true);
 
     // Simulate API delay

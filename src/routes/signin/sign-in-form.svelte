@@ -142,7 +142,6 @@
       loading = true;
       errorMessage = '';
 
-      //todo I will also like to send identifier type.
       const response = await myUserContext.sendMultiStepActionNotification(mfaActionId, identifier);
 
       if (typeof response === 'string') {
