@@ -18,7 +18,6 @@
 
   let settings = $state<NotificationSettings>({ ...initialSettings });
 
-  // Function to toggle settings
   const toggleSetting = (key: keyof NotificationSettings) => {
     settings[key] = !settings[key];
   };

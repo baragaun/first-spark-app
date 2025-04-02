@@ -276,6 +276,10 @@ export class MyUserContext {
         return { error: translate(response.error, AppUiMessage.systemError) };
       }
 
+      // Refresh the myUser object after successful update
+      if (response.object) {
+        this.myUser = response.object;
+      }
       return { myUser: response.object };
     } catch (error) {
       console.error('MyUserContext.updateMyUser: error', {
@@ -444,10 +448,7 @@ export class MyUserContext {
     }
   }
 
-  async sendMultiStepActionNotification(
-    actionId: string,
-    email?: string,
-  ): Promise<true | string> {
+  async sendMultiStepActionNotification(actionId: string, email?: string): Promise<true | string> {
     if (!this.client.isInitialized) {
       console.error('MyUserContext.sendMultiStepActionNotification: not initialized.');
       return 'system-error';
