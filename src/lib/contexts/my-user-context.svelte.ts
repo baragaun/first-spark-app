@@ -66,9 +66,7 @@ export class MyUserContext {
         return;
       }
 
-      await this.client.init(config);
-
-      this.client.addListener({
+      const listener: MyUserListener = {
         id: 'MyUserContext',
         topic: BgListenerTopic.myUser,
         onSignedIn: () => isSignedIn.set(true),
@@ -76,20 +74,14 @@ export class MyUserContext {
         onMyUserUpdated: (myUser) => {
           this.myUser = myUser;
         },
-      } as MyUserListener);
-
+      };
+      await this.client.init({
+        config,
+        isOnline: true,
+        startSession: true,
+        listener,
+      });
       isSignedIn.set(this.client.isSignedIn);
-
-      if (this.client.isSignedIn) {
-        try {
-          const userResponse = await this.client.operations.myUser.findMyUser();
-          if (userResponse.object) {
-            this.myUser = userResponse.object;
-          }
-        } catch (error) {
-          console.error('Failed to restore user data:', error);
-        }
-      }
     } catch (error) {
       console.error('MyUserContext: Error initializing BgNodeClient:', { error });
       this._isInitializing = false;
