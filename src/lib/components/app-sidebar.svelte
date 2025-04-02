@@ -32,6 +32,7 @@
       title: m['sidebar.menu.settings'](),
       url: '/settings',
       icon: Settings,
+      requiresAuth: true,
     },
   ];
 </script>
@@ -39,14 +40,21 @@
 <script lang="ts">
   import * as Sidebar from '$lib/components/ui/sidebar/index.js';
   import type { ComponentProps } from 'svelte';
+  import { isSignedIn } from '@/contexts/my-user-context.svelte';
   import { page } from '$app/state';
 
+  const authenticated = $derived(isSignedIn);
   const isItemActive = (itemUrl: string, currentPath: string): boolean => {
     if (itemUrl === '/') {
       return currentPath === '/';
     }
     return itemUrl !== '#' && currentPath.startsWith(itemUrl);
   };
+
+  let visibleItems = $derived(
+    authenticated ? items :
+      items.filter((item) => !item.requiresAuth)
+  );
 
   let {
     ref = $bindable(null),
@@ -82,7 +90,7 @@
     </Sidebar.Header>
     <Sidebar.Group>
       <Sidebar.Menu>
-        {#each items as item, i (item.title)}
+        {#each visibleItems as item, i (item.title)}
           <Sidebar.MenuItem>
             <Sidebar.MenuButton isActive={isItemActive(item.url, page.url.pathname)}>
               {#snippet child({ props })}
