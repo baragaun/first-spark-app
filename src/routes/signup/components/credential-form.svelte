@@ -1,60 +1,67 @@
 <script lang="ts">
-  import { Button } from '$lib/components/ui/button';
-  import { UserIdentType } from '@baragaun/bg-node-client';
   import AuthCard from '$lib/components/auth-card.svelte';
-  import PasswordInput from '../../../lib/components/ui/password-input';
-  import passwordHelpers from '@/helpers/password-helpers';
-  import IdentInput from '@/components/ident-input.svelte';
+  import { Button } from '$lib/components/ui/button';
+  import UsernameInput from '@/components/ui/username-input/username-input.svelte';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
-
+  import passwordHelpers from '@/helpers/password-helpers';
+  import { UserIdentType } from '@baragaun/bg-node-client';
+  import PasswordInput from '../../../lib/components/ui/password-input';
+  // State variables
   let password = $state('');
   let username = $state('');
-  let checkingUsername = $state(false);
   let loading = $state(false);
-  let usernameError = $state('');
-  let suggestedHandle = $state('');
-
+  let isUsernameAvailable = $state<boolean | null>(null);
+  // Destructure password helpers
   const { getPasswordError, validatePassword } = passwordHelpers;
-
-  // Get suggested username handle
-  const getSuggestedHandle = async () => {
-    if (!email) return;
-
-    if (myUserContext.myUserHandle) {
-      username = myUserContext.myUserHandle;
-      return;
-    }
-
-    try {
-      checkingUsername = true;
-      const result = await myUserContext.findAvailableUserHandle(email);
-      if (typeof result === 'string') {
-        suggestedHandle = result;
-      }
-    } catch (error) {
-      console.error('Error getting suggested handle:', error);
-    } finally {
-      checkingUsername = false;
-    }
-  };
-
-  $effect(() => {
-    if (email) {
-      getSuggestedHandle();
-    }
-  });
-
+  // Props interface
   interface Props {
     email?: string;
     onSubmit?: (credentials: { username: string; password: string }) => void;
     onBack?: () => void;
   }
-
   const { email, onSubmit, onBack }: Props = $props();
-
+  const getSuggestedHandle = async (): Promise<string | null> => {
+    if (!email) return '';
+    if (myUserContext.myUserHandle) return myUserContext.myUserHandle;
+    try {
+      const result = await myUserContext.findAvailableUserHandle(email);
+      if (result && typeof result === 'object' && 'object' in result) {
+        isUsernameAvailable = true;
+        return result.object ?? '';
+      }
+      if (typeof result === 'string') {
+        isUsernameAvailable = true;
+        return result;
+      }
+    } catch (error) {
+      console.error('Error getting suggested handle:', error);
+      isUsernameAvailable = false;
+    }
+    return '';
+  };
+  const checkUsernameAvailability = async (ident: string, type: UserIdentType): Promise<void> => {
+    // Skip check if it's the current user's handle
+    const isCurrentIdent =
+      type === UserIdentType.userHandle && ident === myUserContext.myUserHandle;
+    if (isCurrentIdent) {
+      console.log('isCurrentIdent', { isCurrentIdent });
+      isUsernameAvailable = true;
+      return;
+    }
+    try {
+      const result = await myUserContext.isUserIdentAvailable(ident, type);
+      isUsernameAvailable = result.isAvailable ?? false;
+      console.log('checkUsernameAvailability', result.isAvailable);
+    } catch (error) {
+      console.error('Error checking identifier availability:', error);
+      isUsernameAvailable = false;
+    }
+  };
+  // Form submission handler
   const handleSubmit = (e: SubmitEvent) => {
     e.preventDefault();
-    if (onSubmit && validatePassword(password).isValid && !usernameError) {
+    const isPasswordValid = validatePassword(password).isValid;
+    if (onSubmit && isPasswordValid && isUsernameAvailable) {
       onSubmit({ username, password });
     }
   };
@@ -67,21 +74,20 @@
   {onBack}
 >
   <form onsubmit={handleSubmit} class="space-y-4">
-    <IdentInput
-      bind:identifier={username}
-      bind:identError={usernameError}
-      identType={UserIdentType.userHandle}
+    <UsernameInput
+      bind:username
+      bind:isUsernameAvailable
       placeholder="Username (e.g., CosmoExplorer, PixelPioneer)"
+      checkAvailability={checkUsernameAvailability}
+      generateUsername={getSuggestedHandle}
     />
-    {#if suggestedHandle}
-      <p class="text-xs text-muted-foreground">
-        Suggested username: {suggestedHandle}
-      </p>
-    {/if}
+
     <div class="relative space-y-2">
       <label for="password" class="text-sm font-medium">Password</label>
       <PasswordInput bind:value={password} placeholder="Password" required />
+
       {#if password}
+        {@const passwordValidation = validatePassword(password)}
         <div class="space-y-2 text-xs">
           <p class="text-muted-foreground">Password requirements:</p>
           <ul class="list-inside list-disc space-y-1 pl-2">
@@ -93,16 +99,17 @@
             </li>
           </ul>
         </div>
-      {/if}
-      {#if password && getPasswordError(password)}
-        <p class="text-xs text-destructive">{getPasswordError(password)}</p>
+
+        {#if getPasswordError(password)}
+          <p class="text-xs text-destructive">{getPasswordError(password)}</p>
+        {/if}
       {/if}
     </div>
+
     <Button
       type="submit"
       class="w-full"
-      disabled={checkingUsername ||
-        !!usernameError ||
+      disabled={isUsernameAvailable !== true ||
         loading ||
         !password ||
         !validatePassword(password).isValid}
