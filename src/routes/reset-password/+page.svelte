@@ -1,7 +1,6 @@
 <script lang="ts">
   import * as Card from '$lib/components/ui/card';
   import { onDestroy } from 'svelte';
-  import IdentInput from '@/components/ident-input.svelte';
   import { writable } from 'svelte/store';
   import TokenForm from '@/components/token-form.svelte';
   import ErrorAlert from '@/components/error-alert.svelte';
@@ -9,7 +8,8 @@
   import Button from '@/components/ui/button/button.svelte';
   import translate from '@/helpers/language/translate';
   import { AppUiMessage, MsaTokenStatus } from '@/types/enums';
-  import { MultiStepActionEventType, SidMultiStepActionProgress } from '@baragaun/bg-node-client';
+  import { MultiStepActionEventType, SidMultiStepActionProgress, UserIdentType } from '@baragaun/bg-node-client';
+  import Input from '@/components/ui/input/input.svelte';
 
   let currentStep = writable(0);
   let identifier = $state('');
@@ -220,13 +220,13 @@
       </Card.Header>
       <Card.Content>
         <form onsubmit={handleResetPassword} class="space-y-4">
-          <IdentInput
-            bind:identifier
-            skipAvailabilityCheck={true}
-            autoDetect={true}
-            bind:identError
+          <Input
+            type="text"
+            placeholder="Enter your email or username"
+            bind:value={identifier}
+            required
           />
-          <Button type="submit" class="w-full" disabled={loading || !identifier || !!identError}>
+          <Button type="submit" class="w-full" disabled={loading || !identifier }>
             {loading ? 'Sending email...' : 'Send email'}
           </Button>
           <div class="flex items-center justify-between">

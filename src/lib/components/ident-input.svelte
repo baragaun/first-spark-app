@@ -10,7 +10,6 @@
   let debounceTimer: number | null = null;
   const DEBOUNCE_DELAY = 300; // ms
   const myUserContext = getContext<MyUserContext>('myUserContext');
-  let autoDetectedType = $state(UserIdentType.email);
 
   // Define Zod schemas for validation
   const emailSchema = z.string().email('Not a valid email address');
@@ -18,24 +17,6 @@
     .string()
     .min(3, 'Must be at least 3 characters')
     .max(30, 'Cannot exceed 30 characters');
-
-  // Function to determine identifier type using Zod
-  const determineIdentifierType = (value: string): UserIdentType => {
-    // Try to validate as email first
-    const emailResult = emailSchema.safeParse(value);
-    if (emailResult.success) {
-      return UserIdentType.email;
-    }
-
-    // Then try to validate as handle
-    const handleResult = handleSchema.safeParse(value);
-    if (handleResult.success) {
-      return UserIdentType.userHandle;
-    }
-
-    // Default to email if unclear (validation will catch errors later)
-    return UserIdentType.email;
-  };
 
   const checkIdentAvailability = async (
     ident: string,
@@ -58,20 +39,20 @@
     }
   };
 
-  const validateIdentifier = (ident: string, type: UserIdentType): boolean => {
+  const validateIdentifier = (ident: string): boolean => {
     if (!ident) {
       return false;
     }
 
     const isCurrentIdent =
-      (type === UserIdentType.email && ident === myUserContext.myEmail) ||
-      (type === UserIdentType.userHandle && ident === myUserContext.myUserHandle);
+      (identType === UserIdentType.email && ident === myUserContext.myEmail) ||
+      (identType === UserIdentType.userHandle && ident === myUserContext.myUserHandle);
 
     if (isCurrentIdent) {
       return true;
     }
 
-    if (type === UserIdentType.email) {
+    if (identType === UserIdentType.email) {
       const result = emailSchema.safeParse(ident);
       return result.success;
     } else {
@@ -85,30 +66,16 @@
     identType?: UserIdentType;
     identError?: string;
     placeholder?: string;
-    autoDetect?: boolean;
-    skipAvailabilityCheck?: boolean;
+    oninput?: (event: Event) => void;
   }
 
   let {
     identifier = $bindable(''),
     identError = $bindable(''),
-    identType = $bindable(undefined),
+    identType = $bindable(UserIdentType.email),
     placeholder = 'Enter email or username',
-    autoDetect = false,
-    skipAvailabilityCheck = false,
+    oninput = $bindable(() => {}),
   }: Props = $props();
-
-  // Auto-detect identifier type when not explicitly provided
-  $effect(() => {
-    if (autoDetect && identifier && identType === undefined) {
-      autoDetectedType = determineIdentifierType(identifier);
-    }
-  });
-
-  // Get the effective type (either provided or auto-detected)
-  const getEffectiveType = (): UserIdentType => {
-    return identType !== undefined ? identType : autoDetectedType;
-  };
 
   // Combined effect for identifier validation and availability checking
   $effect(() => {
@@ -125,32 +92,15 @@
       return;
     }
 
-    const effectiveType = getEffectiveType();
-
-    // Check format validation first
-    if (!validateIdentifier(identifier, effectiveType)) {
+    // Skip availability check for invalid identifiers
+    if (!validateIdentifier(identifier)) {
       isChecking = false;
-      identError =
-        identType !== undefined
-          ? effectiveType === UserIdentType.email
-            ? 'Please enter a valid email address'
-            : 'Username must be 3-30 characters'
-          : 'Please enter a valid email address or username';
-      return;
-    } else {
-      identError = '';
-    }
-
-    // If skipAvailabilityCheck is true, only validate format but don't check availability
-    if (skipAvailabilityCheck) {
-      isChecking = false;
-      identError = '';
       return;
     }
 
     const isCurrentIdent =
-      (effectiveType === UserIdentType.email && identifier === myUserContext.myEmail) ||
-      (effectiveType === UserIdentType.userHandle && identifier === myUserContext.myUserHandle);
+      (identType === UserIdentType.email && identifier === myUserContext.myEmail) ||
+      (identType === UserIdentType.userHandle && identifier === myUserContext.myUserHandle);
 
     if (isCurrentIdent) {
       // Allow using the current identifier without showing errors
@@ -162,13 +112,13 @@
     isChecking = true;
     debounceTimer = window.setTimeout(async () => {
       try {
-        const result = await checkIdentAvailability(identifier, effectiveType);
+        const result = await checkIdentAvailability(identifier, identType);
 
         if (result.isCurrentIdent) {
           identError = '';
         } else if (!result.isAvailable) {
           identError = `This ${
-            effectiveType === UserIdentType.email
+            identType === UserIdentType.email
               ? 'email address is already registered.'
               : 'username is unavailable.'
           }`;
@@ -177,7 +127,6 @@
         }
       } catch (error) {
         console.error('Error checking identifier:', error);
-        identError = 'Error checking availability';
       } finally {
         isChecking = false;
         debounceTimer = null;
@@ -188,15 +137,23 @@
 
 <div class="space-y-2">
   <Input
+    class={identError ? 'border-red-500 focus-visible:ring-red-500' : ''}
     type="text"
     {placeholder}
     bind:value={identifier}
     title="Please enter a valid email or username"
     required
-    class={identError ? 'border-red-500 focus-visible:ring-red-500' : ''}
+
   />
   {#if isChecking}
     <p class="text-xs text-muted-foreground">Checking availability...</p>
+  {/if}
+  {#if identifier && !validateIdentifier(identifier)}
+    <p class="text-xs text-destructive">
+      {identType === UserIdentType.email
+        ? 'Please enter a valid email address'
+        : 'Username must be 3-30 characters'}
+    </p>
   {/if}
   {#if identError}
     <p class="text-xs text-destructive">{identError}</p>
