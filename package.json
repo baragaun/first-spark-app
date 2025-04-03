@@ -71,6 +71,7 @@
   },
   "dependencies": {
     "@baragaun/bg-node-client": "^0.0.22",
+    "date-fns": "^4.1.0",
     "formsnap": "^2.0.0",
     "mode-watcher": "^0.5.1",
     "rxdb": "^16.8.1",
