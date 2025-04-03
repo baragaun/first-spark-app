@@ -5,29 +5,31 @@
   import BookUser from 'lucide-svelte/icons/book-user';
   import MessageSquare from 'lucide-svelte/icons/message-square';
 
+  import { m } from '$lib/paraglide/messages';
+
   const items = [
     {
-      title: 'Home',
+      title: m['sidebar.menu.home'](),
       url: '/',
       icon: House,
     },
     {
-      title: 'Inbox',
+      title: m['sidebar.menu.inbox'](),
       url: '#',
       icon: Inbox,
     },
     {
-      title: 'Conversations',
+      title: m['sidebar.menu.conversations'](),
       url: '#',
       icon: MessageSquare,
     },
     {
-      title: 'Contacts',
+      title: m['sidebar.menu.contacts'](),
       url: '#',
       icon: BookUser,
     },
     {
-      title: 'Settings',
+      title: m['sidebar.menu.settings'](),
       url: '/settings',
       icon: Settings,
     },
