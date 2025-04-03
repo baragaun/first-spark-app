@@ -1,4 +1,110 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-  "example_message": "Guten Tag {username}"
+  "welcome": "Willkommen bei First Spark",
+  "welcome_subtitle": "Verbinden, inspirieren, wachsen!",
+  "get_started": "Jetzt starten",
+  "sidebar": {
+    "logo": {
+      "alt": "App-Logo",
+      "title": "First Spark"
+    },
+    "menu": {
+      "home": "Startseite",
+      "inbox": "Posteingang",
+      "conversations": "Gespräche",
+      "contacts": "Kontakte",
+      "settings": "Einstellungen"
+    }
+  },
+
+  "nav": {
+    "menu": "Menü",
+    "open_menu": "Menü öffnen",
+    "theme": {
+      "light_mode": "Heller Modus",
+      "dark_mode": "Dunkler Modus"
+    },
+    "auth": {
+      "log_in": "Anmelden",
+      "sign_up": "Registrieren",
+      "sign_out": "Abmelden"
+    }
+  },
+
+  "footer": {
+    "copyright": "© {year} First Spark. Alle Rechte vorbehalten.",
+    "navigation": {
+      "faq": "FAQ",
+      "privacy_policy": "Datenschutzerklärung",
+      "terms_of_service": "Nutzungsbedingungen"
+    }
+  },
+
+  "user_nav": {
+    "profile": "Profil",
+    "inbox": "Posteingang",
+    "settings": "Einstellungen",
+    "logout": "Abmelden"
+  },
+
+  "language": {
+    "change": "Sprache ändern",
+    "select": "Sprache auswählen"
+  },
+  "signin": {
+    "title": "Anmelden",
+    "terms_agreement": "Indem Sie fortfahren, stimmen Sie unserer Benutzervereinbarung zu und bestätigen, dass Sie unsere Datenschutzerklärung verstehen und ihr zustimmen.",
+    "have_account": "Neu bei First Spark?",
+    "auth_method": "Wie möchten Sie sich anmelden?",
+    "auth_method1": "Passwort",
+    "auth_method2": "Einmalpasswort",
+    "forgot_password": "Passwort vergessen?",
+    "username_or_email_placeholder": "Benutzername oder E-Mail",
+    "email_placeholder": "E-Mail",
+    "password_placeholder": "Passwort",
+    "otp_title": "Überprüfen Sie Ihren Posteingang",
+    "otp_subtitle": "Wir haben einen Magic-Link gesendet an ",
+    "otp_expiration": "Der Verifizierungscode läuft in 10 Minuten ab. Geben Sie den Code unten ein, um sich anzumelden.",
+    "otp_timer": "Erneut senden in ",
+    "otp_renewal": "Keine E-Mail erhalten?",
+    "buttons": {
+      "back": "← Zurück zur Anmeldung",
+      "continue": "Anmelden",
+      "continue_otp": "Code zusenden",
+      "resend_otp": "E-Mail erneut senden",
+      "verify": "Verifizieren",
+      "sending": "OTP wird gesendet...",
+      "verifying": "Anmeldung läuft...",
+      "signup": "Registrieren"
+    }
+  },
+  "signup": {
+    "title": "Registrierung",
+    "verify_email_title": "E-Mail bestätigen",
+    "terms_agreement": "Mit dem Fortfahren stimmen Sie unseren Nutzungsbedingungen zu und bestätigen, dass Sie unsere Datenschutzerklärung verstanden haben.",
+    "verify_code_message": "Geben Sie den sechsstelligen Code ein, den wir an {email} gesendet haben",
+    "have_account": "Bereits ein Konto?",
+    "login_link": "Anmelden",
+    "create_credentials_title": "Benutzername und Passwort erstellen",
+    "username_description": "Benutzernamen sind einzigartige Kennungen. Wir überprüfen, ob Ihrer noch verfügbar ist.",
+    "username_placeholder": "Benutzername (z.B. KosmoEntdecker, PixelPionier)",
+    "password_placeholder": "Passwort",
+    "password_requirements": {
+      "title": "Passwortanforderungen:",
+      "min_length": "Mindestens 8 Zeichen"
+    },
+    "password_errors": {
+      "min_length": "Das Passwort muss mindestens 8 Zeichen lang sein",
+      "too_simple": "Das Passwort ist zu einfach oder zu leicht zu erraten"
+    },
+    "buttons": {
+      "back": "← Zurück",
+      "continue": "Weiter",
+      "verify": "Bestätigen",
+      "sending": "Wird gesendet...",
+      "verifying": "Wird überprüft...",
+      "create_account": "Konto erstellen",
+      "creating_account": "Konto wird erstellt..."
+    }
+  }
 }
