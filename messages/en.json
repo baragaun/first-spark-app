@@ -25,7 +25,7 @@
       "dark_mode": "Dark Mode"
     },
     "auth": {
-      "log_in": "Log In",
+      "sign_in": "Sign In",
       "sign_up": "Sign Up",
       "sign_out": "Sign Out"
     }
