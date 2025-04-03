@@ -5,6 +5,7 @@
   import { getLocale, setLocale } from '$lib/paraglide/runtime.js';
   import { m } from '$lib/paraglide/messages.js';
 
+  // Todo: somehow incorporate the language names into paraglide?
   const LANGUAGE_NAMES: Record<string, string> = {
     en: 'English',
     de: 'Deutsch',
