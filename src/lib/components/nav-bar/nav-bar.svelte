@@ -1,12 +1,12 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
+  import { goto } from '$app/navigation';
+  import { isSignedIn } from '@/contexts/my-user-context.svelte';
+  import { m } from '$lib/paraglide/messages.js';
   import AvatarMenu from './avatar-menu.svelte';
-  import * as Sidebar from '$lib/components/ui/sidebar/index.js';
   import ThemeButton from '../theme-button.svelte';
   import LanguageButton from '../language-button.svelte';
-  import { isSignedIn } from '@/contexts/my-user-context.svelte';
-  import { goto } from '$app/navigation';
-  import { m } from '$lib/paraglide/messages.js';
+  import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 </script>
 
 <nav
