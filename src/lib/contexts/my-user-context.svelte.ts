@@ -39,6 +39,7 @@ export class MyUserContext {
 
     const config: BgNodeClientConfig = {
       inBrowser: true,
+      // enableMockMode: true,
       fsdata: {
         url: import.meta.env.VITE_FSDATA_URL || 'http://localhost:8092/fsdata/api/graphql',
         headers: {

@@ -64,6 +64,24 @@
 
     // Here you would also send the message to your backend
   };
+
+  const handleEditMessage = (id: string, newText: string) => {
+    // Find and update the message
+    messages = messages.map(message =>
+      message.id === id
+        ? { ...message, text: newText }
+        : message
+    );
+
+    // Here you would also update the message in your backend
+  };
+
+  const handleDeleteMessage = (id: string) => {
+    // Implement delete functionality
+    messages = messages.filter(message => message.id !== id);
+
+    // Here you would also delete the message from your backend
+  };
 </script>
 
 <div class="flex h-[calc(100vh-4rem)] flex-col">
@@ -77,7 +95,11 @@
     </div>
   {:else}
     <ChatHeader {contact} />
-    <MessageList {messages} />
+    <MessageList
+      {messages}
+      onEditMessage={handleEditMessage}
+      onDeleteMessage={handleDeleteMessage}
+    />
     <MessageInput onSendMessage={handleSendMessage} />
   {/if}
 </div>

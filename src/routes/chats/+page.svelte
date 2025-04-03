@@ -2,29 +2,20 @@
   import { Button } from '$lib/components/ui/button';
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
-  import ChatThreadList from './components/chat-thread-list.svelte';
-  import { myChannelContext } from '@/contexts/my-channel-context.svelte';
+  import ChatList from './components/chat-thread-list.svelte';
+  import { Channel } from '@baragaun/bg-node-client';
+  import type { PageData } from './$types';
 
-  interface ChatThread {
-    id: string;
-    name: string;
-    lastMessage: string;
-    timestamp: Date;
-    unread: number;
-  }
+  let { data }: { data: PageData } = $props();
 
-  let threads = $state<ChatThread[]>([]);
+  let channels = $state<Channel[]>([]);
   let isLoading = $state(true);
 
   onMount(async () => {
-    // Mock data for now - would be replaced with actual API call
     isLoading = true;
+    // Use the mock data from the layout
     setTimeout(() => {
-      threads = [
-        { id: '1', name: 'Alice Smith', lastMessage: 'Hey, how are you?', timestamp: new Date(), unread: 2 },
-        { id: '2', name: 'Bob Johnson', lastMessage: 'Did you see the latest update?', timestamp: new Date(Date.now() - 3600000), unread: 0 },
-        { id: '3', name: 'Carol Williams', lastMessage: 'Thanks for your help!', timestamp: new Date(Date.now() - 86400000), unread: 0 },
-      ];
+      channels = data.channels;
       isLoading = false;
     }, 500);
   });
@@ -46,6 +37,6 @@
       <div class="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
     </div>
   {:else}
-    <ChatThreadList {threads} />
+    <ChatList threads={channels} />
   {/if}
 </div>
