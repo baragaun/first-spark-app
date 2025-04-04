@@ -2,19 +2,8 @@
   import { Button } from '$lib/components/ui/button/index.js';
   import { Languages } from 'lucide-svelte';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-  import { getLocale, setLocale } from '$lib/paraglide/runtime.js';
+  import { getLocale, setLocale, locales } from '$lib/paraglide/runtime.js';
   import { m } from '$lib/paraglide/messages.js';
-
-  // Todo: somehow incorporate the language names into paraglide?
-  const LANGUAGE_NAMES: Record<string, string> = {
-    en: 'English',
-    de: 'Deutsch',
-    hi: 'हिन्दी',
-  };
-
-  const setLanguage = (code: keyof typeof LANGUAGE_NAMES) => {
-    setLocale(code as 'en' | 'de' | 'hi');
-  };
 </script>
 
 <div class="hidden md:flex">
@@ -32,12 +21,12 @@
     <DropdownMenu.Content>
       <DropdownMenu.Label>{m['language.select']()}</DropdownMenu.Label>
       <DropdownMenu.Separator />
-      {#each Object.entries(LANGUAGE_NAMES) as [code, name]}
-        <DropdownMenu.Item class="cursor-pointer" onclick={() => setLanguage(code)}>
-          <span class:font-bold={getLocale() === code}>
-            {name}
+      {#each locales as locale}
+        <DropdownMenu.Item class="cursor-pointer" onclick={() => setLocale(locale)}>
+          <span class:font-bold={getLocale() === locale}>
+            {new Intl.DisplayNames([locale], { type: 'language' }).of(locale)}
           </span>
-          {#if getLocale() === code}
+          {#if getLocale() === locale}
             <DropdownMenu.Shortcut>✓</DropdownMenu.Shortcut>
           {/if}
         </DropdownMenu.Item>
