@@ -22,6 +22,7 @@ const mockUser: MyUser = {
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
   isEmailVerified: false,
+  isPhoneNumberVerified: false,
   spokenLanguagesTextIds: [],
   roles: [],
   trustLevel: 0,

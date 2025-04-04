@@ -66,7 +66,7 @@ export class MyUserContext {
         return;
       }
 
-      await this.client.init(config);
+      await this.client.init({ config });
 
       this.client.addListener({
         id: 'MyUserContext',

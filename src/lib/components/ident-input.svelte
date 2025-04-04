@@ -4,6 +4,7 @@
   import { MyUserContext } from '@/contexts/my-user-context.svelte';
   import { z } from 'zod';
   import { getContext } from 'svelte';
+  import { AlertCircle, Check } from 'lucide-svelte';
 
   // State variables
   let isChecking = $state(false);
@@ -40,6 +41,7 @@
   };
 
   const validateIdentifier = (ident: string): boolean => {
+
     if (!ident) {
       return false;
     }
@@ -66,6 +68,7 @@
     identType?: UserIdentType;
     identError?: string;
     placeholder?: string;
+    showAvailabilityMessage?: boolean;
   }
 
   let {
@@ -73,6 +76,7 @@
     identError = $bindable(''),
     identType = $bindable(UserIdentType.email),
     placeholder = 'Enter email or username',
+    showAvailabilityMessage = false,
   }: Props = $props();
 
   // Combined effect for identifier validation and availability checking
@@ -118,7 +122,7 @@
           identError = `This ${
             identType === UserIdentType.email
               ? 'email address is already registered.'
-              : 'username is unavailable.'
+              : 'username name is already taken.'
           }`;
         } else {
           identError = '';
@@ -134,25 +138,51 @@
 </script>
 
 <div class="space-y-2">
-  <Input
-    type="text"
-    {placeholder}
-    bind:value={identifier}
-    title="Please enter a valid email or username"
-    required
-    class={identError ? 'border-red-500 focus-visible:ring-red-500' : ''}
-  />
-  {#if isChecking}
-    <p class="text-xs text-muted-foreground">Checking availability...</p>
-  {/if}
+  <div class="relative">
+    <Input
+      type="text"
+      {placeholder}
+      bind:value={identifier}
+      title="Please enter a valid email or username"
+      required
+      class={identError ? 'border-red-500 focus-visible:ring-red-500' : ''}
+    />
+    {#if isChecking}
+      <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+        <div
+          class="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent"
+        ></div>
+      </div>
+    {:else if identError}
+      <div
+        class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-red-500"
+      >
+        <AlertCircle class="h-4 w-4" />
+      </div>
+    {/if}
+    {#if showAvailabilityMessage && !isChecking && !identError && identifier && validateIdentifier(identifier)}
+      <div
+        class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-green-500"
+      >
+        <Check class="h-4 w-4" />
+      </div>
+    {/if}
+  </div>
+
+
   {#if identifier && !validateIdentifier(identifier)}
     <p class="text-xs text-destructive">
       {identType === UserIdentType.email
         ? 'Please enter a valid email address'
         : 'Username must be 3-30 characters'}
     </p>
-  {/if}
-  {#if identError}
+  {:else if identError}
     <p class="text-xs text-destructive">{identError}</p>
+  {:else if identifier && !identError && validateIdentifier(identifier) && !isChecking}
+    <p class="text-xs text-green-500">
+      {identType === UserIdentType.email ? 'This email is available' : 'This username is available'}
+    </p>
   {/if}
 </div>
+
+ 
