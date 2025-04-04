@@ -4,60 +4,75 @@
   import ChatHeader from '../components/chat-header.svelte';
   import MessageList from '../components/message-list.svelte';
   import MessageInput from '../components/message-input.svelte';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
-
-  interface Contact {
-    id: string;
-    name: string;
-    avatar: string;
-  }
-
-  interface Message {
-    id: string;
-    sender: 'me' | 'other';
-    text: string;
-    timestamp: Date;
-  }
+  import { Channel, ChannelMessage } from '@baragaun/bg-node-client';
 
   const chatId = page.params.chatId;
 
-  let contact = $state<Contact | null>(null);
-  let messages = $state<Message[]>([]);
+  interface ContactDetails {
+    id: string;
+    name: string;
+    avatar: string;
+    discription?: string;
+  }
+
+  let channelDetails = $state<ContactDetails | null>(null);
+  let messages = $state<ChannelMessage[]>([]);
   let isLoading = $state(true);
+
+  // Function to determine contact info based on channel participants
+  const setContactInfo = (channel: Channel) => {
+    if (!channel || !channel.participants) return null;
+
+    if (channel.participants.length > 2) {
+      // Group chat - use channel info
+      channelDetails = {
+        id: channel.id,
+        name: channel.name || 'Group Chat',
+        avatar: channel.name?.charAt(0) || 'G',
+      };
+    } else {
+      // Direct message - use recipient info
+      const recipientParticipant = channel.participants.find(
+        (p) => p.userId !== page.data.currentMockUserId,
+      );
+
+      if (!recipientParticipant) return null;
+
+      const recipientUser = page.data.users.find(
+        (user: { id: string }) => user.id === recipientParticipant.userId,
+      );
+
+      if (!recipientUser) return null;
+
+      channelDetails = {
+        id: recipientUser.id,
+        name: `${recipientUser.firstName} ${recipientUser.lastName}`,
+        avatar: recipientUser.firstName.charAt(0),
+      };
+    }
+  };
 
   onMount(async () => {
     // Mock data - would be replaced with actual API call
     isLoading = true;
     setTimeout(() => {
-      // Get contact info
-
-
-      const contacts: Record<string, Contact> = {
-        '1': { id: '1', name: 'Alice Smith', avatar: '' },
-        '2': { id: '2', name: 'Bob Johnson', avatar: '' },
-        '3': { id: '3', name: 'Carol Williams', avatar: '' },
-      };
-
-      contact = contacts[chatId] || null;
-
-      // Get messages
-      messages = [
-        { id: '1', sender: 'other', text: 'Hey there!', timestamp: new Date(Date.now() - 3600000) },
-        { id: '2', sender: 'me', text: 'Hi! How are you?', timestamp: new Date(Date.now() - 3500000) },
-        { id: '3', sender: 'other', text: 'I\'m good, thanks for asking 😊', timestamp: new Date(Date.now() - 3400000) },
-        { id: '4', sender: 'me', text: 'Great to hear! What have you been up to?', timestamp: new Date(Date.now() - 3300000) },
-      ] as Message[];
-
+      // Find the channel from the data
+      const channel = page.data.channels.find((c: Channel) => c.id === chatId);
+      if (channel) {
+        setContactInfo(channel);
+        messages = page.data.messages[chatId] || [];
+      }
       isLoading = false;
     }, 500);
   });
 
-  const handleSendMessage = (text: string) => {
-    const newMessage : Message = {
+  const handleSendMessage = (messageText: string) => {
+    const newMessage: ChannelMessage = {
       id: Date.now().toString(),
-      sender: 'me',
-      text,
-      timestamp: new Date()
+      channelId: chatId,
+      createdBy: page.data.currentMockUserId,
+      messageText,
+      createdAt: new Date().toISOString(),
     };
 
     messages = [...messages, newMessage];
@@ -67,10 +82,8 @@
 
   const handleEditMessage = (id: string, newText: string) => {
     // Find and update the message
-    messages = messages.map(message =>
-      message.id === id
-        ? { ...message, text: newText }
-        : message
+    messages = messages.map((message) =>
+      message.id === id ? { ...message, text: newText } : message,
     );
 
     // Here you would also update the message in your backend
@@ -78,28 +91,33 @@
 
   const handleDeleteMessage = (id: string) => {
     // Implement delete functionality
-    messages = messages.filter(message => message.id !== id);
+    messages = messages.filter((message) => message.id !== id);
 
     // Here you would also delete the message from your backend
   };
 </script>
 
-<div class="flex h-[calc(100vh-4rem)] flex-col">
+<div class="flex h-screen flex-col">
   {#if isLoading}
     <div class="flex flex-1 items-center justify-center">
       <div class="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
     </div>
-  {:else if !contact}
+  {:else if !channelDetails}
     <div class="flex flex-1 items-center justify-center">
       <p>Chat not found</p>
     </div>
   {:else}
-    <ChatHeader {contact} />
+    <div class="sticky top-0 z-10 bg-background">
+      <ChatHeader contact={channelDetails} />
+    </div>
     <MessageList
       {messages}
+      channelId={chatId}
       onEditMessage={handleEditMessage}
       onDeleteMessage={handleDeleteMessage}
     />
-    <MessageInput onSendMessage={handleSendMessage} />
+    <div class="sticky bottom-0 z-10 bg-background">
+      <MessageInput onSendMessage={handleSendMessage} />
+    </div>
   {/if}
 </div>

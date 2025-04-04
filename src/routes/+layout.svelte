@@ -6,8 +6,14 @@
   import NavBar from '@/components/nav-bar/nav-bar.svelte';
   import Footer from '$lib/components/footer.svelte';
   import MyUserProvider from '@/contexts/my-user-provider.svelte';
+  import { page } from '$app/state';
 
   let { children } = $props();
+
+  // Check if current route is a chat detail page
+  let isChatDetailPage = $derived(() => {
+    return page.url.pathname.startsWith('/chats/') && page.url.pathname !== '/chats/';
+  });
 </script>
 
 <MyUserProvider>
@@ -16,11 +22,15 @@
     <Sidebar.Provider>
       <AppSidebar />
       <div class="flex flex-1 flex-col">
-        <NavBar />
+        {#if !isChatDetailPage()}
+          <NavBar />
+        {/if}
         <main class="flex flex-1 flex-col">
           {@render children?.()}
         </main>
-        <Footer />
+        {#if !isChatDetailPage()}
+          <Footer />
+        {/if}
       </div>
     </Sidebar.Provider>
   </div>
