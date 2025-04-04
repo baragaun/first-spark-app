@@ -11,21 +11,11 @@ export const emailSchema = z.object({
   currentPassword: z.string().min(1, 'Current password is required'),
 });
 
-// Extract the base schema before applying refine
-const basePasswordSchema = z.object({
+// Password schema without confirm password
+export const passwordSchema = z.object({
   currentPassword: z.string().min(1, 'Current password is required'),
   newPassword: z.string().min(8, 'Password must be at least 8 characters'),
-  confirmPassword: z.string(),
 });
-
-// Password schema with validation
-export const passwordSchema = basePasswordSchema.refine(
-  (data) => data.newPassword === data.confirmPassword,
-  {
-    message: 'Passwords do not match',
-    path: ['confirmPassword'],
-  },
-);
 
 // Delete account schema
 export const deleteAccountSchema = z.object({
@@ -36,8 +26,9 @@ export const deleteAccountSchema = z.object({
 export const accountSettingsSchema = z.object({
   ...usernameSchema.shape,
   ...emailSchema.shape,
-  ...basePasswordSchema.shape,
+  ...passwordSchema.shape,
   ...deleteAccountSchema.shape,
 });
 
 export type AccountSettingsSchema = typeof accountSettingsSchema;
+

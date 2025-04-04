@@ -2,8 +2,8 @@
   import { goto } from '$app/navigation';
   import { Separator } from '$lib/components/ui/separator';
   import UpdateUsernameInput from './update-username-dialog.svelte';
-  import UpdateEmailInput from './update-email-input.svelte';
-  import UpdatePasswordInput from './update-password-input.svelte';
+  import UpdateEmailInput from './update-email-dialog.svelte';
+  import UpdatePasswordInput from './update-password-dialog.svelte';
   import DeleteAccountInput from './delete-account-input.svelte';
   import type { PageData } from '../$types';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
@@ -25,7 +25,7 @@
     updateUserData();
   });
 
-  const handleUsernameChange = async () => {
+  const handleUsernameEmailChange = async () => {
     try {
       isLoading = true;
       updateUserData();
@@ -38,37 +38,7 @@
     }
   };
 
-  const handleEmailChange = async (newEmail: string) => {
-    try {
-      isLoading = true;
-      // Call the API to update the email
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      currentEmail = newEmail;
-      return true;
-    } catch (error) {
-      console.error('Error updating email:', error);
-      return false;
-    } finally {
-      isLoading = false;
-    }
-  };
 
-  const handlePasswordChange = async (passwordData: {
-    currentPassword: string;
-    newPassword: string;
-  }) => {
-    try {
-      isLoading = true;
-      // Call the API to update the password
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      return true;
-    } catch (error) {
-      console.error('Error updating password:', error);
-      return false;
-    } finally {
-      isLoading = false;
-    }
-  };
 
   const handleAccountDeletion = async () => {
     try {
@@ -94,7 +64,7 @@
       {currentEmail}
       usernameForm={data.usernameForm}
       onSave={async () => {
-        await handleUsernameChange();
+        await handleUsernameEmailChange();
       }}
     />
 
@@ -102,16 +72,11 @@
       {currentEmail}
       emailForm={data.emailForm}
       onSave={async (newEmail) => {
-        await handleEmailChange(newEmail);
+        await handleUsernameEmailChange();
       }}
     />
 
-    <UpdatePasswordInput
-      passwordForm={data.passwordForm}
-      onSave={async (passwordData) => {
-        await handlePasswordChange(passwordData);
-      }}
-    />
+    <UpdatePasswordInput passwordForm={data.passwordForm} />
   </div>
 
   <Separator class="my-6" />
