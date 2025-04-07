@@ -1,28 +1,32 @@
 <script lang="ts">
   import { format } from 'date-fns';
-  import { ChevronDown, Pencil, Trash2, Check, X } from 'lucide-svelte';
+  import { ChevronDown, Pencil, Trash2, Check, X, Reply } from 'lucide-svelte';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
   import * as Avatar from '$lib/components/ui/avatar/index.js';
   import { Input } from '$lib/components/ui/input';
   import { Button } from '$lib/components/ui/button';
   import type { ChannelMessage, Channel } from '@baragaun/bg-node-client';
   import { page } from '$app/state';
+  import { createEventDispatcher } from 'svelte';
 
   let {
     messages,
     onEditMessage,
     onDeleteMessage,
+    onReplyMessage,
     channelId,
   }: {
     messages: ChannelMessage[];
     onEditMessage?: (id: string, newText: string) => void;
     onDeleteMessage?: (id: string) => void;
+    onReplyMessage?: (replyToId: string, text: string) => void;
     channelId?: string;
   } = $props();
 
   let messagesContainer: HTMLDivElement;
   let editingMessageId = $state<string | null>(null);
   let editText = $state<string | null | undefined>(null);
+  let replyingToMessage = $state<ChannelMessage | null>(null);
 
   let channel = $derived(() => {
     return page.data.channels.find((c: Channel) => c.id === channelId);
@@ -83,6 +87,13 @@
       editingMessageId = null;
     }
   };
+
+  const dispatch = createEventDispatcher();
+
+  const startReplying = (message: ChannelMessage) => {
+    replyingToMessage = message;
+    dispatch('startReply', { message });
+  };
 </script>
 
 <div class="flex-1 overflow-y-auto p-4" bind:this={messagesContainer}>
@@ -106,6 +117,22 @@
             ? 'bg-primary text-primary-foreground'
             : 'bg-muted'}"
         >
+          {#if message.replyToMessageId}
+            <div class="mb-2 rounded bg-black/10 p-2 text-xs dark:bg-white/10">
+              {#if messages.find((m) => m.id === message.replyToMessageId)}
+                <p class="font-semibold">
+                  {getSenderInfo(
+                    messages.find((m) => m.id === message.replyToMessageId)?.createdBy ?? '',
+                  ).name}
+                </p>
+                <p class="line-clamp-2">
+                  {messages.find((m) => m.id === message.replyToMessageId)?.messageText}
+                </p>
+              {:else}
+                <p class="italic">Original message not available</p>
+              {/if}
+            </div>
+          {/if}
           {#if editingMessageId !== message.id}
             <div
               class="touch-action-none absolute right-1 top-1 opacity-0 transition-opacity group-hover:opacity-100"
@@ -117,6 +144,10 @@
                   <ChevronDown class="h-4 w-4" />
                 </DropdownMenu.Trigger>
                 <DropdownMenu.Content align="end">
+                  <DropdownMenu.Item onclick={() => startReplying(message)}>
+                    <Reply class="mr-2 h-4 w-4" />
+                    Reply
+                  </DropdownMenu.Item>
                   {#if message.createdBy === page.data.currentMockUserId}
                     <DropdownMenu.Item onclick={() => startEditing(message)}>
                       <Pencil class="mr-2 h-4 w-4" />

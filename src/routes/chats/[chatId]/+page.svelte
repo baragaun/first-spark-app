@@ -5,6 +5,8 @@
   import MessageList from '../components/message-list.svelte';
   import MessageInput from '../components/message-input.svelte';
   import { Channel, ChannelMessage } from '@baragaun/bg-node-client';
+  import { X } from 'lucide-svelte';
+  import Button from '@/components/ui/button/button.svelte';
 
   const chatId = page.params.chatId;
 
@@ -19,6 +21,7 @@
   let messages = $state<ChannelMessage[]>([]);
   let isLoading = $state(true);
   let messageListRef = $state<HTMLDivElement>();
+  let replyingTo = $state<ChannelMessage | null>(null);
 
   // Function to scroll to bottom of messages
   const scrollToBottom = () => {
@@ -118,6 +121,25 @@
 
     // Here you would also delete the message from your backend
   };
+
+  const handleReplyMessage = (replyToMessageId: string, messageText: string) => {
+    const newMessage: ChannelMessage = {
+      id: Date.now().toString(),
+      channelId: chatId,
+      createdBy: page.data.currentMockUserId,
+      messageText,
+      createdAt: new Date().toISOString(),
+      replyToMessageId: replyToMessageId,
+    };
+
+    messages = [...messages, newMessage];
+    // Reset reply state
+    replyingTo = null;
+    // Scroll to bottom after sending a message
+    scrollToBottom();
+
+    // Here you would also send the message to your backend
+  };
 </script>
 
 <div class="flex h-screen flex-col overflow-hidden">
@@ -141,12 +163,29 @@
           channelId={chatId}
           onEditMessage={handleEditMessage}
           onDeleteMessage={handleDeleteMessage}
+          onReplyMessage={handleReplyMessage}
+          on:startReply={(event) => (replyingTo = event.detail.message)}
         />
       </div>
     </div>
 
     <div class="shadow-t sticky bottom-0 z-20 bg-background">
-      <MessageInput onSendMessage={handleSendMessage} />
+      {#if replyingTo}
+        <div class="flex items-center justify-between border-b border-t bg-muted/50 p-2">
+          <div class="flex-1">
+            <p class="text-xs text-muted-foreground">Replying to</p>
+            <p class="line-clamp-1 text-sm">{replyingTo.messageText}</p>
+          </div>
+          <Button variant="ghost" size="sm" onclick={() => (replyingTo = null)}>
+            <X class="h-4 w-4" />
+          </Button>
+        </div>
+      {/if}
+      <MessageInput
+        onSendMessage={(text) =>
+          replyingTo ? handleReplyMessage(replyingTo.id, text) : handleSendMessage(text)}
+        placeholder={replyingTo ? 'Type your reply...' : 'Type a message...'}
+      />
     </div>
   {/if}
 </div>
