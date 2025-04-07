@@ -19,13 +19,21 @@
   };
 
   function handleMessageSearch(e: CustomEvent<string>): void {
-    throw new Error('Function not implemented.');
+    const searchQuery = e.detail.toLowerCase().trim();
+    if (searchQuery) {
+      // Dispatch a custom event to parent component to filter messages
+      const searchEvent = new CustomEvent('messageSearch', {
+        detail: { query: searchQuery },
+        bubbles: true,
+      });
+      document.dispatchEvent(searchEvent);
+    }
   }
 </script>
 
 <div class="flex items-center justify-between border-b p-4">
   <div class="flex items-center gap-4">
-    <Button variant="ghost" size="icon" onclick={handleBack} class="md:hidden">
+    <Button variant="ghost" size="icon" onclick={handleBack}>
       <ArrowLeft class="h-5 w-5" />
     </Button>
 

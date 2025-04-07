@@ -18,7 +18,7 @@
     },
     {
       title: 'Conversations',
-      url: '#',
+      url: '/chats',
       icon: MessageSquare,
     },
     {

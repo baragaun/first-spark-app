@@ -10,15 +10,24 @@
   let showEmojiPicker = $state(false);
   let inputRef = $state<HTMLInputElement | null>(null);
 
-  const handleSubmit = (e: Event) => {
-    e.preventDefault();
+  const handleSubmit = () => {
     if (messageText.trim()) {
+      // Store current cursor position
+      const cursorPosition = inputRef?.selectionStart || 0;
+
+      // Send message
       onSendMessage(messageText.trim());
       messageText = '';
-      // Maintain focus on the input after sending
+
+      // Immediately focus the input without waiting
+      inputRef?.focus();
+
+      // For mobile browsers, also use the timeout approach as a fallback
       setTimeout(() => {
-        inputRef?.focus();
-      }, 10); // Slightly longer timeout for mobile
+        if (document.activeElement !== inputRef) {
+          inputRef?.focus();
+        }
+      }, 0);
     }
   };
 
@@ -51,7 +60,7 @@
 </script>
 
 <div class="border-t p-4">
-  <form onsubmit={handleSubmit} class="flex items-center gap-2">
+  <div class="flex items-center gap-2">
     <div class="relative">
       <Button type="button" variant="ghost" size="icon" onclick={toggleEmojiPicker}>
         <Smile class="h-5 w-5" />
@@ -73,8 +82,18 @@
       bind:ref={inputRef}
     />
 
-    <Button type="submit" variant="default" size="icon" disabled={!messageText.trim()}>
+    <Button
+      type="button"
+      variant="default"
+      size="icon"
+      disabled={!messageText.trim()}
+      onclick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        handleSubmit();
+      }}
+    >
       <Send class="h-5 w-5" />
     </Button>
-  </form>
+  </div>
 </div>

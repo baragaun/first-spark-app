@@ -18,6 +18,23 @@
   let channelDetails = $state<ContactDetails | null>(null);
   let messages = $state<ChannelMessage[]>([]);
   let isLoading = $state(true);
+  let messageListRef: HTMLDivElement;
+
+  // Function to scroll to bottom of messages
+  const scrollToBottom = () => {
+    if (messageListRef) {
+      setTimeout(() => {
+        messageListRef.scrollTop = messageListRef.scrollHeight;
+      }, 0);
+    }
+  };
+
+  // Effect to scroll down when messages change
+  $effect(() => {
+    if (messages.length > 0) {
+      scrollToBottom();
+    }
+  });
 
   // Function to determine contact info based on channel participants
   const setContactInfo = (channel: Channel) => {
@@ -63,6 +80,8 @@
         messages = page.data.messages[chatId] || [];
       }
       isLoading = false;
+      // Scroll to bottom after messages load
+      scrollToBottom();
     }, 500);
   });
 
@@ -76,6 +95,8 @@
     };
 
     messages = [...messages, newMessage];
+    // Scroll to bottom after sending a message
+    scrollToBottom();
 
     // Here you would also send the message to your backend
   };
@@ -83,7 +104,7 @@
   const handleEditMessage = (id: string, newText: string) => {
     // Find and update the message
     messages = messages.map((message) =>
-      message.id === id ? { ...message, text: newText } : message,
+      message.id === id ? { ...message, messageText: newText } : message,
     );
 
     // Here you would also update the message in your backend
@@ -97,7 +118,7 @@
   };
 </script>
 
-<div class="flex h-screen flex-col">
+<div class="flex h-screen flex-col overflow-hidden">
   {#if isLoading}
     <div class="flex flex-1 items-center justify-center">
       <div class="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
@@ -107,17 +128,30 @@
       <p>Chat not found</p>
     </div>
   {:else}
-    <div class="sticky top-0 z-10 bg-background">
+    <div class="sticky top-0 z-30 bg-background shadow-sm">
       <ChatHeader contact={channelDetails} />
     </div>
-    <MessageList
-      {messages}
-      channelId={chatId}
-      onEditMessage={handleEditMessage}
-      onDeleteMessage={handleDeleteMessage}
-    />
-    <div class="sticky bottom-0 z-10 bg-background">
+
+    <div class="relative flex-1 overflow-hidden">
+      <div class="absolute inset-0 overflow-y-auto" bind:this={messageListRef}>
+        <MessageList
+          {messages}
+          channelId={chatId}
+          onEditMessage={handleEditMessage}
+          onDeleteMessage={handleDeleteMessage}
+        />
+      </div>
+    </div>
+
+    <div class="shadow-t sticky bottom-0 z-20 bg-background">
       <MessageInput onSendMessage={handleSendMessage} />
     </div>
   {/if}
 </div>
+
+<style>
+  /* Add shadow to top of input area */
+  .shadow-t {
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.05);
+  }
+</style>

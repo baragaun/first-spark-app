@@ -15,16 +15,14 @@
   };
 </script>
 
-<div
-  class="touch-action-none absolute left-2 top-2 opacity-0 transition-opacity group-hover:opacity-100"
->
+<div class="touch-action-none">
   <DropdownMenu.Root>
     <DropdownMenu.Trigger
-      class="flex h-6 w-6 items-center justify-center rounded-full bg-black/20 hover:bg-black/30 dark:bg-primary-foreground/20 dark:hover:bg-primary-foreground/30"
+      class="flex h-6 w-6 items-center justify-center rounded-full bg-black/10 dark:bg-primary-foreground/10"
     >
       <ChevronDown class="h-4 w-4" />
     </DropdownMenu.Trigger>
-    <DropdownMenu.Content align="start">
+    <DropdownMenu.Content align="end">
       <DropdownMenu.Item>
         <Archive class="mr-2 h-4 w-4" />
         Archive

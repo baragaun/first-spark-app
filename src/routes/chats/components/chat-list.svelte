@@ -94,9 +94,12 @@
                   {getRecipientName(channel) || 'Unknown User'}
                 {/if}
               </h3>
-              <span class="text-xs text-muted-foreground"
-                >{formatTime(channel.updatedAt || channel.createdAt)}</span
-              >
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-muted-foreground"
+                  >{formatTime(channel.updatedAt || channel.createdAt)}</span
+                >
+                <ChannelOptionsMenu channelId={channel.id} onDeleteChannel={handleDeleteChannel} />
+              </div>
             </div>
             <p class="truncate text-sm text-muted-foreground">
               {channel.description || 'No description'}
@@ -109,8 +112,6 @@
             </div>
           {/if} -->
         </a>
-
-        <ChannelOptionsMenu channelId={channel.id} onDeleteChannel={handleDeleteChannel} />
       </div>
     {/each}
   {/if}
