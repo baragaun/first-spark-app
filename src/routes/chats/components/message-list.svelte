@@ -23,30 +23,6 @@
   let messagesContainer: HTMLDivElement;
   let editingMessageId = $state<string | null>(null);
   let editText = $state<string | null | undefined>(null);
-  let searchQuery = $state<string>('');
-  let filteredMessages = $derived(() => {
-    if (!searchQuery) return messages;
-    return messages.filter((msg) =>
-      msg.messageText?.toLowerCase().includes(searchQuery.toLowerCase()),
-    ) as ChannelMessage[];
-  });
-
-  // Listen for search events
-  $effect(() => {
-    const handleSearch = (e: CustomEvent<{ query: string }>) => {
-      searchQuery = e.detail.query;
-      // Reset filtered messages when search is cleared
-      if (!e.detail.query) {
-        searchQuery = '';
-      }
-    };
-
-    document.addEventListener('messageSearch', handleSearch as EventListener);
-
-    return () => {
-      document.removeEventListener('messageSearch', handleSearch as EventListener);
-    };
-  });
 
   let channel = $derived(() => {
     return page.data.channels.find((c: Channel) => c.id === channelId);
@@ -87,13 +63,6 @@
     }
   });
 
-  // Add a function to handle input focus events
-  const scrollToBottom = () => {
-    if (messagesContainer) {
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    }
-  };
-
   const formatMessageTime = (date: Date) => {
     return format(date, 'h:mm a');
   };
@@ -118,7 +87,7 @@
 
 <div class="flex-1 overflow-y-auto p-4" bind:this={messagesContainer}>
   <div class="space-y-4">
-    {#each filteredMessages() as message (message.id)}
+    {#each messages as message (message.id)}
       <div
         class="flex {message.createdBy === page.data.currentMockUserId
           ? 'justify-end'

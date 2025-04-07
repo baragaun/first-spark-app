@@ -18,13 +18,15 @@
   let channelDetails = $state<ContactDetails | null>(null);
   let messages = $state<ChannelMessage[]>([]);
   let isLoading = $state(true);
-  let messageListRef: HTMLDivElement;
+  let messageListRef = $state<HTMLDivElement>();
 
   // Function to scroll to bottom of messages
   const scrollToBottom = () => {
     if (messageListRef) {
       setTimeout(() => {
-        messageListRef.scrollTop = messageListRef.scrollHeight;
+        if (messageListRef) {
+          messageListRef.scrollTop = messageListRef.scrollHeight;
+        }
       }, 0);
     }
   };

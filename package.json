@@ -70,7 +70,7 @@
     "vitest": "^3.0.7"
   },
   "dependencies": {
-    "@baragaun/bg-node-client": "link:/Users/raghvindyadav/GitHub/bg-node-client",
+    "@baragaun/bg-node-client": "^0.0.22",
     "date-fns": "^4.1.0",
     "formsnap": "^2.0.0",
     "mode-watcher": "^0.5.1",
