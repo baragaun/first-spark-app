@@ -1,15 +1,14 @@
 <script lang="ts">
-  import { Button } from '$lib/components/ui/button';
-  import { Input } from '$lib/components/ui/input';
-  import * as Dialog from '$lib/components/ui/dialog';
   import * as Alert from '$lib/components/ui/alert';
-  import { AlertDescription } from '$lib/components/ui/alert';
-  import { ChevronRight, AlertTriangle } from 'lucide-svelte';
+  import { Button } from '$lib/components/ui/button';
+  import * as Dialog from '$lib/components/ui/dialog';
   import * as Form from '$lib/components/ui/form/index';
+  import { Input } from '$lib/components/ui/input';
+  import Label from '@/components/ui/label/label.svelte';
+  import { AlertTriangle, ChevronRight } from 'lucide-svelte';
   import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
   import { zodClient } from 'sveltekit-superforms/adapters';
   import { deleteAccountSchema } from '../account-settings-schema';
-  import Label from '@/components/ui/label/label.svelte';
 
   interface DeleteAccountProps {
     currentEmail: string;

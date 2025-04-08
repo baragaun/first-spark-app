@@ -280,10 +280,6 @@ export class MyUserContext {
         return { error: translate(response.error, AppUiMessage.systemError) };
       }
 
-      // Refresh the myUser object after successful update
-      if (response.object) {
-        this.myUser = response.object;
-      }
       return { myUser: response.object };
     } catch (error) {
       console.error('MyUserContext.updateMyUser: error', {
@@ -302,8 +298,8 @@ export class MyUserContext {
       return translate(AppUiMessage.systemError);
     }
 
-    if (this.client.isSignedIn) {
-      console.error('MyUserContext.updateMyPassword: already signed in');
+    if (!this.client.isSignedIn) {
+      console.error('MyUserContext.updateMyPassword: not signed in');
       return translate(AppUiMessage.systemError);
     }
 
@@ -414,6 +410,46 @@ export class MyUserContext {
       return { error: translate((error as Error).message, AppUiMessage.systemError) };
     } finally {
       isLoading = false;
+    }
+  }
+
+  async verifyMyPassword(password: string): Promise<QueryResult<boolean>> {
+    if (!this.client.isInitialized) {
+      console.error('MyUserContext.verifyMyPassword: not initialized.');
+      return { error: translate(AppUiMessage.systemError) };
+    }
+
+    try {
+      isLoading.set(true);
+      return await this.client.operations.myUser.verifyMyPassword(password);
+    } catch (error) {
+      console.error('MyUserContext.verifyMyPassword: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return { error: translate((error as Error).message, AppUiMessage.systemError) };
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  async verifyMyPassword(password: string): Promise<QueryResult<boolean>> {
+    if (!this.client.isInitialized) {
+      console.error('MyUserContext.verifyMyPassword: not initialized.');
+      return { error: translate(AppUiMessage.systemError) };
+    }
+
+    try {
+      isLoading.set(true);
+      return await this.client.operations.myUser.verifyMyPassword(password);
+    } catch (error) {
+      console.error('MyUserContext.verifyMyPassword: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return { error: translate((error as Error).message, AppUiMessage.systemError) };
+    } finally {
+      isLoading.set(false);
     }
   }
 
