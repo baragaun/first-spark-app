@@ -15,10 +15,13 @@
     placeholder = 'Password',
     showValidation = false,
     isValid = $bindable(false),
+    errorMessage = $bindable(''),
     ...restProps
-  }: ComponentProps<typeof Input> & { 
+  }: ComponentProps<typeof Input> & {
     showValidation?: boolean;
+    errorMessage?: string;
     isValid?: boolean;
+    passwordError?: string;
   } = $props();
 
   let showPassword = $state(false);
@@ -26,7 +29,7 @@
   const togglePasswordVisibility = () => {
     showPassword = !showPassword;
   };
-  
+
   // Update isValid whenever value changes
   $effect(() => {
     if (!value) {
@@ -67,10 +70,7 @@
     <div class="space-y-2 text-xs">
       <p class="text-muted-foreground">Password requirements:</p>
       <ul class="list-inside list-disc space-y-1 pl-2">
-        <li
-          class:text-destructive={value.length < 8}
-          class:text-green-500={value.length >= 8}
-        >
+        <li class:text-destructive={value.length < 8} class:text-green-500={value.length >= 8}>
           At least 8 characters
         </li>
       </ul>
@@ -80,5 +80,7 @@
       <p class="text-xs text-destructive">{getPasswordError(value)}</p>
     {/if}
   {/if}
+  {#if errorMessage}
+    <p class="text-xs text-destructive">{errorMessage}</p>
+  {/if}
 </div>
-

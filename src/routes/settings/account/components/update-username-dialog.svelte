@@ -92,8 +92,8 @@
   };
 
   function resetDialogState() {
-    $formData.username = currentUsername;
     errorMessage = '';
+    form.reset();
   }
 
   const saveUsername = async () => {
@@ -174,7 +174,14 @@
       >
         Cancel
       </Button>
-      <Button type="submit" disabled={isLoading || !hasFormValues} onclick={saveUsername}>
+      <Button
+        type="submit"
+        disabled={isLoading || !hasFormValues}
+        onclick={() => {
+          saveUsername();
+          resetDialogState();
+        }}
+      >
         {isLoading ? 'Saving...' : 'Save Changes'}
       </Button>
     </Dialog.Footer>
