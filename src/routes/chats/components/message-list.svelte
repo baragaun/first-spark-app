@@ -13,7 +13,6 @@
     messages,
     onEditMessage,
     onDeleteMessage,
-    onReplyMessage,
     channelId,
   }: {
     messages: ChannelMessage[];

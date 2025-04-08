@@ -4,7 +4,13 @@
   import { Smile, Send } from 'lucide-svelte';
   import EmojiPicker from './emoji-picker.svelte';
 
-  let { onSendMessage }: { onSendMessage: (text: string) => void } = $props();
+  let {
+    onSendMessage,
+    placeholder = 'Type a message...',
+  }: {
+    onSendMessage: (text: string) => void;
+    placeholder?: string;
+  } = $props();
 
   let messageText = $state('');
   let showEmojiPicker = $state(false);
@@ -75,7 +81,7 @@
 
     <Input
       type="text"
-      placeholder="Type a message..."
+      {placeholder}
       bind:value={messageText}
       onkeydown={handleKeyDown}
       class="flex-1"
