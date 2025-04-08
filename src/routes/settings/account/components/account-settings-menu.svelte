@@ -1,13 +1,14 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { Separator } from '$lib/components/ui/separator';
-  import UpdateUsernameInput from './update-username-dialog.svelte';
-  import UpdateEmailInput from './update-email-dialog.svelte';
-  import UpdatePasswordInput from './update-password-dialog.svelte';
-  import DeleteAccountInput from './delete-account-input.svelte';
-  import type { PageData } from '../$types';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { myUser } from '@/contexts/my-user-context.svelte'; // Import the myUser store
   import { onMount } from 'svelte';
+  import type { PageData } from '../$types';
+  import DeleteAccountDialog from './delete-account-dialog.svelte';
+  import UpdateEmailDialog from './update-email-dialog.svelte';
+  import UpdatePasswordDialog from './update-password-dialog.svelte';
+  import UpdateUsernameDialog from './update-username-dialog.svelte';
 
   let { data }: { data: PageData } = $props();
 
@@ -15,6 +16,19 @@
 
   let currentUsername = $state('');
   let currentEmail = $state('');
+
+  // Subscribe to the myUser store
+  $effect(() => {
+    if ($myUser) {
+      console.log('myUser', $myUser);
+
+      currentUsername = $myUser.userHandle || data.currentUsername || '';
+      currentEmail = $myUser.email || data.email || '';
+    } else {
+      console.log('updateUserData', $myUser);
+      updateUserData();
+    }
+  });
 
   function updateUserData() {
     currentUsername = data.currentUsername || myUserContext.myUserHandle || '';
@@ -38,8 +52,6 @@
     }
   };
 
-
-
   const handleAccountDeletion = async () => {
     try {
       isLoading = true;
@@ -59,7 +71,7 @@
 <div>
   <h4 class="font-lexend mb-4 px-4 text-lg font-bold">General</h4>
   <div class="space-y-4 px-4">
-    <UpdateUsernameInput
+    <UpdateUsernameDialog
       {currentUsername}
       {currentEmail}
       usernameForm={data.usernameForm}
@@ -68,7 +80,7 @@
       }}
     />
 
-    <UpdateEmailInput
+    <UpdateEmailDialog
       {currentEmail}
       emailForm={data.emailForm}
       onSave={async (newEmail) => {
@@ -76,14 +88,14 @@
       }}
     />
 
-    <UpdatePasswordInput passwordForm={data.passwordForm} />
+    <UpdatePasswordDialog passwordForm={data.passwordForm} />
   </div>
 
   <Separator class="my-6" />
 
   <h4 class="font-lexend mb-4 px-4 text-lg font-bold">Danger Zone</h4>
   <div class="space-y-4 px-4">
-    <DeleteAccountInput
+    <DeleteAccountDialog
       {currentEmail}
       deleteAccountForm={data.deleteAccountForm}
       onDelete={async () => {

@@ -4,42 +4,90 @@
   import { PasswordInput } from '$lib/components/ui/password-input';
   import IdentInput from '@/components/ident-input.svelte';
   import { Label } from '@/components/ui/label';
-  import type { Infer, SuperForm } from 'sveltekit-superforms';
-  import type { emailSchema } from '../../../../routes/settings/account/account-settings-schema';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { AppUiMessage } from '@/types/enums';
   import { UserIdentType } from '@baragaun/bg-node-client';
+  import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
+  import { zodClient } from 'sveltekit-superforms/adapters';
+  import { emailSchema } from '../account-settings-schema';
 
   interface UpdateEmailFormProps {
-    form: SuperForm<Infer<typeof emailSchema>, unknown>;
+    emailForm: SuperValidated<Infer<typeof emailSchema>>;
     isLoading: boolean;
     isPasswordValid: boolean;
-    hasFormValues: boolean | string;
     onCancel: () => void;
-    onSave: () => void;
+    onSave: (email: string, currentPassword: string) => void;
   }
 
   let {
-    form,
-    isLoading,
+    emailForm,
+    isLoading = $bindable(false),
     isPasswordValid = $bindable(false),
-    hasFormValues = $bindable(false),
     onCancel,
     onSave,
   }: UpdateEmailFormProps = $props();
 
-  let newEmail = $state('');
-  let currentPassword = $state('');
-  let errorMessage = $state('');
-  // $errors.email?.[0]
+  const form = superForm(emailForm, {
+    validators: zodClient(emailSchema),
+    validationMethod: 'oninput',
+  });
 
   // Destructure form helpers
   const { form: formData, errors, enhance } = form;
 
+  // Initialize with values from the SuperForm data
+  let newEmail = $state(emailForm.data.email || '');
+  let currentPassword = $state(emailForm.data.currentPassword || '');
+  let isIdentAvailable = $state(null);
+  let passwordErrorMsg = $state('');
+
   // Derive form validity
   let formIsValid = $derived(
-    //   $formData.email &&
-    //   $formData.currentPassword &&
-    newEmail && !errorMessage && currentPassword && !$errors.email && isPasswordValid,
+    newEmail && isIdentAvailable && !passwordErrorMsg && !$errors.email && currentPassword,
   );
+
+  // Update formData when newEmail and currentPassword change
+  $effect(() => {
+    $formData.email = newEmail;
+    $formData.currentPassword = currentPassword;
+    passwordErrorMsg = $errors.currentPassword?.[0] || '';
+  });
+
+  const verifyCurrentPasswordAndUpdateEmail = async (password: string) => {
+    isLoading = true;
+    passwordErrorMsg = '';
+
+    const verifyMyPasswordResponse = await myUserContext.verifyMyPassword(password);
+    if (
+      verifyMyPasswordResponse.object === false ||
+      verifyMyPasswordResponse.object?.toString() === 'false'
+    ) {
+      console.error('Incorrect password', {
+        verifyMyPasswordResponse,
+      });
+      passwordErrorMsg = 'Incorrect password. Please verify and try again.';
+      isPasswordValid = false;
+      isLoading = false;
+      return;
+    }
+
+    if (verifyMyPasswordResponse.error) {
+      console.error('Failed to verify password:', {
+        verifyMyPasswordResponse,
+      });
+      passwordErrorMsg = verifyMyPasswordResponse.error || AppUiMessage.systemError;
+      isLoading = false;
+      return;
+    }
+
+    isPasswordValid = true;
+    isLoading = false;
+    onSave(newEmail, currentPassword);
+  };
+
+  const handleSaveClick = () => {
+    verifyCurrentPasswordAndUpdateEmail(currentPassword);
+  };
 </script>
 
 <form method="POST" use:enhance>
@@ -51,7 +99,7 @@
       <IdentInput
         bind:identifier={newEmail}
         identType={UserIdentType.email}
-        bind:identError={errorMessage}
+        bind:isIdentAvailable
         showAvailabilityMessage={true}
         placeholder="Enter new email address"
       />
@@ -63,16 +111,16 @@
       </Label>
       <PasswordInput
         id="email-change-password"
-        showValidation={true}
         placeholder="password"
         bind:isValid={isPasswordValid}
         bind:value={currentPassword}
+        bind:errorMessage={passwordErrorMsg}
       />
     </div>
 
     <Dialog.Footer class="mt-6 flex justify-end gap-3">
       <Button variant="outline" type="button" onclick={onCancel}>Cancel</Button>
-      <Button type="submit" disabled={isLoading || !formIsValid} onclick={onSave}>
+      <Button type="button" disabled={isLoading || !formIsValid} onclick={handleSaveClick}>
         {isLoading ? 'Saving...' : 'Save changes'}
       </Button>
     </Dialog.Footer>

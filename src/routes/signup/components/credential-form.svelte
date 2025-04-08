@@ -11,11 +11,11 @@
   let password = $state('');
   let username = $state('');
   let loading = $state(false);
-  let isUsernameAvailable = $state<boolean | null>(null);
+  let isUsernameAvailable = $state(true);
   let isPasswordValid = $state(false);
 
   // Destructure password helpers
-  const { getPasswordError, validatePassword } = passwordHelpers;
+  const { validatePassword } = passwordHelpers;
 
   // Props interface
   interface Props {
@@ -56,7 +56,7 @@
       type === UserIdentType.userHandle && ident === myUserContext.myUserHandle;
     if (isCurrentIdent) {
       console.log('isCurrentIdent', { isCurrentIdent });
-      isUsernameAvailable = null;
+      isUsernameAvailable = true;
       return;
     }
 
@@ -98,22 +98,19 @@
 
     <div class="relative space-y-2">
       <label for="password" class="text-sm font-medium">Password</label>
-      <PasswordInput 
-        bind:value={password} 
+      <PasswordInput
+        bind:value={password}
         bind:isValid={isPasswordValid}
-        placeholder="Password" 
+        placeholder="Password"
         showValidation={true}
-        required 
+        required
       />
     </div>
 
     <Button
       type="submit"
       class="w-full"
-      disabled={isUsernameAvailable !== true ||
-        loading ||
-        !password ||
-        !isPasswordValid}
+      disabled={isUsernameAvailable === false || loading || !password || !isPasswordValid}
     >
       {loading ? 'Creating account...' : 'Create Account'}
     </Button>

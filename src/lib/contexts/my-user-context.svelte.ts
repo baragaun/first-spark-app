@@ -17,14 +17,14 @@ import {
   type SignInUserInput,
   type SignUpUserInput,
 } from '@baragaun/bg-node-client';
-import { writable } from 'svelte/store';
+import { writable, type Writable } from 'svelte/store';
 
 export const isSignedIn = writable(false);
 export const isLoading = writable(false);
+export const myUser: Writable<MyUser | undefined> = writable(undefined);
 
 export class MyUserContext {
   private client: BgNodeClient = new BgNodeClient();
-  private myUser: MyUser | undefined;
   private _isInitializing = false;
 
   public async initialize(): Promise<void> {
@@ -73,8 +73,9 @@ export class MyUserContext {
         topic: BgListenerTopic.myUser,
         onSignedIn: () => isSignedIn.set(true),
         onSignedOut: () => isSignedIn.set(false),
-        onMyUserUpdated: (myUser) => {
-          this.myUser = myUser;
+        onMyUserUpdated: (updatedMyUser: MyUser) => {
+          console.log('MyUserContext: onMyUserUpdated', { myUser });
+          myUser.set(updatedMyUser);
         },
       } as MyUserListener);
 
@@ -276,10 +277,6 @@ export class MyUserContext {
         return { error: translate(response.error, AppUiMessage.systemError) };
       }
 
-      // Refresh the myUser object after successful update
-      if (response.object) {
-        this.myUser = response.object;
-      }
       return { myUser: response.object };
     } catch (error) {
       console.error('MyUserContext.updateMyUser: error', {
@@ -298,8 +295,8 @@ export class MyUserContext {
       return translate(AppUiMessage.systemError);
     }
 
-    if (this.client.isSignedIn) {
-      console.error('MyUserContext.updateMyPassword: already signed in');
+    if (!this.client.isSignedIn) {
+      console.error('MyUserContext.updateMyPassword: not signed in');
       return translate(AppUiMessage.systemError);
     }
 
@@ -413,6 +410,26 @@ export class MyUserContext {
     }
   }
 
+  async verifyMyPassword(password: string): Promise<QueryResult<boolean>> {
+    if (!this.client.isInitialized) {
+      console.error('MyUserContext.verifyMyPassword: not initialized.');
+      return { error: translate(AppUiMessage.systemError) };
+    }
+
+    try {
+      isLoading.set(true);
+      return await this.client.operations.myUser.verifyMyPassword(password);
+    } catch (error) {
+      console.error('MyUserContext.verifyMyPassword: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return { error: translate((error as Error).message, AppUiMessage.systemError) };
+    } finally {
+      isLoading.set(false);
+    }
+  }
+
   async verifyMultiStepActionToken(
     actionId: string,
     token: string,
@@ -485,11 +502,19 @@ export class MyUserContext {
   }
 
   public get myUserHandle(): string | null | undefined {
-    return this.myUser?.userHandle;
+    let handle: string | null | undefined;
+    myUser.subscribe((user) => {
+      handle = user?.userHandle;
+    })();
+    return handle;
   }
 
   public get myEmail(): string | null | undefined {
-    return this.myUser?.email;
+    let email: string | null | undefined;
+    myUser.subscribe((user) => {
+      email = user?.email;
+    })();
+    return email;
   }
 }
 

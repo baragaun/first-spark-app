@@ -2,8 +2,7 @@
   import { Button } from '$lib/components/ui/button';
   import * as Dialog from '$lib/components/ui/dialog';
   import { ChevronRight } from 'lucide-svelte';
-  import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
-  import { zodClient } from 'sveltekit-superforms/adapters';
+  import { type Infer, type SuperValidated } from 'sveltekit-superforms';
   import { emailSchema } from '../account-settings-schema';
   import UpdateEmailForm from './update-email-form.svelte';
   import TokenForm from '@/components/token-form.svelte';
@@ -12,6 +11,9 @@
     MultiStepActionEventType,
     type SidMultiStepActionProgress,
   } from '@baragaun/bg-node-client';
+  import ErrorAlert from '@/components/error-alert.svelte';
+  import { AppUiMessage } from '@/types/enums';
+  import { writable } from 'svelte/store';
 
   interface EmailInputProps {
     currentEmail: string;
@@ -21,66 +23,53 @@
 
   let { currentEmail, onSave, emailForm }: EmailInputProps = $props();
 
-  const form = superForm(emailForm, {
-    validators: zodClient(emailSchema),
-    validationMethod: 'oninput',
-    onResult: ({ result }) => {
-      isLoading = false;
-      if (result.type === 'success') {
-        handleEmailChange();
-      }
-    },
-  });
+  // Define steps similar to sign-up-form
+  const STEPS = {
+    EMAIL_FORM: 0,
+    VERIFICATION: 1,
+    CONFIRMATION: 2,
+  };
 
-  // Destructure form helpers
-  const { form: formData, enhance, validateForm, errors } = form;
+  // Use writable store for currentStep
+  let currentStep = writable(STEPS.EMAIL_FORM);
 
   // State variables
   let isLoading = $state(false);
   let showEmailEdit = $state(false);
-  let showConfirmation = $state(false);
-  let showVerification = $state(false);
-  let error = $state('');
-  let isPasswordValid = $state(false);
   let errorMessage = $state('');
-  let mfaActionId: string | undefined; // <- no need to make it a state variable
-
-  // Derived state to check if form has values and is valid
-  let hasFormValues = $derived(
-    $formData.email &&
-      $formData.currentPassword &&
-      !$errors.email &&
-      !$errors.currentPassword &&
-      isPasswordValid,
-  );
+  let isPasswordValid = $state(false);
+  let mfaActionId: string | undefined;
 
   // Reset dialog state when closed
   function resetDialogState() {
-    $formData.email = '';
-    $formData.currentPassword = '';
-    showConfirmation = false;
-    showVerification = false;
-    if (isLoading) isLoading = false;
+    currentStep.set(STEPS.EMAIL_FORM);
+    isLoading = false;
+    errorMessage = '';
+    isPasswordValid = false;
+    mfaActionId = undefined;
+    emailForm.data.email = '';
+    emailForm.data.currentPassword = '';
   }
 
   // When opening the dialog, set initial values
   function openDialog() {
     showEmailEdit = true;
-    // Initialize form with empty values to avoid validation errors on first render
-    $formData.email = '';
-    $formData.currentPassword = '';
   }
 
   // Handle email change
-  const handleEmailChange = async () => {
+  const handleEmailChange = async (email: string, password: string) => {
     try {
+      // Store values in the SuperForm data
+      emailForm.data.email = email;
+      emailForm.data.currentPassword = password;
+
       isLoading = true;
       errorMessage = '';
 
-      // Show verification step
+      console.log('email', email);
 
       // Send verification token to the new email
-      const verifyMyEmailResponse = await myUserContext.verifyMyEmail($formData.email);
+      const verifyMyEmailResponse = await myUserContext.verifyMyEmail(email);
 
       if (
         !verifyMyEmailResponse ||
@@ -93,18 +82,15 @@
         console.error('UpdateEmailDialog.handleEmailChange: verifyMyEmail failed.', {
           verifyMyEmailResponse,
         });
-        errorMessage = verifyMyEmailResponse?.error || 'A system error occurred. Please try again.';
-        showVerification = false;
+        errorMessage = verifyMyEmailResponse.error || AppUiMessage.systemError;
         return;
       }
 
       console.log('Email confirmation started:', verifyMyEmailResponse);
 
-      // Store the action ID for later verification
       mfaActionId = verifyMyEmailResponse?.object.actionProgress?.actionId;
-      showVerification = true;
+      currentStep.set(STEPS.VERIFICATION);
 
-      // Set up event listener for the verification process
       verifyMyEmailResponse.object.run.addListener({
         id: 'UpdateEmailDialog',
         onEvent: async (
@@ -124,7 +110,32 @@
 
             errorMessage =
               'We could not send the verification token to your email. Please try again.';
-            showVerification = false;
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.notificationSent) {
+            console.log(
+              'UpdateEmailDialog.multiStepActionListener: Notification sent out.',
+              action.notificationResult,
+            );
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.tokenFailed) {
+            console.error(
+              'UpdateEmailDialog.multiStepActionListener: incorrect token.',
+              action.notificationResult,
+            );
+            errorMessage = 'We could not verify the token you entered. Please try again.';
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.timedOut) {
+            console.error(
+              'UpdateEmailDialog.multiStepActionListener: timeout.',
+              action.notificationResult,
+            );
+            errorMessage = 'The verification token has expired. Please request a new one.';
             return;
           }
 
@@ -134,47 +145,41 @@
               action.notificationResult,
             );
             errorMessage = 'A system error has occurred. Please try again later.';
-            showVerification = false;
             return;
           }
 
           if (eventType === MultiStepActionEventType.success) {
-            // The token was accepted. The email change was successful.
+            // The token was accepted. The email has been updated now.
             console.log(
               'UpdateEmailDialog.multiStepActionListener: success.',
               action.notificationResult,
             );
-
-            // Update the email
-            await updateNewEmail()
-
-            // Show confirmation screen
-            showVerification = false;
-            showConfirmation = true;
+            await updateNewEmail(email);
+            currentStep.set(STEPS.CONFIRMATION);
           }
         },
       });
     } catch (error) {
       console.error('Error updating email:', error);
       errorMessage = error instanceof Error ? error.message : 'Failed to send verification';
-      showVerification = false;
     } finally {
       isLoading = false;
     }
   };
 
-
-  const updateNewEmail = async (): Promise<boolean> => {
+  const updateNewEmail = async (email: string): Promise<boolean> => {
     errorMessage = '';
     try {
       const result = await myUserContext.updateMyUser({
-        email: $formData.email,
+        email: email,
       });
 
       if (result.error) {
+        console.log('updateNewEmail: fail.', result);
         errorMessage = result.error;
         return false;
       }
+      console.log('updateNewEmail: success.', result);
       return true;
     } catch (error) {
       errorMessage = error instanceof Error ? error.message : 'Failed to update email';
@@ -207,11 +212,7 @@
       }
 
       // If verification is successful, update the email
-      await onSave($formData.email);
-
-      // Show confirmation screen
-      showVerification = false;
-      showConfirmation = true;
+      await onSave(emailForm.data.email);
     } catch (error) {
       console.error('Error verifying code:', error);
       errorMessage = error instanceof Error ? error.message : 'A system error occurred';
@@ -222,7 +223,13 @@
 
   // Handle resend verification token
   const handleResend = async () => {
-    const response = await myUserContext.sendMultiStepActionNotification($formData.email);
+    if (!mfaActionId) {
+      console.error('UpdateEmailDialog.handleResend: no mfaActionId.');
+      errorMessage = 'A system error occurred. Please try again.';
+      return;
+    }
+
+    const response = await myUserContext.sendMultiStepActionNotification(mfaActionId);
 
     if (response !== true) {
       errorMessage = response || 'We failed to send the verification token. Please try again.';
@@ -232,7 +239,8 @@
 
   // Handle back button
   const handleBack = () => {
-    showVerification = false;
+    currentStep.set(STEPS.EMAIL_FORM);
+    errorMessage = '';
   };
 </script>
 
@@ -257,11 +265,10 @@
   open={showEmailEdit}
   onOpenChange={(open: boolean) => {
     showEmailEdit = open;
-    if (!open) resetDialogState();
   }}
 >
   <Dialog.Content class="sm:max-w-[425px]">
-    {#if showVerification}
+    {#if $currentStep === STEPS.VERIFICATION}
       <Dialog.Header class="space-y-2">
         <Dialog.Title class="text-xl font-semibold">Verify your email</Dialog.Title>
         <Dialog.Description class="text-base text-muted-foreground">
@@ -270,18 +277,39 @@
       </Dialog.Header>
 
       <TokenForm
-        ident={$formData.email}
+        ident={emailForm.data.email}
         onSubmit={handleEmailVerificationSubmit}
         onResend={handleResend}
         onBack={handleBack}
       />
 
       {#if errorMessage}
-        <div class="mt-4 rounded-md bg-destructive/15 p-3 text-sm text-destructive">
-          {errorMessage}
-        </div>
+        <ErrorAlert bind:errorMessage />
       {/if}
-    {:else if !showConfirmation}
+    {:else if $currentStep === STEPS.CONFIRMATION}
+      <!-- Email confirmation screen -->
+      <Dialog.Header>
+        <Dialog.Title class="text-xl font-semibold">Email updated successfully</Dialog.Title>
+      </Dialog.Header>
+      <div class="mt-6 space-y-4">
+        <p class="text-sm text-muted-foreground">
+          Your email has been successfully changed to <span class="font-medium"
+            >{emailForm.data.email}</span
+          >.
+        </p>
+        <Dialog.Footer class="flex justify-end">
+          <Button
+            variant="outline"
+            onclick={() => {
+              showEmailEdit = false;
+              resetDialogState();
+            }}
+          >
+            Close
+          </Button>
+        </Dialog.Footer>
+      </div>
+    {:else}
       <Dialog.Header class="space-y-2">
         <Dialog.Title class="text-xl font-semibold">Change email</Dialog.Title>
         <Dialog.Description class="text-base text-muted-foreground">
@@ -294,42 +322,19 @@
       </div>
 
       <UpdateEmailForm
-        {form}
-        {isLoading}
+        {emailForm}
+        bind:isLoading
         bind:isPasswordValid
-        {hasFormValues}
-        onCancel={() => (showEmailEdit = false)}
+        onCancel={() => {
+          showEmailEdit = false;
+          resetDialogState();
+        }}
         onSave={handleEmailChange}
       />
 
       {#if errorMessage}
-        <div class="mt-4 rounded-md bg-destructive/15 p-3 text-sm text-destructive">
-          {errorMessage}
-        </div>
+        <ErrorAlert bind:errorMessage />
       {/if}
-    {:else}
-      <!-- Email confirmation screen -->
-      <Dialog.Header>
-        <Dialog.Title class="text-xl font-semibold">Email updated successfully</Dialog.Title>
-      </Dialog.Header>
-      <div class="mt-6 space-y-4">
-        <p class="text-sm text-muted-foreground">
-          Your email has been successfully changed to <span class="font-medium"
-            >{$formData.email}</span
-          >.
-        </p>
-        <Dialog.Footer class="flex justify-end">
-          <Button
-            variant="outline"
-            onclick={() => {
-              showEmailEdit = false;
-              showConfirmation = false;
-            }}
-          >
-            Close
-          </Button>
-        </Dialog.Footer>
-      </div>
     {/if}
   </Dialog.Content>
 </Dialog.Root>

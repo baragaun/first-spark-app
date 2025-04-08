@@ -31,4 +31,3 @@ export const accountSettingsSchema = z.object({
 });
 
 export type AccountSettingsSchema = typeof accountSettingsSchema;
-

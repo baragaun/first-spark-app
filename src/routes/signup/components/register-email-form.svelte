@@ -4,7 +4,7 @@
   import IdentInput from '@/components/ident-input.svelte';
 
   let loading = $state(false);
-  let emailError = $state('');
+  let isIdentAvailable = $state(null);
 
   const isValidEmail = (email: string): boolean => {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -24,15 +24,11 @@
   description="By continuing, you agree to our User Agreement and acknowledge that you understand and agree to our Privacy Policy."
 >
   <div class="space-y-4">
-    <IdentInput
-      bind:identifier={email}
-      bind:identError={emailError}
-      placeholder="Enter your email"
-    />
+    <IdentInput bind:identifier={email} bind:isIdentAvailable placeholder="Enter your email" />
     <Button
       type="submit"
       class="w-full"
-      disabled={loading || emailError !== '' || !email || !isValidEmail(email)}
+      disabled={loading || !isIdentAvailable || !email || !isValidEmail(email)}
       onclick={() => onEmailSubmit(email)}
     >
       Continue

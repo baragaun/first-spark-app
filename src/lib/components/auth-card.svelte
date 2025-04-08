@@ -21,7 +21,9 @@
 </script>
 
 {#if showBackButton && onBack}
-  <Button variant="ghost" size="sm" class="absolute -top-12 left-0" onclick={onBack}>← Back</Button>
+  <Button variant="secondary" size="sm" class="absolute -top-12 left-0" onclick={onBack}
+    >← Back</Button
+  >
 {/if}
 
 <Card class="relative w-full max-w-md">
