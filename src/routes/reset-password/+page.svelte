@@ -8,7 +8,11 @@
   import Button from '@/components/ui/button/button.svelte';
   import translate from '@/helpers/language/translate';
   import { AppUiMessage, MsaTokenStatus } from '@/types/enums';
-  import { MultiStepActionEventType, SidMultiStepActionProgress, UserIdentType } from '@baragaun/bg-node-client';
+  import {
+    MultiStepActionEventType,
+    SidMultiStepActionProgress,
+    UserIdentType,
+  } from '@baragaun/bg-node-client';
   import Input from '@/components/ui/input/input.svelte';
 
   let currentStep = writable(0);
@@ -226,7 +230,7 @@
             bind:value={identifier}
             required
           />
-          <Button type="submit" class="w-full" disabled={loading || !identifier }>
+          <Button type="submit" class="w-full" disabled={loading || !identifier}>
             {loading ? 'Sending email...' : 'Send email'}
           </Button>
           <div class="flex items-center justify-between">

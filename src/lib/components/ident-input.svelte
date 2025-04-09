@@ -143,7 +143,6 @@
     bind:value={identifier}
     title="Please enter a valid email or username"
     required
-
   />
   {#if isChecking}
     <p class="text-xs text-muted-foreground">Checking availability...</p>
