@@ -17,6 +17,7 @@
   import ErrorAlert from '@/components/error-alert.svelte';
   import { z } from 'zod';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import * as AlertDialog from '@/components/ui/alert-dialog';
 
   let identifier = $state('');
   let identType = $state(UserIdentType.email);
@@ -26,6 +27,7 @@
   let tokenStatus = $state(MsaTokenStatus.unset);
   let errorMessage = $state('');
   let message = $state('');
+  let signUpSuggestion = $state(false);
   let resendTimer = $state(30);
   let canResend = $state(false);
   let timerInterval: ReturnType<typeof setInterval>;
@@ -302,6 +304,13 @@
     errorMessage = '';
 
     try {
+      const checkAccountExists = await myUserContext.isUserIdentAvailable(identifier, identType);
+
+      if (checkAccountExists.isAvailable) {
+        signUpSuggestion = true;
+        return;
+      }
+
       if ($currentStep === 2) {
         await signMeInWithPassword();
       } else {
@@ -341,6 +350,10 @@
       const result = handleSchema.safeParse(identifier);
       return result.success;
     }
+  };
+
+  const handleRedirectToSignup = () => {
+    goto('/signup');
   };
 </script>
 
@@ -431,3 +444,21 @@
     <ErrorAlert bind:errorMessage />
   {/if}
 </div>
+
+{#if signUpSuggestion}
+  <AlertDialog.Root open={signUpSuggestion}>
+    <AlertDialog.Content>
+      <AlertDialog.Header>
+        <AlertDialog.Title>Account not found</AlertDialog.Title>
+        <AlertDialog.Description>
+          We couldn't find an account with these credentials. Would you like to create a new
+          account?
+        </AlertDialog.Description>
+      </AlertDialog.Header>
+      <AlertDialog.Footer>
+        <AlertDialog.Cancel onclick={() => (signUpSuggestion = false)}>Cancel</AlertDialog.Cancel>
+        <AlertDialog.Action onclick={handleRedirectToSignup}>Sign Up</AlertDialog.Action>
+      </AlertDialog.Footer>
+    </AlertDialog.Content>
+  </AlertDialog.Root>
+{/if}
