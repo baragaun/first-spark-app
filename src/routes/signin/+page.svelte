@@ -1,7 +1,12 @@
 <script lang="ts">
-  import SigninForm from './sign-in-form.svelte';
+  import { type PageData } from './$types.js';
+  import SignInForm from './sign-in-form2.svelte';
+
+  let { data }: { data: PageData } = $props();
 </script>
 
-<div class="flex items-center justify-center px-4 py-40">
-  <SigninForm />
+<div class="flex h-full w-full items-center justify-center px-4">
+  <div class="w-full max-w-md">
+    <SignInForm {data} />
+  </div>
 </div>

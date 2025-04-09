@@ -1,6 +1,6 @@
 <script module>
   import { defineMeta } from '@storybook/addon-svelte-csf';
-  import TokenForm from '@/components/token-form.svelte';
+  import TokenForm from '@/components/token-form/token-form.svelte';
 
   const { Story } = defineMeta({
     title: 'Components/TokenForm',
