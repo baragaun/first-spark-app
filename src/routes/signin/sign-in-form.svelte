@@ -12,7 +12,7 @@
   import translate from '@/helpers/language/translate';
   import { AppUiMessage, MsaTokenStatus } from '@/types/enums';
   import { writable } from 'svelte/store';
-  import TokenForm from '@/components/token-form.svelte';
+  // import TokenForm from '@/components/token-form.svelte';
   import PasswordInput from '@/components/ui/password-input';
   import ErrorAlert from '@/components/error-alert.svelte';
   import { z } from 'zod';
@@ -391,7 +391,7 @@
             <div class="grid gap-2">
               <div class="flex items-center">
                 <Label for="password">Password</Label>
-                <a href="/reset-password" class="ml-auto inline-block text-sm underline">
+                <a href="/reset-password-2" class="ml-auto inline-block text-sm underline">
                   Forgot your password?
                 </a>
               </div>

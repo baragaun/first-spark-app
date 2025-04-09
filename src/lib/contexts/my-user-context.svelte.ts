@@ -17,14 +17,14 @@ import {
   type SignInUserInput,
   type SignUpUserInput,
 } from '@baragaun/bg-node-client';
-import { writable } from 'svelte/store';
 
-export const isSignedIn = writable(false);
-export const isLoading = writable(false);
+let isSignedIn = $state(false);
+let isLoading = $state(false);
+let myUser = $state<MyUser | undefined>(undefined);
 
 export class MyUserContext {
   private client: BgNodeClient = new BgNodeClient();
-  private myUser: MyUser | undefined;
+  // private myUser: MyUser | undefined;
   private _isInitializing = false;
 
   public async initialize(): Promise<void> {
@@ -69,10 +69,10 @@ export class MyUserContext {
       const listener: MyUserListener = {
         id: 'MyUserContext',
         topic: BgListenerTopic.myUser,
-        onSignedIn: () => isSignedIn.set(true),
-        onSignedOut: () => isSignedIn.set(false),
-        onMyUserUpdated: (myUser) => {
-          this.myUser = myUser;
+        onSignedIn: () => { isSignedIn = true },
+        onSignedOut: () => { isSignedIn = false },
+        onMyUserUpdated: (updatedMyUser) => {
+          myUser = updatedMyUser;
         },
       };
       await this.client.init({
@@ -81,7 +81,24 @@ export class MyUserContext {
         startSession: true,
         listener,
       });
-      isSignedIn.set(this.client.isSignedIn);
+
+      isSignedIn = this.client.isSignedIn;
+
+      // =============================================
+      // This is required to survive a hard refresh
+      // 
+      // if (this.client.isSignedIn) {
+      //   try {
+      //     const myUserResponse = await this.client.operations.myUser.findMyUser();
+      //     if (myUserResponse.object) {
+      //       this.myUser = myUserResponse.object;
+      //     }
+      //   } catch (error) {
+      //     console.error('Failed to load user data during initialization:', error);
+      //   }
+      // }
+      // =============================================
+
     } catch (error) {
       console.error('MyUserContext: Error initializing BgNodeClient:', { error });
       this._isInitializing = false;
@@ -113,7 +130,7 @@ export class MyUserContext {
     }
 
     try {
-      isLoading.set(true);
+      isLoading = true;
       const input: SignUpUserInput = { email };
 
       if (import.meta.env.VITE_APP_ENVIRONMENT === 'development') {
@@ -137,7 +154,7 @@ export class MyUserContext {
       });
       return translate(AppUiMessage.systemError);
     } finally {
-      isLoading.set(false);
+      isLoading = false;
     }
   }
 
@@ -164,7 +181,7 @@ export class MyUserContext {
     }
 
     try {
-      isLoading.set(true);
+      isLoading = true;
       const input: SignInUserInput = {
         ident: userIdent,
         identType,
@@ -186,7 +203,7 @@ export class MyUserContext {
       });
       return translate((error as Error).message, AppUiMessage.systemError);
     } finally {
-      isLoading.set(false);
+      isLoading = false;
     }
   }
 
@@ -202,7 +219,7 @@ export class MyUserContext {
     }
 
     try {
-      isLoading.set(true);
+      isLoading = true;
       return this.client.operations.myUser.signInWithToken(userIdent, {
         polling: {
           enabled: true,
@@ -217,7 +234,7 @@ export class MyUserContext {
       });
       return { error: AppUiMessage.systemError }; // <-- where should we translate this?
     } finally {
-      isLoading.set(false);
+      isLoading = false;
     }
   }
 
@@ -237,7 +254,7 @@ export class MyUserContext {
     }
 
     try {
-      isLoading.set(true);
+      isLoading = true;
       const response = await this.client.operations.myUser.signMeOut();
       if (response.error) {
         console.error('MyUserContext.signMeOut: received error.', { response });
@@ -252,7 +269,7 @@ export class MyUserContext {
       });
       return translate((error as Error).message, AppUiMessage.systemError);
     } finally {
-      isLoading.set(false);
+      isLoading = false;
     }
   }
 
@@ -270,7 +287,7 @@ export class MyUserContext {
     }
 
     try {
-      isLoading.set(true);
+      isLoading = true;
 
       const response = await this.client.operations.myUser.updateMyUser(changes);
 
@@ -287,7 +304,7 @@ export class MyUserContext {
       });
       return { error: translate((error as Error).message, AppUiMessage.systemError) };
     } finally {
-      isLoading.set(false);
+      isLoading = false;
     }
   }
 
@@ -303,7 +320,7 @@ export class MyUserContext {
     }
 
     try {
-      isLoading.set(true);
+      isLoading = true;
       const response = await this.client.operations.myUser.updateMyPassword(
         currentPassword,
         newPassword,
@@ -322,7 +339,7 @@ export class MyUserContext {
       });
       return translate((error as Error).message, AppUiMessage.systemError);
     } finally {
-      isLoading.set(false);
+      isLoading = false;
     }
   }
 
@@ -370,7 +387,7 @@ export class MyUserContext {
       return { error: 'Client not initialized' };
     }
     try {
-      isLoading.set(true);
+      isLoading = true;
       return this.client.operations.myUser.resetMyPassword(email, {
         polling: {
           enabled: true,
@@ -382,7 +399,7 @@ export class MyUserContext {
       console.error('resetMyPassword: error', { error });
       return { error: (error as Error).message };
     } finally {
-      isLoading.set(false);
+      isLoading = false;
     }
   }
 
@@ -393,7 +410,7 @@ export class MyUserContext {
     }
 
     try {
-      isLoading.set(true);
+      isLoading = true;
       return this.client.operations.myUser.verifyMyEmail(email, {
         polling: {
           enabled: true,
@@ -408,7 +425,7 @@ export class MyUserContext {
       });
       return { error: translate((error as Error).message, AppUiMessage.systemError) };
     } finally {
-      isLoading.set(false);
+      isLoading = false;
     }
   }
 
@@ -423,7 +440,7 @@ export class MyUserContext {
     }
 
     try {
-      isLoading.set(true);
+      isLoading = true;
       const response = await this.client.operations.multiStepAction.verifyMultiStepActionToken(
         actionId,
         token,
@@ -443,7 +460,7 @@ export class MyUserContext {
       console.error('verifyMultiStepActionToken: error', { error });
       return (error as Error).message;
     } finally {
-      isLoading.set(false);
+      isLoading = false;
     }
   }
 
@@ -454,7 +471,7 @@ export class MyUserContext {
     }
 
     try {
-      isLoading.set(true);
+      isLoading = true;
       const response = await this.client.operations.multiStepAction.sendMultiStepActionNotification(
         actionId,
         email,
@@ -471,7 +488,7 @@ export class MyUserContext {
       console.error('MyUserContext.sendMultiStepActionNotification: error', { error });
       return 'system-error';
     } finally {
-      isLoading.set(false);
+      isLoading = false;
     }
   }
 
@@ -479,16 +496,28 @@ export class MyUserContext {
     return this.client.isInitialized;
   }
 
+  public get isLoading(): boolean {
+    return isLoading;
+  }
+
+  public get isSignedIn(): boolean {
+    return isSignedIn;
+  }
+
+  public get myUser(): MyUser | undefined {
+    return myUser;
+  }
+
   public get myUserId(): string | undefined {
     return this.client.myUserId;
   }
 
   public get myUserHandle(): string | null | undefined {
-    return this.myUser?.userHandle;
+    return myUser?.userHandle;
   }
 
   public get myEmail(): string | null | undefined {
-    return this.myUser?.email;
+    return myUser?.email;
   }
 }
 
