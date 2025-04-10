@@ -1,19 +1,18 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
   import * as Dialog from '$lib/components/ui/dialog';
-  import { ChevronRight } from 'lucide-svelte';
-  import { type Infer, type SuperValidated } from 'sveltekit-superforms';
-  import { emailSchema } from '../account-settings-schema';
-  import UpdateEmailForm from './update-email-form.svelte';
+  import ErrorAlert from '@/components/error-alert.svelte';
   import TokenForm from '@/components/token-form.svelte';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { AppUiMessage } from '@/types/enums';
   import {
     MultiStepActionEventType,
     type SidMultiStepActionProgress,
   } from '@baragaun/bg-node-client';
-  import ErrorAlert from '@/components/error-alert.svelte';
-  import { AppUiMessage } from '@/types/enums';
-  import { writable } from 'svelte/store';
+  import { ChevronRight } from 'lucide-svelte';
+  import { type Infer, type SuperValidated } from 'sveltekit-superforms';
+  import { emailSchema } from '../account-settings-schema';
+  import UpdateEmailForm from './update-email-form.svelte';
 
   interface EmailInputProps {
     currentEmail: string;
@@ -23,37 +22,28 @@
 
   let { currentEmail, onSave, emailForm }: EmailInputProps = $props();
 
-  // Define steps similar to sign-up-form
   const STEPS = {
     EMAIL_FORM: 0,
     VERIFICATION: 1,
     CONFIRMATION: 2,
   };
 
-  // Use writable store for currentStep
-  let currentStep = writable(STEPS.EMAIL_FORM);
-
-  // State variables
   let isLoading = $state(false);
   let showEmailEdit = $state(false);
   let errorMessage = $state('');
   let isPasswordValid = $state(false);
   let mfaActionId: string | undefined;
+  let currentStep = $state(STEPS.EMAIL_FORM);
 
   // Reset dialog state when closed
   function resetDialogState() {
-    currentStep.set(STEPS.EMAIL_FORM);
+    currentStep = STEPS.EMAIL_FORM;
     isLoading = false;
     errorMessage = '';
     isPasswordValid = false;
     mfaActionId = undefined;
     emailForm.data.email = '';
     emailForm.data.currentPassword = '';
-  }
-
-  // When opening the dialog, set initial values
-  function openDialog() {
-    showEmailEdit = true;
   }
 
   // Handle email change
@@ -89,7 +79,7 @@
       console.log('Email confirmation started:', verifyMyEmailResponse);
 
       mfaActionId = verifyMyEmailResponse?.object.actionProgress?.actionId;
-      currentStep.set(STEPS.VERIFICATION);
+      currentStep = STEPS.VERIFICATION;
 
       verifyMyEmailResponse.object.run.addListener({
         id: 'UpdateEmailDialog',
@@ -155,7 +145,7 @@
               action.notificationResult,
             );
             await updateNewEmail(email);
-            currentStep.set(STEPS.CONFIRMATION);
+            currentStep = STEPS.CONFIRMATION;
           }
         },
       });
@@ -222,7 +212,7 @@
   };
 
   // Handle resend verification token
-  const handleResend = async () => {
+  const handleResendVerificationToken = async () => {
     if (!mfaActionId) {
       console.error('UpdateEmailDialog.handleResend: no mfaActionId.');
       errorMessage = 'A system error occurred. Please try again.';
@@ -237,16 +227,15 @@
     }
   };
 
-  // Handle back button
   const handleBack = () => {
-    currentStep.set(STEPS.EMAIL_FORM);
+    currentStep = STEPS.EMAIL_FORM;
     errorMessage = '';
   };
 </script>
 
 <button
   class="group flex w-full items-center justify-between rounded-lg py-2 hover:bg-muted/50"
-  onclick={() => openDialog()}
+  onclick={() => (showEmailEdit = true)}
 >
   <div class="flex flex-col text-left sm:flex-row sm:items-center sm:gap-2">
     <p class="text-sm font-medium">Email</p>
@@ -268,7 +257,7 @@
   }}
 >
   <Dialog.Content class="sm:max-w-[425px]">
-    {#if $currentStep === STEPS.VERIFICATION}
+    {#if currentStep === STEPS.VERIFICATION}
       <Dialog.Header class="space-y-2">
         <Dialog.Title class="text-xl font-semibold">Verify your email</Dialog.Title>
         <Dialog.Description class="text-base text-muted-foreground">
@@ -279,14 +268,14 @@
       <TokenForm
         ident={emailForm.data.email}
         onSubmit={handleEmailVerificationSubmit}
-        onResend={handleResend}
+        onResend={handleResendVerificationToken}
         onBack={handleBack}
       />
 
       {#if errorMessage}
         <ErrorAlert bind:errorMessage />
       {/if}
-    {:else if $currentStep === STEPS.CONFIRMATION}
+    {:else if currentStep === STEPS.CONFIRMATION}
       <!-- Email confirmation screen -->
       <Dialog.Header>
         <Dialog.Title class="text-xl font-semibold">Email updated successfully</Dialog.Title>
