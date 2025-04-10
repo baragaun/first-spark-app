@@ -440,7 +440,7 @@ export class MyUserContext {
     }
 
     try {
-      isLoading.set(true);
+      this.setLoading(true);
       return await this.client.operations.myUser.verifyMyPassword(password);
     } catch (error) {
       console.error('MyUserContext.verifyMyPassword: error', {
@@ -449,7 +449,7 @@ export class MyUserContext {
       });
       return { error: translate((error as Error).message, AppUiMessage.systemError) };
     } finally {
-      isLoading.set(false);
+      this.setLoading(false);
     }
   }
 
