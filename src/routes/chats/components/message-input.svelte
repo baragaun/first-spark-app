@@ -1,7 +1,8 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
+  import { Textarea } from '$lib/components/ui/textarea/index.js';
   import { Input } from '$lib/components/ui/input';
-  import { Smile, Send } from 'lucide-svelte';
+  import { Smile, Send, ArrowUp } from 'lucide-svelte';
   import EmojiPicker from './emoji-picker.svelte';
 
   let {
@@ -14,26 +15,20 @@
 
   let messageText = $state('');
   let showEmojiPicker = $state(false);
-  let inputRef = $state<HTMLInputElement | null>(null);
+  let inputRef = $state<HTMLTextAreaElement | null>(null);
+  let isLongMessage = $derived(messageText.length > 100);
 
   const handleSubmit = () => {
     if (messageText.trim()) {
-      // Store current cursor position
-      const cursorPosition = inputRef?.selectionStart || 0;
-
       // Send message
       onSendMessage(messageText.trim());
       messageText = '';
 
-      // Immediately focus the input without waiting
-      inputRef?.focus();
-
-      // For mobile browsers, also use the timeout approach as a fallback
-      setTimeout(() => {
-        if (document.activeElement !== inputRef) {
-          inputRef?.focus();
-        }
-      }, 0);
+      // Reset textarea height and focus
+      if (inputRef) {
+        inputRef.style.height = 'auto';
+        inputRef.focus();
+      }
     }
   };
 
@@ -43,10 +38,12 @@
       if (messageText.trim()) {
         onSendMessage(messageText.trim());
         messageText = '';
-        // Maintain focus on the input after sending
-        setTimeout(() => {
-          inputRef?.focus();
-        }, 0);
+
+        // Reset textarea height and focus
+        if (inputRef) {
+          inputRef.style.height = 'auto';
+          inputRef.focus();
+        }
       }
     }
   };
@@ -63,11 +60,25 @@
       inputRef?.focus();
     }, 0);
   };
+
+  // Auto-resize textarea as content grows
+  const adjustTextareaHeight = () => {
+    if (inputRef) {
+      inputRef.style.height = 'auto';
+      inputRef.style.height = `${Math.min(inputRef.scrollHeight, 150)}px`;
+    }
+  };
+
+  $effect(() => {
+    if (messageText) {
+      adjustTextareaHeight();
+    }
+  });
 </script>
 
 <div class="border-t p-4">
-  <div class="flex items-center gap-2">
-    <div class="relative">
+  <div class="flex items-start gap-2">
+    <div class="relative self-end">
       <Button type="button" variant="ghost" size="icon" onclick={toggleEmojiPicker}>
         <Smile class="h-5 w-5" />
       </Button>
@@ -79,13 +90,14 @@
       {/if}
     </div>
 
-    <Input
-      type="text"
+    <Textarea
       {placeholder}
       bind:value={messageText}
       onkeydown={handleKeyDown}
-      class="flex-1"
+      oninput={adjustTextareaHeight}
+      class="max-h-[150px] min-h-[40px] flex-1 resize-none"
       bind:ref={inputRef}
+      rows={1}
     />
 
     <Button
@@ -93,13 +105,17 @@
       variant="default"
       size="icon"
       disabled={!messageText.trim()}
-      onclick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        handleSubmit();
-      }}
+      onclick={handleSubmit}
+      class="self-end"
     >
       <Send class="h-5 w-5" />
     </Button>
   </div>
 </div>
+
+<style>
+  /* Add smooth transition for textarea resizing */
+  :global(textarea) {
+    transition: height 0.1s ease-out;
+  }
+</style>

@@ -109,7 +109,13 @@
   const handleEditMessage = (id: string, newText: string) => {
     // Find and update the message
     messages = messages.map((message) =>
-      message.id === id ? { ...message, messageText: newText } : message,
+      message.id === id
+        ? {
+            ...message,
+            messageText: newText,
+            editedAt: new Date().toISOString(), // Set editedAt timestamp
+          }
+        : message,
     );
 
     // Here you would also update the message in your backend
