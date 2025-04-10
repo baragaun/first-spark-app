@@ -24,7 +24,6 @@ let myUser = $state<MyUser | undefined>(undefined);
 
 export class MyUserContext {
   private client: BgNodeClient = new BgNodeClient();
-  // private myUser: MyUser | undefined;
   private _isInitializing = false;
 
   public async initialize(): Promise<void> {
@@ -83,22 +82,6 @@ export class MyUserContext {
       });
 
       isSignedIn = this.client.isSignedIn;
-
-      // =============================================
-      // This is required to survive a hard refresh
-      // 
-      // if (this.client.isSignedIn) {
-      //   try {
-      //     const myUserResponse = await this.client.operations.myUser.findMyUser();
-      //     if (myUserResponse.object) {
-      //       this.myUser = myUserResponse.object;
-      //     }
-      //   } catch (error) {
-      //     console.error('Failed to load user data during initialization:', error);
-      //   }
-      // }
-      // =============================================
-
     } catch (error) {
       console.error('MyUserContext: Error initializing BgNodeClient:', { error });
       this._isInitializing = false;

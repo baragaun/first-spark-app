@@ -15,9 +15,9 @@
   import passwordHelpers from "@/helpers/password-helpers.js";
   import { goto } from "$app/navigation";
   
-  import EmailFormInput from '@/components/forms/email-form-input.svelte';
-  import OtpFormInput from '@/components/forms/otp-form-input.svelte';
-  import UpdatePasswordFormInput from '@/components/forms/update-password-form-input.svelte';
+  import EmailFormInput from '@/components/forms/form-ident-input.svelte';
+  import OtpFormInput from '@/components/forms/form-otp-input.svelte';
+  import UpdatePasswordFormInput from '@/components/forms/form-update-password-input.svelte';
   import FormButton from '@/components/forms/form-button.svelte';
  
   let { data }: { data: { form: SuperValidated<Infer<ResetPasswordFormSchema>> } } = $props();
@@ -43,6 +43,12 @@
     validators: getCurrentValidator(),
     resetForm: false,
     async onChange() {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+
+      isValidating = true;
+
       debounceTimer = window.setTimeout(async () => {
         try {
           const result = await validateForm({ update: true });
@@ -194,29 +200,25 @@
           }
 
           if (eventType === MultiStepActionEventType.failed) {
-            console.error(
-              'ResetPasswordPage.multiStepActionListener: error.',
-              action.notificationResult,
-            );
+            console.error('ResetPasswordPage.multiStepActionListener: error.', action.notificationResult);
             tokenStatus = MsaTokenStatus.verificationFailed;
             errorMessage = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError);
             return;
           }
 
           if (eventType === MultiStepActionEventType.success) {
-            console.log(
-              'ResetPasswordPage.multiStepActionListener: success.',
-              action.notificationResult,
-            );
+            console.log('ResetPasswordPage.multiStepActionListener: success.', action.notificationResult);
             tokenStatus = MsaTokenStatus.success;
-            step = 2
+            step = 2;
           }
         },
       });
     } catch (err) {
       console.error('Error resetting password:', err);
-      errorMessage =
-        err instanceof Error ? err.message : 'Unable to process your request. Please try again.';
+      tokenStatus = MsaTokenStatus.verificationFailed;
+      // errorMessage =
+      //   err instanceof Error ? err.message : 'Unable to process your request. Please try again.';
+      errorMessage = translate(AppUiMessage.systemError);
     } finally {
       loading = false;
     }
