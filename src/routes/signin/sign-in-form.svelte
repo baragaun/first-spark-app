@@ -79,8 +79,8 @@
       }, DEBOUNCE_DELAY);
     },
     async onSubmit({ cancel }) {
-      // if (step === steps.length) return;
-			// cancel();
+      // Advoid the actual server-side validation form action
+      cancel()
 
       const result = await validateForm({ update: true, focusOnError: true });
       if (!result.valid) {
