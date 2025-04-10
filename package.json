@@ -14,6 +14,8 @@
     "lint": "eslint . --ext .js,.ts,.svelte --fix",
     "lint:format": "prettier --check . && eslint .",
     "test": "vitest",
+    "test:unit": "vitest run --project unit",
+    "test:storybook": "vitest run --project storybook",
     "test:e2e": "playwright test --headed",
     "test:e2e:ci": "playwright test",
     "test:all": "vitest run && playwright test",

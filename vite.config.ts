@@ -5,6 +5,7 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   plugins: [sveltekit(), svelteTesting()],
   test: {
+    name: 'unit',
     globals: true,
     environment: 'jsdom',
     include: ['tests/unit/*.{test,spec}.{js,ts,svelte}'],
