@@ -57,7 +57,10 @@ Unit tests are written using Vitest Library. To run unit tests:
 
 ```shell
 # Run tests in watch mode (for development)
-pnpm run test
+pnpm run test:unit
+
+# Run tests without watch mode (for CI)
+pnpm run test:unit:ci
 ```
 
 ### End-to-End Tests
@@ -76,6 +79,8 @@ or
 pnpm playwright test
 ```
 
+Storybook tests
+
 ### Run All Tests
 
 To run both unit and e2e tests in sequence:
@@ -88,6 +93,15 @@ pnpm run test:all
 
 ```shell
 pnpm run storybook
+```
+
+### Run Storybook tests
+```shell
+# Run tests in watch mode (for development)
+pnpm run test:storybook
+
+# Run tests without watch mode (for CI)
+pnpm run test:storybook:ci
 ```
 
 > To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
