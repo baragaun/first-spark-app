@@ -7,12 +7,14 @@
     form, 
     fieldName = "email", 
     placeholder = 'e.g. "student@example.com"',
-    label = "Email address"
+    label = "Email address",
+    disabled = false
   } = $props<{
     form: SuperForm<any, any>;
     fieldName?: string;
     placeholder?: string;
     label?: string;
+    disabled?: boolean;
   }>();
 
   const formData = form.form;
@@ -26,6 +28,7 @@
         {...props}
         bind:value={$formData[fieldName]}
         {placeholder}
+        {disabled}
       />
     {/snippet}
   </Form.Control>
