@@ -16,6 +16,7 @@ export const schemaLastStep = schemaStepTwo.extend({
   newPassword: z.string().min(8, {
     message: 'Your password must be at least 8 characters.',
   }),
+  actionId: z.string()
 });
 
 // The exported type should be the totality of the form. Since this is stepped, we need to specify the last.

@@ -24,7 +24,7 @@
        
   const steps = [zod(schemaFirstStep), zod(schemaStepTwo), zod(schemaLastStep)];
   let step = $state(1);
-  let actionId = $state('');
+  let msaActionId = $state<string | undefined>(undefined);
   let loading = $state(false);
   let errorMessage = $state('');
   let resendTimer = $state(30);
@@ -47,6 +47,10 @@
         clearTimeout(debounceTimer);
       }
 
+      if (msaActionId && !$formData.actionId) {
+        $formData.actionId = msaActionId;
+      }
+
       isValidating = true;
 
       debounceTimer = window.setTimeout(async () => {
@@ -62,44 +66,21 @@
       }, DEBOUNCE_DELAY);
     },
     async onSubmit({ cancel }) {
-			if (step === steps.length) return;
-			else cancel();
-
+			 // Advoid the actual server-side validation form action
+       cancel()
+    
       const result = await validateForm({ update: true, focusOnError: true });
       if (!result.valid) return;
 
       if (step === 1) {
-        await handleResetPassword();
-        startResendTimer();
+        await startPasswordReset();
       } else if (step === 2) {
-        await handleVerifyToken($formData.emailOtp);
+        await verifyResetPasswordToken();
       } else if (step === 3) {
-        await handleVerifyToken($formData.emailOtp, $formData.newPassword);
+        await updatePassword();
       }
 
-      if (result.valid) step = step + 1;
       return;
-    },
-    async onUpdate({ form, cancel }) {
-      console.log('>>>>> On update...')
-      if (step !== steps.length) cancel()
-      
-      if (form.valid) {
-        console.log('>>>>> Attempting to log in...')
-        const response = await myUserContext.signMeInWithPassword(
-          $formData.email,
-          UserIdentType.email,
-          $formData.newPassword
-        );
-        console.log('>>>>> Response...', response)
-
-        if (response !== true) {
-          errorMessage = response;
-          return;
-        }
-
-        return await goto('/');
-      };
     },
   });
 
@@ -122,7 +103,7 @@
     }, 1000);
   };
 
-  const handleResetPassword = async () => {
+  const startPasswordReset = async () => {
     isValidating = true;
     errorMessage = '';
 
@@ -141,7 +122,11 @@
         return;
       }
 
-      actionId = response.object.actionProgress.actionId;
+      msaActionId = response.object.actionProgress.actionId;
+
+      // We advance instead of waiting for the poll to come back with a `sent` status
+      step = 2
+      startResendTimer();
 
       response.object.run.addListener({
         id: 'ResetPassword',
@@ -173,9 +158,6 @@
               'ResetPasswordPage.multiStepActionListener: Notification sent out.',
               action.notificationResult,
             );
-
-            step = 2
-            startResendTimer();
             tokenStatus = MsaTokenStatus.notificationSent;
             return;
           }
@@ -203,21 +185,19 @@
             console.error('ResetPasswordPage.multiStepActionListener: error.', action.notificationResult);
             tokenStatus = MsaTokenStatus.verificationFailed;
             errorMessage = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError);
+
             return;
           }
 
           if (eventType === MultiStepActionEventType.success) {
             console.log('ResetPasswordPage.multiStepActionListener: success.', action.notificationResult);
             tokenStatus = MsaTokenStatus.success;
-            step = 2;
           }
         },
       });
     } catch (err) {
       console.error('Error resetting password:', err);
       tokenStatus = MsaTokenStatus.verificationFailed;
-      // errorMessage =
-      //   err instanceof Error ? err.message : 'Unable to process your request. Please try again.';
       errorMessage = translate(AppUiMessage.systemError);
     } finally {
       loading = false;
@@ -226,7 +206,7 @@
 
   const handleResendEmail = async () => {
     if (!canResend) return;
-
+``
     loading = true;
     try {
       const response = await myUserContext.sendMultiStepActionNotification($formData.email);
@@ -248,51 +228,82 @@
 
   const { getPasswordError, validatePassword } = passwordHelpers;
 
-  const handleVerifyToken = async (token: string, newPassword?: string) => {
-    if (!token || (newPassword === undefined && step === 1)) {
-      errorMessage = 'Verification code and new password are required';
-      return;
-    }
+  const verifyResetPasswordToken = async () => {
+    if (!$formData.emailOtp) return;
 
+    try {
+      if (!msaActionId) {
+        console.error('SignInForm.handleVerifyOtp: actionId missing:');
+        errorMessage = translate(AppUiMessage.systemError);
+        return;
+      }
+
+      loading = true;
+      errorMessage = '';
+
+      const response = await myUserContext.verifyMultiStepActionToken(
+        $formData.actionId, 
+        $formData.emailOtp
+      );
+
+      if (response !== true) {
+        console.error('ResetPasswordForm.verifyResetPasswordToken: invalid response:', { result: response });
+        errorMessage = translate(AppUiMessage.systemError);
+        tokenStatus = MsaTokenStatus.unset;
+        return;
+      }
+
+      tokenStatus = MsaTokenStatus.sending;
+      step = 3;
+    } catch (error) {
+      console.error('ResetPasswordForm.verifyResetPasswordToken: error:', { error });
+      errorMessage = translate(AppUiMessage.systemError);
+      tokenStatus = MsaTokenStatus.unset;
+    } finally {
+      loading = false;
+    }
+  };
+
+  const updatePassword = async () => {
     loading = true;
     errorMessage = '';
 
-    if (!newPassword) {
-      try {
-        const result = await myUserContext.verifyMultiStepActionToken(actionId, token, newPassword);
+    if (!$formData.newPassword) return;
 
-        if (result !== true) {
-          errorMessage = typeof result === 'string' ? result : 'Failed to verify code';
-          return;
-        }
+    try {
+      if (!validatePassword($formData.newPassword).isValid) {
+        errorMessage = getPasswordError($formData.newPassword)
+      return;
+    }
+    const result = await myUserContext.verifyMultiStepActionToken(
+      $formData.actionId,
+      $formData.emailOtp, 
+      $formData.newPassword
+    );
 
-        step = 2;
-      } catch (err) {
-        console.error('Error verifying reset code:', err);
-        errorMessage =
-          err instanceof Error ? err.message : 'Failed to verify code. Please try again.';
-      } finally {
-        loading = false;
-      }
-    } else {
-      try {
-        if (!validatePassword(newPassword).isValid) {
-          errorMessage = getPasswordError(newPassword)
-        return;
-      }
-      const result = await myUserContext.verifyMultiStepActionToken(actionId, token, newPassword);
+    if (result !== true) {
+      errorMessage = typeof result === 'string' ? result : 'Failed to verify code';
+      return;
+    }
 
-        if (result !== true) {
-          errorMessage = typeof result === 'string' ? result : 'Failed to verify code';
-          return;
-        }
-      } catch (err) {
-        console.error('Error verifying reset code:', err);
-        errorMessage =
-          err instanceof Error ? err.message : 'Failed to verify code. Please try again.';
-      } finally {
-        loading = false;
-      }
+    const response = await myUserContext.signMeInWithPassword(
+      $formData.email,
+      UserIdentType.email,
+      $formData.newPassword
+    );
+
+    if (response !== true) {
+      errorMessage = response;
+      return;
+    }
+
+    return await goto('/');
+    } catch (err) {
+      console.error('Error verifying reset code:', err);
+      errorMessage =
+        err instanceof Error ? err.message : 'Failed to verify code. Please try again.';
+    } finally {
+      loading = false;
     }
   };
 
