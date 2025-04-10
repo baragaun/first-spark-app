@@ -4,7 +4,7 @@
   import { UserIdentType } from '@baragaun/bg-node-client';
   import { AlertCircle, Check, RefreshCw } from 'lucide-svelte';
   import { onMount } from 'svelte';
-  import { z } from 'zod';
+  import { usernameSchema } from '../../../../routes/settings/account/account-settings-schema';
 
   interface UsernameInputProps {
     username: string;
@@ -17,11 +17,6 @@
     currentUsername?: string;
     class?: string;
   }
-
-  const handleSchema = z
-    .string()
-    .min(3, 'Must be at least 3 characters')
-    .max(30, 'Cannot exceed 30 characters');
 
   let {
     username = $bindable(''),
@@ -75,7 +70,7 @@
     }
 
     // Skip check if username doesn't meet basic requirements
-    if (handleSchema.safeParse(username).success === false) {
+    if (usernameSchema.shape.username.safeParse(username).success === false) {
       isUsernameAvailable = null;
       isChecking = false;
       return;
@@ -107,7 +102,7 @@
 
     if (ident === currentUsername) return { ...result, isValid: true };
 
-    const parsed = handleSchema.safeParse(ident);
+    const parsed = usernameSchema.shape.username.safeParse(ident);
     if (!parsed.success) {
       return { ...result, message: 'Username must be 3-30 characters' };
     }

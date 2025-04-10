@@ -17,11 +17,16 @@ import {
   type SignInUserInput,
   type SignUpUserInput,
 } from '@baragaun/bg-node-client';
-import { writable, type Writable } from 'svelte/store';
+import { writable } from 'svelte/store';
 
+// Private internal stores
 export const isSignedIn = writable(false);
 export const isLoading = writable(false);
-export const myUser: Writable<MyUser | undefined> = writable(undefined);
+let _myUser = $state<MyUser | undefined>(undefined);
+
+// Public readonly stores
+// export const isSignedIn: Readable<boolean> = readonly(_isSignedIn);
+// export const isLoading: Readable<boolean> = readonly(_isLoading);
 
 export class MyUserContext {
   private client: BgNodeClient = new BgNodeClient();
@@ -68,18 +73,30 @@ export class MyUserContext {
 
       await this.client.init({ config });
 
+      // Add listener for future updates
       this.client.addListener({
         id: 'MyUserContext',
         topic: BgListenerTopic.myUser,
         onSignedIn: () => isSignedIn.set(true),
         onSignedOut: () => isSignedIn.set(false),
         onMyUserUpdated: (updatedMyUser: MyUser) => {
-          console.log('MyUserContext: onMyUserUpdated', { myUser });
-          myUser.set(updatedMyUser);
+          console.log('MyUserContext: onMyUserUpdated', { updatedMyUser });
+          _myUser = updatedMyUser;
         },
       } as MyUserListener);
 
       isSignedIn.set(this.client.isSignedIn);
+
+      if (this.client.isSignedIn) {
+        try {
+          const myUserResponse = await this.client.operations.myUser.findMyUser();
+          if (myUserResponse.object) {
+            _myUser = myUserResponse.object;
+          }
+        } catch (error) {
+          console.error('Failed to load user data during initialization:', error);
+        }
+      }
     } catch (error) {
       console.error('MyUserContext: Error initializing BgNodeClient:', { error });
       this._isInitializing = false;
@@ -111,7 +128,7 @@ export class MyUserContext {
     }
 
     try {
-      isLoading.set(true);
+      this.setLoading(true);
       const input: SignUpUserInput = { email };
 
       if (import.meta.env.VITE_APP_ENVIRONMENT === 'development') {
@@ -135,7 +152,7 @@ export class MyUserContext {
       });
       return translate(AppUiMessage.systemError);
     } finally {
-      isLoading.set(false);
+      this.setLoading(false);
     }
   }
 
@@ -162,7 +179,7 @@ export class MyUserContext {
     }
 
     try {
-      isLoading.set(true);
+      this.setLoading(true);
       const input: SignInUserInput = {
         ident: userIdent,
         identType,
@@ -184,7 +201,7 @@ export class MyUserContext {
       });
       return translate((error as Error).message, AppUiMessage.systemError);
     } finally {
-      isLoading.set(false);
+      this.setLoading(false);
     }
   }
 
@@ -200,7 +217,7 @@ export class MyUserContext {
     }
 
     try {
-      isLoading.set(true);
+      this.setLoading(true);
       return this.client.operations.myUser.signInWithToken(userIdent, {
         polling: {
           enabled: true,
@@ -215,7 +232,7 @@ export class MyUserContext {
       });
       return { error: AppUiMessage.systemError }; // <-- where should we translate this?
     } finally {
-      isLoading.set(false);
+      this.setLoading(false);
     }
   }
 
@@ -235,7 +252,7 @@ export class MyUserContext {
     }
 
     try {
-      isLoading.set(true);
+      this.setLoading(true);
       const response = await this.client.operations.myUser.signMeOut();
       if (response.error) {
         console.error('MyUserContext.signMeOut: received error.', { response });
@@ -250,7 +267,7 @@ export class MyUserContext {
       });
       return translate((error as Error).message, AppUiMessage.systemError);
     } finally {
-      isLoading.set(false);
+      this.setLoading(false);
     }
   }
 
@@ -268,7 +285,7 @@ export class MyUserContext {
     }
 
     try {
-      isLoading.set(true);
+      this.setLoading(true);
 
       const response = await this.client.operations.myUser.updateMyUser(changes);
 
@@ -285,7 +302,7 @@ export class MyUserContext {
       });
       return { error: translate((error as Error).message, AppUiMessage.systemError) };
     } finally {
-      isLoading.set(false);
+      this.setLoading(false);
     }
   }
 
@@ -301,7 +318,7 @@ export class MyUserContext {
     }
 
     try {
-      isLoading.set(true);
+      this.setLoading(true);
       const response = await this.client.operations.myUser.updateMyPassword(
         currentPassword,
         newPassword,
@@ -320,7 +337,7 @@ export class MyUserContext {
       });
       return translate((error as Error).message, AppUiMessage.systemError);
     } finally {
-      isLoading.set(false);
+      this.setLoading(false);
     }
   }
 
@@ -368,7 +385,7 @@ export class MyUserContext {
       return { error: 'Client not initialized' };
     }
     try {
-      isLoading.set(true);
+      this.setLoading(true);
       return this.client.operations.myUser.resetMyPassword(email, {
         polling: {
           enabled: true,
@@ -380,7 +397,7 @@ export class MyUserContext {
       console.error('resetMyPassword: error', { error });
       return { error: (error as Error).message };
     } finally {
-      isLoading.set(false);
+      this.setLoading(false);
     }
   }
 
@@ -391,7 +408,7 @@ export class MyUserContext {
     }
 
     try {
-      isLoading.set(true);
+      this.setLoading(true);
       return this.client.operations.myUser.verifyMyEmail(email, {
         polling: {
           enabled: true,
@@ -406,7 +423,7 @@ export class MyUserContext {
       });
       return { error: translate((error as Error).message, AppUiMessage.systemError) };
     } finally {
-      isLoading.set(false);
+      this.setLoading(false);
     }
   }
 
@@ -417,7 +434,7 @@ export class MyUserContext {
     }
 
     try {
-      isLoading.set(true);
+      this.setLoading(true);
       return await this.client.operations.myUser.verifyMyPassword(password);
     } catch (error) {
       console.error('MyUserContext.verifyMyPassword: error', {
@@ -426,7 +443,7 @@ export class MyUserContext {
       });
       return { error: translate((error as Error).message, AppUiMessage.systemError) };
     } finally {
-      isLoading.set(false);
+      this.setLoading(false);
     }
   }
 
@@ -441,7 +458,7 @@ export class MyUserContext {
     }
 
     try {
-      isLoading.set(true);
+      this.setLoading(true);
       const response = await this.client.operations.multiStepAction.verifyMultiStepActionToken(
         actionId,
         token,
@@ -461,7 +478,7 @@ export class MyUserContext {
       console.error('verifyMultiStepActionToken: error', { error });
       return (error as Error).message;
     } finally {
-      isLoading.set(false);
+      this.setLoading(false);
     }
   }
 
@@ -472,7 +489,7 @@ export class MyUserContext {
     }
 
     try {
-      isLoading.set(true);
+      this.setLoading(true);
       const response = await this.client.operations.multiStepAction.sendMultiStepActionNotification(
         actionId,
         email,
@@ -489,7 +506,7 @@ export class MyUserContext {
       console.error('MyUserContext.sendMultiStepActionNotification: error', { error });
       return 'system-error';
     } finally {
-      isLoading.set(false);
+      this.setLoading(false);
     }
   }
 
@@ -497,24 +514,27 @@ export class MyUserContext {
     return this.client.isInitialized;
   }
 
+  private setLoading(value: boolean): void {
+    isLoading.set(value);
+  }
+
   public get myUserId(): string | undefined {
     return this.client.myUserId;
   }
 
   public get myUserHandle(): string | null | undefined {
-    let handle: string | null | undefined;
-    myUser.subscribe((user) => {
-      handle = user?.userHandle;
-    })();
-    return handle;
+    // return get(_myUser)?.userHandle;
+    return _myUser?.userHandle;
   }
 
   public get myEmail(): string | null | undefined {
-    let email: string | null | undefined;
-    myUser.subscribe((user) => {
-      email = user?.email;
-    })();
-    return email;
+    // return get(_myUser)?.email;
+    return _myUser?.email;
+  }
+
+  public get myUser(): MyUser | undefined {
+    // return get(_myUser)?.email;
+    return _myUser;
   }
 }
 

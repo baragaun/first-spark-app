@@ -2,13 +2,14 @@
   import { goto } from '$app/navigation';
   import { Separator } from '$lib/components/ui/separator';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
-  import { myUser } from '@/contexts/my-user-context.svelte'; // Import the myUser store
   import { onMount } from 'svelte';
   import type { PageData } from '../$types';
   import DeleteAccountDialog from './delete-account-dialog.svelte';
   import UpdateEmailDialog from './update-email-dialog.svelte';
   import UpdatePasswordDialog from './update-password-dialog.svelte';
   import UpdateUsernameDialog from './update-username-dialog.svelte';
+
+  const myUser = $derived(myUserContext.myUser);
 
   let { data }: { data: PageData } = $props();
 
@@ -19,20 +20,23 @@
 
   // Subscribe to the myUser store
   $effect(() => {
-    if ($myUser) {
-      console.log('myUser', $myUser);
+    if (myUser) {
+      console.log('myUser', myUser);
 
-      currentUsername = $myUser.userHandle || data.currentUsername || '';
-      currentEmail = $myUser.email || data.email || '';
+      currentUsername = myUser.userHandle || myUserContext.myUserHandle || '';
+      currentEmail = myUser?.email || myUserContext.myEmail || '';
     } else {
-      console.log('updateUserData', $myUser);
+      console.log('updateUserData', myUser);
       updateUserData();
     }
   });
 
   function updateUserData() {
-    currentUsername = data.currentUsername || myUserContext.myUserHandle || '';
-    currentEmail = data.email || myUserContext.myEmail || '';
+    console.log('myUser', myUser);
+
+    currentUsername =
+      data.currentUsername || myUserContext.myUserHandle || myUser?.userHandle || '';
+    currentEmail = data.email || myUserContext.myEmail || myUser?.email || '';
   }
 
   onMount(() => {

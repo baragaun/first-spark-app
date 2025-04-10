@@ -1,23 +1,19 @@
 <script lang="ts">
   import { Input } from '$lib/components/ui/input';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { UserIdentType } from '@baragaun/bg-node-client';
-  import { MyUserContext } from '@/contexts/my-user-context.svelte';
-  import { z } from 'zod';
-  import { getContext } from 'svelte';
   import { AlertCircle, Check } from 'lucide-svelte';
+  import {
+    emailSchema,
+    usernameSchema,
+  } from '../../routes/settings/account/account-settings-schema';
 
   // State variables
   let isChecking = $state(false);
   let debounceTimer: number | null = null;
   const DEBOUNCE_DELAY = 300; // ms
-  const myUserContext = getContext<MyUserContext>('myUserContext');
 
-  // Define Zod schemas for validation
-  const emailSchema = z.string().email('Not a valid email address');
-  const handleSchema = z
-    .string()
-    .min(3, 'Must be at least 3 characters')
-    .max(30, 'Cannot exceed 30 characters');
+  const myUser = $derived(myUserContext.myUser);
 
   const checkIdentAvailability = async (
     ident: string,
@@ -55,7 +51,9 @@
       return { ...result, isValid: true };
     }
 
-    const parsed = (UserIdentType.email ? emailSchema : handleSchema).safeParse(identifier);
+    const parsed = (
+      UserIdentType.email ? emailSchema.shape.email : usernameSchema.shape.username
+    ).safeParse(identifier);
 
     if (!parsed.success) {
       return {
@@ -126,7 +124,9 @@
 
     // Skip check if username doesn't meet basic requirements
     if (
-      (UserIdentType.email ? emailSchema : handleSchema).safeParse(identifier).success === false
+      (UserIdentType.email ? emailSchema.shape.email : usernameSchema.shape.username).safeParse(
+        identifier,
+      ).success === false
     ) {
       isIdentAvailable = null;
       isChecking = false;
