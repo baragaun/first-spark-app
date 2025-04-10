@@ -47,9 +47,26 @@ pnpm build
 
 You can preview the production build with `pnpm run preview`.
 
+## Storybook
+
+### Run Storybook
+
+```shell
+pnpm run storybook
+```
+
+### Run Storybook tests
+```shell
+# Run tests in watch mode (for development)
+pnpm run test:storybook
+
+# Run tests without watch mode (for CI)
+pnpm run test:storybook:ci
+```
+
 ## Testing
 
-This project includes unit tests, and end-to-end (e2e) tests and a Storybook instance.
+This project includes unit tests, and end-to-end (e2e) tests
 
 ### Unit Tests
 
@@ -79,29 +96,12 @@ or
 pnpm playwright test
 ```
 
-Storybook tests
-
 ### Run All Tests
 
 To run both unit and e2e tests in sequence:
 
 ```shell
 pnpm run test:all
-```
-
-### Run Storybook
-
-```shell
-pnpm run storybook
-```
-
-### Run Storybook tests
-```shell
-# Run tests in watch mode (for development)
-pnpm run test:storybook
-
-# Run tests without watch mode (for CI)
-pnpm run test:storybook:ci
 ```
 
 > To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
