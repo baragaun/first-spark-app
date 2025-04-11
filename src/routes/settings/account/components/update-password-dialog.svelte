@@ -43,7 +43,8 @@
   });
 
   let hasFormValues = $derived(
-    $formData.currentPassword && $formData.newPassword && !passwordErrorMsg && isNewPassworValid,
+    $formData.currentPassword && $formData.newPassword && !passwordErrorMsg && isNewPassworValid &&
+      !$errors.newPassword,
   );
 
   // Reset dialog state when closed
@@ -152,27 +153,21 @@
 
       <form method="POST" class="mt-6 space-y-4" use:enhance>
         <div class="space-y-2">
-          <label for="current-password" class="block text-sm font-medium leading-none">
-            Current Password
-          </label>
           <PasswordInput
-            id="current-password"
-            bind:value={$formData.currentPassword}
-            bind:isValid={isCurrentPassworValid}
+            {form}
+            fieldName="currentPassword"
+            label="Current Password"
             placeholder="Enter current password"
-            bind:errorMessage={passwordErrorMsg}
+            errorMessage={passwordErrorMsg}
           />
         </div>
 
         <div class="space-y-2">
-          <label for="new-password" class="block text-sm font-medium leading-none">
-            New Password
-          </label>
           <PasswordInput
-            id="new-password"
+            {form}
+            fieldName="newPassword"
+            label="New Password"
             placeholder="Enter new password"
-            bind:value={$formData.newPassword}
-            bind:isValid={isNewPassworValid}
             showValidation={true}
           />
         </div>
