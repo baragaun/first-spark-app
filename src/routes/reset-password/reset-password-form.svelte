@@ -138,6 +138,10 @@
         !response?.object.run
       ) {
         errorMessage = 'Failed to send verification code. Please try again.';
+        errors.update((errors) => ({
+          ...errors,
+          ident: [errorMessage],
+        }));
         return;
       }
 
