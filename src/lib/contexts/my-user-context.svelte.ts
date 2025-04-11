@@ -68,8 +68,12 @@ export class MyUserContext {
       const listener: MyUserListener = {
         id: 'MyUserContext',
         topic: BgListenerTopic.myUser,
-        onSignedIn: () => { isSignedIn = true },
-        onSignedOut: () => { isSignedIn = false },
+        onSignedIn: () => {
+          isSignedIn = true;
+        },
+        onSignedOut: () => {
+          isSignedIn = false;
+        },
         onMyUserUpdated: (updatedMyUser) => {
           myUser = updatedMyUser;
         },

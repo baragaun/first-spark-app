@@ -5,13 +5,19 @@ const isValidEmail = (email: string): boolean => {
   return emailRegex.test(email);
 };
 
-export const emailSchema = z.string().email({
-  message: 'Please enter a valid email address.',
-}).refine((email) => isValidEmail(email));
+export const emailSchema = z
+  .string()
+  .email({
+    message: 'Please enter a valid email address.',
+  })
+  .refine((email) => isValidEmail(email));
 
-export const usernameSchema = z.string({
-  message: 'A username must be at least 3 characters.'
-}).min(3).max(30);
+export const usernameSchema = z
+  .string({
+    message: 'A username must be at least 3 characters.',
+  })
+  .min(3)
+  .max(30);
 
 export const schemaFirstStep = z.object({
   ident: z
@@ -30,7 +36,7 @@ export const schemaLastStep = schemaStepTwo.extend({
   newPassword: z.string().min(8, {
     message: 'Your password must be at least 8 characters.',
   }),
-  actionId: z.string()
+  actionId: z.string(),
 });
 
 export const getOtpMessage = (formData: { ident?: string }) => {
