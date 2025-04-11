@@ -21,7 +21,6 @@ test('Landing page includes NavBar component, signup, login buttons', async ({ p
 
   // Check for the navigation bar
   // Since the NavBar is in the layout, we can verify it by checking for elements that are part of the NavBar
-  //const navElement = page.locator('nav');
   const navElement = page.getByRole('navigation').filter({ hasText: 'Sign In Sign Up' });
   await expect(navElement).toBeVisible();
 
