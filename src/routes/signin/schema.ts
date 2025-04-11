@@ -1,8 +1,13 @@
 import { z } from 'zod';
 
+const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  return emailRegex.test(email);
+};
+
 export const emailSchema = z.string().email({
   message: 'Please enter a valid email address.',
-});
+}).refine((email) => isValidEmail(email));
 
 export const usernameSchema = z.string({
   message: 'A username must be at least 3 characters.'
