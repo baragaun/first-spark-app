@@ -1,6 +1,6 @@
 <script lang="ts">
   import AuthCard from "@/components/auth-card.svelte";
-  import { schemaFirstStep, schemaLastStep, schemaStepTwo, type ResetPasswordFormSchema } from "./schema";
+  import { emailSchema, getOtpMessage, schemaFirstStep, schemaLastStep, schemaStepTwo, usernameSchema, type ResetPasswordFormSchema } from "./schema";
   import SuperDebug, {
     type SuperValidated,
     type Infer,
@@ -27,6 +27,8 @@
   let msaActionId = $state<string | undefined>(undefined);
   let loading = $state(false);
   let errorMessage = $state('');
+  let identifier = $state('');
+  let identType = $state(UserIdentType.email);
   let resendTimer = $state(30);
   let canResend = $state(false);
   let tokenStatus = $state(MsaTokenStatus.unset);
@@ -86,6 +88,20 @@
 
   const { form: formData, enhance, errors, delayed, validateForm, options } = form;
 
+  const determineIdentifierType = (value: string): UserIdentType => {
+    const emailValidationResult = emailSchema.safeParse(value);
+    if (emailValidationResult.success) {
+      return UserIdentType.email;
+    }
+
+    const usernameValidationResult = usernameSchema.safeParse(value);
+    if (usernameValidationResult.success) {
+      return UserIdentType.userHandle;
+    }
+
+    return UserIdentType.email;
+  };
+
   let timerInterval: ReturnType<typeof setInterval>;
 
   const startResendTimer = () => {
@@ -108,7 +124,10 @@
     errorMessage = '';
 
     try {
-      const response = await myUserContext.resetMyPassword($formData.email);
+      identifier = $formData.ident || '';
+      identType = determineIdentifierType(identifier);
+
+      const response = await myUserContext.resetMyPassword($formData.ident);
 
       if (
         !response ||
@@ -209,7 +228,7 @@
 ``
     loading = true;
     try {
-      const response = await myUserContext.sendMultiStepActionNotification($formData.email);
+      const response = await myUserContext.sendMultiStepActionNotification($formData.ident);
 
       if (response !== true) {
         errorMessage =
@@ -229,7 +248,7 @@
   const { getPasswordError, validatePassword } = passwordHelpers;
 
   const verifyResetPasswordToken = async () => {
-    if (!$formData.emailOtp) return;
+    if (!$formData.token) return;
 
     try {
       if (!msaActionId) {
@@ -243,7 +262,7 @@
 
       const response = await myUserContext.verifyMultiStepActionToken(
         $formData.actionId, 
-        $formData.emailOtp
+        $formData.token
       );
 
       if (response !== true) {
@@ -277,7 +296,7 @@
     }
     const result = await myUserContext.verifyMultiStepActionToken(
       $formData.actionId,
-      $formData.emailOtp, 
+      $formData.token, 
       $formData.newPassword
     );
 
@@ -287,8 +306,8 @@
     }
 
     const response = await myUserContext.signMeInWithPassword(
-      $formData.email,
-      UserIdentType.email,
+      $formData.ident,
+      identType,
       $formData.newPassword
     );
 
@@ -330,7 +349,8 @@
       case 1:
         return 'Provide your email address to receive a verification code and update your password.';
       case 2:
-        return `Enter the six digit code that was sent to ${$formData.email}.`;
+        // return `Enter the six digit code that was sent to ${$formData.ident}.`;
+        return getOtpMessage($formData);
       case 3:
         return 'Now, update your password.';
     }
@@ -346,7 +366,7 @@
         {#if step == 1}
           <EmailFormInput
             form={form}
-            fieldName="email"
+            fieldName="ident"
             placeholder='e.g. "student@example.com"'
             label="Email address"
           />
@@ -360,7 +380,7 @@
         {:else if step == 2}
           <OtpFormInput
             form={form}
-            fieldName="emailOtp"
+            fieldName="token"
             label="Verification code"
             length={6}
             showResend={true}

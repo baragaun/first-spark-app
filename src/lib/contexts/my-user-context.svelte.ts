@@ -365,13 +365,13 @@ export class MyUserContext {
     }
   }
 
-  async resetMyPassword(email: string): Promise<QueryResult<MultiStepActionProgressResult>> {
+  async resetMyPassword(ident: string): Promise<QueryResult<MultiStepActionProgressResult>> {
     if (!this.client.isInitialized) {
       return { error: 'Client not initialized' };
     }
     try {
       isLoading = true;
-      return this.client.operations.myUser.resetMyPassword(email, {
+      return this.client.operations.myUser.resetMyPassword(ident, {
         polling: {
           enabled: true,
           interval: 2000, // 2 seconds
