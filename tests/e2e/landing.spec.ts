@@ -12,8 +12,8 @@ test('Landing page has welcome text, Get Started Button', async ({ page }) => {
   await expect(subtextElement).toBeVisible();
 
   // Check for the Get Started button
-  const logInButton = page.getByRole('button', { name: 'Get Started' });
-  await expect(logInButton).toBeVisible();
+  const getStartedButton = page.getByText('Get Started');
+  await expect(getStartedButton).toBeVisible();
 });
 
 test('Landing page includes NavBar component, signup, login buttons', async ({ page }) => {
@@ -22,18 +22,23 @@ test('Landing page includes NavBar component, signup, login buttons', async ({ p
   // Check for the navigation bar
   // Since the NavBar is in the layout, we can verify it by checking for elements that are part of the NavBar
   //const navElement = page.locator('nav');
-  const navElement = page.getByRole('navigation').filter({ hasText: 'Log In Sign Up Open Menu' });
+  const navElement = page.getByRole('navigation').filter({ hasText: 'Sign In Sign Up' });
   await expect(navElement).toBeVisible();
 
   // We can also check for specific elements within the NavBar
-  const themeToggleButton = page.getByRole('button', { name: /toggle theme/i });
+  // Check if it contains a toggle theme button
+  const themeToggleButton = navElement.getByRole('button', { name: 'Toggle theme' });
   await expect(themeToggleButton).toBeVisible();
 
-  // Check if it contains a Sign Up button
-  const signUpButton = navElement.getByText('Sign Up');
-  await expect(signUpButton).toBeVisible();
+  // Check if it contains a change language button
+  const changeLanguageButton = navElement.getByRole('button', { name: 'Change language' });
+  await expect(changeLanguageButton).toBeVisible();
 
-  // Check if it contains a Log In button
-  const logInButton = navElement.getByText('Log In');
-  await expect(logInButton).toBeVisible();
+  // Check if it contains a "Sign In" button
+  const signInButton = navElement.getByRole('button', { name: 'Sign In' });
+  await expect(signInButton).toBeVisible();
+
+  // Check if it contains a "Sign Up" button
+  const signUpButton = navElement.getByRole('button', { name: 'Sign Up' });
+  await expect(signUpButton).toBeVisible();
 });
