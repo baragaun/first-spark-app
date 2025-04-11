@@ -5,21 +5,33 @@ const isValidEmail = (email: string): boolean => {
   return emailRegex.test(email);
 };
 
-export const emailSchema = z.string().email({
-  message: 'Please enter a valid email address.',
-}).refine((email) => isValidEmail(email));
+export const emailSchema = z
+  .string()
+  .email({
+    message: 'Please enter a valid email address.',
+  })
+  .refine((email) => isValidEmail(email));
 
-export const usernameSchema = z.string({
-  message: 'A username must be at least 3 characters.'
-}).min(3).max(30);
+export const usernameSchema = z
+  .string({
+    message: 'A username must be at least 3 characters.',
+  })
+  .min(3)
+  .max(30);
 
-const otpSchema = z.string().min(6, {
-  message: 'Your one-time password must be at least 6 characters.',
-}).transform((val) => val.trim());
+const otpSchema = z
+  .string()
+  .min(6, {
+    message: 'Your one-time password must be at least 6 characters.',
+  })
+  .transform((val) => val.trim());
 
-const passwordSchema = z.string().min(8, {
-  message: 'Your password must be at least 8 characters.',
-}).transform((val) => val.trim());
+const passwordSchema = z
+  .string()
+  .min(8, {
+    message: 'Your password must be at least 8 characters.',
+  })
+  .transform((val) => val.trim());
 
 export const schemaFirstStep = z.object({
   ident: z
@@ -36,10 +48,7 @@ export const schemaLastStep = schemaFirstStep.extend({
   authType: z.literal('token').optional(),
 });
 
-export const signInFormSchema = z.discriminatedUnion('authType', [
-  schemaFirstStep,
-  schemaLastStep,
-]);
+export const signInFormSchema = z.discriminatedUnion('authType', [schemaFirstStep, schemaLastStep]);
 
 export const getOtpMessage = (formData: { ident?: string }) => {
   const identifier = formData.ident || '';

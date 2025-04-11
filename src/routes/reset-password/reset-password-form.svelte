@@ -1,27 +1,35 @@
 <script lang="ts">
-  import AuthCard from "@/components/auth-card.svelte";
-  import { emailSchema, getOtpMessage, schemaFirstStep, schemaLastStep, schemaStepTwo, usernameSchema, type ResetPasswordFormSchema } from "./schema";
-  import SuperDebug, {
-    type SuperValidated,
-    type Infer,
-    superForm,
-  } from "sveltekit-superforms";
-  import { zod } from "sveltekit-superforms/adapters";
-  import { AppUiMessage, MsaTokenStatus } from "@/types/enums.js";
-  import { myUserContext } from "@/contexts/my-user-context.svelte.js";
-  import translate from "@/helpers/language/translate.js";
-  import { MultiStepActionEventType, SidMultiStepActionProgress, UserIdentType } from '@baragaun/bg-node-client';
-  import { onDestroy } from "svelte";
-  import passwordHelpers from "@/helpers/password-helpers.js";
-  import { goto } from "$app/navigation";
-  
+  import AuthCard from '@/components/auth-card.svelte';
+  import {
+    emailSchema,
+    getOtpMessage,
+    schemaFirstStep,
+    schemaLastStep,
+    schemaStepTwo,
+    usernameSchema,
+    type ResetPasswordFormSchema,
+  } from './schema';
+  import SuperDebug, { type SuperValidated, type Infer, superForm } from 'sveltekit-superforms';
+  import { zod } from 'sveltekit-superforms/adapters';
+  import { AppUiMessage, MsaTokenStatus } from '@/types/enums.js';
+  import { myUserContext } from '@/contexts/my-user-context.svelte.js';
+  import translate from '@/helpers/language/translate.js';
+  import {
+    MultiStepActionEventType,
+    SidMultiStepActionProgress,
+    UserIdentType,
+  } from '@baragaun/bg-node-client';
+  import { onDestroy } from 'svelte';
+  import passwordHelpers from '@/helpers/password-helpers.js';
+  import { goto } from '$app/navigation';
+
   import EmailFormInput from '@/components/forms/form-ident-input.svelte';
   import OtpFormInput from '@/components/forms/form-otp-input.svelte';
   import UpdatePasswordFormInput from '@/components/forms/form-update-password-input.svelte';
   import FormButton from '@/components/forms/form-button.svelte';
- 
+
   let { data }: { data: { form: SuperValidated<Infer<ResetPasswordFormSchema>> } } = $props();
-       
+
   const steps = [zod(schemaFirstStep), zod(schemaStepTwo), zod(schemaLastStep)];
   let step = $state(1);
   let msaActionId = $state<string | undefined>(undefined);
@@ -58,7 +66,7 @@
       debounceTimer = window.setTimeout(async () => {
         try {
           const result = await validateForm({ update: true });
-          hasStepError = !result.valid
+          hasStepError = !result.valid;
         } catch (error) {
           console.error('Error validating form:', error);
         } finally {
@@ -68,9 +76,9 @@
       }, DEBOUNCE_DELAY);
     },
     async onSubmit({ cancel }) {
-			 // Advoid the actual server-side validation form action
-       cancel()
-    
+      // Advoid the actual server-side validation form action
+      cancel();
+
       const result = await validateForm({ update: true, focusOnError: true });
       if (!result.valid) return;
 
@@ -109,7 +117,7 @@
     canResend = false;
 
     clearInterval(timerInterval);
-    console.log('starting resend timer')
+    console.log('starting resend timer');
     timerInterval = setInterval(() => {
       resendTimer -= 1;
       if (resendTimer <= 0) {
@@ -138,13 +146,17 @@
         !response?.object.run
       ) {
         errorMessage = 'Failed to send verification code. Please try again.';
+        errors.update((errors) => ({
+          ...errors,
+          ident: [errorMessage],
+        }));
         return;
       }
 
       msaActionId = response.object.actionProgress.actionId;
 
       // We advance instead of waiting for the poll to come back with a `sent` status
-      step = 2
+      step = 2;
       startResendTimer();
 
       response.object.run.addListener({
@@ -201,7 +213,10 @@
           }
 
           if (eventType === MultiStepActionEventType.failed) {
-            console.error('ResetPasswordPage.multiStepActionListener: error.', action.notificationResult);
+            console.error(
+              'ResetPasswordPage.multiStepActionListener: error.',
+              action.notificationResult,
+            );
             tokenStatus = MsaTokenStatus.verificationFailed;
             errorMessage = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError);
 
@@ -209,7 +224,10 @@
           }
 
           if (eventType === MultiStepActionEventType.success) {
-            console.log('ResetPasswordPage.multiStepActionListener: success.', action.notificationResult);
+            console.log(
+              'ResetPasswordPage.multiStepActionListener: success.',
+              action.notificationResult,
+            );
             tokenStatus = MsaTokenStatus.success;
           }
         },
@@ -225,7 +243,7 @@
 
   const handleResendEmail = async () => {
     if (!canResend) return;
-``
+    ``;
     loading = true;
     try {
       const response = await myUserContext.sendMultiStepActionNotification($formData.ident);
@@ -261,12 +279,14 @@
       errorMessage = '';
 
       const response = await myUserContext.verifyMultiStepActionToken(
-        $formData.actionId, 
-        $formData.token
+        $formData.actionId,
+        $formData.token,
       );
 
       if (response !== true) {
-        console.error('ResetPasswordForm.verifyResetPasswordToken: invalid response:', { result: response });
+        console.error('ResetPasswordForm.verifyResetPasswordToken: invalid response:', {
+          result: response,
+        });
         errorMessage = translate(AppUiMessage.systemError);
         tokenStatus = MsaTokenStatus.unset;
         return;
@@ -291,32 +311,32 @@
 
     try {
       if (!validatePassword($formData.newPassword).isValid) {
-        errorMessage = getPasswordError($formData.newPassword)
-      return;
-    }
-    const result = await myUserContext.verifyMultiStepActionToken(
-      $formData.actionId,
-      $formData.token, 
-      $formData.newPassword
-    );
+        errorMessage = getPasswordError($formData.newPassword);
+        return;
+      }
+      const result = await myUserContext.verifyMultiStepActionToken(
+        $formData.actionId,
+        $formData.token,
+        $formData.newPassword,
+      );
 
-    if (result !== true) {
-      errorMessage = typeof result === 'string' ? result : 'Failed to verify code';
-      return;
-    }
+      if (result !== true) {
+        errorMessage = typeof result === 'string' ? result : 'Failed to verify code';
+        return;
+      }
 
-    const response = await myUserContext.signMeInWithPassword(
-      $formData.ident,
-      identType,
-      $formData.newPassword
-    );
+      const response = await myUserContext.signMeInWithPassword(
+        $formData.ident,
+        identType,
+        $formData.newPassword,
+      );
 
-    if (response !== true) {
-      errorMessage = response;
-      return;
-    }
+      if (response !== true) {
+        errorMessage = response;
+        return;
+      }
 
-    return await goto('/');
+      return await goto('/');
     } catch (err) {
       console.error('Error verifying reset code:', err);
       errorMessage =
@@ -354,68 +374,66 @@
       case 3:
         return 'Now, update your password.';
     }
-  }
+  };
 </script>
- 
-<form method="POST" id="reset-password-form" use:enhance>
-    <AuthCard
-      title="Reset your password"
-      description={getCurrentStepDescription()}
-    >
-      <div class="space-y-4">
-        {#if step == 1}
-          <EmailFormInput
-            form={form}
-            fieldName="ident"
-            placeholder='e.g. "student@example.com"'
-            label="Email address"
-          />
-          
-          <FormButton
-            disabled={$delayed || isValidating || hasStepError}
-            loading={$delayed}
-            buttonText="Send me an email"
-            loadingText="Drafting email..."
-          />
-        {:else if step == 2}
-          <OtpFormInput
-            form={form}
-            fieldName="token"
-            label="Verification code"
-            length={6}
-            showResend={true}
-            canResend={canResend}
-            resendTimer={resendTimer}
-            onResendClick={handleResendEmail}
-          />
 
-          <FormButton
-            disabled={$delayed || isValidating || hasStepError}
-            loading={$delayed}
-            buttonText="Verify my email"
-            loadingText="Verifiying email..."
-          />
-        {:else if step == 3}
-          <UpdatePasswordFormInput
-            form={form}
-            fieldName="newPassword"
-            label="New password"
-            placeholder="Your password must be at least 8 characters"
-          />
-          
-          <FormButton
-            disabled={$delayed || isValidating || hasStepError}
-            loading={$delayed}
-            buttonText="Update my password"
-            loadingText="Updating password..."
-          />
-        {/if}
-      </div>
-    </AuthCard>
-    
-    <div class="mt-4"><SuperDebug data={$formData} /></div>
-    <div class="mt-4"><SuperDebug data={errors} />
-      <!-- TODO: Need to connect token errors with the input -->
-      {errorMessage}
+<form method="POST" id="reset-password-form" use:enhance>
+  <AuthCard title="Reset your password" description={getCurrentStepDescription()}>
+    <div class="space-y-4">
+      {#if step == 1}
+        <EmailFormInput
+          {form}
+          fieldName="ident"
+          placeholder="e.g. 'student@example.com'"
+          label="Email address"
+        />
+
+        <FormButton
+          disabled={$delayed || isValidating || hasStepError}
+          loading={$delayed}
+          buttonText="Send me an email"
+          loadingText="Drafting email..."
+        />
+      {:else if step == 2}
+        <OtpFormInput
+          {form}
+          fieldName="token"
+          label="Verification code"
+          length={6}
+          showResend={true}
+          {canResend}
+          {resendTimer}
+          onResendClick={handleResendEmail}
+        />
+
+        <FormButton
+          disabled={$delayed || isValidating || hasStepError}
+          loading={$delayed}
+          buttonText="Verify my email"
+          loadingText="Verifiying email..."
+        />
+      {:else if step == 3}
+        <UpdatePasswordFormInput
+          {form}
+          fieldName="newPassword"
+          label="New password"
+          placeholder="Your password must be at least 8 characters"
+        />
+
+        <FormButton
+          disabled={$delayed || isValidating || hasStepError}
+          loading={$delayed}
+          buttonText="Update my password"
+          loadingText="Updating password..."
+        />
+      {/if}
     </div>
+  </AuthCard>
+
+  <div class="mt-4"><SuperDebug data={$formData} /></div>
+  <div class="mt-4">
+    <SuperDebug data={errors} />
+    <!-- TODO: Need to connect token errors with the input -->
+    {errorMessage}
+  </div>
 </form>

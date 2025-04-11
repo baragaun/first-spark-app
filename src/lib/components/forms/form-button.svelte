@@ -1,16 +1,16 @@
 <script lang="ts">
-  import * as Form from "$lib/components/ui/form/index.js";
-  import { LoaderCircle } from "lucide-svelte";
+  import * as Form from '$lib/components/ui/form/index.js';
+  import { LoaderCircle } from 'lucide-svelte';
 
   let {
     disabled = false,
     loading = false,
-    buttonText = "Submit",
-    loadingText = "Processing...",
-    variant = "default",
+    buttonText = 'Submit',
+    loadingText = 'Processing...',
+    variant = 'default',
     fullWidth = true,
-    type = "submit",
-    onClick = undefined
+    type = 'submit',
+    onClick = undefined,
   } = $props<{
     disabled?: boolean;
     loading?: boolean;
@@ -27,7 +27,7 @@
   {variant}
   {disabled}
   {type}
-  class={fullWidth ? "w-full" : ""}
+  class={fullWidth ? 'w-full' : ''}
   onclick={(e) => {
     if (onClick) {
       e.preventDefault();
@@ -36,7 +36,7 @@
   }}
 >
   {#if loading}
-    <LoaderCircle class="animate-spin mr-2" />
+    <LoaderCircle class="mr-2 animate-spin" />
     {loadingText}
   {:else}
     {buttonText}

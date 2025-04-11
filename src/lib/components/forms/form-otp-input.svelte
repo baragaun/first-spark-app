@@ -1,22 +1,22 @@
 <script lang="ts">
-  import * as Form from "$lib/components/ui/form/index.js";
+  import * as Form from '$lib/components/ui/form/index.js';
   import * as InputOTP from '$lib/components/ui/input-otp';
   import { REGEXP_ONLY_DIGITS } from 'bits-ui';
-  import type { SuperForm } from "sveltekit-superforms";
+  import type { SuperForm } from 'sveltekit-superforms';
 
   let {
     form,
-    fieldName = "emailOtp",
-    label = "Verification code",
+    fieldName = 'emailOtp',
+    label = 'Verification code',
     length = 6,
-    id = "verification-code",
+    id = 'verification-code',
     pattern = REGEXP_ONLY_DIGITS,
     showResend = false,
     canResend = false,
-    resendLabel = "Resend code",
-    resendTimerLabel = "Resend in",
+    resendLabel = 'Resend code',
+    resendTimerLabel = 'Resend in',
     resendTimer = 0,
-    onResendClick = undefined
+    onResendClick = undefined,
   } = $props<{
     form: SuperForm<any, any>;
     fieldName?: string;
@@ -45,13 +45,7 @@
   <Form.Control>
     {#snippet children({ props })}
       <Form.Label>{label}</Form.Label>
-      <InputOTP.Root
-        {...props}
-        {id}
-        maxlength={length}
-        bind:value={$formData[fieldName]}
-        {pattern}
-      >
+      <InputOTP.Root {...props} {id} maxlength={length} bind:value={$formData[fieldName]} {pattern}>
         {#snippet children({ cells })}
           <InputOTP.Group class="w-full">
             {#each cells as cell}
@@ -67,10 +61,15 @@
 
 {#if showResend}
   <div class="flex justify-between text-sm">
-    <Form.Button variant="link" class="px-0" disabled={!canResend} onclick={(e) => {
-      e.preventDefault();
-      if (onResendClick) onResendClick();
-    }}>
+    <Form.Button
+      variant="link"
+      class="px-0"
+      disabled={!canResend}
+      onclick={(e) => {
+        e.preventDefault();
+        if (onResendClick) onResendClick();
+      }}
+    >
       {canResend ? resendLabel : `${resendTimerLabel} ${formatTime()}`}
     </Form.Button>
   </div>

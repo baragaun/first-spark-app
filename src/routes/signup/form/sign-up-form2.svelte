@@ -17,7 +17,15 @@
   import { zod } from 'sveltekit-superforms/adapters';
   import { onDestroy } from 'svelte';
   import AuthCard from '@/components/auth-card.svelte';
-  import { determineIdentifierType, emailSchema, schemaFirstStep, schemaLastStep, schemaSecondStep, usernameSchema, type SignInFormSchema } from './schema';
+  import {
+    determineIdentifierType,
+    emailSchema,
+    schemaFirstStep,
+    schemaLastStep,
+    schemaSecondStep,
+    usernameSchema,
+    type SignInFormSchema,
+  } from './schema';
   import FormUpdatePasswordInput from '@/components/forms/form-update-password-input.svelte';
 
   let { data }: { data: { form: SuperValidated<SignInFormSchema> } } = $props();
@@ -53,24 +61,22 @@
         clearTimeout(debounceTimer);
       }
 
-      if (!$formData) return
-      
+      if (!$formData) return;
+
       isValidating = true;
 
       debounceTimer = window.setTimeout(async () => {
-        try {  
+        try {
           await validateForm({ update: true });
-          
+
           if (step === 1) {
-            hasStepError = !await checkIdentAvailability();
+            hasStepError = !(await checkIdentAvailability());
             const emailValidationResult = emailSchema.safeParse($formData.email);
           } else if (step === 2) {
-
           } else if (step === 3) {
-            hasStepError = !await checkIdentAvailability();
+            hasStepError = !(await checkIdentAvailability());
             const usernameValidationResult = usernameSchema.safeParse($formData.username);
           }
-
 
           // hasStepError = !result.valid;
         } catch (error) {
@@ -83,7 +89,7 @@
     },
     async onSubmit({ cancel }) {
       // Advoid the actual server-side validation form action
-      cancel()
+      cancel();
 
       const result = await validateForm({ update: true, focusOnError: true });
       if (!result.valid) {
@@ -124,7 +130,7 @@
     loading = true;
     errorMessage = '';
     let schemaValdationResult;
-    
+
     if (step === 1) {
       identifier = $formData.email;
       if (!identifier) return false;
@@ -136,31 +142,31 @@
       identType = UserIdentType.userHandle;
       schemaValdationResult = usernameSchema.safeParse($formData.username);
     }
-    
+
     if (schemaValdationResult && schemaValdationResult.success) {
       try {
         const response = await myUserContext.isUserIdentAvailable(identifier, identType);
-        
+
         if (response.error) {
           errorMessage = response.error;
           return false;
         } else if (!response.isAvailable) {
           if (identType === UserIdentType.email) {
-            errorMessage = 'This email is currently unavailable for use.'
-            form.errors.update(errors => ({
+            errorMessage = 'This email is currently unavailable for use.';
+            form.errors.update((errors) => ({
               ...errors,
-              email: [errorMessage]
-            }))
+              email: [errorMessage],
+            }));
           } else {
-            errorMessage = 'This username is currently unavailable for use.'
-            form.errors.update(errors => ({
+            errorMessage = 'This username is currently unavailable for use.';
+            form.errors.update((errors) => ({
               ...errors,
-              username: [errorMessage]
-            }))
+              username: [errorMessage],
+            }));
           }
           return false;
         } else {
-          return response.isAvailable
+          return response.isAvailable;
         }
       } catch (error) {
         console.error('SignUpForm.createCredentials: error:', { error });
@@ -174,13 +180,12 @@
     }
   };
 
-
   const registerNewEmail = async () => {
     loading = true;
     errorMessage = '';
 
     if (!$formData.email) {
-      validateForm({update: true})
+      validateForm({ update: true });
       return;
     }
 
@@ -340,7 +345,10 @@
       loading = true;
       errorMessage = '';
 
-      const response = await myUserContext.sendMultiStepActionNotification(mfaActionId, $formData.email);
+      const response = await myUserContext.sendMultiStepActionNotification(
+        mfaActionId,
+        $formData.email,
+      );
 
       if (typeof response === 'string') {
         console.error('SignInForm.handleResendOtp: error:', { error: response });
@@ -411,47 +419,44 @@
       case 3:
         return 'Choose a username and a password.';
     }
-  }
+  };
 </script>
 
 <form method="POST" id="sign-up-form" use:enhance>
-  <AuthCard
-    title="Sign up"
-    description={getCurrentStepDescription()}
-  >
+  <AuthCard title="Sign up" description={getCurrentStepDescription()}>
     <div class="space-y-4">
       {#if step === 1}
         <!-- TODO: this should be called identinput -->
         <IdentInputComponent
-          form={form}
+          {form}
           fieldName="email"
-          placeholder='e.g. "student@example.com"'
+          placeholder="e.g. 'student@example.com'"
           label="Email address"
         />
       {:else if step === 2}
         <OTPInputComponent
-          form={form}
+          {form}
           fieldName="token"
           label="Verification code"
           length={6}
           showResend={true}
-          canResend={canResend}
-          resendTimer={resendTimer}
+          {canResend}
+          {resendTimer}
           onResendClick={resendToken}
         />
       {:else if step === 3}
         <IdentInputComponent
-          form={form}
+          {form}
           fieldName="username"
-          placeholder='e.g. "giraffe08"'
+          placeholder="e.g. 'giraffe08'"
           label="Username"
         />
         <FormUpdatePasswordInput
-          form={form}
+          {form}
           fieldName="password"
           label="Password"
           placeholder="Enter your password"
-          />
+        />
       {/if}
       <FormButtonComponent
         disabled={$delayed || isValidating || hasStepError}
@@ -459,12 +464,13 @@
         buttonText="Sign in"
         loadingText="Signing in..."
       />
-    <div class="mt-4 text-center text-sm">
-      Don't have an account?
-      <a href="/signup" class="underline"> Sign up </a>
-    </div>
-  </AuthCard>
-  
+      <div class="mt-4 text-center text-sm">
+        Don't have an account?
+        <a href="/signup" class="underline"> Sign up </a>
+      </div>
+    </div></AuthCard
+  >
+
   <div class="mt-4"><SuperDebug data={$formData} /></div>
   <div class="mt-4"><SuperDebug data={errors} /> {errorMessage}</div>
 </form>
