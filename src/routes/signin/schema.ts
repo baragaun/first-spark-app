@@ -26,7 +26,6 @@ export const schemaFirstStep = z.object({
     .string()
     .min(3, 'Username or email is required')
     .transform((val) => val.trim()),
-  // token: z.undefined(),
   token: otpSchema.optional(),
   password: passwordSchema.optional(),
   authType: z.literal('password').default('password'),
@@ -45,41 +44,6 @@ export const signInFormSchema = z.discriminatedUnion('authType', [
 export const getOtpMessage = (formData: { ident?: string }) => {
   const identifier = formData.ident || '';
   return `Enter the verification code sent to ${identifier}`;
-};
-
-export const shouldUseTokenAuth = (formData: {
-  token?: string;
-  password?: string;
-}): boolean => {
-  return !!formData.token && (!formData.password || formData.password.length === 0);
-};
-
-export const validateAuthForm = (formData: {
-  ident: string;
-  password?: string;
-  token?: string;
-  authType: 'password' | 'token';
-}) => {
-  try {
-    return {
-      success: true,
-      data: signInFormSchema.parse(formData),
-      error: null,
-    };
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return {
-        success: false,
-        data: null,
-        error: error.format(),
-      };
-    }
-    return {
-      success: false,
-      data: null,
-      error: 'An unexpected error occurred',
-    };
-  }
 };
 
 // Since steps swap required values, we need to join the two possible schemas to account for all possible requirements

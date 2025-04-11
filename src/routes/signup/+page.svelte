@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { PageData } from './$types';
-  import SignUpForm from './form/sign-up-form.svelte';
+  import SignUpForm from './form/sign-up-form2.svelte';
   let { data }: { data: PageData } = $props();
 </script>
 
