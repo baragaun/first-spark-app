@@ -431,7 +431,7 @@
         <IdentInputComponent
           {form}
           fieldName="email"
-          placeholder="e.g. "student@example.com""
+          placeholder='e.g. "student@example.com"'
           label="Email address"
         />
 
@@ -463,7 +463,7 @@
         <IdentInputComponent
           {form}
           fieldName="username"
-          placeholder="e.g. "giraffe08""
+          placeholder='e.g. "giraffe08"'
           label="Username"
         />
         <FormUpdatePasswordInput

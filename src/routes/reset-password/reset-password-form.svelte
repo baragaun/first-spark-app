@@ -380,7 +380,7 @@
         <EmailFormInput
           {form}
           fieldName="ident"
-          placeholder="e.g. "student@example.com""
+          placeholder='e.g. "student@example.com"'
           label="Email address"
         />
 
