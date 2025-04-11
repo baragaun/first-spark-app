@@ -143,7 +143,7 @@
       errorMessage = '';
       
       identifier = $formData.ident || '';
-      determineIdentifierType(identifier);
+      identType = determineIdentifierType(identifier);
 
       if (!$formData.password) return;
       const response = await myUserContext.signMeInWithPassword(identifier, identType, $formData.password);
@@ -181,7 +181,7 @@
 
   const startTokenSignIn = async () => {
     identifier = $formData.ident || '';
-    determineIdentifierType(identifier);
+    identType = determineIdentifierType(identifier);
 
     if (!$formData.ident) {
       validateForm({update: true})
