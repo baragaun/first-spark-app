@@ -126,9 +126,6 @@ importers:
       lucide-svelte:
         specifier: ^0.475.0
         version: 0.475.0(svelte@5.22.6)
-      playwright:
-        specifier: ^1.51.1
-        version: 1.51.1
       prettier:
         specifier: ^3.4.2
         version: 3.5.3
@@ -7059,7 +7056,8 @@ snapshots:
 
   playwright-core@1.51.0: {}
 
-  playwright-core@1.51.1: {}
+  playwright-core@1.51.1:
+    optional: true
 
   playwright@1.51.0:
     dependencies:
@@ -7072,6 +7070,7 @@ snapshots:
       playwright-core: 1.51.1
     optionalDependencies:
       fsevents: 2.3.2
+    optional: true
 
   polished@4.3.1:
     dependencies:
