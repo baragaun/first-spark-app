@@ -153,13 +153,11 @@
       </div>
 
       <UsernameInput
-        bind:username={$formData.username}
-        bind:isUsernameAvailable
-        label="New Username"
-        placeholder="Enter username"
+        {form}
         {currentUsername}
         checkAvailability={checkUsernameAvailability}
         generateUsername={getSuggestedHandle}
+        {isUsernameAvailable}
       />
     </form>
 

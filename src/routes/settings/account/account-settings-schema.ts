@@ -14,7 +14,7 @@ export const emailSchema = z.object({
 // Password schema without confirm password
 export const passwordSchema = z.object({
   currentPassword: z.string().min(1, 'Current password is required'),
-  newPassword: z.string().min(8, 'Password must be at least 8 characters'),
+  newPassword: z.string().min(8, 'Password must be at least 8 characters long.'),
 });
 
 // Delete account schema
