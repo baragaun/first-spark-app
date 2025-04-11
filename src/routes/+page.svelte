@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
-  // import { isSignedIn } from '@/contexts/my-user-context.svelte';
+
   const isSignedIn = $derived(myUserContext.isSignedIn);
 </script>
 
