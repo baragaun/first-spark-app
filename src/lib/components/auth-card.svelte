@@ -17,21 +17,13 @@
     onBack?: () => void;
   }
 
-  let {
-    title, 
-    description, 
-    showBackButton = false, 
-    onBack, 
-    children 
-  }: Props = $props();
+  let { title, description, showBackButton = false, onBack, children }: Props = $props();
 </script>
 
 <Card class="w-full">
   {#if showBackButton && onBack}
     <div class="px-4 pt-4">
-      <Button variant="ghost" size="sm" onclick={onBack}
-        >← Back</Button
-      >
+      <Button variant="ghost" size="sm" onclick={onBack}>← Back</Button>
     </div>
   {/if}
   <CardHeader>

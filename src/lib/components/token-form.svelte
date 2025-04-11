@@ -18,7 +18,7 @@
   import { LoaderCircle } from 'lucide-svelte';
   // import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
   // import { zod } from 'sveltekit-superforms/adapters';
-  
+
   interface Props {
     verificationCode: string;
     disabled: boolean;
@@ -26,26 +26,20 @@
     onResend: () => void;
   }
 
-  let {
-    verificationCode = $bindable(),
-    disabled,
-    onSubmit,
-    onResend,
-  }: Props = $props();
+  let { verificationCode = $bindable(), disabled, onSubmit, onResend }: Props = $props();
 
   let processing = $state(false);
   let verificationError = $state('');
   let resendTimer = $state(30);
   let canResend = $state(false);
 
-
   let timerInterval: ReturnType<typeof setInterval>;
 
   // const form = superForm({
-	// 	dataType: 'json',  // No need for hidden fields with dataType: 'json'
+  // 	dataType: 'json',  // No need for hidden fields with dataType: 'json'
   //   validators: zod(otpFormSchema),
   //   resetForm: false,
-	// }) ;
+  // }) ;
 
   // const { enhance, delayed, validateForm, options } = form;
 

@@ -1,14 +1,14 @@
 <script lang="ts">
-  import * as Form from "$lib/components/ui/form/index.js";
-  import { Input } from "$lib/components/ui/input/index.js";
-  import type { SuperForm } from "sveltekit-superforms";
+  import * as Form from '$lib/components/ui/form/index.js';
+  import { Input } from '$lib/components/ui/input/index.js';
+  import type { SuperForm } from 'sveltekit-superforms';
 
-  let { 
-    form, 
-    fieldName = "email", 
+  let {
+    form,
+    fieldName = 'email',
     placeholder = 'e.g. "student@example.com"',
-    label = "Email address",
-    disabled = false
+    label = 'Email address',
+    disabled = false,
   } = $props<{
     form: SuperForm<any, any>;
     fieldName?: string;
@@ -24,12 +24,7 @@
   <Form.Control>
     {#snippet children({ props })}
       <Form.Label>{label}</Form.Label>
-      <Input
-        {...props}
-        bind:value={$formData[fieldName]}
-        {placeholder}
-        {disabled}
-      />
+      <Input {...props} bind:value={$formData[fieldName]} {placeholder} {disabled} />
     {/snippet}
   </Form.Control>
   <Form.FieldErrors />

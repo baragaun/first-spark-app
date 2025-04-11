@@ -18,7 +18,14 @@
   import { zod } from 'sveltekit-superforms/adapters';
   import { onDestroy } from 'svelte';
   import AuthCard from '@/components/auth-card.svelte';
-  import { emailSchema, getOtpMessage, schemaFirstStep, schemaLastStep, usernameSchema, type SignInFormSchema } from './schema';
+  import {
+    emailSchema,
+    getOtpMessage,
+    schemaFirstStep,
+    schemaLastStep,
+    usernameSchema,
+    type SignInFormSchema,
+  } from './schema';
 
   let { data }: { data: { form: SuperValidated<SignInFormSchema> } } = $props();
 
@@ -55,13 +62,13 @@
         clearTimeout(debounceTimer);
       }
 
-      if (!$formData) return
-      
+      if (!$formData) return;
+
       isValidating = true;
 
       debounceTimer = window.setTimeout(async () => {
         try {
-          console.log('currentvalidator: ', getCurrentValidator())
+          console.log('currentvalidator: ', getCurrentValidator());
           const result = await validateForm({ update: true });
           // Skip the initial validation ident & password validation attempt
           if (step === 1 && !$formData.password) {
@@ -78,7 +85,7 @@
     },
     async onSubmit({ cancel }) {
       // Advoid the actual server-side validation form action
-      cancel()
+      cancel();
 
       const result = await validateForm({ update: true, focusOnError: true });
       if (!result.valid) {
@@ -116,35 +123,36 @@
   };
 
   const toggleAuthType = () => {
-    console.log('toggling auth type...')
+    console.log('toggling auth type...');
 
-    isOtpStepActive = !isOtpStepActive
+    isOtpStepActive = !isOtpStepActive;
     if (step === 1) {
-
-      console.log('toggleAuthType.token', step)
-      $formData.authType = "token"
-      $formData.token = ''
-
+      console.log('toggleAuthType.token', step);
+      $formData.authType = 'token';
+      $formData.token = '';
     } else {
-      
-      console.log('toggleAuthType.pass', step)
-      $formData.authType = 'password'
+      console.log('toggleAuthType.pass', step);
+      $formData.authType = 'password';
       $formData.token = undefined;
     }
-    
+
     errorMessage = '';
-  }
+  };
 
   const signMeInWithPassword = async () => {
     try {
       loading = true;
       errorMessage = '';
-      
+
       identifier = $formData.ident || '';
       identType = determineIdentifierType(identifier);
 
       if (!$formData.password) return;
-      const response = await myUserContext.signMeInWithPassword(identifier, identType, $formData.password);
+      const response = await myUserContext.signMeInWithPassword(
+        identifier,
+        identType,
+        $formData.password,
+      );
 
       if (response !== true) {
         errorMessage = response;
@@ -182,11 +190,11 @@
     identType = determineIdentifierType(identifier);
 
     if (!$formData.ident) {
-      validateForm({update: true})
+      validateForm({ update: true });
       return;
     }
 
-    toggleAuthType()
+    toggleAuthType();
 
     if (emailCooldowns.has(identifier)) {
       const cooldownEnd = emailCooldowns.get(identifier) || 0;
@@ -403,60 +411,55 @@
       case 1:
         return 'Enter your email address below to sign in to your account';
       case 2:
-        return isOtpStepActive ? getOtpMessage($formData) : `Enter your password to sign in as ${identifier}`;
+        return isOtpStepActive
+          ? getOtpMessage($formData)
+          : `Enter your password to sign in as ${identifier}`;
       case 3:
         return getOtpMessage($formData);
     }
-  }
+  };
 </script>
 
 <form method="POST" id="sign-in-form" use:enhance>
-  <AuthCard
-    title="Sign in"
-    description={getCurrentStepDescription()}
-  >
+  <AuthCard title="Sign in" description={getCurrentStepDescription()}>
     <div class="space-y-4">
       {#if step === 1}
         <!-- TODO: this should be called identinput -->
         <IdentInputComponent
-          form={form}
+          {form}
           fieldName="ident"
-          placeholder='Enter your email or username'
+          placeholder="Enter your email or username"
           label="Email or Username"
         />
         <PasswordInputComponent
-        form={form}
-        fieldName="password"
-        label="Password"
-        placeholder="Enter your password"
-      />
-      <FormButtonComponent
-        disabled={$delayed || isValidating || hasStepError}
-        loading={$delayed}
-        buttonText="Sign in"
-        loadingText="Signing in..."
-      />
-      <div class="flex text-sm justify-between">
-        <Button variant="link" onclick={
-          async () => await startTokenSignIn()
-        }>
-          Sign in with token
-        </Button>
-        <Button variant="link" onclick={
-          async () => await goto('reset-password')
-        }>
-          Forgot your password?
-        </Button>
-      </div>
+          {form}
+          fieldName="password"
+          label="Password"
+          placeholder="Enter your password"
+        />
+        <FormButtonComponent
+          disabled={$delayed || isValidating || hasStepError}
+          loading={$delayed}
+          buttonText="Sign in"
+          loadingText="Signing in..."
+        />
+        <div class="flex justify-between text-sm">
+          <Button variant="link" onclick={async () => await startTokenSignIn()}>
+            Sign in with token
+          </Button>
+          <Button variant="link" onclick={async () => await goto('reset-password')}>
+            Forgot your password?
+          </Button>
+        </div>
       {:else if step === 2}
         <OTPInputComponent
-          form={form}
+          {form}
           fieldName="token"
           label="Verification code"
           length={6}
           showResend={true}
-          canResend={canResend}
-          resendTimer={resendTimer}
+          {canResend}
+          {resendTimer}
           onResendClick={resendToken}
         />
         <FormButtonComponent
@@ -465,29 +468,29 @@
           buttonText="Sign in"
           loadingText="Signing in..."
         />
-        <div class="flex text-sm justify-between">
-          <Button variant="link" onclick={
-            () => {
-              toggleAuthType()
-              step = 1
+        <div class="flex justify-between text-sm">
+          <Button
+            variant="link"
+            onclick={() => {
+              toggleAuthType();
+              step = 1;
               // TODO: Clean up the active listener
-            }
-          }>
+            }}
+          >
             Sign in with password
           </Button>
-          <Button variant="link" onclick={
-            async () => await goto('reset-password')
-          }>
+          <Button variant="link" onclick={async () => await goto('reset-password')}>
             Forgot your password?
           </Button>
         </div>
       {/if}
-    <div class="mt-4 text-center text-sm">
-      Don't have an account?
-      <a href="/signup" class="underline"> Sign up </a>
-    </div>
-  </AuthCard>
-  
+      <div class="mt-4 text-center text-sm">
+        Don't have an account?
+        <a href="/signup" class="underline"> Sign up </a>
+      </div>
+    </div></AuthCard
+  >
+
   <div class="mt-4"><SuperDebug data={$formData} /></div>
   <div class="mt-4"><SuperDebug data={errors} /> {errorMessage}</div>
 </form>
