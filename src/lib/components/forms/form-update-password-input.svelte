@@ -6,7 +6,7 @@
 
   let {
     form,
-    fieldName = 'newPassword',
+    fieldName = 'password',
     placeholder = 'Your password must be at least 8 characters',
     label = 'Password',
   } = $props<{
@@ -17,6 +17,8 @@
   }>();
 
   const formData = form.form;
+  const errors = form.errors;
+
   let showPassword = $state(false);
 </script>
 
@@ -30,6 +32,7 @@
           bind:value={$formData[fieldName]}
           {placeholder}
           type={showPassword ? 'text' : 'password'}
+          class={$errors[fieldName] ? 'border-red-500 focus-visible:ring-red-500' : ''}
         />
         <button
           type="button"
