@@ -33,19 +33,16 @@ export class MsaListenerHandler {
         ): Promise<void> => {
           if (eventType === MultiStepActionEventType.notificationFailed) {
             // The notification failed to go out.
+            if (import.meta.env.VITE_APP_ENVIRONMENT === 'development') {
+              // We can ignore the failure to send the email in development.
+              console.log('DEVELOPMENT')
+              this.errorMessage = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError)
+              return;
+            }
             console.error(
               `${this.listenerId}.multiStepActionListener: Notification failed.`,
               action.notificationResult,
             );
-
-            if (import.meta.env.VITE_APP_ENVIRONMENT === 'development') {
-              // We can ignore the failure to send the email in development.
-              this.errorMessage = '';
-              return;
-            } else {
-              this.errorMessage =
-                'We could not send the verification token to your email. Please try again.';
-            }
 
             this.tokenStatus = MsaTokenStatus.sendingFailed;
             this.errorMessage = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError);

@@ -1,6 +1,7 @@
 <script lang="ts">
   import AuthCard from '@/components/auth-card.svelte';
   import {
+  determineIdentifierType,
     emailSchema,
     getOtpMessage,
     schemaFirstStep,
@@ -15,6 +16,8 @@
   import { myUserContext } from '@/contexts/my-user-context.svelte.js';
   import translate from '@/helpers/language/translate.js';
   import {
+  MultiStepActionEventType,
+    SidMultiStepActionProgress,
     UserIdentType,
   } from '@baragaun/bg-node-client';
   import { onDestroy } from 'svelte';
@@ -31,18 +34,20 @@
 
   const steps = [zod(schemaFirstStep), zod(schemaStepTwo), zod(schemaLastStep)];
   let step = $state(1);
+  const getCurrentValidator = () => steps[step - 1];
+  
+  // let otpHandler: MsaListenerHandler | undefined = $state(undefined);
   let msaActionId = $state<string | undefined>(undefined);
-  let loading = $state(false);
-  let errorMessage = $state('');
-  let identifier = $state('');
-  let identType = $state(UserIdentType.email);
+  let msaActionStatus = $state(MsaTokenStatus.unset);
   let resendTimer = $state(30);
   let canResend = $state(false);
-  let tokenStatus = $state(MsaTokenStatus.unset);
+      
+  let loading = $state(false);
+  let errorMessage = $state('');
   let hasStepError = $state(true); // Treat an initial empty input as an error
-  let isValidating = $state(false);
-
-  const getCurrentValidator = () => steps[step - 1];
+  
+  let identifier = $state('');
+  let identType = $state(UserIdentType.email);
 
   let debounceTimer: number | null = null;
   const DEBOUNCE_DELAY = 350; // ms
@@ -60,7 +65,7 @@
         $formData.actionId = msaActionId;
       }
 
-      isValidating = true;
+      loading = true;
 
       debounceTimer = window.setTimeout(async () => {
         try {
@@ -69,7 +74,7 @@
         } catch (error) {
           console.error('Error validating form:', error);
         } finally {
-          isValidating = false;
+          loading = false;
           debounceTimer = null;
         }
       }, DEBOUNCE_DELAY);
@@ -97,20 +102,6 @@
 
   const { form: formData, enhance, errors, delayed, validateForm, options } = form;
 
-  const determineIdentifierType = (value: string): UserIdentType => {
-    const emailValidationResult = emailSchema.safeParse(value);
-    if (emailValidationResult.success) {
-      return UserIdentType.email;
-    }
-
-    const usernameValidationResult = usernameSchema.safeParse(value);
-    if (usernameValidationResult.success) {
-      return UserIdentType.userHandle;
-    }
-
-    return UserIdentType.email;
-  };
-
   let timerInterval: ReturnType<typeof setInterval>;
 
   const startResendTimer = () => {
@@ -129,7 +120,7 @@
   };
 
   const startPasswordReset = async () => {
-    isValidating = true;
+    loading = true;
     errorMessage = '';
 
     try {
@@ -155,16 +146,122 @@
       }
 
       msaActionId = response.object.actionProgress.actionId;
+      response.object.run.addListener({
+        id: 'ResetPassword',
+        onEvent: async (
+          eventType: MultiStepActionEventType,
+          action: SidMultiStepActionProgress,
+        ): Promise<void> => {
+          if (eventType === MultiStepActionEventType.notificationFailed) {
+            // The notification failed to go out.
+            if (import.meta.env.VITE_APP_ENVIRONMENT === 'development') {
+              // We can ignore the failure to send the email in development.
+              console.log('DEVELOPMENT')
+              // If an error throws, the ident cannot be found
+              errorMessage = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError)
+              errors.update((errors) => ({
+                ...errors,
+                token: [errorMessage],
+              }));
+              return;
+            }
+            console.error(
+              `ResetPasswordForm.multiStepActionListener: Notification failed.`,
+              action.notificationResult,
+            );
+            msaActionStatus = MsaTokenStatus.sendingFailed;
+            errorMessage = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError);
+            errors.update((errors) => ({
+              ...errors,
+              token: [errorMessage],
+            }));
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.notificationSent) {
+            // The notification has been sent out.
+            console.log(
+              `ResetPasswordForm.multiStepActionListener: Notification sent out.`,
+              action.notificationResult,
+            );
+
+            msaActionStatus = MsaTokenStatus.notificationSent;
+            errorMessage = translate(AppUiMessage.msaTokenSent);
+            // todo this shows up as error
+            errors.update((errors) => ({
+                ...errors,
+                token: [errorMessage],
+              }));
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.tokenFailed) {
+            console.error(
+              `ResetPasswordForm.multiStepActionListener: incorrect token.`,
+              action.notificationResult,
+            );
+            errorMessage = 'We could not verify the token you entered. Please try again.';
+            errors.update((errors) => ({
+                ...errors,
+                token: [errorMessage],
+              }));
+
+              // We are advancing to step 3 before this comes back as failed, aka "accepting an invalid token"
+
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.timedOut) {
+            console.error(
+              `ResetPasswordForm.multiStepActionListener: timeout.`,
+              action.notificationResult,
+            );
+            msaActionStatus = MsaTokenStatus.sendingFailed;
+            errorMessage = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError);
+            errors.update((errors) => ({
+                ...errors,
+                token: [errorMessage],
+              }));
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.failed) {
+            console.error(`ResetPasswordForm.multiStepActionListener: error.`, action.notificationResult);
+            msaActionStatus = MsaTokenStatus.verificationFailed;
+            errorMessage = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError);
+            errors.update((errors) => ({
+                ...errors,
+                token: [errorMessage],
+              }));
+            return;
+          }
+
+          if (eventType === MultiStepActionEventType.success) {
+            // The token was accepted. The user is now signed in.
+            console.log(`ResetPasswordForm.multiStepActionListener: success.`, action.notificationResult);
+            msaActionStatus = MsaTokenStatus.success;
+            errorMessage = translate(AppUiMessage.msaTokenSuccess);
+            // TODO: this shows up as an error
+            errors.update((errors) => ({
+                ...errors,
+                token: [errorMessage],
+            }));
+          }
+        },
+      });
 
       // We advance instead of waiting for the poll to come back with a `sent` status
       step = 2;
       startResendTimer();
-      new MsaListenerHandler('ResetPassword', response);
       return;
     } catch (err) {
       console.error('Error resetting password:', err);
-      tokenStatus = MsaTokenStatus.verificationFailed;
+      msaActionStatus = MsaTokenStatus.verificationFailed;
       errorMessage = translate(AppUiMessage.systemError);
+      errors.update((errors) => ({
+        ...errors,
+        token: [errorMessage],
+      }));
     } finally {
       loading = false;
     }
@@ -172,7 +269,6 @@
 
   const handleResendEmail = async () => {
     if (!canResend) return;
-    ``;
     loading = true;
     try {
       const response = await myUserContext.sendMultiStepActionNotification($formData.ident);
@@ -197,12 +293,10 @@
   const verifyResetPasswordToken = async () => {
     if (!$formData.token) return;
 
-    console.log('>>>>> here we are trying to verify our token')
     try {
       if (!msaActionId) {
         console.error('SignInForm.handleVerifyOtp: actionId missing:');
         errorMessage = translate(AppUiMessage.systemError);
-        console.log('>>>>> oh, we bailed')
         return;
       }
 
@@ -222,17 +316,21 @@
         });
         errorMessage = translate(AppUiMessage.systemError);
         console.log('>>>>> but we have an error: ', errorMessage)
-        tokenStatus = MsaTokenStatus.unset;
+        msaActionStatus = MsaTokenStatus.unset;
         return;
       }
 
-      tokenStatus = MsaTokenStatus.sending;
+      msaActionStatus = MsaTokenStatus.sending;
       console.log('>>>>> heading to step 3')
       step = 3;
     } catch (error) {
       console.error('ResetPasswordForm.verifyResetPasswordToken: error:', { error });
+      msaActionStatus = MsaTokenStatus.unset;
       errorMessage = translate(AppUiMessage.systemError);
-      tokenStatus = MsaTokenStatus.unset;
+      errors.update((errors) => ({
+        ...errors,
+        token: [errorMessage],
+      }));
     } finally {
       loading = false;
     }
@@ -302,7 +400,7 @@
     }
 
     if (!$formData) {
-      isValidating = false;
+      loading = false;
       return;
     }
 
@@ -332,9 +430,8 @@
           placeholder="e.g. 'student@example.com'"
           label="Email address"
         />
-
         <FormButton
-          disabled={$delayed || isValidating || hasStepError}
+          disabled={$delayed || loading || hasStepError}
           loading={$delayed}
           buttonText="Send me an email"
           loadingText="Drafting email..."
@@ -350,9 +447,8 @@
           {resendTimer}
           onResendClick={handleResendEmail}
         />
-
         <FormButton
-          disabled={$delayed || isValidating || hasStepError}
+          disabled={$delayed || loading || hasStepError}
           loading={$delayed}
           buttonText="Verify my email"
           loadingText="Verifiying email..."
@@ -364,9 +460,8 @@
           label="New password"
           placeholder="Your password must be at least 8 characters"
         />
-
         <FormButton
-          disabled={$delayed || isValidating || hasStepError}
+          disabled={$delayed || loading || hasStepError}
           loading={$delayed}
           buttonText="Update my password"
           loadingText="Updating password..."

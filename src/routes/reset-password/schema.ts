@@ -1,3 +1,4 @@
+import { UserIdentType } from '@baragaun/bg-node-client';
 import { z } from 'zod';
 
 const isValidEmail = (email: string): boolean => {
@@ -42,6 +43,20 @@ export const schemaLastStep = schemaStepTwo.extend({
 export const getOtpMessage = (formData: { ident?: string }) => {
   const identifier = formData.ident || '';
   return `Enter the verification code sent to ${identifier}`;
+};
+
+export const determineIdentifierType = (value: string): UserIdentType => {
+  const emailValidationResult = emailSchema.safeParse(value);
+  if (emailValidationResult.success) {
+    return UserIdentType.email;
+  }
+
+  const usernameValidationResult = usernameSchema.safeParse(value);
+  if (usernameValidationResult.success) {
+    return UserIdentType.userHandle;
+  }
+
+  return UserIdentType.email;
 };
 
 // The exported type should be the totality of the form. Since this is stepped, we need to specify the last.
