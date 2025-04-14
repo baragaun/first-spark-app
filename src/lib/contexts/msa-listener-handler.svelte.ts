@@ -135,12 +135,24 @@ export class MsaListenerHandler {
   }
 
   removeListener(): void {
-    console.log(`Trying to remove this listener: ${this.listenerId}`);
     try {
-      if (listening && this.listenerRef && this.response.object?.run) {
-        this.response.object.run.abort();
-        this.response.object.run.removeListener(this.listenerRef);
-        console.log(`Removed listener for ${this.listenerId}`);
+      if (this.listenerRef && this.response.object?.run) {
+        console.log(`Removing listener with ref: ${this.listenerRef}`);
+
+        if (this.response.object.run.abort) {
+          this.response.object.run.abort();
+        }
+
+        if (this.response.object.run.removeListener) {
+          this.response.object.run.removeListener(this.listenerRef);
+          console.log(`Successfully removed listener for ${this.listenerId}`);
+        } else {
+          console.error(`removeListener method not found on run object for ${this.listenerId}`);
+        }
+      } else {
+        console.warn(
+          `Cannot remove listener for ${this.listenerId}: listenerRef=${this.listenerRef}, run=${!!this.response.object?.run}`,
+        );
       }
     } catch (error) {
       console.error(`Error removing listener for ${this.listenerId}:`, error);
