@@ -96,7 +96,6 @@
   const { getPasswordError, validatePassword } = passwordHelpers;
 
   let timerInterval: ReturnType<typeof setInterval>;
-
   const startResendTimer = () => {
     resendTimer = 30;
     canResend = false;
@@ -138,7 +137,6 @@
 
   const startPasswordReset = async () => {
     loading = true;
-    // errorMessage = '';
     updateErrorMessage('', 'ident');
 
     try {
@@ -192,10 +190,21 @@
     }
   };
 
-  const handleResendEmail = async () => {
+  const handleResendToken = async () => {
     if (!canResend) return;
+    msaActionStatus = MsaTokenStatus.unset;
     loading = true;
+
+    if (!msaActionId) {
+      console.error('ResetPasswordForm.handleResendToken: actionId missing.');
+      errorMessage = translate(AppUiMessage.systemError);
+      return;
+    }
+
     try {
+      loading = true;
+      errorMessage = '';
+
       const response = await myUserContext.sendMultiStepActionNotification($formData.ident);
 
       if (response !== true) {
@@ -203,6 +212,7 @@
         return;
       }
 
+      msaActionStatus = MsaTokenStatus.sending;
       startResendTimer();
     } catch (error) {
       console.error('Error resending email:', error);
@@ -357,7 +367,7 @@
           showResend={true}
           {canResend}
           {resendTimer}
-          onResendClick={handleResendEmail}
+          onResendClick={handleResendToken}
         />
         <FormButton
           disabled={$delayed || loading || hasStepError}

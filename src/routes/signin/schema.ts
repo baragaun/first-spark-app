@@ -1,3 +1,4 @@
+import { UserIdentType } from '@baragaun/bg-node-client';
 import { z } from 'zod';
 
 const isValidEmail = (email: string): boolean => {
@@ -53,6 +54,20 @@ export const signInFormSchema = z.discriminatedUnion('authType', [schemaFirstSte
 export const getOtpMessage = (formData: { ident?: string }) => {
   const identifier = formData.ident || '';
   return `Enter the verification code sent to ${identifier}`;
+};
+
+export const determineIdentifierType = (value: string): UserIdentType => {
+  const emailValidationResult = emailSchema.safeParse(value);
+  if (emailValidationResult.success) {
+    return UserIdentType.email;
+  }
+
+  const usernameValidationResult = usernameSchema.safeParse(value);
+  if (usernameValidationResult.success) {
+    return UserIdentType.userHandle;
+  }
+
+  return UserIdentType.email;
 };
 
 // Since steps swap required values, we need to join the two possible schemas to account for all possible requirements
