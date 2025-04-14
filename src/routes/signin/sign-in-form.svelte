@@ -22,6 +22,7 @@
   import { Button } from '$lib/components/ui/button';
   import { goto } from '$app/navigation';
   import { onDestroy } from 'svelte';
+  import { beforeNavigate } from '$app/navigation';
 
   let { data }: { data: { form: SuperValidated<SignInFormSchema> } } = $props();
 
@@ -44,10 +45,17 @@
   let message = $state('');
   let errorMessage = $state('');
   let hasStepError = $state(true);
-  
+
   let identifier = $state('');
   let identType = $state(UserIdentType.email);
-  const emailCooldowns = $state(new Map<string, number>());  // Track emails that have active cooldowns
+  const emailCooldowns = $state(new Map<string, number>()); // Track emails that have active cooldowns
+
+  $effect(() => {
+    if (otpHandler) {
+      errorMessage = otpHandler.errorMessage;
+      message = otpHandler.message;
+    }
+  });
 
   const form = superForm(data.form, {
     dataType: 'json',
@@ -124,13 +132,13 @@
     // 4. Go to the others step
 
     if (otpHandler) {
-      console.log('togleeauth clearing our otp handler')
+      console.log('togleeauth clearing our otp handler');
       otpHandler.removeListener();
       otpHandler = undefined;
     }
 
     const result = await validateForm({ update: true, focusOnError: false });
-    
+
     if (step === 1) {
       // Ensure that there is valid ident input before we request a token
       if (result.valid) {
@@ -138,25 +146,24 @@
         $formData.token = '';
         form.errors.subscribe((errors) => {
           if (errors.password && errors.password.length > 0) {
-            console.log('blast the password away: ', errors.password)
+            console.log('blast the password away: ', errors.password);
             $formData.password = undefined;
           }
-        })
+        });
         await sendTokenForSignIn();
-        step = 2
+        step = 2;
       }
-
     } else {
       $formData.authType = 'password';
       $formData.password = '';
       // $formData.token = undefined;
       form.errors.subscribe((errors) => {
         if (errors.token && errors.token.length > 0) {
-          console.log('blast the token away: ', errors.token)
+          console.log('blast the token away: ', errors.token);
           $formData.token = undefined;
         }
-      })
-      step = 1
+      });
+      step = 1;
     }
 
     errorMessage = '';
@@ -250,7 +257,9 @@
       }
       startResendTimer();
       mfaActionId = response.object.actionProgress.actionId;
-      otpHandler = new MsaListenerHandler('SignInForm', response, () => {goto('/')});
+      otpHandler = new MsaListenerHandler('SignInForm', response, () => {
+        goto('/');
+      });
 
       return;
     } catch (error) {
@@ -345,6 +354,13 @@
     }
   });
 
+  beforeNavigate(() => {
+    if (otpHandler) {
+      otpHandler.removeListener();
+      otpHandler = undefined;
+    }
+  });
+
   $effect(() => {
     if (debounceTimer) {
       clearTimeout(debounceTimer);
@@ -371,10 +387,26 @@
         return getOtpMessage($formData);
     }
   };
+
+  const onBack = () => {
+    if (otpHandler) {
+      otpHandler.removeListener();
+      otpHandler = undefined;
+    }
+
+    if (step > 1) {
+      step = step - 1;
+    }
+  };
 </script>
 
 <form method="POST" id="sign-in-form" use:enhance>
-  <AuthCard title="Sign in" description={getCurrentStepDescription()}>
+  <AuthCard
+    title="Sign in"
+    description={getCurrentStepDescription()}
+    showBackButton={step > 1}
+    {onBack}
+  >
     <div class="space-y-4">
       {#if step === 1}
         <IdentInputComponent
@@ -396,11 +428,7 @@
           loadingText="Signing in..."
         />
         <div class="flex justify-between text-sm">
-          <Button 
-            variant="link" 
-            disabled={!$formData.ident}
-            onclick={() => toggleAuthType()}
-          >
+          <Button variant="link" disabled={!$formData.ident} onclick={() => toggleAuthType()}>
             Sign in with token
           </Button>
           <Button variant="link" onclick={async () => await goto('reset-password')}>
@@ -425,10 +453,7 @@
           loadingText="Signing in..."
         />
         <div class="flex justify-between text-sm">
-          <Button
-            variant="link"
-            onclick={async () => await toggleAuthType()}
-          >
+          <Button variant="link" onclick={async () => await toggleAuthType()}>
             Sign in with password
           </Button>
           <Button variant="link" onclick={async () => await goto('reset-password')}>

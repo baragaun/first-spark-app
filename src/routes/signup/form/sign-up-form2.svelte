@@ -1,11 +1,6 @@
 <script lang="ts">
-  import { Button } from '$lib/components/ui/button';
-  import { goto } from '$app/navigation';
-  import {
-    MultiStepActionEventType,
-    SidMultiStepActionProgress,
-    UserIdentType,
-  } from '@baragaun/bg-node-client';
+  import { beforeNavigate, goto } from '$app/navigation';
+  import { UserIdentType } from '@baragaun/bg-node-client';
   import translate from '@/helpers/language/translate';
   import { AppUiMessage, MsaTokenStatus } from '@/types/enums';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
@@ -18,7 +13,6 @@
   import { onDestroy } from 'svelte';
   import AuthCard from '@/components/auth-card.svelte';
   import {
-    determineIdentifierType,
     emailSchema,
     schemaFirstStep,
     schemaLastStep,
@@ -27,6 +21,7 @@
     type SignInFormSchema,
   } from './schema';
   import FormUpdatePasswordInput from '@/components/forms/form-update-password-input.svelte';
+  import { MsaListenerHandler } from '@/contexts/msa-listener-handler.svelte';
 
   let { data }: { data: { form: SuperValidated<SignInFormSchema> } } = $props();
 
@@ -46,11 +41,19 @@
   let mfaActionId = $state<string | undefined>(undefined);
   let message = $state('');
   let timerInterval: ReturnType<typeof setInterval>;
+  let otpHandler: MsaListenerHandler | undefined = $state(undefined);
 
   const getCurrentValidator = () => steps[step - 1];
 
   let debounceTimer: number | null = null;
   const DEBOUNCE_DELAY = 350; // ms
+
+  $effect(() => {
+    if (otpHandler) {
+      errorMessage = otpHandler.errorMessage;
+      message = otpHandler.message;
+    }
+  });
 
   const form = superForm(data.form, {
     dataType: 'json',
@@ -67,7 +70,7 @@
 
       debounceTimer = window.setTimeout(async () => {
         try {
-          await validateForm({ update: true });
+          await validateForm({ update: true, focusOnError: false });
 
           if (step === 1) {
             hasStepError = !(await checkIdentAvailability());
@@ -98,7 +101,7 @@
       }
 
       if (step === 1) {
-        // await registerNewEmail();
+        await registerNewEmail();
         step = 2;
       } else if (step === 2) {
         await verifyEmailToken($formData.token);
@@ -218,81 +221,11 @@
       startResendTimer();
 
       mfaActionId = response.object.actionProgress.actionId;
-
-      response.object.run.addListener({
-        id: 'SignUpForm',
-        onEvent: async (
-          eventType: MultiStepActionEventType,
-          action: SidMultiStepActionProgress,
-        ): Promise<void> => {
-          if (eventType === MultiStepActionEventType.notificationFailed) {
-            // The notification failed to go out.
-            console.error(
-              'SignUpForm.multiStepActionListener: Notification failed.',
-              action.notificationResult,
-            );
-
-            if (import.meta.env.VITE_APP_ENVIRONMENT === 'development') {
-              // We can ignore the failure to send the email in development.
-              errorMessage = '';
-              return;
-            } else {
-              errorMessage =
-                'We could not send the verification token to your email. Please try again.';
-            }
-
-            tokenStatus = MsaTokenStatus.sendingFailed;
-            errorMessage = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError);
-            return;
-          }
-
-          if (eventType === MultiStepActionEventType.notificationSent) {
-            // The notification has been sent out.
-            console.log(
-              'SignUpForm.multiStepActionListener: Notification sent out.',
-              action.notificationResult,
-            );
-            // Switching to the token input for
-            tokenStatus = MsaTokenStatus.notificationSent;
-            message = translate(AppUiMessage.msaTokenSent);
-            return;
-          }
-
-          if (eventType === MultiStepActionEventType.tokenFailed) {
-            console.error(
-              'SignUpForm.multiStepActionListener: incorrect token.',
-              action.notificationResult,
-            );
-            errorMessage = 'We could not verify the token you entered. Please try again.';
-            return;
-          }
-
-          if (eventType === MultiStepActionEventType.timedOut) {
-            console.error(
-              'SignUpForm.multiStepActionListener: timeout.',
-              action.notificationResult,
-            );
-            tokenStatus = MsaTokenStatus.sendingFailed;
-            errorMessage = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError);
-            return;
-          }
-
-          if (eventType === MultiStepActionEventType.failed) {
-            console.error('SignUpForm.multiStepActionListener: error.', action.notificationResult);
-            tokenStatus = MsaTokenStatus.verificationFailed;
-            errorMessage = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError);
-            return;
-          }
-
-          if (eventType === MultiStepActionEventType.success) {
-            // The token was accepted. The user is now signed in.
-            console.log('SignUpForm.multiStepActionListener: success.', action.notificationResult);
-            tokenStatus = MsaTokenStatus.success;
-            message = translate(AppUiMessage.msaTokenSuccess);
-            goto('/');
-          }
-        },
+      otpHandler = new MsaListenerHandler('SignUpForm', response, () => {
+        step = 3;
       });
+
+      return;
     } catch (error) {
       console.error('SignUpForm.registerNewEmail:', { error });
       tokenStatus = MsaTokenStatus.verificationFailed;
@@ -394,6 +327,17 @@
 
   onDestroy(() => {
     clearInterval(timerInterval);
+    if (otpHandler) {
+      otpHandler.removeListener();
+      otpHandler = undefined;
+    }
+  });
+
+  beforeNavigate(() => {
+    if (otpHandler) {
+      otpHandler.removeListener();
+      otpHandler = undefined;
+    }
   });
 
   $effect(() => {
@@ -420,10 +364,37 @@
         return 'Choose a username and a password.';
     }
   };
+
+  const getCurrentButtonLabel = () => {
+    switch (step) {
+      case 1:
+        return 'Continue';
+      case 2:
+        return 'Verify my email';
+      case 3:
+        return 'Create Account';
+    }
+  };
+
+  const onBack = () => {
+    if (otpHandler) {
+      otpHandler.removeListener();
+      otpHandler = undefined;
+    }
+
+    if (step > 1) {
+      step = step - 1;
+    }
+  };
 </script>
 
 <form method="POST" id="sign-up-form" use:enhance>
-  <AuthCard title="Sign up" description={getCurrentStepDescription()}>
+  <AuthCard
+    title="Sign up"
+    description={getCurrentStepDescription()}
+    showBackButton={step > 1}
+    {onBack}
+  >
     <div class="space-y-4">
       {#if step === 1}
         <!-- TODO: this should be called identinput -->
@@ -461,8 +432,8 @@
       <FormButtonComponent
         disabled={$delayed || isValidating || hasStepError}
         loading={$delayed}
-        buttonText="Sign in"
-        loadingText="Signing in..."
+        buttonText={getCurrentButtonLabel()}
+        loadingText="Processing..."
       />
       <div class="mt-4 text-center text-sm">
         Don't have an account?
