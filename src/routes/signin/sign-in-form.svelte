@@ -1,182 +1,234 @@
 <script lang="ts">
-  import { Button } from '$lib/components/ui/button';
-  import { Input } from '$lib/components/ui/input';
-  import { Label } from '@/components/ui/label';
-  import * as Card from '$lib/components/ui/card';
+  import SuperDebug, { superForm, type SuperValidated } from 'sveltekit-superforms';
+  import { zod } from 'sveltekit-superforms/adapters';
   import { goto } from '$app/navigation';
-  import {
-    MultiStepActionEventType,
-    SidMultiStepActionProgress,
-    UserIdentType,
-  } from '@baragaun/bg-node-client';
-  import translate from '@/helpers/language/translate';
-  import { AppUiMessage, MsaTokenStatus } from '@/types/enums';
-  import { writable } from 'svelte/store';
-  import TokenForm from '@/components/token-form.svelte';
-  import PasswordInput from '@/components/ui/password-input';
-  import ErrorAlert from '@/components/error-alert.svelte';
-  import { z } from 'zod';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
-  import * as AlertDialog from '@/components/ui/alert-dialog';
+  import { onDestroy } from 'svelte';
 
-  let identifier = $state('');
-  let identType = $state(UserIdentType.email);
-  let mfaActionId = $state<string | undefined>(undefined);
-  let password = $state('');
-  let loading = $state(false);
-  let tokenStatus = $state(MsaTokenStatus.unset);
-  let errorMessage = $state('');
-  let message = $state('');
-  let signUpSuggestion = $state(false);
+  import translate from '@/helpers/language/translate';
+  import { UserIdentType } from '@baragaun/bg-node-client';
+  import AuthCard from '@/components/auth-card.svelte';
+  import FormEmailInput from '@/components/forms/form-ident-input.svelte';
+  import FormOTPInput from '@/components/forms/form-otp-input.svelte';
+  import FormPasswordInput from '@/components/forms/form-update-password-input.svelte';
+  import FormButton from '@/components/forms/form-button.svelte';
+  import { Button } from '@/components/ui/button';
+  import { MsaListenerHandler } from '@/contexts/msa-listener-handler.svelte';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { AppUiMessage, MsaTokenStatus } from '@/types/enums';
+  import {
+  determineIdentifierType,
+    getOtpMessage,
+    schemaFirstStep,
+    schemaLastStep,
+    type SignInFormSchema,
+  } from './schema';
+
+  let { data }: { data: { form: SuperValidated<SignInFormSchema> } } = $props();
+
+  const steps = [zod(schemaFirstStep), zod(schemaLastStep)];
+  let step = $state(1);
+  const getCurrentValidator = () => steps[step - 1];
+
+  let otpHandler: MsaListenerHandler | undefined = $state(undefined);
+  let msaActionId = $state<string | undefined>(undefined);
+  let msaActionStatus = $state(MsaTokenStatus.unset); // TODO: Integrate into the form
   let resendTimer = $state(30);
   let canResend = $state(false);
+  
+  let loading = $state(false);
+  let errorMessage = $state('');
+  let hasStepError = $state(true);
+  
+  let identifier = $state('');
+  let identType = $state(UserIdentType.email);
+
+  let debounceTimer: number | null = null;
+  const DEBOUNCE_DELAY = 350; // ms
+  const emailCooldowns = $state(new Map<string, number>());  // Track emails that have active cooldowns
+
+  const form = superForm(data.form, {
+    dataType: 'json',
+    validators: getCurrentValidator(),
+    resetForm: false,
+    async onChange() {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+
+      if (!$formData) return;
+
+      loading = true;
+
+      debounceTimer = window.setTimeout(async () => {
+        try {
+          // ============================================================
+          // Skip the empty validating to allow for error free authType swapping
+          if (step === 1 && (!$formData.ident || !$formData.password)) {
+            return;
+          } else if (step === 2 && !$formData.token) {
+            return;
+          }
+          // ============================================================
+
+          // This form is friendlier without the automatic error focusing
+          const result = await validateForm({ update: true, focusOnError: false });
+
+          hasStepError = !result.valid;
+        } catch (error) {
+          console.error('Error validating form:', error);
+        } finally {
+          loading = false;
+          debounceTimer = null;
+        }
+      }, DEBOUNCE_DELAY);
+    },
+    async onSubmit({ cancel }) {
+      // Bail on any server side action
+      cancel();
+
+      const result = await validateForm({ update: true, focusOnError: true });
+      if (!result.valid) {
+        hasStepError = true;
+        return;
+      }
+
+      if (step === 1) {
+        await signMeInWithPassword();
+      } else if (step === 2 && $formData.token) {
+        await verifySignInToken();
+      }
+
+      return;
+    },
+  });
+
+  const { form: formData, errors, enhance, delayed, validateForm, options } = form;
+
   let timerInterval: ReturnType<typeof setInterval>;
-  let currentStep = writable(0);
-  // 0 for token sign in, 1 for verification code, 2 for password sign in
+  const startResendTimer = () => {
+    resendTimer = 30;
+    canResend = false;
+    emailCooldowns.set(identifier, Date.now() + resendTimer * 1000);
 
-  // Track emails that have active cooldowns
-  const emailCooldowns = $state(new Map<string, number>());
-  // Define Zod schemas for validation
-  const emailSchema = z.string().email('Not a valid email address');
-  const handleSchema = z
-    .string()
-    .min(3, 'Must be at least 3 characters')
-    .max(30, 'Cannot exceed 30 characters');
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      resendTimer -= 1;
+      if (resendTimer <= 0) {
+        clearInterval(timerInterval);
+        canResend = true;
+        emailCooldowns.delete(identifier);
+      }
+    }, 1000);
+  };
 
-  // Function to determine identifier type using Zod
-  const determineIdentifierType = (value: string): UserIdentType => {
-    // Try to validate as email first
-    const emailResult = emailSchema.safeParse(value);
-    if (emailResult.success) {
-      return UserIdentType.email;
+  const updateErrorMessage = (message: string, field: string) => {
+    errorMessage = message;
+    switch (field) {
+      case 'ident': {
+        errors.update((errors) => ({
+          ...errors,
+          ident: [errorMessage],
+        }));
+      }
+      case 'token': {
+        errors.update((errors) => ({
+          ...errors,
+          token: [errorMessage],
+        }));
+      }
+      case 'password': {
+        errors.update((errors) => ({
+          ...errors,
+          password: [errorMessage],
+        }));
+      }
     }
+  }
 
-    // Then try to validate as handle
-    const handleResult = handleSchema.safeParse(value);
-    if (handleResult.success) {
-      return UserIdentType.userHandle;
+  const toggleAuthType = async () => {
+    // 1. Remove an existing listener that hasn't failed yet
+    // 2. Validate the form on the way out to handle a no-input token request
+    // 3. Clear any existing validation errors for the other authType
+    // 4. Go to the others step
+
+    if (otpHandler) {
+      otpHandler.removeListener();
+      otpHandler = undefined;
     }
+    
+    // Ensure that there is valid ident input before we request a token
+    if ($formData.ident && schemaFirstStep.safeParse($formData.ident)) {
+      if (step === 1) {
+        $formData.authType = 'token';
+        $formData.token = '';
 
-    // Default to email if unclear (validation will catch errors later)
-    return UserIdentType.email;
+        $formData.password = undefined;
+
+        await sendTokenForSignIn();
+        step = 2
+      } else {
+        $formData.authType = 'password';
+        $formData.password = '';
+        
+        $formData.token = undefined;
+
+        step = 1
+      };
+    };
+    return;
   };
 
   const signMeInWithPassword = async () => {
+    if (!$formData.password) return;
+
     try {
       loading = true;
-      errorMessage = '';
+      updateErrorMessage('', 'password');
 
-      const response = await myUserContext.signMeInWithPassword(identifier, identType, password);
+      identifier = $formData.ident || '';
+      identType = determineIdentifierType(identifier);
+
+      const response = await myUserContext.signMeInWithPassword(
+        $formData.ident,
+        identType,
+        $formData.password,
+      );
 
       if (response !== true) {
-        // `response` is already translated
-        errorMessage = response;
+        updateErrorMessage('Invalid credentials. Please try again.', 'password');
         return;
       }
 
       await goto('/');
     } catch (error) {
       console.error('SignInForm.signMeInWithPassword: error:', { error });
-      errorMessage = translate(AppUiMessage.systemError);
+      updateErrorMessage(translate(AppUiMessage.systemError), 'password');
     } finally {
       loading = false;
     }
   };
 
-  const onSendToken = async (token: string): Promise<void> => {
-    try {
-      if (!mfaActionId) {
-        console.error('SignInForm.handleVerifyOtp: actionId missing:');
-        errorMessage = translate(AppUiMessage.systemError);
-        return;
-      }
-
-      loading = true;
-      errorMessage = '';
-
-      const response = await myUserContext.verifyMultiStepActionToken(mfaActionId, token);
-
-      // Here, we don't have to add another listener, since we already added one when
-      // we called `signMeInWithToken`. We do want to check the `result` object to
-      // make sure the `verifyMultiStepActionToken` call did not fail. But this
-      // function does not actually verify the token. For that, we are waiting for
-      // the listener to be called with the result of the token verification.
-
-      if (response !== true) {
-        console.error('SignInForm.handleVerifyOtp: invalid response:', { result: response });
-        errorMessage = translate(AppUiMessage.systemError); // todo: translate?
-        tokenStatus = MsaTokenStatus.unset;
-        return;
-      }
-
-      tokenStatus = MsaTokenStatus.sending;
-    } catch (error) {
-      console.error('SignInForm.handleVerifyOtp: error:', { error });
-      errorMessage = translate(AppUiMessage.systemError);
-      tokenStatus = MsaTokenStatus.unset;
-    } finally {
-      loading = false;
-    }
-  };
-
-  const onSendNotification = async () => {
-    tokenStatus = MsaTokenStatus.unset;
-
-    if (!mfaActionId) {
-      console.error('SignInForm.handleResendOtp: actionId missing.');
-      errorMessage = translate(AppUiMessage.systemError); // todo: translate?
+  const sendTokenForSignIn = async () => {
+    if (!$formData.ident) {
+      validateForm({ update: true });
       return;
     }
 
+    identifier = $formData.ident || '';
+    identType = determineIdentifierType(identifier);
+
     if (emailCooldowns.has(identifier)) {
       const cooldownEnd = emailCooldowns.get(identifier) || 0;
       const remainingTime = Math.ceil((cooldownEnd - Date.now()) / 1000);
 
       if (remainingTime > 0) {
-        // If same email and cooldown active, just show verification screen with current timer
-        resendTimer = remainingTime;
-        tokenStatus = MsaTokenStatus.unset;
-        return;
-      }
-    }
-
-    try {
-      loading = true;
-      errorMessage = '';
-
-      const response = await myUserContext.sendMultiStepActionNotification(mfaActionId, identifier);
-
-      if (typeof response === 'string') {
-        console.error('SignInForm.handleResendOtp: error:', { error: response });
-        errorMessage = response;
-        return;
-      }
-
-      tokenStatus = MsaTokenStatus.sending;
-      startResendTimer(identifier);
-    } catch (error) {
-      console.error('SignInForm.handleResendOtp: error:', { error });
-      errorMessage = translate(AppUiMessage.systemError);
-    } finally {
-      loading = false;
-    }
-  };
-
-  const startTokenSignIn = async () => {
-    // Check if this email has an active cooldown
-    if (emailCooldowns.has(identifier)) {
-      const cooldownEnd = emailCooldowns.get(identifier) || 0;
-      const remainingTime = Math.ceil((cooldownEnd - Date.now()) / 1000);
-
-      if (remainingTime > 0) {
-        // If same email and cooldown active, just show verification screen with current timer
         resendTimer = remainingTime;
         return;
       }
     }
 
     loading = true;
-    errorMessage = '';
+    updateErrorMessage('', 'ident');
 
     try {
       const response = await myUserContext.signMeInWithToken(identifier);
@@ -189,276 +241,219 @@
         !response?.object.actionProgress?.actionId ||
         !response?.object.run
       ) {
-        errorMessage = 'Failed to send verification code. Please try again.';
+        updateErrorMessage('Failed to send verification code. Please try again.', 'ident');
         return;
       }
+      startResendTimer();
+      msaActionId = response.object.actionProgress.actionId;
 
-      startResendTimer(identifier);
-      mfaActionId = response.object.actionProgress.actionId;
+      const onNotificationSent = () => { step = 2 };
+      const onFailure = () => { console.error('onFailure') };
+      const onSuccess = async () => await goto('/');
 
-      response.object.run.addListener({
-        id: 'SignInForm',
-        onEvent: async (
-          eventType: MultiStepActionEventType,
-          action: SidMultiStepActionProgress,
-        ): Promise<void> => {
-          if (eventType === MultiStepActionEventType.notificationFailed) {
-            // The notification failed to go out.
-            console.error(
-              'SignInPage.multiStepActionListener: Notification failed.',
-              action.notificationResult,
-            );
+      otpHandler = new MsaListenerHandler(
+        'SignInForm', 
+        response, 
+        onNotificationSent, 
+        onFailure, 
+        onSuccess
+      );
 
-            if (import.meta.env.VITE_APP_ENVIRONMENT === 'development') {
-              // We can ignore the failure to send the email in development.
-              errorMessage = '';
-              currentStep.set(1);
-              return;
-            } else {
-              errorMessage =
-                'We could not send the verification token to your email. Please try again.';
-            }
-
-            tokenStatus = MsaTokenStatus.sendingFailed;
-            errorMessage = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError);
-            return;
-          }
-
-          if (eventType === MultiStepActionEventType.notificationSent) {
-            // The notification has been sent out.
-            console.log(
-              'SignInPage.multiStepActionListener: Notification sent out.',
-              action.notificationResult,
-            );
-            // Switching to the token input for
-            tokenStatus = MsaTokenStatus.notificationSent;
-            message = translate(AppUiMessage.msaTokenSent);
-            currentStep.set(1);
-            return;
-          }
-
-          if (eventType === MultiStepActionEventType.tokenFailed) {
-            console.error(
-              'SignInPage.multiStepActionListener: incorrect token.',
-              action.notificationResult,
-            );
-            errorMessage = 'We could not verify the token you entered. Please try again.';
-            return;
-          }
-
-          if (eventType === MultiStepActionEventType.timedOut) {
-            console.error(
-              'SignInPage.multiStepActionListener: timeout.',
-              action.notificationResult,
-            );
-            tokenStatus = MsaTokenStatus.sendingFailed;
-            errorMessage = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError);
-            return;
-          }
-
-          if (eventType === MultiStepActionEventType.failed) {
-            console.error('SignInPage.multiStepActionListener: error.', action.notificationResult);
-            tokenStatus = MsaTokenStatus.verificationFailed;
-            errorMessage = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError);
-            return;
-          }
-
-          if (eventType === MultiStepActionEventType.success) {
-            // The token was accepted. The user is now signed in.
-            console.log('SignInPage.multiStepActionListener: success.', action.notificationResult);
-            tokenStatus = MsaTokenStatus.success;
-            // todo: don't use `errorMessage` as it's rendered as an error (red color)
-            message = translate(AppUiMessage.msaTokenSuccess);
-            goto('/');
-          }
-        },
-      });
+      return;
     } catch (error) {
       console.error('SignInForm.startTokenSignIn:', { error });
-      tokenStatus = MsaTokenStatus.verificationFailed;
-      errorMessage = translate(AppUiMessage.systemError);
+      msaActionStatus = MsaTokenStatus.verificationFailed;
+      updateErrorMessage(translate(AppUiMessage.systemError), 'ident');
     } finally {
       loading = false;
     }
   };
 
-  const startResendTimer = (emailAddress: string) => {
-    resendTimer = 30;
-    canResend = false;
-    emailCooldowns.set(emailAddress, Date.now() + resendTimer * 1000);
-    //todo also need to store actionId!
-
-    clearInterval(timerInterval);
-    timerInterval = setInterval(() => {
-      resendTimer -= 1;
-      if (resendTimer <= 0) {
-        clearInterval(timerInterval);
-        canResend = true;
-        emailCooldowns.delete(emailAddress);
-      }
-    }, 1000);
-  };
-
-  const handleSignIn = async () => {
+  const verifySignInToken = async (): Promise<void> => {
     loading = true;
-    errorMessage = '';
+    updateErrorMessage('', '');
 
     try {
-      const checkAccountExists = await myUserContext.isUserIdentAvailable(identifier, identType);
-
-      if (checkAccountExists.isAvailable) {
-        signUpSuggestion = true;
+      if (!msaActionId) {
+        console.error('SignInForm.handleVerifyOtp: actionId missing:');
+        updateErrorMessage(translate(AppUiMessage.systemError), 'token');
         return;
       }
 
-      if ($currentStep === 2) {
-        await signMeInWithPassword();
-      } else {
-        console.log('starting token sign in');
-        await startTokenSignIn();
+      if (!$formData.token) return;
+
+      const response = await myUserContext.verifyMultiStepActionToken(msaActionId, $formData.token);
+
+      if (response !== true) {
+        console.error('SignInForm.handleVerifyOtp: invalid response:', { result: response });
+        updateErrorMessage(translate(AppUiMessage.systemError), 'token');
+        msaActionStatus = MsaTokenStatus.unset;
+        return;
       }
-    } catch (err) {
-      console.error('Error signing in:', err);
-      errorMessage = 'Invalid credentials. Please try again.';
+
+      msaActionStatus = MsaTokenStatus.sending;
+    } catch (error) {
+      console.error('SignInForm.handleVerifyOtp: error:', { error });
+      updateErrorMessage(translate(AppUiMessage.systemError), 'token');
+      msaActionStatus = MsaTokenStatus.unset;
     } finally {
       loading = false;
     }
   };
 
-  const handleIdentifierChange = () => {
-    if (identifier) {
-      identType = determineIdentifierType(identifier);
+  const handleResendToken = async () => {
+    if (!canResend) return;
+    msaActionStatus = MsaTokenStatus.unset;
+    loading = true;
+
+    if (!msaActionId) {
+      console.error('SignInForm.handleResendToken: actionId missing.');
+      updateErrorMessage(translate(AppUiMessage.systemError), 'token');
+      return;
+    }
+
+    if (emailCooldowns.has(identifier)) {
+      const cooldownEnd = emailCooldowns.get(identifier) || 0;
+      const remainingTime = Math.ceil((cooldownEnd - Date.now()) / 1000);
+      if (remainingTime > 0) {
+        // If same email and cooldown active, just show verification screen with current timer
+        resendTimer = remainingTime;
+        msaActionStatus = MsaTokenStatus.unset;
+        return;
+      }
+    }
+
+    try {
+      loading = true;
+      updateErrorMessage('', 'ident');
+
+      const response = await myUserContext.sendMultiStepActionNotification(msaActionId, identifier);
+
+      if (response !== true) {
+        updateErrorMessage(typeof response === 'string' ? response : 'Failed to resend verification code', 'token')
+        return;
+      }
+
+      msaActionStatus = MsaTokenStatus.sending;
+      startResendTimer();
+    } catch (error) {
+      console.error('SignInForm.handleResendToken: error:', { error });
+      updateErrorMessage(translate(AppUiMessage.systemError), 'ident');
+    } finally {
+      loading = false;
     }
   };
 
-  $effect(() => {
-    if (identifier) {
-      handleIdentifierChange();
-    }
+  onDestroy(() => {
+    clearInterval(timerInterval);
+    if (otpHandler) otpHandler.removeListener();
   });
 
-  // Function to validate the current identifier based on its type
-  const validateIdentifier = (): boolean => {
-    if (!identifier) {
-      return false;
+  $effect(() => {
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+      debounceTimer = null;
     }
 
-    if (identType === UserIdentType.email) {
-      const result = emailSchema.safeParse(identifier);
-      return result.success;
-    } else {
-      const result = handleSchema.safeParse(identifier);
-      return result.success;
+    if (!$formData) {
+      loading = false;
+      return;
     }
-  };
 
-  const handleRedirectToSignup = () => {
-    goto('/signup');
+    if (otpHandler) {
+      const currentErrorMessage = otpHandler.getErrorMessage();
+      if (currentErrorMessage) {
+        updateErrorMessage(currentErrorMessage, 'token')
+      }
+    }
+
+    options.validators = getCurrentValidator();
+  });
+
+  const getCurrentStepDescription = () => {
+    switch (step) {
+      case 1:
+        return 'Enter your email address below to sign in to your account';
+      case 2:
+        return step === 2
+          ? getOtpMessage($formData)
+          : `Enter your password to sign in as ${identifier}`;
+      case 3:
+        return getOtpMessage($formData);
+    }
   };
 </script>
 
-<div class="mx-auto max-w-sm">
-  {#if $currentStep === 1}
-    <TokenForm
-      ident={identifier}
-      onSubmit={onSendToken}
-      onResend={onSendNotification}
-      onBack={() => {
-        currentStep.set(0);
-        errorMessage = '';
-      }}
-    />
-  {:else}
-    <Card.Root>
-      <Card.Header>
-        <Card.Title class="text-2xl">Sign In</Card.Title>
-        <Card.Description>Enter your email below to login to your account</Card.Description>
-      </Card.Header>
-      <Card.Content>
-        <div class="grid gap-4">
-          <div class="grid gap-2">
-            <Label for="email or username">Email or Username</Label>
-            <Input
-              bind:value={identifier}
-              id="identifier"
-              placeholder="me@example.com, myusername"
-              oninput={handleIdentifierChange}
-              required
-            />
-          </div>
-
-          {#if $currentStep === 2}
-            <div class="grid gap-2">
-              <div class="flex items-center">
-                <Label for="password">Password</Label>
-                <a href="/reset-password" class="ml-auto inline-block text-sm underline">
-                  Forgot your password?
-                </a>
-              </div>
-              <PasswordInput id="password" bind:value={password} required />
-            </div>
-          {/if}
-
-          <Button
-            type="submit"
-            class="w-full"
-            disabled={loading || !validateIdentifier() || ($currentStep === 2 && !password)}
-            onclick={handleSignIn}
-            >Sign in
+<form method="POST" id="sign-in-form" use:enhance>
+  <AuthCard title="Sign in" description={getCurrentStepDescription()}>
+    <div class="space-y-4">
+      {#if step === 1}
+        <FormEmailInput
+          {form}
+          fieldName="ident"
+          placeholder="Enter your email or username"
+          label="Email or Username"
+        />
+        <FormPasswordInput
+          {form}
+          fieldName="password"
+          label="Password"
+          placeholder="Enter your password"
+        />
+        <FormButton
+          disabled={$delayed || loading || hasStepError}
+          loading={$delayed}
+          buttonText="Sign in"
+          loadingText="Signing in..."
+        />
+        <div class="flex justify-between text-sm">
+          <Button 
+            variant="link" 
+            disabled={!$formData.ident}
+            onclick={() => toggleAuthType()}
+          >
+            Sign in with token
           </Button>
-
-          {#if $currentStep === 0}
-            <Button
-              variant="outline"
-              class="w-full"
-              onclick={() => {
-                currentStep.set(2);
-              }}
-            >
-              Sign in with password
-            </Button>
-          {/if}
+          <Button variant="link" onclick={async () => await goto('reset-password')}>
+            Forgot your password?
+          </Button>
         </div>
-        {#if $currentStep === 2}
-          <div class="mt-4 text-center text-sm">
-            <Button
-              variant="link"
-              onclick={() => {
-                currentStep.set(0);
-              }}
-              class="underline"
-            >
-              Sign in with your email
-            </Button>
-          </div>
-        {/if}
-        <div class="mt-4 text-center text-sm">
-          Don't have an account?
-          <a href="/signup" class="underline"> Sign up </a>
+      {:else if step === 2}
+        <FormOTPInput
+          {form}
+          fieldName="token"
+          label="Verification code"
+          length={6}
+          showResend={true}
+          {canResend}
+          {resendTimer}
+          onResendClick={handleResendToken}
+        />
+        <FormButton
+          disabled={$delayed || loading || hasStepError}
+          loading={$delayed}
+          buttonText="Sign in"
+          loadingText="Signing in..."
+        />
+        <div class="flex justify-between text-sm">
+          <Button
+            variant="link"
+            onclick={async () => await toggleAuthType()}
+          >
+            Sign in with password
+          </Button>
+          <Button variant="link" onclick={async () => await goto('reset-password')}>
+            Forgot your password?
+          </Button>
         </div>
-      </Card.Content>
-    </Card.Root>
-  {/if}
-  <!-- Alert for errors -->
-  {#if errorMessage}
-    <ErrorAlert bind:errorMessage />
-  {/if}
-</div>
+      {/if}
+      <div class="mt-4 text-center text-sm">
+        Don't have an account?
+        <a href="/signup" class="underline"> Sign up </a>
+      </div>
+    </div></AuthCard
+  >
 
-{#if signUpSuggestion}
-  <AlertDialog.Root open={signUpSuggestion}>
-    <AlertDialog.Content>
-      <AlertDialog.Header>
-        <AlertDialog.Title>Account not found</AlertDialog.Title>
-        <AlertDialog.Description>
-          We couldn't find an account with these credentials. Would you like to create a new
-          account?
-        </AlertDialog.Description>
-      </AlertDialog.Header>
-      <AlertDialog.Footer>
-        <AlertDialog.Cancel onclick={() => (signUpSuggestion = false)}>Cancel</AlertDialog.Cancel>
-        <AlertDialog.Action onclick={handleRedirectToSignup}>Sign Up</AlertDialog.Action>
-      </AlertDialog.Footer>
-    </AlertDialog.Content>
-  </AlertDialog.Root>
-{/if}
+  <div class="mt-4"><SuperDebug data={$formData} /></div>
+  <div class="mt-4"><SuperDebug data={errors} />{errorMessage}</div>
+</form>
