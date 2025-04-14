@@ -68,4 +68,4 @@ export const determineIdentifierType = (value: string): UserIdentType => {
 };
 
 // Since steps swap required values, we need to join the two possible schemas to account for all possible requirements
-export type SignInFormSchema = z.infer<typeof schemaLastStep>;
+export type SignUpFormSchema = z.infer<typeof schemaLastStep>;
