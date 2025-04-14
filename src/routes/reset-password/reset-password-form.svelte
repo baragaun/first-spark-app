@@ -24,7 +24,7 @@
   import FormButton from '@/components/forms/form-button.svelte';
   import { MsaListenerHandler } from '@/contexts/msa-listener-handler.svelte';
 
-  let { data }: { data: { form: SuperValidated<Infer<ResetPasswordFormSchema>> } } = $props();
+  let { data }: { data: { form: SuperValidated<ResetPasswordFormSchema> } } = $props();
 
   const steps = [zod(schemaFirstStep), zod(schemaStepTwo), zod(schemaLastStep)];
   let step = $state(1);

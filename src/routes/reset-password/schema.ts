@@ -60,4 +60,4 @@ export const determineIdentifierType = (value: string): UserIdentType => {
 };
 
 // The exported type should be the totality of the form. Since this is stepped, we need to specify the last.
-export type ResetPasswordFormSchema = typeof schemaLastStep;
+export type ResetPasswordFormSchema = z.infer<typeof schemaLastStep>;
