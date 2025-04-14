@@ -88,7 +88,6 @@
   });
 
   const { form: formData, enhance, errors, delayed, validateForm, options } = form;
-
   const startResendTimer = () => {
     resendTimer = 30;
     canResend = false;

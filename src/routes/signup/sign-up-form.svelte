@@ -160,7 +160,6 @@
       identifier = $formData.email;
       if (!identifier) return false;
       identType = UserIdentType.email;
-
       const validationResult = emailSchema.safeParse($formData.email);
       if (!validationResult.success) return false;
     } else if (step === 3) {
@@ -169,7 +168,6 @@
       identType = UserIdentType.userHandle;
 
       if (identifier === myUserContext.myUserHandle) return true;
-
       const validationResult = usernameSchema.safeParse($formData.username);
       if (!validationResult.success) return false;
     }

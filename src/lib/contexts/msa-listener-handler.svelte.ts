@@ -31,7 +31,6 @@ export class MsaListenerHandler {
     this.onNotificationSent = onNotificationSent;
     this.onFailure = onFailure;
     this.onSuccess = onSuccess;
-
     this.initialize();
   }
 
@@ -72,7 +71,6 @@ export class MsaListenerHandler {
           if (eventType === MultiStepActionEventType.notificationSent) {
             // The notification has been sent out.
             tokenStatus = MsaTokenStatus.notificationSent;
-
             // Proceed with any callback
             if (this.onNotificationSent) this.onNotificationSent();
             return;
