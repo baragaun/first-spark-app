@@ -20,7 +20,7 @@
     usernameSchema,
     type SignUpFormSchema,
   } from './schema';
-  import FormUpdatePasswordInput from '@/components/forms/form-update-password-input.svelte';
+  import FormUpdatePasswordInput from '@/components/forms/form-password-input.svelte';
   import { MsaListenerHandler } from '@/contexts/msa-listener-handler.svelte';
 
   let { data }: { data: { form: SuperValidated<SignUpFormSchema> } } = $props();

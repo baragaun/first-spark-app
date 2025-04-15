@@ -20,7 +20,7 @@
 
   import EmailFormInput from '@/components/forms/form-ident-input.svelte';
   import OtpFormInput from '@/components/forms/form-otp-input.svelte';
-  import UpdatePasswordFormInput from '@/components/forms/form-update-password-input.svelte';
+  import UpdatePasswordFormInput from '@/components/forms/form-password-input.svelte';
   import FormButton from '@/components/forms/form-button.svelte';
   import { MsaListenerHandler } from '@/contexts/msa-listener-handler.svelte';
 
