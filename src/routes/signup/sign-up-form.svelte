@@ -28,34 +28,41 @@
   const steps = [
     {
       schema: zod(schemaFirstStep),
-      description: 'Enter an email address below create a First Spark account.',
+      description: 'Provide an email address to create your First Spark account.',
+      buttonLabel: 'Sign up',
     },
     {
       schema: zod(schemaSecondStep),
-      description: 'Enter the verification code we sent to {email}',
+      description: `Enter the verification code we sent to {email}.`,
+      buttonLabel: 'Submit',
     },
     {
       schema: zod(schemaLastStep),
       description: 'Choose a username and a password for your account.',
+      buttonLabel: 'Sign Up',
     },
   ];
 
-  let step = $state(1);
+  const getCurrentStepDescription = (): string => {
+    const description = steps[step - 1].description;
+    return step === 2 ? description.replace('{email}', $formData.email) : description;
+  }
 
-  let otpHandler: MsaListenerHandler | undefined = $state(undefined);
-  let loading = $state(false);
+  let step = $state(1);
+  let isLoading = $state(false);
+  let hasStepError = $state(true);  // Start with a disabled state
   let errorMessage = $state('');
-  let resendTimer = $state(30);
+
   let canResend = $state(false);
-  let tokenStatus = $state(MsaTokenStatus.unset);
-  let hasStepError = $state(true);
-  let isValidating = $state(false);
+  let resendTimer = $state(30);
+  let otpHandler: MsaListenerHandler | undefined = $state(undefined);
+  let msaId = $state<string | undefined>(undefined);
+  let msaStatus = $state(MsaTokenStatus.unset);
 
   let identifier = $state('');
   let identType = $state(UserIdentType.email);
-  let mfaActionId = $state<string | undefined>(undefined);
+  
   let timerInterval: ReturnType<typeof setInterval>;
-
   let debounceTimer: number | null = null;
   const DEBOUNCE_DELAY = 350; // ms
   const RESEND_TIMER_DURATION = 30; // s
@@ -66,84 +73,56 @@
     dataType: 'json',
     validators: getCurrentValidator(),
     resetForm: false,
-    validationMethod: 'submit-only', // Only validate on submit, not on blur
+    validationMethod: 'submit-only',
     async onChange() {
       debounceFormValidation();
     },
     async onSubmit({ cancel }) {
-      cancel(); // Avoid the server-side validation form action
+      cancel(); // Avoid the server-side form action
       await handleFormSubmit();
     },
   });
 
   const { form: formData, errors, enhance, delayed, validateForm, options } = form;
 
-  function getCurrentStepDescription() {
-    const description = steps[step - 1].description;
-    return step === 2 ? description.replace('{email}', $formData.email) : description;
+  const updateFormErrors = (field: keyof SignUpFormSchema, message: string) => {
+    errors.update((errors) => {
+      const newErrors = {
+        ...errors,
+        [field]: [message],
+      };
+      return newErrors;
+    });
   }
 
-  function updateErrorMessage(message: string, field: keyof SignUpFormSchema) {
-    errorMessage = message;
-    if (message) {
-      // Update errors and force a refresh of the errors store
-      errors.update((errors) => {
-        const newErrors = {
-          ...errors,
-          [field]: [message],
-        };
-        return newErrors;
-      });
-
-      // Force the superForm to recognize these errors as "touched"
-      // This prevents them from being cleared on blur
-      form.tainted.update((tainted) => {
-        return {
-          ...tainted,
-          [field]: true,
-        };
-      });
-    } else if (field) {
-      // Only clear if explicitly asked to
-      errors.update((errors) => {
-        const newErrors = { ...errors };
-        delete newErrors[field];
-        return newErrors;
-      });
-    }
-  }
-
-  async function debounceFormValidation() {
+  const debounceFormValidation = async () => {
     if (debounceTimer) {
       clearTimeout(debounceTimer);
     }
 
     if (!$formData) return;
 
-    isValidating = true;
-
     debounceTimer = window.setTimeout(async () => {
+      isLoading = false;
       try {
-        // First validate the form schema
-        await validateForm({ update: true, focusOnError: false });
+        // Validate the identifier
+        const result = await validateForm({ update: true, focusOnError: false });
 
         // Check availability if needed
         if (step === 1 || step === 3) {
-          hasStepError = !(await checkIdentAvailability());
-          if (!hasStepError) {
-            errors.set($errors); // Force update to ensure persistence
-          }
+          const availability = await checkIdentAvailability()
+          hasStepError = !availability || !result.valid;
         }
       } catch (error) {
-        console.error('Error validating form:', error);
+        console.error('Error debouncing the form input:', error);
       } finally {
-        isValidating = false;
+        isLoading = false;
         debounceTimer = null;
       }
     }, DEBOUNCE_DELAY);
   }
 
-  async function handleFormSubmit() {
+  const handleFormSubmit = async () => {
     const result = await validateForm({ update: true, focusOnError: true });
     if (!result.valid) {
       hasStepError = true;
@@ -177,9 +156,8 @@
     }, 1000);
   };
 
-  async function checkIdentAvailability(): Promise<boolean> {
-    loading = true;
-    updateErrorMessage('', step === 1 ? 'email' : 'username');
+  const checkIdentAvailability = async (): Promise<boolean> => {
+    isLoading = true;
 
     if (step === 1) {
       identifier = $formData.email;
@@ -199,34 +177,34 @@
       if (!validationResult.success) return false;
     }
 
+    const fieldName = identType === UserIdentType.email ? 'email' : 'username';
+    const message = `This ${fieldName} is currently unavailable for use.`;
+
     try {
       const response = await myUserContext.isUserIdentAvailable(identifier, identType);
 
       if (response.error) {
-        updateErrorMessage(response.error, step === 1 ? 'email' : 'username');
+        updateFormErrors(step === 1 ? 'email' : 'username', response.error);
         return false;
       }
 
       if (!response.isAvailable) {
-        const fieldName = identType === UserIdentType.email ? 'email' : 'username';
-        const message = `This ${fieldName} is currently unavailable for use.`;
-        updateErrorMessage(message, fieldName);
+        updateFormErrors(fieldName, message);
         return false;
       }
 
       return response.isAvailable;
     } catch (error) {
       console.error('SignUpForm.checkIdentAvailability:', { error });
-      updateErrorMessage(translate(AppUiMessage.systemError), step === 1 ? 'email' : 'username');
+      updateFormErrors(fieldName, translate(AppUiMessage.systemError));
       return false;
     } finally {
-      loading = false;
+      isLoading = false;
     }
   }
 
   const registerNewEmail = async () => {
-    loading = true;
-    updateErrorMessage('', 'email');
+    isLoading = true;
 
     if (!$formData.email) {
       validateForm({ update: true });
@@ -238,7 +216,7 @@
 
       if (signUpResponse !== true) {
         console.error('SignUpForm.registerNewEmail: signUpUser failed.', { signUpResponse });
-        updateErrorMessage(signUpResponse, 'email');
+        updateFormErrors('email', signUpResponse);
         return;
       }
 
@@ -253,21 +231,24 @@
         !verificationResponse?.object.run
       ) {
         console.error('SignUpForm.onEmailSubmit: verifyMyEmail failed.', { verificationResponse });
-        updateErrorMessage(translate(AppUiMessage.systemError), 'email');
+        updateFormErrors('email', translate(AppUiMessage.systemError));
         return;
       }
 
       startResendTimer();
 
-      mfaActionId = verificationResponse.object.actionProgress.actionId;
+      msaId = verificationResponse.object.actionProgress.actionId;
       const onNotificationSent = () => {
         step = 2;
+        isLoading = false;
       };
       const onFailure = () => {
         console.error('onFailure');
+        isLoading = false;
       };
       const onSuccess = async () => {
         step = 3;
+        isLoading = false;
       };
 
       otpHandler = new MsaListenerHandler(
@@ -279,81 +260,80 @@
       );
     } catch (error) {
       console.error('SignUpForm.registerNewEmail:', { error });
-      tokenStatus = MsaTokenStatus.verificationFailed;
-      updateErrorMessage(translate(AppUiMessage.systemError), 'email');
+      msaStatus = MsaTokenStatus.verificationFailed;
+      updateFormErrors('email', translate(AppUiMessage.systemError));
     } finally {
-      loading = false;
+      // isLoading = false;  // Leave the button in a processing state until sent event
     }
   };
 
   const verifyEmailToken = async (): Promise<void> => {
     try {
-      if (!mfaActionId) {
+      if (!msaId) {
         console.error('SignInForm.handleVerifyOtp: actionId missing:');
-        updateErrorMessage(translate(AppUiMessage.systemError), 'token');
+        updateFormErrors('token', translate(AppUiMessage.systemError));
         return;
       }
 
-      loading = true;
-      errorMessage = '';
+      updateFormErrors('token', '');
+      isLoading = true;
 
-      const response = await myUserContext.verifyMultiStepActionToken(mfaActionId, $formData.token);
+      const response = await myUserContext.verifyMultiStepActionToken(msaId, $formData.token);
 
       if (response !== true) {
         console.error('SignUpForm.handleVerifyOtp: invalid response:', { result: response });
-        updateErrorMessage(translate(AppUiMessage.systemError), 'token');
-        tokenStatus = MsaTokenStatus.unset;
+        updateFormErrors('token', translate(AppUiMessage.systemError));
+        msaStatus = MsaTokenStatus.unset;
         return;
       }
 
-      tokenStatus = MsaTokenStatus.sending;
+      msaStatus = MsaTokenStatus.sending;
 
       try {
         await getSuggestedUsername();
       } catch (error) {
         console.error('SignUpForm.getSuggestedUsername: error:', { error });
-        updateErrorMessage(translate(AppUiMessage.systemError), 'token');
+        updateFormErrors('token', translate(AppUiMessage.systemError));
       }
     } catch (error) {
       console.error('SignUpForm.handleVerifyOtp: error:', { error });
-      updateErrorMessage(translate(AppUiMessage.systemError), 'token');
-      tokenStatus = MsaTokenStatus.unset;
+      updateFormErrors('token', translate(AppUiMessage.systemError));
+      msaStatus = MsaTokenStatus.unset;
     } finally {
-      loading = false;
+      // isLoading = false;  // Leave the button in a processing state until success event
     }
   };
 
   const resendToken = async () => {
-    tokenStatus = MsaTokenStatus.unset;
+    msaStatus = MsaTokenStatus.unset;
 
-    if (!mfaActionId) {
+    if (!msaId) {
       console.error('SignUpForm.handleResendOtp: actionId missing.');
-      updateErrorMessage(translate(AppUiMessage.systemError), 'token');
+      updateFormErrors('token', translate(AppUiMessage.systemError));
       return;
     }
 
     try {
-      loading = true;
-      updateErrorMessage('', 'token');
+      isLoading = true;
 
       const response = await myUserContext.sendMultiStepActionNotification(
-        mfaActionId,
+        msaId,
         $formData.email,
       );
 
       if (typeof response === 'string') {
         console.error('SignInForm.handleResendOtp: error:', { error: response });
-        updateErrorMessage(response, 'token');
+        updateFormErrors('token', response);
         return;
       }
 
-      tokenStatus = MsaTokenStatus.sending;
+      msaStatus = MsaTokenStatus.sending;
       startResendTimer();
     } catch (error) {
       console.error('SignUpForm.resendToken: error:', { error });
-      updateErrorMessage(translate(AppUiMessage.systemError), 'token');
+      updateFormErrors('token', translate(AppUiMessage.systemError));
     } finally {
-      loading = false;
+      isLoading = false;
     }
   };
 
@@ -366,7 +346,7 @@
     }
 
     try {
-      loading = true;
+      isLoading = true;
       const result = await myUserContext.findAvailableUserHandle($formData.email);
       if (typeof result === 'string') {
         $formData.username = result;
@@ -374,13 +354,14 @@
     } catch (error) {
       console.error('Error getting suggested handle:', error);
     } finally {
-      loading = false;
+      // isLoading = false;  //  
     }
   };
 
   const createCredentials = async () => {
-    loading = true;
-    updateErrorMessage('', 'password');
+    isLoading = true;
+    // Clear any remaining token errors
+    updateFormErrors('token', '');
 
     if (!$formData.password) return;
 
@@ -392,23 +373,18 @@
 
       if (error) {
         errorMessage = error;
-        updateErrorMessage(error, 'password');
+        updateFormErrors('password', error);
         return;
       }
 
       await goto('/');
     } catch (error) {
       console.error('SignUpForm.createCredentials: error:', { error });
-      updateErrorMessage(translate(AppUiMessage.systemError), 'password');
+      updateFormErrors('password', translate(AppUiMessage.systemError));
     } finally {
-      loading = false;
+      isLoading = false;
     }
   };
-
-  onDestroy(() => {
-    clearInterval(timerInterval);
-    if (otpHandler) otpHandler.removeListener();
-  });
 
   $effect(() => {
     if (debounceTimer) {
@@ -417,18 +393,23 @@
     }
 
     if (!$formData) {
-      isValidating = false;
+      isLoading = false;
       return;
     }
 
     if (otpHandler) {
       const currentErrorMessage = otpHandler.getErrorMessage();
       if (currentErrorMessage) {
-        updateErrorMessage(currentErrorMessage, 'token');
+        updateFormErrors('token', currentErrorMessage);
       }
     }
 
     options.validators = getCurrentValidator();
+  });
+
+  onDestroy(() => {
+    clearInterval(timerInterval);
+    if (otpHandler) otpHandler.removeListener();
   });
 </script>
 
@@ -469,10 +450,10 @@
         />
       {/if}
       <FormButtonComponent
-        disabled={$delayed || isValidating || hasStepError}
-        loading={$delayed}
+        disabled={$delayed || isLoading || hasStepError}
+        loading={$delayed || isLoading}
         buttonText="Sign Up"
-        loadingText="Signing up..."
+        loadingText={steps[step - 1].buttonLabel}
       />
       <div class="mt-4 text-center text-sm">
         Do you already have an account?

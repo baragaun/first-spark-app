@@ -119,31 +119,9 @@
     }, 1000);
   };
 
-  const updateErrorMessage = (message: string, field: keyof ResetPasswordFormSchema) => {
+  function updateErrorMessage(message: string, field: keyof ResetPasswordFormSchema) {
     errorMessage = message;
-    switch (field) {
-      case 'ident': {
-        errors.update((errors) => ({
-          ...errors,
-          ident: [errorMessage],
-        }));
-      }
-      case 'token': {
-        errors.update((errors) => ({
-          ...errors,
-          token: [errorMessage],
-        }));
-      }
-      case 'newPassword': {
-        errors.update((errors) => ({
-          ...errors,
-          newPassword: [errorMessage],
-        }));
-      }
-    }
-
     if (message) {
-      // Set the error message
       errors.update((errors) => {
         const newErrors = {
           ...errors,
@@ -154,12 +132,12 @@
 
       // Force the superForm to recognize these errors as "touched"
       // This prevents them from being cleared on blur
-      form.tainted.update((tainted) => {
-        return {
-          ...tainted,
-          [field]: true,
-        };
-      });
+      // form.tainted.update((tainted) => {
+      //   return {
+      //     ...tainted,
+      //     [field]: true,
+      //   };
+      // });
     } else if (field) {
       // Only clear if explicitly asked to
       errors.update((errors) => {
@@ -168,7 +146,9 @@
         return newErrors;
       });
     }
-  };
+  }
+
+
 
   const startPasswordReset = async () => {
     loading = true;
