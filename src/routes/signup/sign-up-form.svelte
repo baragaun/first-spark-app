@@ -117,7 +117,7 @@
         debounceTimer = null;
       }
     }, DEBOUNCE_DELAY);
-  };
+  }
 
   const handleFormSubmit = async () => {
     const result = await validateForm({ update: true, focusOnError: true });
@@ -137,7 +137,7 @@
         await createCredentials();
         break;
     }
-  };
+  }
 
   const startResendTimer = () => {
     resendTimer = RESEND_TIMER_DURATION;
