@@ -1,6 +1,11 @@
-import translate from "@/helpers/language/translate";
-import { AppUiMessage, MsaTokenStatus } from "@/types/enums";
-import { type QueryResult, type MultiStepActionProgressResult, MultiStepActionEventType, type SidMultiStepActionProgress } from "@baragaun/bg-node-client";
+import translate from '@/helpers/language/translate';
+import { AppUiMessage, MsaTokenStatus } from '@/types/enums';
+import {
+  MultiStepActionEventType,
+  type MultiStepActionProgressResult,
+  type QueryResult,
+  type SidMultiStepActionProgress,
+} from '@baragaun/bg-node-client';
 
 let errorMessage = $state('');
 let tokenStatus = $state(MsaTokenStatus.unset);
@@ -19,14 +24,14 @@ export class MsaListenerHandler {
     response: QueryResult,
     onNotificationSent?: () => void,
     onFailure?: () => void,
-    onSuccess?: () => void
+    onSuccess?: () => void,
   ) {
     this.listenerId = listenerId;
     this.response = response;
     this.onNotificationSent = onNotificationSent;
     this.onFailure = onFailure;
     this.onSuccess = onSuccess;
-    
+
     this.initialize();
   }
 
@@ -35,7 +40,7 @@ export class MsaListenerHandler {
       errorMessage = 'Missing response object';
       console.error('MsaListenerHandler.initialize: error: ', errorMessage);
       return;
-    };
+    }
 
     try {
       this.listenerRef = this.response.object.run.addListener({
@@ -48,7 +53,7 @@ export class MsaListenerHandler {
             // The notification failed to go out.
             if (import.meta.env.VITE_APP_ENVIRONMENT === 'development') {
               errorMessage = "Notification failed, but you're in development.";
-              
+
               // Advance, ignoring the failure to send in development
               if (this.onNotificationSent) this.onNotificationSent();
               return;
@@ -71,7 +76,7 @@ export class MsaListenerHandler {
             );
 
             tokenStatus = MsaTokenStatus.notificationSent;
-            
+
             // Proceed with any callback
             if (this.onNotificationSent) this.onNotificationSent();
             return;
@@ -101,8 +106,8 @@ export class MsaListenerHandler {
 
           if (eventType === MultiStepActionEventType.failed) {
             console.error(
-              `${this.listenerId}.multiStepActionListener: error.`, 
-              action.notificationResult
+              `${this.listenerId}.multiStepActionListener: error.`,
+              action.notificationResult,
             );
             tokenStatus = MsaTokenStatus.verificationFailed;
             errorMessage = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError);
@@ -115,11 +120,11 @@ export class MsaListenerHandler {
           if (eventType === MultiStepActionEventType.success) {
             // The token was accepted. The user is now signed in.
             console.log(
-              `${this.listenerId}.multiStepActionListener: success.`, 
-              action.notificationResult
+              `${this.listenerId}.multiStepActionListener: success.`,
+              action.notificationResult,
             );
             tokenStatus = MsaTokenStatus.success;
-            
+
             // Proceed with any callback
             if (this.onSuccess) this.onSuccess();
           }

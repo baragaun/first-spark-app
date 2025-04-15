@@ -16,7 +16,7 @@
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { AppUiMessage, MsaTokenStatus } from '@/types/enums';
   import {
-  determineIdentifierType,
+    determineIdentifierType,
     getOtpMessage,
     schemaFirstStep,
     schemaLastStep,
@@ -34,17 +34,17 @@
   let msaActionStatus = $state(MsaTokenStatus.unset); // TODO: Integrate into the form
   let resendTimer = $state(30);
   let canResend = $state(false);
-  
+
   let loading = $state(false);
   let errorMessage = $state('');
   let hasStepError = $state(true);
-  
+
   let identifier = $state('');
   let identType = $state(UserIdentType.email);
 
   let debounceTimer: number | null = null;
   const DEBOUNCE_DELAY = 350; // ms
-  const emailCooldowns = $state(new Map<string, number>());  // Track emails that have active cooldowns
+  const emailCooldowns = $state(new Map<string, number>()); // Track emails that have active cooldowns
 
   const form = superForm(data.form, {
     dataType: 'json',
@@ -143,7 +143,7 @@
         }));
       }
     }
-  }
+  };
 
   const toggleAuthType = async () => {
     // 1. Remove an existing listener that hasn't failed yet
@@ -155,7 +155,7 @@
       otpHandler.removeListener();
       otpHandler = undefined;
     }
-    
+
     // Ensure that there is valid ident input before we request a token
     if ($formData.ident && schemaFirstStep.safeParse($formData.ident)) {
       if (step === 1) {
@@ -165,16 +165,16 @@
         $formData.password = undefined;
 
         await sendTokenForSignIn();
-        step = 2
+        step = 2;
       } else {
         $formData.authType = 'password';
         $formData.password = '';
-        
+
         $formData.token = undefined;
 
-        step = 1
-      };
-    };
+        step = 1;
+      }
+    }
     return;
   };
 
@@ -247,16 +247,20 @@
       startResendTimer();
       msaActionId = response.object.actionProgress.actionId;
 
-      const onNotificationSent = () => { step = 2 };
-      const onFailure = () => { console.error('onFailure') };
+      const onNotificationSent = () => {
+        step = 2;
+      };
+      const onFailure = () => {
+        console.error('onFailure');
+      };
       const onSuccess = async () => await goto('/');
 
       otpHandler = new MsaListenerHandler(
-        'SignInForm', 
-        response, 
-        onNotificationSent, 
-        onFailure, 
-        onSuccess
+        'SignInForm',
+        response,
+        onNotificationSent,
+        onFailure,
+        onSuccess,
       );
 
       return;
@@ -330,7 +334,10 @@
       const response = await myUserContext.sendMultiStepActionNotification(msaActionId, identifier);
 
       if (response !== true) {
-        updateErrorMessage(typeof response === 'string' ? response : 'Failed to resend verification code', 'token')
+        updateErrorMessage(
+          typeof response === 'string' ? response : 'Failed to resend verification code',
+          'token',
+        );
         return;
       }
 
@@ -363,7 +370,7 @@
     if (otpHandler) {
       const currentErrorMessage = otpHandler.getErrorMessage();
       if (currentErrorMessage) {
-        updateErrorMessage(currentErrorMessage, 'token')
+        updateErrorMessage(currentErrorMessage, 'token');
       }
     }
 
@@ -407,11 +414,7 @@
           loadingText="Signing in..."
         />
         <div class="flex justify-between text-sm">
-          <Button 
-            variant="link" 
-            disabled={!$formData.ident}
-            onclick={() => toggleAuthType()}
-          >
+          <Button variant="link" disabled={!$formData.ident} onclick={() => toggleAuthType()}>
             Sign in with token
           </Button>
           <Button variant="link" onclick={async () => await goto('reset-password')}>
@@ -436,10 +439,7 @@
           loadingText="Signing in..."
         />
         <div class="flex justify-between text-sm">
-          <Button
-            variant="link"
-            onclick={async () => await toggleAuthType()}
-          >
+          <Button variant="link" onclick={async () => await toggleAuthType()}>
             Sign in with password
           </Button>
           <Button variant="link" onclick={async () => await goto('reset-password')}>

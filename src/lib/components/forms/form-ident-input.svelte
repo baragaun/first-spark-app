@@ -25,12 +25,12 @@
   <Form.Control>
     {#snippet children({ props })}
       <Form.Label>{label}</Form.Label>
-      <Input 
-        {...props} 
-        bind:value={$formData[fieldName]} 
+      <Input
+        {...props}
+        bind:value={$formData[fieldName]}
         class={$errors[fieldName] ? 'border-red-500 focus-visible:ring-red-500' : ''}
-        {placeholder} 
-        {disabled} 
+        {placeholder}
+        {disabled}
       />
     {/snippet}
   </Form.Control>

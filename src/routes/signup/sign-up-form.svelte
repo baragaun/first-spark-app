@@ -8,7 +8,7 @@
   import IdentInputComponent from '@/components/forms/form-ident-input.svelte';
   import OTPInputComponent from '@/components/forms/form-otp-input.svelte';
   import FormButtonComponent from '@/components/forms/form-button.svelte';
-  import SuperDebug, { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
+  import SuperDebug, { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
   import { onDestroy } from 'svelte';
   import AuthCard from '@/components/auth-card.svelte';
@@ -26,11 +26,19 @@
   let { data }: { data: { form: SuperValidated<SignUpFormSchema> } } = $props();
 
   const steps = [
-    { schema: zod(schemaFirstStep), description: 'Enter an email address below create a First Spark account.' },
-    { schema: zod(schemaSecondStep), description: 'Enter the verification code we sent to {email}' },
-    { schema: zod(schemaLastStep), description: 'Choose a username and a password for your account.' }
+    {
+      schema: zod(schemaFirstStep),
+      description: 'Enter an email address below create a First Spark account.',
+    },
+    {
+      schema: zod(schemaSecondStep),
+      description: 'Enter the verification code we sent to {email}',
+    },
+    {
+      schema: zod(schemaLastStep),
+      description: 'Choose a username and a password for your account.',
+    },
   ];
-
 
   let step = $state(1);
 
@@ -48,7 +56,6 @@
   let mfaActionId = $state<string | undefined>(undefined);
   let timerInterval: ReturnType<typeof setInterval>;
 
-
   let debounceTimer: number | null = null;
   const DEBOUNCE_DELAY = 350; // ms
   const RESEND_TIMER_DURATION = 30; // s
@@ -59,6 +66,7 @@
     dataType: 'json',
     validators: getCurrentValidator(),
     resetForm: false,
+    validationMethod: 'submit-only', // Only validate on submit, not on blur
     async onChange() {
       debounceFormValidation();
     },
@@ -78,10 +86,30 @@
   function updateErrorMessage(message: string, field: keyof SignUpFormSchema) {
     errorMessage = message;
     if (message) {
-      errors.update((errors) => ({
-        ...errors,
-        [field]: [message],
-      }));
+      // Update errors and force a refresh of the errors store
+      errors.update((errors) => {
+        const newErrors = {
+          ...errors,
+          [field]: [message],
+        };
+        return newErrors;
+      });
+
+      // Force the superForm to recognize these errors as "touched"
+      // This prevents them from being cleared on blur
+      form.tainted.update((tainted) => {
+        return {
+          ...tainted,
+          [field]: true,
+        };
+      });
+    } else if (field) {
+      // Only clear if explicitly asked to
+      errors.update((errors) => {
+        const newErrors = { ...errors };
+        delete newErrors[field];
+        return newErrors;
+      });
     }
   }
 
@@ -96,10 +124,15 @@
 
     debounceTimer = window.setTimeout(async () => {
       try {
-        await validateForm({ update: true });
+        // First validate the form schema
+        await validateForm({ update: true, focusOnError: false });
 
+        // Check availability if needed
         if (step === 1 || step === 3) {
           hasStepError = !(await checkIdentAvailability());
+          if (!hasStepError) {
+            errors.set($errors); // Force update to ensure persistence
+          }
         }
       } catch (error) {
         console.error('Error validating form:', error);
@@ -108,7 +141,7 @@
         debounceTimer = null;
       }
     }, DEBOUNCE_DELAY);
-  };
+  }
 
   async function handleFormSubmit() {
     const result = await validateForm({ update: true, focusOnError: true });
@@ -118,11 +151,17 @@
     }
 
     switch (step) {
-      case 1: await registerNewEmail(); break;
-      case 2: await verifyEmailToken(); break; 
-      case 3: await createCredentials(); break;
+      case 1:
+        await registerNewEmail();
+        break;
+      case 2:
+        await verifyEmailToken();
+        break;
+      case 3:
+        await createCredentials();
+        break;
     }
-  };
+  }
 
   const startResendTimer = () => {
     resendTimer = RESEND_TIMER_DURATION;
@@ -146,7 +185,7 @@
       identifier = $formData.email;
       if (!identifier) return false;
       identType = UserIdentType.email;
-      
+
       const validationResult = emailSchema.safeParse($formData.email);
       if (!validationResult.success) return false;
     } else if (step === 3) {
@@ -155,7 +194,7 @@
       identType = UserIdentType.userHandle;
 
       if (identifier === myUserContext.myUserHandle) return true;
-      
+
       const validationResult = usernameSchema.safeParse($formData.username);
       if (!validationResult.success) return false;
     }
@@ -166,15 +205,15 @@
       if (response.error) {
         updateErrorMessage(response.error, step === 1 ? 'email' : 'username');
         return false;
-      } 
-      
+      }
+
       if (!response.isAvailable) {
         const fieldName = identType === UserIdentType.email ? 'email' : 'username';
         const message = `This ${fieldName} is currently unavailable for use.`;
         updateErrorMessage(message, fieldName);
         return false;
       }
-      
+
       return response.isAvailable;
     } catch (error) {
       console.error('SignUpForm.checkIdentAvailability:', { error });
@@ -221,18 +260,23 @@
       startResendTimer();
 
       mfaActionId = verificationResponse.object.actionProgress.actionId;
-      const onNotificationSent = () => { step = 2; };
-      const onFailure = () => { console.error('onFailure'); };
-      const onSuccess = async () => { step = 3; };
+      const onNotificationSent = () => {
+        step = 2;
+      };
+      const onFailure = () => {
+        console.error('onFailure');
+      };
+      const onSuccess = async () => {
+        step = 3;
+      };
 
       otpHandler = new MsaListenerHandler(
-        'SignUpForm', 
-        verificationResponse, 
-        onNotificationSent, 
-        onFailure, 
-        onSuccess
+        'SignUpForm',
+        verificationResponse,
+        onNotificationSent,
+        onFailure,
+        onSuccess,
       );
-
     } catch (error) {
       console.error('SignUpForm.registerNewEmail:', { error });
       tokenStatus = MsaTokenStatus.verificationFailed;
@@ -263,14 +307,13 @@
       }
 
       tokenStatus = MsaTokenStatus.sending;
-      
+
       try {
         await getSuggestedUsername();
       } catch (error) {
-        console.error('SignUpForm.getSuggestedUsername: error:', { error });  
+        console.error('SignUpForm.getSuggestedUsername: error:', { error });
         updateErrorMessage(translate(AppUiMessage.systemError), 'token');
       }
-
     } catch (error) {
       console.error('SignUpForm.handleVerifyOtp: error:', { error });
       updateErrorMessage(translate(AppUiMessage.systemError), 'token');
@@ -381,7 +424,7 @@
     if (otpHandler) {
       const currentErrorMessage = otpHandler.getErrorMessage();
       if (currentErrorMessage) {
-        updateErrorMessage(currentErrorMessage, 'token')
+        updateErrorMessage(currentErrorMessage, 'token');
       }
     }
 
@@ -432,8 +475,8 @@
         loadingText="Signing up..."
       />
       <div class="mt-4 text-center text-sm">
-        Don't have an account?
-        <a href="/signup" class="underline"> Sign up </a>
+        Do you already have an account?
+        <a href="/signin" class="underline"> Sign in </a>
       </div>
     </div></AuthCard
   >

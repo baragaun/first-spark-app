@@ -1,7 +1,7 @@
 <script lang="ts">
   import AuthCard from '@/components/auth-card.svelte';
   import {
-  determineIdentifierType,
+    determineIdentifierType,
     getOtpMessage,
     schemaFirstStep,
     schemaLastStep,
@@ -35,11 +35,11 @@
   let msaActionStatus = $state(MsaTokenStatus.unset);
   let resendTimer = $state(30);
   let canResend = $state(false);
-      
+
   let loading = $state(false);
   let errorMessage = $state('');
   let hasStepError = $state(true); // Treat an initial empty input as an error
-  
+
   let identifier = $state('');
   let identType = $state(UserIdentType.email);
 
@@ -50,6 +50,7 @@
     dataType: 'json',
     validators: getCurrentValidator(),
     resetForm: false,
+    validationMethod: 'submit-only', // Only validate on submit, not on blur
     async onChange() {
       if (debounceTimer) {
         clearTimeout(debounceTimer);
@@ -64,7 +65,14 @@
       debounceTimer = window.setTimeout(async () => {
         try {
           const result = await validateForm({ update: true });
-          hasStepError = !result.valid;
+
+          // Check if identifier is available for step 1
+          if (step === 1 && $formData.ident) {
+            const isIdentValid = await checkIdentAvailability();
+            hasStepError = !result.valid || !isIdentValid;
+          } else {
+            hasStepError = !result.valid;
+          }
         } catch (error) {
           console.error('Error validating form:', error);
         } finally {
@@ -111,7 +119,7 @@
     }, 1000);
   };
 
-  const updateErrorMessage = (message: string, field: string) => {
+  const updateErrorMessage = (message: string, field: keyof ResetPasswordFormSchema) => {
     errorMessage = message;
     switch (field) {
       case 'ident': {
@@ -133,7 +141,34 @@
         }));
       }
     }
-  }
+
+    if (message) {
+      // Set the error message
+      errors.update((errors) => {
+        const newErrors = {
+          ...errors,
+          [field]: [message],
+        };
+        return newErrors;
+      });
+
+      // Force the superForm to recognize these errors as "touched"
+      // This prevents them from being cleared on blur
+      form.tainted.update((tainted) => {
+        return {
+          ...tainted,
+          [field]: true,
+        };
+      });
+    } else if (field) {
+      // Only clear if explicitly asked to
+      errors.update((errors) => {
+        const newErrors = { ...errors };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
+  };
 
   const startPasswordReset = async () => {
     loading = true;
@@ -153,21 +188,23 @@
         !response?.object.actionProgress?.actionId ||
         !response?.object.run
       ) {
-        updateErrorMessage('Failed to send verification code. Please try again.', 'ident')
+        updateErrorMessage('Failed to send verification code. Please try again.', 'ident');
         return;
       }
 
-      const onNotificationSent = () => { step = 2 };
+      const onNotificationSent = () => {
+        step = 2;
+      };
       const onFailure = () => {
-        console.log('Listener failure, advancing step')
-        step = 3
+        console.log('Listener failure, advancing step');
+        step = 3;
       };
       const onSuccess = async () => {
         if (step === 2) {
           return;
         } else {
           step = 3;
-        };
+        }
       };
 
       msaActionId = response.object.actionProgress.actionId;
@@ -177,14 +214,14 @@
         onNotificationSent,
         onFailure,
         onSuccess,
-      )
+      );
 
       startResendTimer();
       return;
     } catch (err) {
       console.error('Error resetting password:', err);
       msaActionStatus = MsaTokenStatus.verificationFailed;
-      updateErrorMessage(translate(AppUiMessage.systemError), 'ident')
+      updateErrorMessage(translate(AppUiMessage.systemError), 'ident');
     } finally {
       loading = false;
     }
@@ -208,7 +245,10 @@
       const response = await myUserContext.sendMultiStepActionNotification($formData.ident);
 
       if (response !== true) {
-        updateErrorMessage(typeof response === 'string' ? response : 'Failed to resend verification code', 'token')
+        updateErrorMessage(
+          typeof response === 'string' ? response : 'Failed to resend verification code',
+          'token',
+        );
         return;
       }
 
@@ -216,7 +256,7 @@
       startResendTimer();
     } catch (error) {
       console.error('Error resending email:', error);
-      updateErrorMessage('Failed to resend verification code. Please try again.', 'token')
+      updateErrorMessage('Failed to resend verification code. Please try again.', 'token');
     } finally {
       loading = false;
     }
@@ -225,14 +265,14 @@
   const verifyResetPasswordToken = async () => {
     if (!msaActionId) {
       console.error('SignInForm.handleVerifyOtp: actionId missing:');
-      updateErrorMessage(translate(AppUiMessage.systemError), 'token')
+      updateErrorMessage(translate(AppUiMessage.systemError), 'token');
       return;
     }
 
     if (!$formData.token) return;
     try {
       loading = true;
-      updateErrorMessage('', 'token')
+      updateErrorMessage('', 'token');
 
       // We need to wait for the success event before going to to the next step
       const response = await myUserContext.verifyMultiStepActionToken(
@@ -245,29 +285,29 @@
         console.error('ResetPasswordForm.verifyResetPasswordToken: invalid response:', {
           result: response,
         });
-        updateErrorMessage(translate(AppUiMessage.systemError), 'token')
+        updateErrorMessage(translate(AppUiMessage.systemError), 'token');
         msaActionStatus = MsaTokenStatus.unset;
         return;
       }
     } catch (error) {
       console.error('ResetPasswordForm.verifyResetPasswordToken: error:', { error });
       msaActionStatus = MsaTokenStatus.unset;
-      updateErrorMessage(translate(AppUiMessage.systemError), 'token')
+      updateErrorMessage(translate(AppUiMessage.systemError), 'token');
     } finally {
       loading = false;
-      hasStepError = true;  // This response does not determine validity while we poll for success
+      hasStepError = true; // This response does not determine validity while we poll for success
     }
   };
 
   const updateMyPassword = async () => {
     loading = true;
-    updateErrorMessage('', 'newPassword')
+    updateErrorMessage('', 'newPassword');
 
     if (!$formData.newPassword) return;
 
     try {
       if (!validatePassword($formData.newPassword).isValid) {
-        updateErrorMessage(getPasswordError($formData.newPassword), 'newPassword')
+        updateErrorMessage(getPasswordError($formData.newPassword), 'newPassword');
         return;
       }
 
@@ -278,7 +318,7 @@
       );
 
       if (result !== true) {
-        updateErrorMessage(typeof result === 'string' ? result : 'Failed to verify code', 'token')
+        updateErrorMessage(typeof result === 'string' ? result : 'Failed to verify code', 'token');
         return;
       }
 
@@ -290,7 +330,7 @@
 
       if (response !== true) {
         errorMessage = response;
-        updateErrorMessage(response, 'newPassword')
+        updateErrorMessage(response, 'newPassword');
         return;
       }
 
@@ -323,7 +363,7 @@
     if (otpHandler) {
       const currentErrorMessage = otpHandler.getErrorMessage();
       if (currentErrorMessage) {
-        updateErrorMessage(currentErrorMessage, 'token')
+        updateErrorMessage(currentErrorMessage, 'token');
       }
     }
 
@@ -340,6 +380,39 @@
         return 'Now, update your password.';
     }
   };
+
+  async function checkIdentAvailability(): Promise<boolean> {
+    loading = true;
+    updateErrorMessage('', 'ident');
+
+    identifier = $formData.ident;
+    if (!identifier) return false;
+    identType = determineIdentifierType(identifier);
+
+    try {
+      const response = await myUserContext.isUserIdentAvailable(identifier, identType);
+
+      if (response.error) {
+        updateErrorMessage(response.error, 'ident');
+        return false;
+      }
+
+      // For password reset, we want the account to exist (NOT available)
+      if (!response.isAvailable) {
+        return true; // Account exists, which is what we want
+      } else {
+        // If identifier IS available, it means no account exists with this identifier
+        updateErrorMessage('No account found with this identifier.', 'ident');
+        return false;
+      }
+    } catch (error) {
+      console.error('Error checking identifier availability:', error);
+      updateErrorMessage(translate(AppUiMessage.systemError), 'ident');
+      return false;
+    } finally {
+      loading = false;
+    }
+  }
 </script>
 
 <form method="POST" id="reset-password-form" use:enhance>
