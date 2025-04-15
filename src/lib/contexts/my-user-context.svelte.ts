@@ -435,7 +435,7 @@ export class MyUserContext {
       );
 
       // TODO: This isn't appropriately returning false where the code was incorrect
-      console.log('verify response: ', response.object)
+      console.log('verify response: ', response.object);
 
       if (response.error || !response.object) {
         console.error(

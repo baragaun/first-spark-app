@@ -46,17 +46,14 @@
   <Form.Control>
     {#snippet children({ props })}
       <Form.Label>{label}</Form.Label>
-      <InputOTP.Root 
-        {...props} 
-        {id} 
-        {pattern}
-        maxlength={length} 
-        bind:value={$formData[fieldName]} 
-        >
+      <InputOTP.Root {...props} {id} {pattern} maxlength={length} bind:value={$formData[fieldName]}>
         {#snippet children({ cells })}
           <InputOTP.Group class="w-full">
             {#each cells as cell}
-              <InputOTP.Slot {cell} class={$errors[fieldName] ? 'border-red-500 focus-visible:ring-red-500' : ''}/>
+              <InputOTP.Slot
+                {cell}
+                class={$errors[fieldName] ? 'border-red-500 focus-visible:ring-red-500' : ''}
+              />
             {/each}
           </InputOTP.Group>
         {/snippet}
