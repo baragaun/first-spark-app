@@ -9,7 +9,7 @@
   import AuthCard from '@/components/auth-card.svelte';
   import FormEmailInput from '@/components/forms/form-ident-input.svelte';
   import FormOTPInput from '@/components/forms/form-otp-input.svelte';
-  import FormPasswordInput from '@/components/forms/form-update-password-input.svelte';
+  import FormPasswordInput from '@/components/forms/form-password-input.svelte';
   import FormButton from '@/components/forms/form-button.svelte';
   import { Button } from '@/components/ui/button';
   import { MsaListenerHandler } from '@/contexts/msa-listener-handler.svelte';
