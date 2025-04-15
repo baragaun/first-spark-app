@@ -30,7 +30,7 @@ test('Landing page includes NavBar component, signup, login buttons', async ({ p
   await expect(themeToggleButton).toBeVisible();
 
   // Check if it contains a change language button
-  const changeLanguageButton = navElement.getByRole('button', { name: 'Change language' });
+  const changeLanguageButton = navElement.getByLabel('Select Language');
   await expect(changeLanguageButton).toBeVisible();
 
   // Check if it contains a "Sign In" button
