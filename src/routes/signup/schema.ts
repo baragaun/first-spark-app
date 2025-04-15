@@ -49,10 +49,6 @@ export const schemaLastStep = schemaSecondStep.extend({
   password: passwordSchema.transform((val) => val.trim()),
 });
 
-export const shouldUseTokenAuth = (formData: { token?: string; password?: string }): boolean => {
-  return !!formData.token && (!formData.password || formData.password.length === 0);
-};
-
 export const determineIdentifierType = (value: string): UserIdentType => {
   const emailValidationResult = emailSchema.safeParse(value);
   if (emailValidationResult.success) {
