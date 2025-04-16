@@ -1,10 +1,5 @@
 <script lang="ts">
-  import SuperDebug, { superForm, type SuperValidated } from 'sveltekit-superforms';
-  import { zod } from 'sveltekit-superforms/adapters';
   import { goto } from '$app/navigation';
-  import { onDestroy } from 'svelte';
-  import translate from '@/helpers/language/translate';
-  import { UserIdentType } from '@baragaun/bg-node-client';
   import AuthCard from '@/components/auth-card.svelte';
   import FormButton from '@/components/forms/form-button.svelte';
   import IdentFormInput from '@/components/forms/form-ident-input.svelte';
@@ -12,7 +7,12 @@
   import PasswordFormInput from '@/components/forms/form-password-input.svelte';
   import { MsaListenerHandler } from '@/contexts/msa-listener-handler.svelte';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import translate from '@/helpers/language/translate';
   import { AppUiMessage, MsaTokenStatus } from '@/types/enums';
+  import { UserIdentType } from '@baragaun/bg-node-client';
+  import { onDestroy } from 'svelte';
+  import SuperDebug, { superForm, type SuperValidated } from 'sveltekit-superforms';
+  import { zod } from 'sveltekit-superforms/adapters';
   import {
     emailSchema,
     schemaFirstStep,
@@ -102,10 +102,10 @@
     if (!$formData) return;
 
     debounceTimer = window.setTimeout(async () => {
-      isLoading = false;
       try {
         // Validate the identifier
         const result = await validateForm({ update: true, focusOnError: false });
+        isLoading = true;
 
         // Check availability if needed
         if (step === 1 || step === 3) {
@@ -344,13 +344,14 @@
     try {
       isLoading = true;
       const result = await myUserContext.findAvailableUserHandle($formData.email);
+
       if (typeof result === 'string') {
         $formData.username = result;
       }
     } catch (error) {
       console.error('Error getting suggested handle:', error);
     } finally {
-      // isLoading = false;  //
+      isLoading = false;
     }
   };
 
@@ -437,6 +438,9 @@
           fieldName="username"
           placeholder="e.g. 'giraffe08'"
           label="Username"
+          {identType}
+          generateUsername={getSuggestedUsername}
+          {isLoading}
         />
         <PasswordFormInput
           {form}
@@ -457,7 +461,6 @@
       </div>
     </div></AuthCard
   >
-
   <div class="mt-4"><SuperDebug data={$formData} /></div>
   <div class="mt-4"><SuperDebug data={errors} /></div>
 </form>

@@ -1,9 +1,6 @@
 <script module>
-  import { defineMeta } from '@storybook/addon-svelte-csf';
   import AuthCard from '$lib/components/auth-card.svelte';
-  import { Input } from '$lib/components/ui/input';
-  import { Button } from '$lib/components/ui/button';
-  import PasswordInput from '$lib/components/ui/password-input';
+  import { defineMeta } from '@storybook/addon-svelte-csf';
 
   const { Story } = defineMeta({
     title: 'Components/AuthCard',

@@ -65,6 +65,7 @@ export class MsaListenerHandler {
 
             tokenStatus = MsaTokenStatus.sendingFailed;
             errorMessage = translate(AppUiMessage.msaTokenFailedToSend, AppUiMessage.systemError);
+            if (this.onFailure) this.onFailure();
             return;
           }
 
@@ -88,6 +89,7 @@ export class MsaListenerHandler {
               action.notificationResult,
             );
             errorMessage = 'We could not verify the token you entered. Please try again.';
+            if (this.onFailure) this.onFailure();
             return;
           }
 
