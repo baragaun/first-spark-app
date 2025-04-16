@@ -1,11 +1,12 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
+  import { goto } from '$app/navigation';
+  import { isSignedIn } from '@/contexts/my-user-context.svelte';
+  import { m } from '$lib/paraglide/messages.js';
   import AvatarMenu from './avatar-menu.svelte';
-  import * as Sidebar from '$lib/components/ui/sidebar/index.js';
   import ThemeButton from '../theme-button.svelte';
   import LanguageButton from '../language-button.svelte';
-  import { isSignedIn } from '@/contexts/my-user-context.svelte';
-  import { goto } from '$app/navigation';
+  import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 </script>
 
 <nav
@@ -29,25 +30,25 @@
       {#if !$isSignedIn}
         <div class="flex flex-none items-center gap-2">
           <ThemeButton class="hidden md:flex" />
-          <LanguageButton class="hidden md:flex" />
-            <Button
-              variant="ghost"
-              onclick={() => goto('/signin')}
-              aria-label="Sign In"
-              class="font-lexend hidden text-muted-foreground hover:text-foreground md:flex"
-            >
-              Sign In
-            </Button>
-            <span class="sr-only">Sign In</span>
-            <Button
-              variant="default"
-              onclick={() => goto('/signup')}
-              aria-label="Sign Up"
-              class="font-lexend shadow-sm hover:shadow-md"
-            >
-              Sign Up
-            </Button>
-            <span class="sr-only">Sign Up</span>
+          <LanguageButton />
+          <Button
+            variant="ghost"
+            onclick={() => goto('/signin')}
+            aria-label={m['nav.auth.sign_in']()}
+            class="font-lexend hidden text-muted-foreground hover:text-foreground md:flex"
+          >
+            {m['nav.auth.sign_in']()}
+          </Button>
+          <span class="sr-only">Sign In</span>
+          <Button
+            variant="default"
+            onclick={() => goto('/signup')}
+            aria-label={m['nav.auth.sign_up']()}
+            class="font-lexend shadow-sm hover:shadow-md"
+          >
+            {m['nav.auth.sign_up']()}
+          </Button>
+          <span class="sr-only">{m['nav.auth.sign_up']()}</span>
         </div>
       {/if}
       <AvatarMenu />
