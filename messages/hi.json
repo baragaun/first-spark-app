@@ -1,0 +1,135 @@
+{
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "welcome": "फर्स्ट स्पार्क में आपका स्वागत है",
+  "welcome_subtitle": "जुड़ें, प्रेरित करें, विकसित हों!",
+  "get_started": "शुरू करें",
+  "sidebar": {
+    "logo": {
+      "alt": "ऐप लोगो",
+      "title": "फर्स्ट स्पार्क"
+    },
+    "menu": {
+      "home": "होम",
+      "inbox": "इनबॉक्स",
+      "conversations": "वार्तालाप",
+      "contacts": "संपर्क",
+      "settings": "सेटिंग्स"
+    }
+  },
+
+  "nav": {
+    "menu": "मेनू",
+    "open_menu": "मेनू खोलें",
+    "theme": {
+      "light_mode": "लाइट मोड",
+      "dark_mode": "डार्क मोड"
+    },
+    "auth": {
+      "sign_in": "लॉग इन",
+      "sign_up": "साइन अप",
+      "sign_out": "साइन आउट"
+    }
+  },
+
+  "footer": {
+    "copyright": "© {year} First Spark. सर्वाधिकार सुरक्षित।",
+    "navigation": {
+      "faq": "सामान्य प्रश्न",
+      "privacy_policy": "गोपनीयता नीति",
+      "terms_of_service": "सेवा की शर्तें"
+    }
+  },
+
+  "user_nav": {
+    "profile": "प्रोफ़ाइल",
+    "inbox": "इनबॉक्स",
+    "settings": "सेटिंग्स",
+    "logout": "लॉग आउट"
+  },
+
+  "language": {
+    "change": "भाषा बदलें",
+    "select": "भाषा चुनें"
+  },
+  "signin": {
+    "title": "लॉग इन",
+    "terms_agreement": "जारी रखकर, आप हमारे उपयोगकर्ता समझौते से सहमत होते हैं और स्वीकार करते हैं कि आप हमारी गोपनीयता नीति को समझते हैं और उससे सहमत हैं।",
+    "have_account": "फर्स्ट स्पार्क पर नए हैं?",
+    "auth_method": "आप कैसे लॉगिन करना चाहेंगे?",
+    "auth_method1": "पासवर्ड",
+    "auth_method2": "एक बार का पासवर्ड",
+    "forgot_password": "अपना पासवर्ड भूल गए?",
+    "username_or_email_placeholder": "उपयोगकर्ता नाम या ईमेल",
+    "email_placeholder": "ईमेल",
+    "password_placeholder": "पासवर्ड",
+    "otp_title": "अपना इनबॉक्स देखें",
+    "otp_subtitle": "हमने एक मैजिक लिंक भेजा है ",
+    "otp_expiration": "सत्यापन कोड 10 मिनट में समाप्त हो जाएगा। लॉग इन करने के लिए नीचे कोड दर्ज करें।",
+    "otp_timer": "इसमें पुनः भेजें ",
+    "otp_renewal": "ईमेल नहीं मिला?",
+    "buttons": {
+      "back": "← लॉग इन पर वापस जाएं",
+      "continue": "लॉग इन",
+      "continue_otp": "मुझे मेरा कोड भेजें",
+      "resend_otp": "ईमेल पुनः भेजें",
+      "verify": "सत्यापित करें",
+      "sending": "OTP भेज रहा है...",
+      "verifying": "लॉग इन हो रहा है...",
+      "signup": "साइन अप"
+    }
+  },
+  "signup": {
+    "title": "साइन अप",
+    "verify_email_title": "अपना ईमेल सत्यापित करें",
+    "terms_agreement": "जारी रखकर, आप हमारी उपयोगकर्ता सहमति और गोपनीयता नीति से सहमत हैं।",
+    "verify_code_message": "{email} पर भेजा गया छह अंकों का कोड दर्ज करें",
+    "have_account": "क्या पहले से खाता है?",
+    "login_link": "लॉग इन",
+    "create_credentials_title": "अपना यूजरनेम और पासवर्ड बनाएं",
+    "username_description": "यूजरनेम एक विशिष्ट पहचान है। हम जांच करेंगे कि आपका चुना हुआ नाम उपलब्ध है या नहीं।",
+    "username_placeholder": "यूजरनेम (उदाहरण: कॉस्मोएक्सप्लोरर, पिक्सलपायनियर)",
+    "password_placeholder": "पासवर्ड",
+    "password_requirements": {
+      "title": "पासवर्ड की आवश्यकताएं:",
+      "min_length": "कम से कम 8 अक्षर"
+    },
+    "password_errors": {
+      "min_length": "पासवर्ड में कम से कम 8 अक्षर होने चाहिए",
+      "too_simple": "पासवर्ड बहुत सरल या आसानी से अनुमान लगाने योग्य है"
+    },
+    "buttons": {
+      "back": "← वापस",
+      "continue": "जारी रखें",
+      "verify": "सत्यापित करें",
+      "sending": "भेजा जा रहा है...",
+      "verifying": "सत्यापित किया जा रहा है...",
+      "create_account": "खाता बनाएं",
+      "creating_account": "खाता बनाया जा रहा है..."
+    }
+  },
+  "reset_password": {
+    "title": "अपना पासवर्ड रीसेट करें",
+    "description": "यदि हमें यह ईमेल पता मिल जाता है तो हम आपको एक सत्यापन कोड ईमेल करेंगे।",
+    "check_inbox": {
+      "title": "अपना इनबॉक्स जांचें",
+      "description": "हमने {email} पर एक सत्यापन कोड भेजा है",
+      "code_expiration": "नोट: सत्यापन कोड 10 मिनट में समाप्त हो जाएगा।",
+      "didnt_get_email": "ईमेल नहीं मिला?"
+    },
+    "form": {
+      "identifier_placeholder": "ईमेल या यूजरनेम",
+      "errors": {
+        "account_not_found": "इस ईमेल पते से कोई खाता नहीं मिला",
+        "default_error": "आपका अनुरोध प्रोसेस नहीं किया जा सका। कृपया पुनः प्रयास करें।"
+      }
+    },
+    "buttons": {
+      "send_email": "ईमेल भेजें",
+      "sending_email": "ईमेल भेजा जा रहा है...",
+      "resend_email": "ईमेल पुनः भेजें",
+      "resend_timer": "{time} में पुनः भेजें",
+      "back_to_login": "लॉग इन पर वापस जाएं",
+      "need_help": "मदद चाहिए?"
+    }
+  }
+}
