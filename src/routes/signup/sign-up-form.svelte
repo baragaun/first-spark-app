@@ -107,10 +107,10 @@
     if (!$formData) return;
 
     debounceTimer = window.setTimeout(async () => {
-      isLoading = false;
       try {
         // Validate the identifier
         const result = await validateForm({ update: true, focusOnError: false });
+        isLoading = true;
 
         // Check availability if needed
         if (step === 1 || step === 3) {
@@ -379,7 +379,7 @@
     } catch (error) {
       console.error('Error getting suggested handle:', error);
     } finally {
-      // isLoading = false;  //
+      isLoading = false;
     }
   };
 
