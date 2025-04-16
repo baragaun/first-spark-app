@@ -1,7 +1,11 @@
-<script lang="ts">
+<script lang="ts" module>
+  type T = Record<string, unknown>;
+</script>
+
+<script lang="ts" generics="T extends Record<string, unknown>">
   import * as Form from '$lib/components/ui/form/index.js';
   import { Input } from '$lib/components/ui/input/index.js';
-  import type { SuperForm } from 'sveltekit-superforms';
+  import type { FormPathLeaves, SuperForm } from 'sveltekit-superforms';
 
   let {
     form,
@@ -10,8 +14,8 @@
     label = 'Email address',
     disabled = false,
   } = $props<{
-    form: SuperForm<any, any>;
-    fieldName?: string;
+    form: SuperForm<T>;
+    fieldName?: FormPathLeaves<T>;
     placeholder?: string;
     label?: string;
     disabled?: boolean;

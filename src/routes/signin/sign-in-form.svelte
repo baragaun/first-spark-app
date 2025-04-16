@@ -128,18 +128,21 @@
           ...errors,
           ident: [errorMessage],
         }));
+        break;
       }
       case 'token': {
         errors.update((errors) => ({
           ...errors,
           token: [errorMessage],
         }));
+        break;
       }
       case 'password': {
         errors.update((errors) => ({
           ...errors,
           password: [errorMessage],
         }));
+        break;
       }
     }
   };

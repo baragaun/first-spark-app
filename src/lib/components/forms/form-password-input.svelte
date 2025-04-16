@@ -1,8 +1,12 @@
-<script lang="ts">
+<script lang="ts" module>
+  type T = Record<string, unknown>;
+</script>
+
+<script lang="ts" generics="T extends Record<string, unknown>">
   import * as Form from '$lib/components/ui/form/index.js';
   import { Input } from '$lib/components/ui/input/index.js';
   import { Eye, EyeOff } from 'lucide-svelte';
-  import type { SuperForm } from 'sveltekit-superforms';
+  import type { FormPathLeaves, SuperForm } from 'sveltekit-superforms';
 
   let {
     form,
@@ -10,8 +14,8 @@
     placeholder = 'Your password must be at least 8 characters',
     label = 'Password',
   } = $props<{
-    form: SuperForm<any, any>;
-    fieldName?: string;
+    form: SuperForm<T>;
+    fieldName?: FormPathLeaves<T>;
     placeholder?: string;
     label?: string;
   }>();

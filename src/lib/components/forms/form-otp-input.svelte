@@ -1,8 +1,12 @@
-<script lang="ts">
+<script lang="ts" module>
+  type T = Record<string, unknown>;
+</script>
+
+<script lang="ts" generics="T extends Record<string, unknown>">
   import * as Form from '$lib/components/ui/form/index.js';
   import * as InputOTP from '$lib/components/ui/input-otp';
   import { REGEXP_ONLY_DIGITS } from 'bits-ui';
-  import type { SuperForm } from 'sveltekit-superforms';
+  import type { FormPathLeaves, SuperForm } from 'sveltekit-superforms';
 
   let {
     form,
@@ -18,8 +22,8 @@
     resendTimer = 0,
     onResendClick = undefined,
   } = $props<{
-    form: SuperForm<any, any>;
-    fieldName?: string;
+    form: SuperForm<T>;
+    fieldName?: FormPathLeaves<T>;
     label?: string;
     length?: number;
     id?: string;
