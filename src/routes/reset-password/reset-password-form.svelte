@@ -141,8 +141,6 @@
     }
   }
 
-
-
   const startPasswordReset = async () => {
     isLoading = true;
     const existingUser = await isIdentRegistered();
