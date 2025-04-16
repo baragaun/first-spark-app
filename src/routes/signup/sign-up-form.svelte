@@ -48,11 +48,11 @@
   const getCurrentStepDescription = (): string => {
     const description = steps[step - 1].description;
     return step === 2 ? description.replace('{email}', $formData.email) : description;
-  }
+  };
 
   let step = $state(1);
   let isLoading = $state(false);
-  let hasStepError = $state(true);  // Start with a disabled state
+  let hasStepError = $state(true); // Start with a disabled state
   let errorMessage = $state('');
 
   let canResend = $state(false);
@@ -63,7 +63,7 @@
 
   let identifier = $state('');
   let identType = $state(UserIdentType.email);
-  
+
   let timerInterval: ReturnType<typeof setInterval>;
   let debounceTimer: number | null = null;
   const DEBOUNCE_DELAY = 500; // ms
@@ -97,7 +97,7 @@
       };
       return newErrors;
     });
-  }
+  };
 
   const debounceFormValidation = async () => {
     if (debounceTimer) {
@@ -114,7 +114,7 @@
 
         // Check availability if needed
         if (step === 1 || step === 3) {
-          const availability = await checkIdentAvailability()
+          const availability = await checkIdentAvailability();
           hasStepError = !availability || !result.valid;
         }
       } catch (error) {
@@ -126,7 +126,7 @@
         debounceTimer = null;
       }
     }, DEBOUNCE_DELAY);
-  }
+  };
 
   const handleFormSubmit = async () => {
   const handleFormSubmit = async () => {
@@ -147,7 +147,7 @@
         await createCredentials();
         break;
     }
-  }
+  };
 
   const startResendTimer = () => {
     resendTimer = RESEND_TIMER_DURATION;
@@ -343,10 +343,7 @@
       isLoading = true;
       isLoading = true;
 
-      const response = await myUserContext.sendMultiStepActionNotification(
-        msaId,
-        $formData.email,
-      );
+      const response = await myUserContext.sendMultiStepActionNotification(msaId, $formData.email);
 
       if (typeof response === 'string') {
         console.error('SignInForm.handleResendOtp: error:', { error: response });
@@ -382,7 +379,7 @@
     } catch (error) {
       console.error('Error getting suggested handle:', error);
     } finally {
-      // isLoading = false;  //  
+      // isLoading = false;  //
     }
   };
 
