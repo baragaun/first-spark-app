@@ -1,5 +1,19 @@
 <script lang="ts">
+    import SuperDebug, { superForm, type SuperValidated } from 'sveltekit-superforms';
+  import { zod } from 'sveltekit-superforms/adapters';
+  import { goto } from '$app/navigation';
+  import { onDestroy } from 'svelte';
+  import translate from '@/helpers/language/translate.js';
+  import { UserIdentType } from '@baragaun/bg-node-client';
   import AuthCard from '@/components/auth-card.svelte';
+  import EmailFormInput from '@/components/forms/form-ident-input.svelte';
+  import FormButton from '@/components/forms/form-button.svelte';
+  import OtpFormInput from '@/components/forms/form-otp-input.svelte';
+  import PasswordFormInput from '@/components/forms/form-password-input.svelte';
+  import { MsaListenerHandler } from '@/contexts/msa-listener-handler.svelte';
+  import { myUserContext } from '@/contexts/my-user-context.svelte.js';
+  import passwordHelpers from '@/helpers/password-helpers.js';
+  import { AppUiMessage, MsaTokenStatus } from '@/types/enums.js';
   import {
     determineIdentifierType,
     getOtpMessage,
@@ -8,21 +22,6 @@
     schemaStepTwo,
     type ResetPasswordFormSchema,
   } from './schema';
-  import SuperDebug, { type SuperValidated, type Infer, superForm } from 'sveltekit-superforms';
-  import { zod } from 'sveltekit-superforms/adapters';
-  import { AppUiMessage, MsaTokenStatus } from '@/types/enums.js';
-  import { myUserContext } from '@/contexts/my-user-context.svelte.js';
-  import translate from '@/helpers/language/translate.js';
-  import { UserIdentType } from '@baragaun/bg-node-client';
-  import { onDestroy } from 'svelte';
-  import passwordHelpers from '@/helpers/password-helpers.js';
-  import { goto } from '$app/navigation';
-
-  import EmailFormInput from '@/components/forms/form-ident-input.svelte';
-  import OtpFormInput from '@/components/forms/form-otp-input.svelte';
-  import UpdatePasswordFormInput from '@/components/forms/form-password-input.svelte';
-  import FormButton from '@/components/forms/form-button.svelte';
-  import { MsaListenerHandler } from '@/contexts/msa-listener-handler.svelte';
 
   let { data }: { data: { form: SuperValidated<ResetPasswordFormSchema> } } = $props();
 
@@ -429,7 +428,7 @@
           loadingText="Verifiying email..."
         />
       {:else if step == 3}
-        <UpdatePasswordFormInput
+        <PasswordFormInput
           {form}
           fieldName="newPassword"
           label="New password"

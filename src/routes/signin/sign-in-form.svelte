@@ -3,14 +3,13 @@
   import { zod } from 'sveltekit-superforms/adapters';
   import { goto } from '$app/navigation';
   import { onDestroy } from 'svelte';
-
   import translate from '@/helpers/language/translate';
   import { UserIdentType } from '@baragaun/bg-node-client';
   import AuthCard from '@/components/auth-card.svelte';
-  import FormEmailInput from '@/components/forms/form-ident-input.svelte';
-  import FormOTPInput from '@/components/forms/form-otp-input.svelte';
-  import FormPasswordInput from '@/components/forms/form-password-input.svelte';
+  import EmailFormInput from '@/components/forms/form-ident-input.svelte';
   import FormButton from '@/components/forms/form-button.svelte';
+  import OTPFormInput from '@/components/forms/form-otp-input.svelte';
+  import PasswordFormInput from '@/components/forms/form-password-input.svelte';
   import { Button } from '@/components/ui/button';
   import { MsaListenerHandler } from '@/contexts/msa-listener-handler.svelte';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
@@ -395,13 +394,13 @@
   <AuthCard title="Sign in" description={getCurrentStepDescription()}>
     <div class="space-y-4">
       {#if step === 1}
-        <FormEmailInput
+        <EmailFormInput
           {form}
           fieldName="ident"
           placeholder="Enter your email or username"
           label="Email or Username"
         />
-        <FormPasswordInput
+        <PasswordFormInput
           {form}
           fieldName="password"
           label="Password"
@@ -422,7 +421,7 @@
           </Button>
         </div>
       {:else if step === 2}
-        <FormOTPInput
+        <OTPFormInput
           {form}
           fieldName="token"
           label="Verification code"
