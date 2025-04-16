@@ -1,5 +1,5 @@
 <script lang="ts">
-    import SuperDebug, { superForm, type SuperValidated } from 'sveltekit-superforms';
+  import SuperDebug, { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
   import { goto } from '$app/navigation';
   import { onDestroy } from 'svelte';
@@ -146,8 +146,6 @@
       });
     }
   }
-
-
 
   const startPasswordReset = async () => {
     loading = true;
