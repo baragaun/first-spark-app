@@ -480,7 +480,7 @@
           placeholder="Enter your password"
         />
       {/if}
-      <FormButtonComponent
+      <FormButton
         disabled={$delayed || isLoading || hasStepError}
         loading={$delayed || isLoading}
         buttonText="Sign Up"
