@@ -23,7 +23,7 @@ export const usernameSchema = z
 export const schemaFirstStep = z.object({
   ident: z
     .string()
-    .min(3, 'Username or email is required')
+    .min(3, 'A valid username or email is required')
     .transform((val) => val.trim()),
 });
 

@@ -34,13 +34,14 @@
   let resendTimer = $state(30);
   let canResend = $state(false);
 
-  let loading = $state(false);
+  let isLoading = $state(false);
   let errorMessage = $state('');
   let hasStepError = $state(true);
 
   let identifier = $state('');
   let identType = $state(UserIdentType.email);
 
+  let timerInterval: ReturnType<typeof setInterval>;
   let debounceTimer: number | null = null;
   const DEBOUNCE_DELAY = 350; // ms
   const emailCooldowns = $state(new Map<string, number>()); // Track emails that have active cooldowns
@@ -56,7 +57,7 @@
 
       if (!$formData) return;
 
-      loading = true;
+      isLoading = true;
 
       debounceTimer = window.setTimeout(async () => {
         try {
@@ -76,7 +77,7 @@
         } catch (error) {
           console.error('Error validating form:', error);
         } finally {
-          loading = false;
+          isLoading = false;
           debounceTimer = null;
         }
       }, DEBOUNCE_DELAY);
@@ -84,7 +85,6 @@
     async onSubmit({ cancel }) {
       // Bail on any server side action
       cancel();
-
       const result = await validateForm({ update: true, focusOnError: true });
       if (!result.valid) {
         hasStepError = true;
@@ -96,14 +96,12 @@
       } else if (step === 2 && $formData.token) {
         await verifySignInToken();
       }
-
       return;
     },
   });
 
   const { form: formData, errors, enhance, delayed, validateForm, options } = form;
 
-  let timerInterval: ReturnType<typeof setInterval>;
   const startResendTimer = () => {
     resendTimer = 30;
     canResend = false;
@@ -120,32 +118,15 @@
     }, 1000);
   };
 
-  const updateErrorMessage = (message: string, field: string) => {
-    errorMessage = message;
-    switch (field) {
-      case 'ident': {
-        errors.update((errors) => ({
-          ...errors,
-          ident: [errorMessage],
-        }));
-        break;
-      }
-      case 'token': {
-        errors.update((errors) => ({
-          ...errors,
-          token: [errorMessage],
-        }));
-        break;
-      }
-      case 'password': {
-        errors.update((errors) => ({
-          ...errors,
-          password: [errorMessage],
-        }));
-        break;
-      }
-    }
-  };
+  const updateFormErrors = (field: keyof SignInFormSchema, message: string) => {
+    errors.update((errors) => {
+      const newErrors = {
+        ...errors,
+        [field]: [message],
+      };
+      return newErrors;
+    });
+  }
 
   const toggleAuthType = async () => {
     // 1. Remove an existing listener that hasn't failed yet
@@ -184,8 +165,8 @@
     if (!$formData.password) return;
 
     try {
-      loading = true;
-      updateErrorMessage('', 'password');
+      isLoading = true;
+      updateFormErrors('password', '');
 
       identifier = $formData.ident || '';
       identType = determineIdentifierType(identifier);
@@ -197,20 +178,23 @@
       );
 
       if (response !== true) {
-        updateErrorMessage('Invalid credentials. Please try again.', 'password');
+        updateFormErrors('password', 'Invalid credentials. Please try again.');
+
         return;
       }
 
       await goto('/');
     } catch (error) {
       console.error('SignInForm.signMeInWithPassword: error:', { error });
-      updateErrorMessage(translate(AppUiMessage.systemError), 'password');
+      updateFormErrors('password', translate(AppUiMessage.systemError));
     } finally {
-      loading = false;
+      isLoading = false;
     }
   };
 
   const sendTokenForSignIn = async () => {
+    isLoading = true;
+
     if (!$formData.ident) {
       validateForm({ update: true });
       return;
@@ -229,9 +213,6 @@
       }
     }
 
-    loading = true;
-    updateErrorMessage('', 'ident');
-
     try {
       const response = await myUserContext.signMeInWithToken(identifier);
 
@@ -243,7 +224,7 @@
         !response?.object.actionProgress?.actionId ||
         !response?.object.run
       ) {
-        updateErrorMessage('Failed to send verification code. Please try again.', 'ident');
+        updateFormErrors('ident', 'Failed to send verification code. Please try again.');
         return;
       }
       startResendTimer();
@@ -251,9 +232,11 @@
 
       const onNotificationSent = () => {
         step = 2;
+        isLoading = false;
       };
       const onFailure = () => {
         console.error('onFailure');
+        isLoading = false;
       };
       const onSuccess = async () => await goto('/');
 
@@ -269,52 +252,50 @@
     } catch (error) {
       console.error('SignInForm.startTokenSignIn:', { error });
       msaActionStatus = MsaTokenStatus.verificationFailed;
-      updateErrorMessage(translate(AppUiMessage.systemError), 'ident');
+      updateFormErrors('ident', translate(AppUiMessage.systemError));
     } finally {
-      loading = false;
+      // isLoading = false; // Leave the button in a processing state until sent event
     }
   };
 
   const verifySignInToken = async (): Promise<void> => {
-    loading = true;
-    updateErrorMessage('', '');
+    isLoading = true;
+    if (!$formData.token) return;
 
     try {
       if (!msaActionId) {
         console.error('SignInForm.handleVerifyOtp: actionId missing:');
-        updateErrorMessage(translate(AppUiMessage.systemError), 'token');
+        updateFormErrors('token', translate(AppUiMessage.systemError));
         return;
       }
-
-      if (!$formData.token) return;
 
       const response = await myUserContext.verifyMultiStepActionToken(msaActionId, $formData.token);
 
       if (response !== true) {
         console.error('SignInForm.handleVerifyOtp: invalid response:', { result: response });
-        updateErrorMessage(translate(AppUiMessage.systemError), 'token');
+        updateFormErrors('token', translate(AppUiMessage.systemError));
         msaActionStatus = MsaTokenStatus.unset;
+        isLoading = false;
         return;
       }
 
       msaActionStatus = MsaTokenStatus.sending;
     } catch (error) {
       console.error('SignInForm.handleVerifyOtp: error:', { error });
-      updateErrorMessage(translate(AppUiMessage.systemError), 'token');
+      updateFormErrors('token', translate(AppUiMessage.systemError));
       msaActionStatus = MsaTokenStatus.unset;
     } finally {
-      loading = false;
+      // isLoading = false; // Leave the button in a processing state until sent event
     }
   };
 
   const handleResendToken = async () => {
     if (!canResend) return;
     msaActionStatus = MsaTokenStatus.unset;
-    loading = true;
 
     if (!msaActionId) {
       console.error('SignInForm.handleResendToken: actionId missing.');
-      updateErrorMessage(translate(AppUiMessage.systemError), 'token');
+      updateFormErrors('token', translate(AppUiMessage.systemError));
       return;
     }
 
@@ -330,16 +311,14 @@
     }
 
     try {
-      loading = true;
-      updateErrorMessage('', 'ident');
+      isLoading = true;
+      updateFormErrors('token', '');
 
       const response = await myUserContext.sendMultiStepActionNotification(msaActionId, identifier);
 
-      if (response !== true) {
-        updateErrorMessage(
-          typeof response === 'string' ? response : 'Failed to resend verification code',
-          'token',
-        );
+      if (typeof response === 'string') {
+        console.error('SignInForm.handleResendToken: error:', { error: response });
+        updateFormErrors('token', response);
         return;
       }
 
@@ -347,9 +326,9 @@
       startResendTimer();
     } catch (error) {
       console.error('SignInForm.handleResendToken: error:', { error });
-      updateErrorMessage(translate(AppUiMessage.systemError), 'ident');
+      updateFormErrors('ident', translate(AppUiMessage.systemError));
     } finally {
-      loading = false;
+      isLoading = false;
     }
   };
 
@@ -365,14 +344,14 @@
     }
 
     if (!$formData) {
-      loading = false;
+      isLoading = false;
       return;
     }
 
     if (otpHandler) {
       const currentErrorMessage = otpHandler.getErrorMessage();
       if (currentErrorMessage) {
-        updateErrorMessage(currentErrorMessage, 'token');
+        updateFormErrors('token', currentErrorMessage);
       }
     }
 
@@ -410,8 +389,8 @@
           placeholder="Enter your password"
         />
         <FormButton
-          disabled={$delayed || loading || hasStepError}
-          loading={$delayed}
+          disabled={$delayed || isLoading || hasStepError}
+          loading={$delayed || isLoading}
           buttonText="Sign in"
           loadingText="Signing in..."
         />
@@ -435,10 +414,10 @@
           onResendClick={handleResendToken}
         />
         <FormButton
-          disabled={$delayed || loading || hasStepError}
-          loading={$delayed}
-          buttonText="Sign in"
-          loadingText="Signing in..."
+          disabled={$delayed || isLoading || hasStepError}
+          loading={$delayed || isLoading}
+          buttonText="Verify"
+          loadingText="Verifying..."
         />
         <div class="flex justify-between text-sm">
           <Button variant="link" onclick={async () => await toggleAuthType()}>
