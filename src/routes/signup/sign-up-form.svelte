@@ -344,9 +344,6 @@
     try {
       isLoading = true;
       const result = await myUserContext.findAvailableUserHandle($formData.email);
-      if (result && typeof result === 'object' && 'object' in result) {
-        $formData.username = result.object ?? '';
-      }
 
       if (typeof result === 'string') {
         $formData.username = result;
@@ -464,7 +461,6 @@
       </div>
     </div></AuthCard
   >
-
   <div class="mt-4"><SuperDebug data={$formData} /></div>
   <div class="mt-4"><SuperDebug data={errors} /></div>
 </form>

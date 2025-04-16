@@ -57,7 +57,7 @@
 
       if (!$formData) return;
 
-      // isLoading = true;
+      isLoading = true;
 
       debounceTimer = window.setTimeout(async () => {
         try {
@@ -77,7 +77,7 @@
         } catch (error) {
           console.error('Error validating form:', error);
         } finally {
-          // isLoading = false;
+          isLoading = false;
           debounceTimer = null;
         }
       }, DEBOUNCE_DELAY);
@@ -117,8 +117,8 @@
       }
     }, 1000);
   };
-  // change the function defination
-  function updateFormErrors(field: keyof SignInFormSchema, message: string) {
+
+  const updateFormErrors = (field: keyof SignInFormSchema, message: string) => {
     errors.update((errors) => {
       const newErrors = {
         ...errors,
@@ -177,28 +177,23 @@
         $formData.password,
       );
 
-      isLoading = false;
-
       if (response !== true) {
         updateFormErrors('password', 'Invalid credentials. Please try again.');
 
         return;
       }
 
-      // isLoading = false;
       await goto('/');
     } catch (error) {
       console.error('SignInForm.signMeInWithPassword: error:', { error });
       updateFormErrors('password', translate(AppUiMessage.systemError));
-      isLoading = false;
     } finally {
-      // isLoading = false;
+      isLoading = false;
     }
   };
 
   const sendTokenForSignIn = async () => {
     isLoading = true;
-    updateFormErrors('ident', '');
 
     if (!$formData.ident) {
       validateForm({ update: true });
@@ -259,7 +254,7 @@
       msaActionStatus = MsaTokenStatus.verificationFailed;
       updateFormErrors('ident', translate(AppUiMessage.systemError));
     } finally {
-      // isLoading = false;
+      // isLoading = false; // Leave the button in a processing state until sent event
     }
   };
 
@@ -273,8 +268,6 @@
         updateFormErrors('token', translate(AppUiMessage.systemError));
         return;
       }
-
-      // updateFormErrors('token', '');
 
       const response = await myUserContext.verifyMultiStepActionToken(msaActionId, $formData.token);
 
@@ -292,7 +285,7 @@
       updateFormErrors('token', translate(AppUiMessage.systemError));
       msaActionStatus = MsaTokenStatus.unset;
     } finally {
-      // isLoading = false;
+      // isLoading = false; // Leave the button in a processing state until sent event
     }
   };
 

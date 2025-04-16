@@ -8,7 +8,6 @@
   import { cn } from '@/utils';
   import { UserIdentType } from '@baragaun/bg-node-client';
   import { AlertCircle, Check, RefreshCw } from 'lucide-svelte';
-  import { onMount } from 'svelte';
   import type { FormPathLeaves, SuperForm } from 'sveltekit-superforms';
 
   let {
@@ -17,28 +16,22 @@
     placeholder = 'e.g. "student@example.com"',
     label = 'Email address',
     disabled = false,
-    generateUsername = async () => null,
     identType = UserIdentType.email,
     isLoading = false,
+    generateUsername = undefined,
   } = $props<{
     form: SuperForm<T>;
     fieldName?: FormPathLeaves<T>;
     placeholder?: string;
     label?: string;
     disabled?: boolean;
-    generateUsername?: () => Promise<void>;
     identType?: UserIdentType;
     isLoading?: boolean;
+    generateUsername?: () => Promise<void>;
   }>();
 
   const { form: formData, errors } = form;
   const isUserHandle = $derived(identType === UserIdentType.userHandle);
-
-  onMount(() => {
-    if (isUserHandle && !$formData[fieldName]) {
-      generateUsername();
-    }
-  });
 </script>
 
 <Form.Field {form} name={fieldName}>
@@ -50,7 +43,7 @@
             <Form.Label>{label}</Form.Label>
           </div>
 
-          {#if isUserHandle && $errors[fieldName]}
+          {#if isUserHandle && generateUsername && $errors[fieldName]}
             <button
               type="button"
               class={cn(
@@ -59,7 +52,7 @@
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                 'disabled:pointer-events-none disabled:opacity-50',
               )}
-              onclick={generateUsername}
+              onclick={() => generateUsername()}
             >
               <RefreshCw class={cn('mr-1 h-3 w-3', isLoading && 'animate-spin')} />
               {isLoading ? 'Generating...' : 'Suggest new'}
@@ -99,11 +92,5 @@
       </div>
     {/snippet}
   </Form.Control>
-  <div class="mt-2">
-    {#if $errors[fieldName]}
-      <Form.FieldErrors />
-    {:else if isUserHandle}
-      <p class="text-sm text-green-500">This username is available</p>
-    {/if}
-  </div>
+  <Form.FieldErrors />
 </Form.Field>

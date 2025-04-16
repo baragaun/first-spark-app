@@ -4,7 +4,7 @@
   let { data }: { data: PageData } = $props();
 </script>
 
-<div class="flex h-full w-full items-center justify-center p-4">
+<div class="flex h-full w-full items-center justify-center px-4">
   <div class="w-full max-w-md">
     <SignUpForm {data} />
   </div>

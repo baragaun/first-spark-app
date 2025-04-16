@@ -35,7 +35,7 @@
   let resendTimer = $state(30);
   let canResend = $state(false);
 
-  let loading = $state(false);
+  let isLoading = $state(false);
   let errorMessage = $state('');
   let hasStepError = $state(true); // Treat an initial empty input as an error
 
@@ -51,7 +51,7 @@
     dataType: 'json',
     validators: getCurrentValidator(),
     resetForm: false,
-    validationMethod: 'submit-only', // Only validate on submit, not on blur
+    validationMethod: 'submit-only',
     async onChange() {
       if (debounceTimer) {
         clearTimeout(debounceTimer);
@@ -63,29 +63,19 @@
 
       debounceTimer = window.setTimeout(async () => {
         try {
-          loading = true;
+          isLoading = true;
           const result = await validateForm({ update: true });
-
-          // Check if identifier is available for step 1
-          if (step === 1 && $formData.ident) {
-            const isIdentValid = await checkIdentAvailability();
-            console.log('Result valid', result.valid, 'isIdentValid', isIdentValid);
-            hasStepError = !result.valid || !isIdentValid;
-          } else {
-            console.log('Result valid', result.valid);
-            hasStepError = !result.valid;
-          }
+          hasStepError = !result.valid;
         } catch (error) {
           console.error('Error validating form:', error);
         } finally {
-          loading = false;
+          isLoading = false;
           debounceTimer = null;
         }
       }, DEBOUNCE_DELAY);
     },
     async onSubmit({ cancel }) {
-      // Advoid the actual server-side validation form action
-      cancel();
+      cancel();  // Avoid the actual server-side validation form action
 
       const result = await validateForm({ update: true, focusOnError: true });
       if (!result.valid) return;
@@ -119,7 +109,7 @@
     }, 1000);
   };
 
-  function updateFormErrors(field: keyof ResetPasswordFormSchema, message: string) {
+  const updateFormErrors = (field: keyof ResetPasswordFormSchema, message: string) => {
     errors.update((errors) => {
       const newErrors = {
         ...errors,
@@ -130,12 +120,20 @@
   }
 
   const startPasswordReset = async () => {
-    loading = true;
-    // updateFormErrors('ident', '');
+    isLoading = true;
 
     try {
       identifier = $formData.ident || '';
       identType = determineIdentifierType(identifier);
+
+      const existingUser = await isIdentRegistered();
+      if (!existingUser) {
+        // Feign success and proceed
+        // Todo: add the `change email` button like the `sign in with token` button
+        step = 2;
+        startResendTimer();
+        return;
+      }
 
       const response = await myUserContext.resetMyPassword($formData.ident);
 
@@ -153,12 +151,10 @@
 
       const onNotificationSent = () => {
         step = 2;
-        loading = false; // Ensure loading is set to false when notification is sent
+        isLoading = false;
       };
       const onFailure = () => {
-        console.log('Listener failure, advancing step');
-        // step = 3;
-        loading = false; // Ensure loading is set to false on failure
+        isLoading = false;
       };
       const onSuccess = async () => {
         if (step === 2) {
@@ -166,7 +162,7 @@
         } else {
           step = 3;
         }
-        loading = false; // Ensure loading is set to false on success
+        isLoading = false;
       };
 
       msaActionId = response.object.actionProgress.actionId;
@@ -185,14 +181,14 @@
       msaActionStatus = MsaTokenStatus.verificationFailed;
       updateFormErrors('ident', translate(AppUiMessage.systemError));
     } finally {
-      // loading = false; // Leave the button in a processing state until sent event
+      // isLoading = false; // Leave the button in a processing state until sent event
     }
   };
 
   const handleResendToken = async () => {
     if (!canResend) return;
     msaActionStatus = MsaTokenStatus.unset;
-    loading = true;
+    isLoading = true;
 
     if (!msaActionId) {
       console.error('ResetPasswordForm.handleResendToken: actionId missing.');
@@ -219,12 +215,12 @@
       console.error('Error resending email:', error);
       updateFormErrors('token', 'Failed to resend verification code. Please try again.');
     } finally {
-      loading = false;
+      isLoading = false;
     }
   };
 
   const verifyResetPasswordToken = async () => {
-    loading = true;
+    isLoading = true;
 
     if (!msaActionId) {
       console.error('SignInForm.handleVerifyOtp: actionId missing:');
@@ -254,14 +250,13 @@
       msaActionStatus = MsaTokenStatus.unset;
       updateFormErrors('token', translate(AppUiMessage.systemError));
     } finally {
-      loading = false;
+      isLoading = false;
       hasStepError = true; // This response does not determine validity while we poll for success
     }
   };
 
   const updateMyPassword = async () => {
-    loading = true;
-    // updateFormErrors('newPassword', '');
+    isLoading = true;
 
     if (!$formData.newPassword) return;
 
@@ -300,37 +295,11 @@
       errorMessage =
         err instanceof Error ? err.message : 'Failed to verify code. Please try again.';
     } finally {
-      loading = false;
+      isLoading = false;
     }
   };
 
-  onDestroy(() => {
-    clearInterval(timerInterval);
-    if (otpHandler) otpHandler.removeListener();
-  });
-
-  $effect(() => {
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
-      debounceTimer = null;
-    }
-
-    if (!$formData) {
-      loading = false;
-      return;
-    }
-
-    if (otpHandler) {
-      const currentErrorMessage = otpHandler.getErrorMessage();
-      if (currentErrorMessage) {
-        updateFormErrors('token', currentErrorMessage);
-      }
-    }
-
-    options.validators = getCurrentValidator();
-  });
-
-  const getCurrentStepDescription = () => {
+    const getCurrentStepDescription = () => {
     switch (step) {
       case 1:
         return 'Provide your email address to receive a verification code and update your password.';
@@ -341,9 +310,8 @@
     }
   };
 
-  async function checkIdentAvailability(): Promise<boolean> {
-    loading = true;
-    // updateFormErrors('ident', '');
+  const isIdentRegistered = async (): Promise<boolean> => {
+    isLoading = true;
 
     identifier = $formData.ident;
     if (!identifier) return false;
@@ -357,22 +325,45 @@
         return false;
       }
 
-      // For password reset, we want the account to exist (NOT available)
-      if (!response.isAvailable) {
-        return true; // Account exists, which is what we want
-      } else {
-        // If identifier IS available, it means no account exists with this identifier
-        updateFormErrors('ident', 'No account found with this identifier.');
+      if (response.isAvailable) {
         return false;
+      } else {
+        return true;
       }
     } catch (error) {
       console.error('Error checking identifier availability:', error);
       updateFormErrors('ident', translate(AppUiMessage.systemError));
       return false;
     } finally {
-      loading = false;
+      isLoading = false;
     }
   }
+
+  $effect(() => {
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+      debounceTimer = null;
+    }
+
+    if (!$formData) {
+      isLoading = false;
+      return;
+    }
+
+    if (otpHandler) {
+      const currentErrorMessage = otpHandler.getErrorMessage();
+      if (currentErrorMessage) {
+        updateFormErrors('token', currentErrorMessage);
+      }
+    }
+
+    options.validators = getCurrentValidator();
+  });
+
+  onDestroy(() => {
+    clearInterval(timerInterval);
+    if (otpHandler) otpHandler.removeListener();
+  });
 </script>
 
 <form method="POST" id="reset-password-form" use:enhance>
@@ -386,8 +377,8 @@
           label="Username or email"
         />
         <FormButton
-          disabled={$delayed || loading || hasStepError}
-          loading={$delayed || loading}
+          disabled={$delayed || isLoading || hasStepError}
+          loading={$delayed || isLoading}
           buttonText="Send me an email"
           loadingText="Drafting email..."
         />
@@ -403,8 +394,8 @@
           onResendClick={handleResendToken}
         />
         <FormButton
-          disabled={$delayed || loading || hasStepError}
-          loading={$delayed || loading}
+          disabled={$delayed || isLoading || hasStepError}
+          loading={$delayed || isLoading}
           buttonText="Verify my email"
           loadingText="Verifiying email..."
         />
@@ -416,8 +407,8 @@
           placeholder="Your password must be at least 8 characters"
         />
         <FormButton
-          disabled={$delayed || loading || hasStepError}
-          loading={$delayed || loading}
+          disabled={$delayed || isLoading || hasStepError}
+          loading={$delayed || isLoading}
           buttonText="Update my password"
           loadingText="Updating password..."
         />
