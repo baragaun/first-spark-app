@@ -1,17 +1,18 @@
 <script lang="ts">
-  import { goto } from '$app/navigation';
-  import { UserIdentType } from '@baragaun/bg-node-client';
-  import translate from '@/helpers/language/translate';
-  import { AppUiMessage, MsaTokenStatus } from '@/types/enums';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
-
-  import IdentInputComponent from '@/components/forms/form-ident-input.svelte';
-  import OTPInputComponent from '@/components/forms/form-otp-input.svelte';
-  import FormButtonComponent from '@/components/forms/form-button.svelte';
   import SuperDebug, { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
+  import { goto } from '$app/navigation';
   import { onDestroy } from 'svelte';
+  import translate from '@/helpers/language/translate';
+  import { UserIdentType } from '@baragaun/bg-node-client';
   import AuthCard from '@/components/auth-card.svelte';
+  import FormButton from '@/components/forms/form-button.svelte';
+  import IdentFormInput from '@/components/forms/form-ident-input.svelte';
+  import OTPFormInput from '@/components/forms/form-otp-input.svelte';
+  import PasswordFormInput from '@/components/forms/form-password-input.svelte';
+  import { MsaListenerHandler } from '@/contexts/msa-listener-handler.svelte';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { AppUiMessage, MsaTokenStatus } from '@/types/enums';
   import {
     emailSchema,
     schemaFirstStep,
@@ -20,8 +21,6 @@
     usernameSchema,
     type SignUpFormSchema,
   } from './schema';
-  import FormUpdatePasswordInput from '@/components/forms/form-password-input.svelte';
-  import { MsaListenerHandler } from '@/contexts/msa-listener-handler.svelte';
 
   let { data }: { data: { form: SuperValidated<SignUpFormSchema> } } = $props();
 
@@ -418,14 +417,14 @@
     <div class="space-y-4">
       {#if step === 1}
         <!-- TODO: this should be called identinput -->
-        <IdentInputComponent
+        <IdentFormInput
           {form}
           fieldName="email"
           placeholder="e.g. 'student@example.com'"
           label="Email address"
         />
       {:else if step === 2}
-        <OTPInputComponent
+        <OTPFormInput
           {form}
           fieldName="token"
           label="Verification code"
@@ -436,20 +435,20 @@
           onResendClick={resendToken}
         />
       {:else if step === 3}
-        <IdentInputComponent
+        <IdentFormInput
           {form}
           fieldName="username"
           placeholder="e.g. 'giraffe08'"
           label="Username"
         />
-        <FormUpdatePasswordInput
+        <PasswordFormInput
           {form}
           fieldName="password"
           label="Password"
           placeholder="Enter your password"
         />
       {/if}
-      <FormButtonComponent
+      <FormButton
         disabled={$delayed || isLoading || hasStepError}
         loading={$delayed || isLoading}
         buttonText="Sign Up"
