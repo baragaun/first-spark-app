@@ -42,8 +42,10 @@
   let identifier = $state('');
   let identType = $state(UserIdentType.email);
 
+  let timerInterval: ReturnType<typeof setInterval>;
   let debounceTimer: number | null = null;
   const DEBOUNCE_DELAY = 350; // ms
+  const { getPasswordError, validatePassword } = passwordHelpers;
 
   const form = superForm(data.form, {
     dataType: 'json',
@@ -100,9 +102,7 @@
   });
 
   const { form: formData, enhance, errors, delayed, validateForm, options } = form;
-  const { getPasswordError, validatePassword } = passwordHelpers;
 
-  let timerInterval: ReturnType<typeof setInterval>;
   const startResendTimer = () => {
     resendTimer = 30;
     canResend = false;
@@ -118,38 +118,19 @@
     }, 1000);
   };
 
-  function updateErrorMessage(message: string, field: keyof ResetPasswordFormSchema) {
-    errorMessage = message;
-    if (message) {
-      errors.update((errors) => {
-        const newErrors = {
-          ...errors,
-          [field]: [message],
-        };
-        return newErrors;
-      });
-
-      // Force the superForm to recognize these errors as "touched"
-      // This prevents them from being cleared on blur
-      // form.tainted.update((tainted) => {
-      //   return {
-      //     ...tainted,
-      //     [field]: true,
-      //   };
-      // });
-    } else if (field) {
-      // Only clear if explicitly asked to
-      errors.update((errors) => {
-        const newErrors = { ...errors };
-        delete newErrors[field];
-        return newErrors;
-      });
-    }
+  function updateFormErrors(field: keyof ResetPasswordFormSchema, message: string) {
+    errors.update((errors) => {
+      const newErrors = {
+        ...errors,
+        [field]: [message],
+      };
+      return newErrors;
+    });
   }
 
   const startPasswordReset = async () => {
     loading = true;
-    updateErrorMessage('', 'ident');
+    updateFormErrors('ident', '');
 
     try {
       identifier = $formData.ident || '';
@@ -165,7 +146,7 @@
         !response?.object.actionProgress?.actionId ||
         !response?.object.run
       ) {
-        updateErrorMessage('Failed to send verification code. Please try again.', 'ident');
+        updateFormErrors('ident', 'Failed to send verification code. Please try again.');
         return;
       }
 
@@ -198,7 +179,7 @@
     } catch (err) {
       console.error('Error resetting password:', err);
       msaActionStatus = MsaTokenStatus.verificationFailed;
-      updateErrorMessage(translate(AppUiMessage.systemError), 'ident');
+      updateFormErrors('ident', translate(AppUiMessage.systemError));
     } finally {
       loading = false;
     }
@@ -222,10 +203,7 @@
       const response = await myUserContext.sendMultiStepActionNotification($formData.ident);
 
       if (response !== true) {
-        updateErrorMessage(
-          typeof response === 'string' ? response : 'Failed to resend verification code',
-          'token',
-        );
+        updateFormErrors('token', typeof response === 'string' ? response : 'Failed to resend verification code');
         return;
       }
 
@@ -233,7 +211,7 @@
       startResendTimer();
     } catch (error) {
       console.error('Error resending email:', error);
-      updateErrorMessage('Failed to resend verification code. Please try again.', 'token');
+      updateFormErrors('token', 'Failed to resend verification code. Please try again.');
     } finally {
       loading = false;
     }
@@ -242,14 +220,14 @@
   const verifyResetPasswordToken = async () => {
     if (!msaActionId) {
       console.error('SignInForm.handleVerifyOtp: actionId missing:');
-      updateErrorMessage(translate(AppUiMessage.systemError), 'token');
+      updateFormErrors('token', translate(AppUiMessage.systemError));
       return;
     }
 
     if (!$formData.token) return;
     try {
       loading = true;
-      updateErrorMessage('', 'token');
+      updateFormErrors('token', '');
 
       // We need to wait for the success event before going to to the next step
       const response = await myUserContext.verifyMultiStepActionToken(
@@ -262,14 +240,14 @@
         console.error('ResetPasswordForm.verifyResetPasswordToken: invalid response:', {
           result: response,
         });
-        updateErrorMessage(translate(AppUiMessage.systemError), 'token');
+        updateFormErrors('token', translate(AppUiMessage.systemError));
         msaActionStatus = MsaTokenStatus.unset;
         return;
       }
     } catch (error) {
       console.error('ResetPasswordForm.verifyResetPasswordToken: error:', { error });
       msaActionStatus = MsaTokenStatus.unset;
-      updateErrorMessage(translate(AppUiMessage.systemError), 'token');
+      updateFormErrors('token', translate(AppUiMessage.systemError));
     } finally {
       loading = false;
       hasStepError = true; // This response does not determine validity while we poll for success
@@ -278,13 +256,13 @@
 
   const updateMyPassword = async () => {
     loading = true;
-    updateErrorMessage('', 'newPassword');
+    updateFormErrors('newPassword', '');
 
     if (!$formData.newPassword) return;
 
     try {
       if (!validatePassword($formData.newPassword).isValid) {
-        updateErrorMessage(getPasswordError($formData.newPassword), 'newPassword');
+        updateFormErrors('newPassword', getPasswordError($formData.newPassword));
         return;
       }
 
@@ -295,7 +273,7 @@
       );
 
       if (result !== true) {
-        updateErrorMessage(typeof result === 'string' ? result : 'Failed to verify code', 'token');
+        updateFormErrors('token', typeof result === 'string' ? result : 'Failed to verify code');
         return;
       }
 
@@ -307,7 +285,7 @@
 
       if (response !== true) {
         errorMessage = response;
-        updateErrorMessage(response, 'newPassword');
+        updateFormErrors('newPassword', response);
         return;
       }
 
@@ -340,7 +318,7 @@
     if (otpHandler) {
       const currentErrorMessage = otpHandler.getErrorMessage();
       if (currentErrorMessage) {
-        updateErrorMessage(currentErrorMessage, 'token');
+        updateFormErrors('token', currentErrorMessage);
       }
     }
 
@@ -360,7 +338,7 @@
 
   async function checkIdentAvailability(): Promise<boolean> {
     loading = true;
-    updateErrorMessage('', 'ident');
+    updateFormErrors('ident', '');
 
     identifier = $formData.ident;
     if (!identifier) return false;
@@ -370,7 +348,7 @@
       const response = await myUserContext.isUserIdentAvailable(identifier, identType);
 
       if (response.error) {
-        updateErrorMessage(response.error, 'ident');
+        updateFormErrors('ident', response.error);
         return false;
       }
 
@@ -379,12 +357,12 @@
         return true; // Account exists, which is what we want
       } else {
         // If identifier IS available, it means no account exists with this identifier
-        updateErrorMessage('No account found with this identifier.', 'ident');
+        updateFormErrors('ident', 'No account found with this identifier.');
         return false;
       }
     } catch (error) {
       console.error('Error checking identifier availability:', error);
-      updateErrorMessage(translate(AppUiMessage.systemError), 'ident');
+      updateFormErrors('ident', translate(AppUiMessage.systemError));
       return false;
     } finally {
       loading = false;
