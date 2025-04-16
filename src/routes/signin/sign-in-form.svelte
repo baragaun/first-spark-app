@@ -117,7 +117,7 @@
       }
     }, 1000);
   };
-
+  // change the function defination
   function updateFormErrors(field: keyof SignInFormSchema, message: string) {
     errors.update((errors) => {
       const newErrors = {
@@ -177,17 +177,22 @@
         $formData.password,
       );
 
+      isLoading = false;
+
       if (response !== true) {
         updateFormErrors('password', 'Invalid credentials. Please try again.');
+
         return;
       }
 
+      // isLoading = false;
       await goto('/');
     } catch (error) {
       console.error('SignInForm.signMeInWithPassword: error:', { error });
-      updateFormErrors('password',translate(AppUiMessage.systemError));
-    } finally {
+      updateFormErrors('password', translate(AppUiMessage.systemError));
       isLoading = false;
+    } finally {
+      // isLoading = false;
     }
   };
 
@@ -232,9 +237,11 @@
 
       const onNotificationSent = () => {
         step = 2;
+        isLoading = false;
       };
       const onFailure = () => {
         console.error('onFailure');
+        isLoading = false;
       };
       const onSuccess = async () => await goto('/');
 
@@ -252,7 +259,7 @@
       msaActionStatus = MsaTokenStatus.verificationFailed;
       updateFormErrors('ident', translate(AppUiMessage.systemError));
     } finally {
-      isLoading = false;
+      // isLoading = false;
     }
   };
 
@@ -263,12 +270,11 @@
     try {
       if (!msaActionId) {
         console.error('SignInForm.handleVerifyOtp: actionId missing:');
-        updateFormErrors( 'token', translate(AppUiMessage.systemError));
+        updateFormErrors('token', translate(AppUiMessage.systemError));
         return;
       }
 
-      updateFormErrors('token', '');
-
+      // updateFormErrors('token', '');
 
       const response = await myUserContext.verifyMultiStepActionToken(msaActionId, $formData.token);
 
@@ -276,6 +282,7 @@
         console.error('SignInForm.handleVerifyOtp: invalid response:', { result: response });
         updateFormErrors('token', translate(AppUiMessage.systemError));
         msaActionStatus = MsaTokenStatus.unset;
+        isLoading = false;
         return;
       }
 
@@ -285,7 +292,7 @@
       updateFormErrors('token', translate(AppUiMessage.systemError));
       msaActionStatus = MsaTokenStatus.unset;
     } finally {
-      isLoading = false;
+      // isLoading = false;
     }
   };
 
@@ -326,7 +333,7 @@
       startResendTimer();
     } catch (error) {
       console.error('SignInForm.handleResendToken: error:', { error });
-      updateFormErrors( 'ident', translate(AppUiMessage.systemError));
+      updateFormErrors('ident', translate(AppUiMessage.systemError));
     } finally {
       isLoading = false;
     }

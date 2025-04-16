@@ -61,17 +61,18 @@
         $formData.actionId = msaActionId;
       }
 
-      loading = true;
-
       debounceTimer = window.setTimeout(async () => {
         try {
+          loading = true;
           const result = await validateForm({ update: true });
 
           // Check if identifier is available for step 1
           if (step === 1 && $formData.ident) {
             const isIdentValid = await checkIdentAvailability();
+            console.log('Result valid', result.valid, 'isIdentValid', isIdentValid);
             hasStepError = !result.valid || !isIdentValid;
           } else {
+            console.log('Result valid', result.valid);
             hasStepError = !result.valid;
           }
         } catch (error) {
@@ -130,7 +131,7 @@
 
   const startPasswordReset = async () => {
     loading = true;
-    updateFormErrors('ident', '');
+    // updateFormErrors('ident', '');
 
     try {
       identifier = $formData.ident || '';
@@ -152,10 +153,12 @@
 
       const onNotificationSent = () => {
         step = 2;
+        loading = false; // Ensure loading is set to false when notification is sent
       };
       const onFailure = () => {
         console.log('Listener failure, advancing step');
-        step = 3;
+        // step = 3;
+        loading = false; // Ensure loading is set to false on failure
       };
       const onSuccess = async () => {
         if (step === 2) {
@@ -163,6 +166,7 @@
         } else {
           step = 3;
         }
+        loading = false; // Ensure loading is set to false on success
       };
 
       msaActionId = response.object.actionProgress.actionId;
@@ -181,7 +185,7 @@
       msaActionStatus = MsaTokenStatus.verificationFailed;
       updateFormErrors('ident', translate(AppUiMessage.systemError));
     } finally {
-      loading = false;
+      // loading = false; // Leave the button in a processing state until sent event
     }
   };
 
@@ -197,13 +201,15 @@
     }
 
     try {
-      loading = true;
       errorMessage = '';
 
       const response = await myUserContext.sendMultiStepActionNotification($formData.ident);
 
       if (response !== true) {
-        updateFormErrors('token', typeof response === 'string' ? response : 'Failed to resend verification code');
+        updateFormErrors(
+          'token',
+          typeof response === 'string' ? response : 'Failed to resend verification code',
+        );
         return;
       }
 
@@ -218,6 +224,8 @@
   };
 
   const verifyResetPasswordToken = async () => {
+    loading = true;
+
     if (!msaActionId) {
       console.error('SignInForm.handleVerifyOtp: actionId missing:');
       updateFormErrors('token', translate(AppUiMessage.systemError));
@@ -226,9 +234,6 @@
 
     if (!$formData.token) return;
     try {
-      loading = true;
-      updateFormErrors('token', '');
-
       // We need to wait for the success event before going to to the next step
       const response = await myUserContext.verifyMultiStepActionToken(
         $formData.actionId,
@@ -256,7 +261,7 @@
 
   const updateMyPassword = async () => {
     loading = true;
-    updateFormErrors('newPassword', '');
+    // updateFormErrors('newPassword', '');
 
     if (!$formData.newPassword) return;
 
@@ -338,7 +343,7 @@
 
   async function checkIdentAvailability(): Promise<boolean> {
     loading = true;
-    updateFormErrors('ident', '');
+    // updateFormErrors('ident', '');
 
     identifier = $formData.ident;
     if (!identifier) return false;
@@ -382,7 +387,7 @@
         />
         <FormButton
           disabled={$delayed || loading || hasStepError}
-          loading={$delayed}
+          loading={$delayed || loading}
           buttonText="Send me an email"
           loadingText="Drafting email..."
         />
@@ -399,7 +404,7 @@
         />
         <FormButton
           disabled={$delayed || loading || hasStepError}
-          loading={$delayed}
+          loading={$delayed || loading}
           buttonText="Verify my email"
           loadingText="Verifiying email..."
         />
@@ -412,7 +417,7 @@
         />
         <FormButton
           disabled={$delayed || loading || hasStepError}
-          loading={$delayed}
+          loading={$delayed || loading}
           buttonText="Update my password"
           loadingText="Updating password..."
         />
