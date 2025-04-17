@@ -6,8 +6,8 @@
   import { Languages, LogIn, LogOut, Moon, MoreHorizontal, Sun } from 'lucide-svelte';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { toggleMode } from 'mode-watcher';
-  import { isSignedIn } from '@/contexts/my-user-context.svelte';
 
+  const isSignedIn = $derived(myUserContext.isSignedIn);
   const username = $derived(myUserContext.myUserHandle);
   const email = $derived(myUserContext.myEmail);
 
@@ -16,14 +16,14 @@
     // Solution for putting a dialog in a dropdown menu:
     // https://stackoverflow.com/questions/77185827/shadcn-dialog-inside-of-dropdown-closes-automatically
     const result = await myUserContext.signMeOut();
-    goto('/signin');
+    await goto('/signin');
   };
 </script>
 
 <DropdownMenu.Root>
-  <DropdownMenu.Trigger class="ml-2 {!$isSignedIn ? 'md:hidden' : ''}">
+  <DropdownMenu.Trigger class="ml-2 {!isSignedIn ? 'md:hidden' : ''}">
     <Button variant="ghost" data-testid="avatar-menu-trigger" class="relative h-8 w-8 rounded-full">
-      {#if $isSignedIn}
+      {#if isSignedIn}
         <Avatar.Root class="h-9 w-9">
           <Avatar.Image src="" alt={`@${username}`} />
           <Avatar.Fallback>FS</Avatar.Fallback>
@@ -34,7 +34,7 @@
     </Button>
   </DropdownMenu.Trigger>
   <DropdownMenu.Content class="mt-2 w-56" align="end">
-    {#if $isSignedIn}
+    {#if isSignedIn}
       <DropdownMenu.Label class="font-normal">
         <div class="flex items-center">
           <Avatar.Root class="mr-2 h-9 w-9">
@@ -65,7 +65,7 @@
       </DropdownMenu.Item>
     </DropdownMenu.Group>
     <DropdownMenu.Separator />
-    {#if $isSignedIn}
+    {#if isSignedIn}
       <DropdownMenu.Item
         onclick={handleLogout}
         class="bg-destructive text-white focus:bg-destructive focus:text-white"

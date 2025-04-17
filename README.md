@@ -56,6 +56,7 @@ pnpm run storybook
 ```
 
 ### Run Storybook tests
+
 ```shell
 # Run tests in watch mode (for development)
 pnpm run test:storybook

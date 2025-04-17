@@ -20,11 +20,12 @@
   let { title, description, showBackButton = false, onBack, children }: Props = $props();
 </script>
 
-{#if showBackButton && onBack}
-  <Button variant="ghost" size="sm" class="absolute -top-12 left-0" onclick={onBack}>← Back</Button>
-{/if}
-
-<Card class="relative w-full max-w-md">
+<Card class="w-full">
+  {#if showBackButton && onBack}
+    <div class="px-4 pt-4">
+      <Button variant="ghost" size="sm" onclick={onBack}>← Back</Button>
+    </div>
+  {/if}
   <CardHeader>
     <CardTitle class="text-2xl">{title}</CardTitle>
     {#if description}
