@@ -16,7 +16,7 @@
     // Solution for putting a dialog in a dropdown menu:
     // https://stackoverflow.com/questions/77185827/shadcn-dialog-inside-of-dropdown-closes-automatically
     const result = await myUserContext.signMeOut();
-    goto('/signin');
+    await goto('/signin');
   };
 </script>
 
