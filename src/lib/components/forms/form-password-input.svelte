@@ -20,8 +20,7 @@
     label?: string;
   }>();
 
-  const formData = form.form;
-  const errors = form.errors;
+  const { form: formData, errors } = form;
 
   let showPassword = $state(false);
 </script>

@@ -75,7 +75,7 @@
       }, DEBOUNCE_DELAY);
     },
     async onSubmit({ cancel }) {
-      cancel();  // Avoid the actual server-side validation form action
+      cancel(); // Avoid the actual server-side validation form action
 
       const result = await validateForm({ update: true, focusOnError: true });
       if (!result.valid) return;
@@ -117,7 +117,7 @@
       };
       return newErrors;
     });
-  }
+  };
 
   const startPasswordReset = async () => {
     isLoading = true;
@@ -299,7 +299,7 @@
     }
   };
 
-    const getCurrentStepDescription = () => {
+  const getCurrentStepDescription = () => {
     switch (step) {
       case 1:
         return 'Provide your email address to receive a verification code and update your password.';
@@ -337,7 +337,7 @@
     } finally {
       isLoading = false;
     }
-  }
+  };
 
   $effect(() => {
     if (debounceTimer) {
