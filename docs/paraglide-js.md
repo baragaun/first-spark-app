@@ -98,7 +98,7 @@ Messages work just as well inside script logic:
 
 ```svelte
 <script>
-  import { m } from '$paraglide/messages';
+  import { m } from '$lib/paraglide/messages.js';
   const errorMessage = m['auth.error.invalid']();
 </script>
 
