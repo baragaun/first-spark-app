@@ -13,7 +13,7 @@
   import { Button } from '@/components/ui/button';
   import { MsaListenerHandler } from '@/contexts/msa-listener-handler.svelte';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
-  import { AppUiMessage, MsaTokenStatus } from '@/types/enums';
+  import { AppUiMessage } from '@/types/enums';
   import {
     determineIdentifierType,
     getOtpMessage,
@@ -30,13 +30,11 @@
 
   let otpHandler: MsaListenerHandler | undefined = $state(undefined);
   let msaActionId = $state<string | undefined>(undefined);
-  let msaActionStatus = $state(MsaTokenStatus.unset); // TODO: Integrate into the form
   let resendTimer = $state(30);
   let canResend = $state(false);
 
   let isLoading = $state(false);
-  let errorMessage = $state('');
-  let hasStepError = $state(true);
+  let hasStepError = $state(false);
 
   let identifier = $state('');
   let identType = $state(UserIdentType.email);
@@ -129,11 +127,6 @@
   };
 
   const toggleAuthType = async () => {
-    // 1. Remove an existing listener that hasn't failed yet
-    // 2. Validate the form on the way out to handle a no-input token request
-    // 3. Clear any existing validation errors for the other authType
-    // 4. Go to the others step
-
     if (otpHandler) {
       otpHandler.removeListener();
       otpHandler = undefined;
@@ -166,7 +159,6 @@
 
     try {
       isLoading = true;
-      updateFormErrors('password', '');
 
       identifier = $formData.ident || '';
       identType = determineIdentifierType(identifier);
@@ -251,10 +243,9 @@
       return;
     } catch (error) {
       console.error('SignInForm.startTokenSignIn:', { error });
-      msaActionStatus = MsaTokenStatus.verificationFailed;
       updateFormErrors('ident', translate(AppUiMessage.systemError));
     } finally {
-      // isLoading = false; // Leave the button in a processing state until sent event
+      isLoading = true; // Leave the button in a processing state until sent event
     }
   };
 
@@ -274,24 +265,19 @@
       if (response !== true) {
         console.error('SignInForm.handleVerifyOtp: invalid response:', { result: response });
         updateFormErrors('token', translate(AppUiMessage.systemError));
-        msaActionStatus = MsaTokenStatus.unset;
         isLoading = false;
         return;
       }
-
-      msaActionStatus = MsaTokenStatus.sending;
     } catch (error) {
       console.error('SignInForm.handleVerifyOtp: error:', { error });
       updateFormErrors('token', translate(AppUiMessage.systemError));
-      msaActionStatus = MsaTokenStatus.unset;
     } finally {
-      // isLoading = false; // Leave the button in a processing state until sent event
+      isLoading = true; // Leave the button in a processing state until sent event
     }
   };
 
   const handleResendToken = async () => {
     if (!canResend) return;
-    msaActionStatus = MsaTokenStatus.unset;
 
     if (!msaActionId) {
       console.error('SignInForm.handleResendToken: actionId missing.');
@@ -305,14 +291,12 @@
       if (remainingTime > 0) {
         // If same email and cooldown active, just show verification screen with current timer
         resendTimer = remainingTime;
-        msaActionStatus = MsaTokenStatus.unset;
         return;
       }
     }
 
     try {
       isLoading = true;
-      updateFormErrors('token', '');
 
       const response = await myUserContext.sendMultiStepActionNotification(msaActionId, identifier);
 
@@ -322,7 +306,6 @@
         return;
       }
 
-      msaActionStatus = MsaTokenStatus.sending;
       startResendTimer();
     } catch (error) {
       console.error('SignInForm.handleResendToken: error:', { error });
@@ -331,10 +314,17 @@
       isLoading = false;
     }
   };
-
   onDestroy(() => {
     clearInterval(timerInterval);
-    if (otpHandler) otpHandler.removeListener();
+    
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+      debounceTimer = null;
+    }
+    
+    if (otpHandler) {
+      otpHandler.removeListener();
+    }
   });
 
   $effect(() => {
@@ -366,8 +356,6 @@
         return step === 2
           ? getOtpMessage($formData)
           : `Enter your password to sign in as ${identifier}`;
-      case 3:
-        return getOtpMessage($formData);
     }
   };
 </script>
@@ -432,9 +420,9 @@
         Don't have an account?
         <a href="/signup" class="underline"> Sign up </a>
       </div>
-    </div></AuthCard
-  >
+    </div>
+  </AuthCard>
 
   <div class="mt-4"><SuperDebug data={$formData} /></div>
-  <div class="mt-4"><SuperDebug data={errors} />{errorMessage}</div>
+  <div class="mt-4"><SuperDebug data={errors} /></div>
 </form>

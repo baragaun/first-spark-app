@@ -13,7 +13,7 @@
   import { MsaListenerHandler } from '@/contexts/msa-listener-handler.svelte';
   import { myUserContext } from '@/contexts/my-user-context.svelte.js';
   import passwordHelpers from '@/helpers/password-helpers.js';
-  import { AppUiMessage, MsaTokenStatus } from '@/types/enums.js';
+  import { AppUiMessage } from '@/types/enums.js';
   import {
     determineIdentifierType,
     getOtpMessage,
@@ -31,13 +31,11 @@
 
   let otpHandler: MsaListenerHandler | undefined = $state(undefined);
   let msaActionId = $state<string | undefined>(undefined);
-  let msaActionStatus = $state(MsaTokenStatus.unset);
   let resendTimer = $state(30);
   let canResend = $state(false);
 
   let isLoading = $state(false);
-  let errorMessage = $state('');
-  let hasStepError = $state(true); // Treat an initial empty input as an error
+  let hasStepError = $state(false);
 
   let identifier = $state('');
   let identType = $state(UserIdentType.email);
@@ -99,7 +97,6 @@
     canResend = false;
 
     clearInterval(timerInterval);
-    console.log('starting resend timer');
     timerInterval = setInterval(() => {
       resendTimer -= 1;
       if (resendTimer <= 0) {
@@ -119,14 +116,42 @@
     });
   };
 
-  const startPasswordReset = async () => {
+  const isIdentRegistered = async (): Promise<boolean> => {
     isLoading = true;
 
-    try {
-      identifier = $formData.ident || '';
-      identType = determineIdentifierType(identifier);
+    identifier = $formData.ident;
+    if (!identifier) return false;
+    identType = determineIdentifierType(identifier);
 
-      const existingUser = await isIdentRegistered();
+    try {
+      const response = await myUserContext.isUserIdentAvailable(identifier, identType);
+
+      if (response.error) {
+        updateFormErrors('ident', response.error);
+        return false;
+      }
+
+      if (response.isAvailable) {
+        return false;
+      } else {
+        return true;
+      }
+    } catch (error) {
+      console.error('Error checking identifier availability:', error);
+      updateFormErrors('ident', translate(AppUiMessage.systemError));
+      return false;
+    } finally {
+      isLoading = false;
+    }
+  };
+
+  const startPasswordReset = async () => {
+    isLoading = true;
+    const existingUser = await isIdentRegistered();
+
+    try {
+      isLoading = true;
+
       if (!existingUser) {
         // Feign success and proceed
         // Todo: add the `change email` button like the `sign in with token` button
@@ -178,27 +203,23 @@
       return;
     } catch (err) {
       console.error('Error resetting password:', err);
-      msaActionStatus = MsaTokenStatus.verificationFailed;
       updateFormErrors('ident', translate(AppUiMessage.systemError));
     } finally {
-      // isLoading = false; // Leave the button in a processing state until sent event
+      isLoading = true; // Leave the button in a processing state until sent event
     }
   };
 
   const handleResendToken = async () => {
     if (!canResend) return;
-    msaActionStatus = MsaTokenStatus.unset;
     isLoading = true;
 
     if (!msaActionId) {
       console.error('ResetPasswordForm.handleResendToken: actionId missing.');
-      errorMessage = translate(AppUiMessage.systemError);
+      updateFormErrors('token', translate(AppUiMessage.systemError));
       return;
     }
 
     try {
-      errorMessage = '';
-
       const response = await myUserContext.sendMultiStepActionNotification($formData.ident);
 
       if (response !== true) {
@@ -209,7 +230,6 @@
         return;
       }
 
-      msaActionStatus = MsaTokenStatus.sending;
       startResendTimer();
     } catch (error) {
       console.error('Error resending email:', error);
@@ -242,15 +262,13 @@
           result: response,
         });
         updateFormErrors('token', translate(AppUiMessage.systemError));
-        msaActionStatus = MsaTokenStatus.unset;
         return;
       }
     } catch (error) {
       console.error('ResetPasswordForm.verifyResetPasswordToken: error:', { error });
-      msaActionStatus = MsaTokenStatus.unset;
       updateFormErrors('token', translate(AppUiMessage.systemError));
     } finally {
-      isLoading = false;
+      isLoading = true;
       hasStepError = true; // This response does not determine validity while we poll for success
     }
   };
@@ -284,7 +302,6 @@
       );
 
       if (response !== true) {
-        errorMessage = response;
         updateFormErrors('newPassword', response);
         return;
       }
@@ -292,8 +309,7 @@
       return await goto('/');
     } catch (err) {
       console.error('Error verifying reset code:', err);
-      errorMessage =
-        err instanceof Error ? err.message : 'Failed to verify code. Please try again.';
+      updateFormErrors('newPassword', err instanceof Error ? err.message : 'Failed to verify code. Please try again.');
     } finally {
       isLoading = false;
     }
@@ -302,7 +318,7 @@
   const getCurrentStepDescription = () => {
     switch (step) {
       case 1:
-        return 'Provide your email address to receive a verification code and update your password.';
+        return 'Provide your username or email to get a verification code';
       case 2:
         return getOtpMessage($formData);
       case 3:
@@ -310,32 +326,14 @@
     }
   };
 
-  const isIdentRegistered = async (): Promise<boolean> => {
-    isLoading = true;
-
-    identifier = $formData.ident;
-    if (!identifier) return false;
-    identType = determineIdentifierType(identifier);
-
-    try {
-      const response = await myUserContext.isUserIdentAvailable(identifier, identType);
-
-      if (response.error) {
-        updateFormErrors('ident', response.error);
-        return false;
-      }
-
-      if (response.isAvailable) {
-        return false;
-      } else {
-        return true;
-      }
-    } catch (error) {
-      console.error('Error checking identifier availability:', error);
-      updateFormErrors('ident', translate(AppUiMessage.systemError));
-      return false;
-    } finally {
-      isLoading = false;
+  const getCurrentStepButtonLabel = () => {
+    switch (step) {
+      case 1:
+        return 'Send me an email';
+      case 2:
+        return 'Verify my email';
+      case 3:
+        return 'Update my password';
     }
   };
 
@@ -361,9 +359,17 @@
   });
 
   onDestroy(() => {
-    clearInterval(timerInterval);
-    if (otpHandler) otpHandler.removeListener();
-  });
+  clearInterval(timerInterval);
+  
+  if (debounceTimer) {
+    clearTimeout(debounceTimer);
+    debounceTimer = null;
+  }
+  
+  if (otpHandler) {
+    otpHandler.removeListener();
+  }
+});
 </script>
 
 <form method="POST" id="reset-password-form" use:enhance>
@@ -375,12 +381,7 @@
           fieldName="ident"
           placeholder="Enter your username or email"
           label="Username or email"
-        />
-        <FormButton
-          disabled={$delayed || isLoading || hasStepError}
-          loading={$delayed || isLoading}
-          buttonText="Send me an email"
-          loadingText="Drafting email..."
+          {isLoading}
         />
       {:else if step == 2}
         <OtpFormInput
@@ -393,12 +394,6 @@
           {resendTimer}
           onResendClick={handleResendToken}
         />
-        <FormButton
-          disabled={$delayed || isLoading || hasStepError}
-          loading={$delayed || isLoading}
-          buttonText="Verify my email"
-          loadingText="Verifiying email..."
-        />
       {:else if step == 3}
         <PasswordFormInput
           {form}
@@ -406,13 +401,17 @@
           label="New password"
           placeholder="Your password must be at least 8 characters"
         />
-        <FormButton
-          disabled={$delayed || isLoading || hasStepError}
-          loading={$delayed || isLoading}
-          buttonText="Update my password"
-          loadingText="Updating password..."
-        />
       {/if}
+      <FormButton
+        disabled={$delayed || isLoading || hasStepError}
+        loading={$delayed || isLoading}
+        buttonText={getCurrentStepButtonLabel()}
+        loadingText="Processing..."
+      />
+    </div>
+    <div class="mt-4 text-center text-sm">
+      Don't have an account?
+      <a href="/signup" class="underline"> Sign up </a>
     </div>
   </AuthCard>
 

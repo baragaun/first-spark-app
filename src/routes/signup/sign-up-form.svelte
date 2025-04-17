@@ -8,7 +8,7 @@
   import { MsaListenerHandler } from '@/contexts/msa-listener-handler.svelte';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import translate from '@/helpers/language/translate';
-  import { AppUiMessage, MsaTokenStatus } from '@/types/enums';
+  import { AppUiMessage } from '@/types/enums';
   import { UserIdentType } from '@baragaun/bg-node-client';
   import { onDestroy } from 'svelte';
   import SuperDebug, { superForm, type SuperValidated } from 'sveltekit-superforms';
@@ -49,21 +49,19 @@
 
   let step = $state(1);
   let isLoading = $state(false);
-  let hasStepError = $state(true); // Start with a disabled state
-  let errorMessage = $state('');
+  let hasStepError = $state(false);
 
   let canResend = $state(false);
   let resendTimer = $state(30);
   let otpHandler: MsaListenerHandler | undefined = $state(undefined);
   let msaId = $state<string | undefined>(undefined);
-  let msaStatus = $state(MsaTokenStatus.unset);
 
   let identifier = $state('');
   let identType = $state(UserIdentType.email);
 
   let timerInterval: ReturnType<typeof setInterval>;
   let debounceTimer: number | null = null;
-  const DEBOUNCE_DELAY = 350; // ms
+  const DEBOUNCE_DELAY = 500; // ms
   const RESEND_TIMER_DURATION = 30; // s
 
   const getCurrentValidator = () => steps[step - 1].schema;
@@ -259,10 +257,9 @@
       );
     } catch (error) {
       console.error('SignUpForm.registerNewEmail:', { error });
-      msaStatus = MsaTokenStatus.verificationFailed;
       updateFormErrors('email', translate(AppUiMessage.systemError));
     } finally {
-      // isLoading = false;  // Leave the button in a processing state until sent event
+      isLoading = true;  // Leave the button in a processing state until sent event
     }
   };
 
@@ -274,7 +271,6 @@
         return;
       }
 
-      updateFormErrors('token', '');
       isLoading = true;
 
       const response = await myUserContext.verifyMultiStepActionToken(msaId, $formData.token);
@@ -282,11 +278,8 @@
       if (response !== true) {
         console.error('SignUpForm.handleVerifyOtp: invalid response:', { result: response });
         updateFormErrors('token', translate(AppUiMessage.systemError));
-        msaStatus = MsaTokenStatus.unset;
         return;
       }
-
-      msaStatus = MsaTokenStatus.sending;
 
       try {
         await getSuggestedUsername();
@@ -297,15 +290,12 @@
     } catch (error) {
       console.error('SignUpForm.handleVerifyOtp: error:', { error });
       updateFormErrors('token', translate(AppUiMessage.systemError));
-      msaStatus = MsaTokenStatus.unset;
     } finally {
-      // isLoading = false;  // Leave the button in a processing state until success event
+      isLoading = true;  // Leave the button in a processing state until success event
     }
   };
 
   const resendToken = async () => {
-    msaStatus = MsaTokenStatus.unset;
-
     if (!msaId) {
       console.error('SignUpForm.handleResendOtp: actionId missing.');
       updateFormErrors('token', translate(AppUiMessage.systemError));
@@ -323,7 +313,6 @@
         return;
       }
 
-      msaStatus = MsaTokenStatus.sending;
       startResendTimer();
     } catch (error) {
       console.error('SignUpForm.resendToken: error:', { error });
@@ -354,8 +343,6 @@
 
   const createCredentials = async () => {
     isLoading = true;
-    // Clear any remaining token errors
-    updateFormErrors('token', '');
 
     if (!$formData.password) return;
 
@@ -366,7 +353,6 @@
       });
 
       if (error) {
-        errorMessage = error;
         updateFormErrors('password', error);
         return;
       }
@@ -402,9 +388,17 @@
   });
 
   onDestroy(() => {
-    clearInterval(timerInterval);
-    if (otpHandler) otpHandler.removeListener();
-  });
+  clearInterval(timerInterval);
+  
+  if (debounceTimer) {
+    clearTimeout(debounceTimer);
+    debounceTimer = null;
+  }
+  
+  if (otpHandler) {
+    otpHandler.removeListener();
+  }
+});
 </script>
 
 <form method="POST" id="sign-up-form" use:enhance>
