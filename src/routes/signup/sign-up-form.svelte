@@ -336,11 +336,6 @@
   const getSuggestedUsername = async () => {
     if (!$formData.email) return;
 
-    if (myUserContext.myUserHandle) {
-      $formData.username = myUserContext.myUserHandle;
-      return;
-    }
-
     try {
       isLoading = true;
       const result = await myUserContext.findAvailableUserHandle($formData.email);
