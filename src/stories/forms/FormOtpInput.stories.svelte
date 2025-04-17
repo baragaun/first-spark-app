@@ -10,7 +10,7 @@
       subscribe,
       set,
       update,
-      clear: () => set({})
+      clear: () => set({}),
     };
   }
 
@@ -22,7 +22,7 @@
     errors: {},
     data: { token: '' },
     constraints: {},
-    message: ''
+    message: '',
   };
 
   const { Story } = defineMeta({
@@ -32,7 +32,7 @@
       layout: 'centered',
     },
     argTypes: {
-      form  : {
+      form: {
         control: { type: 'object' },
         description: 'The form object',
       },
@@ -54,10 +54,8 @@
           run({ token: '123456' }); // token field value
           return function unsubscribe() {};
         },
-        set: function (value, options) {
-        },
-        update: function (updater, options) {
-        }
+        set: function (value, options) {},
+        update: function (updater, options) {},
       },
       errors: createMockErrorsStore(),
       constraints: writable({}),
@@ -72,16 +70,14 @@
       options: mockOptions,
       enhance: function (_el, _events) {
         return {
-          destroy: () => {}
+          destroy: () => {},
         };
       },
       isTainted: function (path) {
         return false; // Return a boolean value instead of throwing an error
       },
-      reset: function (options) {
-      },
-      submit: function (submitter) {
-      },
+      reset: function (options) {},
+      submit: function (submitter) {},
       capture: function () {
         throw new Error('Function not implemented.');
       },
@@ -93,7 +89,7 @@
       },
       validateForm: function (opts) {
         throw new Error('Function not implemented.');
-      }
+      },
     },
     fieldName: 'token',
   }}

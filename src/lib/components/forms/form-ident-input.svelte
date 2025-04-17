@@ -18,7 +18,7 @@
     disabled = false,
     identType = UserIdentType.email,
     isLoading = false,
-    generateUsername = undefined,
+    suggestUsername = undefined,
   } = $props<{
     form: SuperForm<T>;
     fieldName?: FormPathLeaves<T>;
@@ -27,7 +27,7 @@
     disabled?: boolean;
     identType?: UserIdentType;
     isLoading?: boolean;
-    generateUsername?: () => Promise<void>;
+    suggestUsername?: () => Promise<void>;
   }>();
 
   const { form: formData, errors } = form;
@@ -43,7 +43,7 @@
             <Form.Label>{label}</Form.Label>
           </div>
 
-          {#if isUserHandle && generateUsername && $errors[fieldName]}
+          {#if isUserHandle && suggestUsername && $errors[fieldName]}
             <button
               type="button"
               class={cn(
@@ -52,7 +52,7 @@
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                 'disabled:pointer-events-none disabled:opacity-50',
               )}
-              onclick={() => generateUsername()}
+              onclick={() => suggestUsername()}
             >
               <RefreshCw class={cn('mr-1 h-3 w-3', isLoading && 'animate-spin')} />
               {isLoading ? 'Generating...' : 'Suggest new'}

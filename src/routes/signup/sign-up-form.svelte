@@ -336,16 +336,13 @@
   const getSuggestedUsername = async () => {
     if (!$formData.email) return;
 
-    if (myUserContext.myUserHandle) {
-      $formData.username = myUserContext.myUserHandle;
-      return;
-    }
-
     try {
       isLoading = true;
       const result = await myUserContext.findAvailableUserHandle($formData.email);
 
-      if (typeof result === 'string') {
+      if (result && typeof result === 'object' && 'object' in result) {
+        $formData.username = result.object ?? '';
+      } else if (typeof result === 'string') {
         $formData.username = result;
       }
     } catch (error) {
@@ -439,7 +436,7 @@
           placeholder="e.g. 'giraffe08'"
           label="Username"
           {identType}
-          generateUsername={getSuggestedUsername}
+          suggestUsername={getSuggestedUsername}
           {isLoading}
         />
         <PasswordFormInput

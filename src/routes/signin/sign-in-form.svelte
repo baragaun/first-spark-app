@@ -126,7 +126,7 @@
       };
       return newErrors;
     });
-  }
+  };
 
   const toggleAuthType = async () => {
     // 1. Remove an existing listener that hasn't failed yet
