@@ -1,9 +1,8 @@
 import { zod } from 'sveltekit-superforms/adapters';
 import { superValidate } from 'sveltekit-superforms/server';
 
-import { signInFormSchema } from './schema.js';
+import { schemaLastStep } from './schema';
 
 export const load = async () => {
-  const form = await superValidate(zod(signInFormSchema));
-  return { form };
+  return { form: await superValidate(zod(schemaLastStep)) };
 };
