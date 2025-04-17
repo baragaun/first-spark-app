@@ -316,12 +316,12 @@
   };
   onDestroy(() => {
     clearInterval(timerInterval);
-    
+
     if (debounceTimer) {
       clearTimeout(debounceTimer);
       debounceTimer = null;
     }
-    
+
     if (otpHandler) {
       otpHandler.removeListener();
     }

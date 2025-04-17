@@ -259,7 +259,7 @@
       console.error('SignUpForm.registerNewEmail:', { error });
       updateFormErrors('email', translate(AppUiMessage.systemError));
     } finally {
-      isLoading = true;  // Leave the button in a processing state until sent event
+      isLoading = true; // Leave the button in a processing state until sent event
     }
   };
 
@@ -291,7 +291,7 @@
       console.error('SignUpForm.handleVerifyOtp: error:', { error });
       updateFormErrors('token', translate(AppUiMessage.systemError));
     } finally {
-      isLoading = true;  // Leave the button in a processing state until success event
+      isLoading = true; // Leave the button in a processing state until success event
     }
   };
 
@@ -388,17 +388,17 @@
   });
 
   onDestroy(() => {
-  clearInterval(timerInterval);
-  
-  if (debounceTimer) {
-    clearTimeout(debounceTimer);
-    debounceTimer = null;
-  }
-  
-  if (otpHandler) {
-    otpHandler.removeListener();
-  }
-});
+    clearInterval(timerInterval);
+
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+      debounceTimer = null;
+    }
+
+    if (otpHandler) {
+      otpHandler.removeListener();
+    }
+  });
 </script>
 
 <form method="POST" id="sign-up-form" use:enhance>

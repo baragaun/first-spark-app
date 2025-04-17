@@ -309,7 +309,10 @@
       return await goto('/');
     } catch (err) {
       console.error('Error verifying reset code:', err);
-      updateFormErrors('newPassword', err instanceof Error ? err.message : 'Failed to verify code. Please try again.');
+      updateFormErrors(
+        'newPassword',
+        err instanceof Error ? err.message : 'Failed to verify code. Please try again.',
+      );
     } finally {
       isLoading = false;
     }
@@ -359,17 +362,17 @@
   });
 
   onDestroy(() => {
-  clearInterval(timerInterval);
-  
-  if (debounceTimer) {
-    clearTimeout(debounceTimer);
-    debounceTimer = null;
-  }
-  
-  if (otpHandler) {
-    otpHandler.removeListener();
-  }
-});
+    clearInterval(timerInterval);
+
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+      debounceTimer = null;
+    }
+
+    if (otpHandler) {
+      otpHandler.removeListener();
+    }
+  });
 </script>
 
 <form method="POST" id="reset-password-form" use:enhance>
