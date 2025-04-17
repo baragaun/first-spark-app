@@ -52,7 +52,7 @@ export class MsaListenerHandler {
           if (eventType === MultiStepActionEventType.notificationFailed) {
             // The notification failed to go out.
             if (import.meta.env.VITE_APP_ENVIRONMENT === 'development') {
-              errorMessage = "Notification failed, but you're in development.";
+              errorMessage = 'Notification failed, but you\'re in development.';
 
               // Advance, ignoring the failure to send in development
               if (this.onNotificationSent) this.onNotificationSent();

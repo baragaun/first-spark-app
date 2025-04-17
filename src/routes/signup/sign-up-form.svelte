@@ -32,7 +32,7 @@
     },
     {
       schema: zod(schemaSecondStep),
-      description: `Enter the verification code we sent to {email}.`,
+      description: 'Enter the verification code we sent to {email}.',
       buttonLabel: 'Submit',
     },
     {
