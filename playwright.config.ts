@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   webServer: {
-    command: 'pnpm run dev', // Start the SvelteKit dev server
+    command: 'VITE_E2E_TESTING=true pnpm run dev', // Set env var for E2E testing
     port: 5173, // Ensure this matches your app's port
     reuseExistingServer: !process.env.CI,
   },

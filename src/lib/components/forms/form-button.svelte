@@ -36,6 +36,7 @@
 {/snippet}
 
 <Form.Button
+  id="form-button"
   {variant}
   {disabled}
   {type}
