@@ -385,6 +385,7 @@
   onSave={handleFormSubmit}
   onCancel={resetDialogState}
   showCancel={step !== 2}
+  showActionButton={step !== 3}
   cancelButtonlabel={step === 3 ? 'Close' : 'Cancel'}
   actionButtonlabel={step === 2 ? 'Verify my email' : 'Save changes'}
   bind:showDialog

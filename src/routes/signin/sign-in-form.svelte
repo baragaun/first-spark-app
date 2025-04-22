@@ -358,10 +358,6 @@
           : `Enter your password to sign in as ${identifier}`;
     }
   };
-
-  const handleRedirectToSignup = () => {
-    goto('/signup');
-  };
 </script>
 
 <form method="POST" id="sign-in-form" use:enhance>

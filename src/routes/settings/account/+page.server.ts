@@ -2,9 +2,9 @@ import { myUserContext } from '@/contexts/my-user-context.svelte';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import {
+  changeEmailschemaLastStep,
   deleteAccountSchema,
   passwordSchema,
-  changeEmailschemaLastStep,
   usernameSchema,
 } from './schema';
 

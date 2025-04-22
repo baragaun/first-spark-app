@@ -7,11 +7,9 @@ const currentPasswordSchema = z
   })
   .transform((val) => val.trim());
 
-export const emailSchema = z
-  .string()
-  .email({
-    message: 'Please enter a valid email address.',
-  });
+export const emailSchema = z.string().email({
+  message: 'Please enter a valid email address.',
+});
 
 // Username schema
 export const usernameSchema = z.object({
@@ -24,7 +22,6 @@ const otpSchema = z
     message: 'Your one-time password must be at least 6 characters.',
   })
   .transform((val) => val.trim());
-
 
 export const changeEmailschemaFirstStep = z.object({
   email: emailSchema,
@@ -41,12 +38,10 @@ export const passwordSchema = z.object({
   newPassword: z.string().min(8, 'Password must be at least 8 characters long.'),
 });
 
-
 // Delete account schema
 export const deleteAccountSchema = z.object({
   confirmEmail: z.string().email('Please enter a valid email address'),
 });
-
 
 export type UpdateEmailFormSchema = z.infer<typeof changeEmailschemaLastStep>;
 export type UsernameSchema = z.infer<typeof usernameSchema>;

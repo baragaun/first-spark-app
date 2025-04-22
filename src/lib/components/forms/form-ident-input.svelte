@@ -36,7 +36,7 @@
 
   onMount(() => {
     if (isUserHandle && !$formData[fieldName]) {
-      generateUsername();
+      suggestUsername();
     }
   });
 </script>

@@ -238,7 +238,7 @@
       placeholder="e.g. 'giraffe08'"
       label="Username"
       {identType}
-      generateUsername={getSuggestedUsername}
+      suggestUsername={getSuggestedUsername}
       {isLoading}
     />
   </div></UpdateDialog

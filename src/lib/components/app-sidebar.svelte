@@ -4,10 +4,11 @@
   import Settings from 'lucide-svelte/icons/settings';
   import BookUser from 'lucide-svelte/icons/book-user';
   import MessageSquare from 'lucide-svelte/icons/message-square';
+  import Settings from 'lucide-svelte/icons/settings';
 
   import { m } from '$lib/paraglide/messages';
 
-  const items = [
+  const allItems = [
     {
       title: m['sidebar.menu.home'](),
       url: '/',
