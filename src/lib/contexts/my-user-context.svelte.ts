@@ -27,7 +27,9 @@ export class MyUserContext {
   private client: BgNodeClient = new BgNodeClient();
   private _isInitializing = false;
 
-  public async initialize(): Promise<void> {
+  public async initialize({ enableMockMode = false } = {}): Promise<void> {
+    console.log('MyUserContext.initialize called.');
+
     if (this.client.isInitialized || this._isInitializing) {
       console.warn('MyUserContext.initialize: already initialized.');
       return;
@@ -37,6 +39,7 @@ export class MyUserContext {
 
     const config: BgNodeClientConfig = {
       inBrowser: true,
+      enableMockMode,
       fsdata: {
         url: import.meta.env.VITE_FSDATA_URL || 'http://localhost:8092/fsdata/api/graphql',
         headers: {
