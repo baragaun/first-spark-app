@@ -14,11 +14,13 @@
   let { data }: { data: PageData } = $props();
 
   let isLoading = $state(false);
-
   let currentUsername = $state('');
   let currentEmail = $state('');
 
-  // Subscribe to the myUser store
+  onMount(() => {
+    updateUserData();
+  });
+
   $effect(() => {
     if (myUser) {
       console.log('myUser', myUser);
@@ -39,27 +41,10 @@
     currentEmail = data.email || myUserContext.myEmail || myUser?.email || '';
   }
 
-  onMount(() => {
-    updateUserData();
-  });
-
-  const handleUsernameEmailChange = async () => {
-    try {
-      isLoading = true;
-      updateUserData();
-      return true;
-    } catch (error) {
-      console.error('Error updating username:', error);
-      return false;
-    } finally {
-      isLoading = false;
-    }
-  };
-
+  //TODO: dummy implementation
   const handleAccountDeletion = async () => {
     try {
       isLoading = true;
-      // Call the API to delete the account
       await new Promise((resolve) => setTimeout(resolve, 500));
       goto('/signup');
       return true;
@@ -75,22 +60,9 @@
 <div>
   <h4 class="font-lexend mb-4 px-4 text-lg font-bold">General</h4>
   <div class="space-y-4 px-4">
-    <UpdateUsernameDialog
-      {currentUsername}
-      {currentEmail}
-      usernameForm={data.usernameForm}
-      onSave={async () => {
-        await handleUsernameEmailChange();
-      }}
-    />
+    <UpdateUsernameDialog {currentUsername} {currentEmail} usernameForm={data.usernameForm} />
 
-    <UpdateEmailDialog
-      {currentEmail}
-      emailForm={data.emailForm}
-      onSave={async (newEmail) => {
-        await handleUsernameEmailChange();
-      }}
-    />
+    <UpdateEmailDialog {currentEmail} emailForm={data.emailForm} />
 
     <UpdatePasswordDialog passwordForm={data.passwordForm} />
   </div>

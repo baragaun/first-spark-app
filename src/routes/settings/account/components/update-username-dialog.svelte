@@ -1,98 +1,174 @@
 <script lang="ts">
-  import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
-  import * as Dialog from '$lib/components/ui/dialog';
+  import IdentFormInput from '@/components/forms/form-ident-input.svelte';
   import { ChevronRight } from 'lucide-svelte';
-  import { UsernameInput } from '$lib/components/ui/username-input';
-  import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
-  import { zodClient } from 'sveltekit-superforms/adapters';
-  import { usernameSchema } from '../../../../routes/settings/account/account-settings-schema';
-  import { UserIdentType } from '@baragaun/bg-node-client';
+
   import { myUserContext } from '@/contexts/my-user-context.svelte';
-  import ErrorAlert from '@/components/error-alert.svelte';
+  import translate from '@/helpers/language/translate';
+  import { AppUiMessage } from '@/types/enums';
+  import { UserIdentType } from '@baragaun/bg-node-client';
+  import { superForm, type SuperValidated } from 'sveltekit-superforms';
+  import { zod } from 'sveltekit-superforms/adapters';
+  import UpdateDialog from './update-dialog-template.svelte';
+  import { usernameSchema, type UsernameSchema } from '../schema';
 
   interface UpdateUsernameDialogProps {
     currentUsername: string;
     currentEmail: string;
-    onSave: () => Promise<void>;
-    usernameForm: SuperValidated<Infer<typeof usernameSchema>>;
+    usernameForm: SuperValidated<UsernameSchema>;
   }
 
-  let { currentUsername, onSave, currentEmail, usernameForm }: UpdateUsernameDialogProps = $props();
+  let { currentUsername, currentEmail, usernameForm }: UpdateUsernameDialogProps = $props();
 
   const form = superForm(usernameForm, {
-    validators: zodClient(usernameSchema),
-    validationMethod: 'oninput',
+    validators: zod(usernameSchema),
+    resetForm: true,
     dataType: 'json',
+    validationMethod: 'submit-only',
+    async onChange() {
+      debounceFormValidation();
+    },
+    async onSubmit({ cancel }) {
+      cancel(); // Avoid the server-side form action
+      await saveUsername();
+      resetDialogState();
+    },
   });
 
-  const { form: formData, errors } = form;
+  const { form: formData, errors, validateForm } = form;
+
+  let isInvalidFormOrUsernameUnavailable = $state(false);
+  let debounceTimer: number | null = null;
+  const DEBOUNCE_DELAY = 350; // ms
 
   let isLoading = $state(false);
   let showUsernameEdit = $state(false);
-  let isUsernameAvailable = $state<boolean | null>(null);
-  let errorMessage = $state('');
+  let identType = $state(UserIdentType.userHandle);
 
   let hasFormValues = $derived(
     $formData.username &&
       !$errors.username &&
-      isUsernameAvailable &&
+      !isInvalidFormOrUsernameUnavailable &&
       $formData.username !== currentUsername,
   );
 
-  const getSuggestedHandle = async (): Promise<string> => {
+  const updateFormErrors = (field: keyof UsernameSchema, message: string) => {
+    errors.update((errors) => {
+      const newErrors = {
+        ...errors,
+        [field]: [message],
+      };
+      return newErrors;
+    });
+  };
+
+  const debounceFormValidation = async () => {
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
+
+    if (!$formData.username) return;
+
+    debounceTimer = window.setTimeout(async () => {
+      try {
+        // Validate the username
+        isLoading = true;
+        const result = await validateForm({ update: true, focusOnError: false });
+
+        const availability = await checkUsernameAvailability();
+        isInvalidFormOrUsernameUnavailable = !availability || !result.valid;
+      } catch (error) {
+        console.error('Error debouncing the form input:', error);
+      } finally {
+        isLoading = false;
+        debounceTimer = null;
+      }
+    }, DEBOUNCE_DELAY);
+  };
+
+  const checkUsernameAvailability = async (): Promise<boolean> => {
+    isLoading = true;
+
+    if ($formData.username === myUserContext.myUserHandle) {
+      return true;
+    }
+
+    const validationResult = usernameSchema.safeParse($formData);
+    if (!validationResult.success) {
+      return false;
+    }
+
+    const fieldName = 'username';
+    const message = `This ${fieldName} is currently unavailable for use.`;
+
     try {
-      const result = await myUserContext.findAvailableUserHandle(currentEmail);
+      const response = await myUserContext.isUserIdentAvailable($formData.username, identType);
+      console.log('checkIdentAvailability: response:', { response });
 
-      if (result && typeof result === 'object' && 'object' in result) {
-        isUsernameAvailable = true;
-        return result.object ?? '';
+      if (response.error) {
+        updateFormErrors('username', response.error);
+        return false;
       }
 
-      if (typeof result === 'string') {
-        isUsernameAvailable = true;
-        return result;
+      if (!response.isAvailable) {
+        updateFormErrors(fieldName, message);
+        return false;
       }
-      return '';
+
+      return response.isAvailable;
     } catch (error) {
-      console.error('Error getting suggested handle:', error);
-      isUsernameAvailable = false;
-      return '';
+      console.error('UpdateEmailDialog.checkIdentAvailability:', { error });
+      updateFormErrors(fieldName, translate(AppUiMessage.systemError));
+      return false;
+    } finally {
+      isLoading = false;
     }
   };
 
-  const checkUsernameAvailability = async (ident: string, type: UserIdentType): Promise<void> => {
+  const getSuggestedUsername = async () => {
     try {
-      const result = await myUserContext.isUserIdentAvailable(ident, type);
-      isUsernameAvailable = result.isAvailable ?? false;
-      return;
+      isLoading = true;
+      const result = await myUserContext.findAvailableUserHandle(currentEmail);
+      if (result && typeof result === 'object' && 'object' in result) {
+        $formData.username = result.object ?? '';
+      } else if (typeof result === 'string') {
+        $formData.username = result;
+      }
     } catch (error) {
-      console.error('Error checking identifier availability:', error);
-      isUsernameAvailable = false;
+      console.error('Error getting suggested handle:', error);
+      updateFormErrors(
+        'username',
+        error instanceof Error ? error.message : 'Failed to find handle',
+      );
+    } finally {
+      isLoading = false;
     }
   };
 
   const handleUsernameChange = async (): Promise<boolean> => {
-    errorMessage = '';
     try {
       const result = await myUserContext.updateMyUser({
         userHandle: $formData.username,
       });
 
       if (result.error) {
-        errorMessage = result.error;
+        updateFormErrors('username', result.error);
+
         return false;
       }
       return true;
     } catch (error) {
-      errorMessage = error instanceof Error ? error.message : 'Failed to update username';
+      updateFormErrors(
+        'username',
+        error instanceof Error ? error.message : 'Failed to find handle',
+      );
+
       console.error('Error updating username:', error);
       return false;
     }
   };
 
   function resetDialogState() {
-    errorMessage = '';
     form.reset();
   }
 
@@ -101,15 +177,24 @@
       isLoading = true;
       const success = await handleUsernameChange();
       if (success) {
-        if (typeof onSave === 'function') {
-          await onSave();
-        }
         showUsernameEdit = false;
       }
     } finally {
       isLoading = false;
     }
   };
+
+  $effect(() => {
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+      debounceTimer = null;
+    }
+
+    if (!$formData) {
+      isLoading = false;
+      return;
+    }
+  });
 </script>
 
 <button
@@ -129,62 +214,32 @@
   </div>
 </button>
 
-<Dialog.Root
-  open={showUsernameEdit}
-  onOpenChange={(open: boolean) => {
-    showUsernameEdit = open;
-    if (!open) resetDialogState();
-  }}
+<UpdateDialog
+  title="Change Username"
+  description="Enter a new username for your account or use our suggestion."
+  {form}
+  shouldEnableSave={hasFormValues}
+  {isLoading}
+  errorMessage=""
+  onSave={saveUsername}
+  onCancel={resetDialogState}
+  bind:showDialog={showUsernameEdit}
 >
-  <Dialog.Content class="sm:max-w-[425px]">
-    <Dialog.Header class="space-y-2">
-      <Dialog.Title class="text-lg font-semibold">Change Username</Dialog.Title>
-      <Dialog.Description class="text-sm text-muted-foreground">
-        Enter a new username for your account or use our suggestion.
-      </Dialog.Description>
-    </Dialog.Header>
-
-    <form method="POST" class="grid gap-4 py-4">
-      <div class="space-y-2">
-        <label for="current-username" class="text-sm font-medium leading-none">
-          Current Username
-        </label>
-        <Input id="current-username" value={currentUsername} disabled class="bg-muted" />
-      </div>
-
-      <UsernameInput
-        {form}
-        {currentUsername}
-        checkAvailability={checkUsernameAvailability}
-        generateUsername={getSuggestedHandle}
-        {isUsernameAvailable}
-      />
-    </form>
-
-    <Dialog.Footer class="flex justify-end gap-2">
-      <Button
-        variant="outline"
-        disabled={isLoading}
-        onclick={() => {
-          showUsernameEdit = false;
-          resetDialogState();
-        }}
-      >
-        Cancel
-      </Button>
-      <Button
-        type="submit"
-        disabled={isLoading || !hasFormValues}
-        onclick={() => {
-          saveUsername();
-          resetDialogState();
-        }}
-      >
-        {isLoading ? 'Saving...' : 'Save Changes'}
-      </Button>
-    </Dialog.Footer>
-    {#if errorMessage}
-      <ErrorAlert bind:errorMessage />
-    {/if}
-  </Dialog.Content>
-</Dialog.Root>
+  <div class="space-y-4">
+    <div class="space-y-2">
+      <label for="current-username" class="text-sm font-medium leading-none">
+        Current Username
+      </label>
+      <Input id="current-username" value={currentUsername} disabled class="bg-muted" />
+    </div>
+    <IdentFormInput
+      {form}
+      fieldName="username"
+      placeholder="e.g. 'giraffe08'"
+      label="Username"
+      {identType}
+      generateUsername={getSuggestedUsername}
+      {isLoading}
+    />
+  </div></UpdateDialog
+>

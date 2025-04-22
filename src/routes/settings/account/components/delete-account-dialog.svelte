@@ -8,7 +8,7 @@
   import { AlertTriangle, ChevronRight } from 'lucide-svelte';
   import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
   import { zodClient } from 'sveltekit-superforms/adapters';
-  import { deleteAccountSchema } from '../account-settings-schema';
+  import { deleteAccountSchema } from '../schema';
 
   interface DeleteAccountProps {
     currentEmail: string;
