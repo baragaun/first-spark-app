@@ -39,8 +39,11 @@
 <script lang="ts">
   import { page } from '$app/state';
   import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-  import { isSignedIn } from '@/contexts/my-user-context.svelte';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
   import type { ComponentProps } from 'svelte';
+
+  const isSignedIn = $derived(myUserContext.isSignedIn);
+
   function isItemActive(itemUrl: string, currentPath: string): boolean {
     if (itemUrl === '/') {
       return currentPath === '/';
@@ -54,7 +57,7 @@
     ...restProps
   }: ComponentProps<typeof Sidebar.Root> = $props();
   // Using $derived rune for reactive computation
-  let items = $derived(allItems.filter((item) => !item.requiresAuth || $isSignedIn));
+  let items = $derived(allItems.filter((item) => !item.requiresAuth || isSignedIn));
 </script>
 
 <Sidebar.Root bind:ref {collapsible} {...restProps}>

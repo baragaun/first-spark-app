@@ -1,7 +1,9 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { isSignedIn } from '@/contexts/my-user-context.svelte';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { onMount } from 'svelte';
+
+  const isSignedIn = $derived(myUserContext.isSignedIn);
 
   onMount(() => {
     if (!isSignedIn) {

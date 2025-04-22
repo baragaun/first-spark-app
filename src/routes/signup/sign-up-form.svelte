@@ -53,7 +53,6 @@
   let step = $state(1);
   let isLoading = $state(false);
   let hasStepError = $state(true); // Start with a disabled state
-  let errorMessage = $state('');
 
   let canResend = $state(false);
   let resendTimer = $state(30);
@@ -397,7 +396,6 @@
       });
 
       if (error) {
-        errorMessage = error;
         updateFormErrors('password', error);
         return;
       }

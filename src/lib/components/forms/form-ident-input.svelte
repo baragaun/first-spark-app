@@ -8,6 +8,7 @@
   import { cn } from '@/utils';
   import { UserIdentType } from '@baragaun/bg-node-client';
   import { AlertCircle, Check, RefreshCw } from 'lucide-svelte';
+  import { onMount } from 'svelte';
   import type { FormPathLeaves, SuperForm } from 'sveltekit-superforms';
 
   let {
@@ -32,6 +33,12 @@
 
   const { form: formData, errors } = form;
   const isUserHandle = $derived(identType === UserIdentType.userHandle);
+
+  onMount(() => {
+    if (isUserHandle && !$formData[fieldName]) {
+      generateUsername();
+    }
+  });
 </script>
 
 <Form.Field {form} name={fieldName}>

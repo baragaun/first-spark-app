@@ -420,7 +420,7 @@ export class MyUserContext {
     }
 
     try {
-      isLoading.set(true);
+      isLoading = true;
       return await this.client.operations.myUser.verifyMyPassword(password);
     } catch (error) {
       console.error('MyUserContext.verifyMyPassword: error', {
@@ -430,26 +430,6 @@ export class MyUserContext {
       return { error: translate((error as Error).message, AppUiMessage.systemError) };
     } finally {
       isLoading = false;
-    }
-  }
-
-  async verifyMyPassword(password: string): Promise<QueryResult<boolean>> {
-    if (!this.client.isInitialized) {
-      console.error('MyUserContext.verifyMyPassword: not initialized.');
-      return { error: translate(AppUiMessage.systemError) };
-    }
-
-    try {
-      this.setLoading(true);
-      return await this.client.operations.myUser.verifyMyPassword(password);
-    } catch (error) {
-      console.error('MyUserContext.verifyMyPassword: error', {
-        error: (error as Error).message,
-        stack: (error as Error).stack,
-      });
-      return { error: translate((error as Error).message, AppUiMessage.systemError) };
-    } finally {
-      this.setLoading(false);
     }
   }
 

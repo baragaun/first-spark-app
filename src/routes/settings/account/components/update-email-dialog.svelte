@@ -1,161 +1,170 @@
 <script lang="ts">
-  import { Button } from '$lib/components/ui/button';
-  import * as Dialog from '$lib/components/ui/dialog';
-  import ErrorAlert from '@/components/error-alert.svelte';
-  import TokenForm from '@/components/token-form.svelte';
+  import IdentFormInput from '@/components/forms/form-ident-input.svelte';
+  import OTPFormInput from '@/components/forms/form-otp-input.svelte';
+  import PasswordFormInput from '@/components/forms/form-password-input.svelte';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
-  import { AppUiMessage } from '@/types/enums';
-  import {
-    MultiStepActionEventType,
-    type SidMultiStepActionProgress,
-  } from '@baragaun/bg-node-client';
+  import { AppUiMessage, MsaTokenStatus } from '@/types/enums';
   import { ChevronRight } from 'lucide-svelte';
-  import { type Infer, type SuperValidated } from 'sveltekit-superforms';
-  import { emailSchema } from '../account-settings-schema';
-  import UpdateEmailForm from './update-email-form.svelte';
+  import { superForm, type SuperValidated } from 'sveltekit-superforms';
+  import {
+    changeEmailschemaFirstStep,
+    changeEmailschemaLastStep,
+    type UpdateEmailFormSchema,
+  } from '../schema';
+
+  import { MsaListenerHandler } from '@/contexts/msa-listener-handler.svelte';
+  import translate from '@/helpers/language/translate';
+  import { UserIdentType } from '@baragaun/bg-node-client';
+  import { onDestroy } from 'svelte';
+  import { zod } from 'sveltekit-superforms/adapters';
+  import UpdateDialog from './update-dialog-template.svelte';
 
   interface EmailInputProps {
     currentEmail: string;
-    onSave: (newEmail: string) => Promise<void>;
-    emailForm: SuperValidated<Infer<typeof emailSchema>>;
+    emailForm: SuperValidated<UpdateEmailFormSchema>;
   }
+  let { currentEmail, emailForm }: EmailInputProps = $props();
 
-  let { currentEmail, onSave, emailForm }: EmailInputProps = $props();
-
-  const STEPS = {
-    EMAIL_FORM: 0,
-    VERIFICATION: 1,
-    CONFIRMATION: 2,
-  };
-
+  let step = $state(1);
   let isLoading = $state(false);
-  let showEmailEdit = $state(false);
+  let hasStepError = $state(false); // Start with a disabled state
+  let canResend = $state(false);
+  let resendTimer = $state(30);
+  let otpHandler: MsaListenerHandler | undefined = $state(undefined);
+  let msaId = $state<string | undefined>(undefined);
+  let msaStatus = $state(MsaTokenStatus.unset);
+  let timerInterval: ReturnType<typeof setInterval>;
+  let debounceTimer: number | null = null;
+  let showDialog = $state(false);
   let errorMessage = $state('');
   let isPasswordValid = $state(false);
   let mfaActionId: string | undefined;
-  let currentStep = $state(STEPS.EMAIL_FORM);
+  const RESEND_TIMER_DURATION = 30; // s
+  const DEBOUNCE_DELAY = 1000;
+  const tokenFieldName = 'token';
+  const emailFieldName = 'email';
+  const passwordFieldName = 'currentPassword';
 
-  // Reset dialog state when closed
-  function resetDialogState() {
-    currentStep = STEPS.EMAIL_FORM;
-    isLoading = false;
-    errorMessage = '';
-    isPasswordValid = false;
-    mfaActionId = undefined;
-    emailForm.data.email = '';
-    emailForm.data.currentPassword = '';
-  }
+  const steps = [zod(changeEmailschemaFirstStep), zod(changeEmailschemaLastStep)];
+  const getCurrentValidator = () => steps[step - 1];
 
-  // Handle email change
-  const handleEmailChange = async (email: string, password: string) => {
+  const form = superForm(emailForm, {
+    dataType: 'json',
+    validators: getCurrentValidator(),
+    resetForm: false,
+    validationMethod: 'oninput',
+    async onChange() {
+      if (step === 1) {
+        await debounceFormValidation();
+      }
+    },
+    async onSubmit({ cancel }) {
+      cancel();
+      await handleFormSubmit();
+    },
+  });
+
+  const { form: formData, errors, enhance, delayed, options, validateForm } = form;
+
+  const updateFormErrors = (field: keyof UpdateEmailFormSchema, message: string) => {
+    errors.update((errors) => {
+      const newErrors = {
+        ...errors,
+        [field]: [message],
+      };
+      return newErrors;
+    });
+  };
+
+  const debounceFormValidation = async () => {
+    if (debounceTimer) clearTimeout(debounceTimer);
+
+    if (!$formData) return;
+
+    debounceTimer = window.setTimeout(async () => {
+      try {
+        const result = await validateForm({ update: true, focusOnError: false });
+        isLoading = true;
+
+        // Check availability if needed
+        const availability = await checkIdentAvailability();
+        hasStepError = !availability || !result.valid;
+      } catch (error) {
+        console.error('Error debouncing the form input:', error);
+      } finally {
+        isLoading = false;
+        debounceTimer = null;
+      }
+    }, DEBOUNCE_DELAY);
+  };
+
+  const handleFormSubmit = async () => {
+    const result = await validateForm({ update: true, focusOnError: true });
+    if (!result.valid) {
+      hasStepError = true;
+      return;
+    }
+
+    switch (step) {
+      case 1:
+        await registerNewEmail();
+        break;
+      case 2:
+        await verifyEmailToken();
+        break;
+    }
+  };
+
+  const checkIdentAvailability = async (): Promise<boolean> => {
+    isLoading = true;
+    if ($formData.email === currentEmail) {
+      updateFormErrors(
+        emailFieldName,
+        'Please enter a different email address than your current one.',
+      );
+      return false;
+    }
+
+    if (!$formData.email) return false;
+
+    const validationResult = changeEmailschemaFirstStep.safeParse($formData);
+
+    if (!validationResult.success) return false;
+
+    const message = `This ${emailFieldName} is currently unavailable for use.`;
+
     try {
-      // Store values in the SuperForm data
-      emailForm.data.email = email;
-      emailForm.data.currentPassword = password;
+      const response = await myUserContext.isUserIdentAvailable(
+        $formData.email,
+        UserIdentType.email,
+      );
 
-      isLoading = true;
-      errorMessage = '';
-
-      console.log('email', email);
-
-      // Send verification token to the new email
-      const verifyMyEmailResponse = await myUserContext.verifyMyEmail(email);
-
-      if (
-        !verifyMyEmailResponse ||
-        verifyMyEmailResponse?.error ||
-        !verifyMyEmailResponse.object ||
-        verifyMyEmailResponse.object.error ||
-        !verifyMyEmailResponse?.object.actionProgress?.actionId ||
-        !verifyMyEmailResponse?.object.run
-      ) {
-        console.error('UpdateEmailDialog.handleEmailChange: verifyMyEmail failed.', {
-          verifyMyEmailResponse,
-        });
-        errorMessage = verifyMyEmailResponse.error || AppUiMessage.systemError;
-        return;
+      if (response.error) {
+        updateFormErrors(emailFieldName, response.error);
+        return false;
       }
 
-      console.log('Email confirmation started:', verifyMyEmailResponse);
+      if (!response.isAvailable) {
+        updateFormErrors(emailFieldName, message);
+        return false;
+      }
 
-      mfaActionId = verifyMyEmailResponse?.object.actionProgress?.actionId;
-      currentStep = STEPS.VERIFICATION;
-
-      verifyMyEmailResponse.object.run.addListener({
-        id: 'UpdateEmailDialog',
-        onEvent: async (
-          eventType: MultiStepActionEventType,
-          action: SidMultiStepActionProgress,
-        ): Promise<void> => {
-          if (eventType === MultiStepActionEventType.notificationFailed) {
-            console.error(
-              'UpdateEmailDialog.multiStepActionListener: Notification failed.',
-              action.notificationResult,
-            );
-
-            if (import.meta.env.VITE_APP_ENVIRONMENT === 'development') {
-              // We can ignore the failure to send the email in development.
-              return;
-            }
-
-            errorMessage =
-              'We could not send the verification token to your email. Please try again.';
-            return;
-          }
-
-          if (eventType === MultiStepActionEventType.notificationSent) {
-            console.log(
-              'UpdateEmailDialog.multiStepActionListener: Notification sent out.',
-              action.notificationResult,
-            );
-            return;
-          }
-
-          if (eventType === MultiStepActionEventType.tokenFailed) {
-            console.error(
-              'UpdateEmailDialog.multiStepActionListener: incorrect token.',
-              action.notificationResult,
-            );
-            errorMessage = 'We could not verify the token you entered. Please try again.';
-            return;
-          }
-
-          if (eventType === MultiStepActionEventType.timedOut) {
-            console.error(
-              'UpdateEmailDialog.multiStepActionListener: timeout.',
-              action.notificationResult,
-            );
-            errorMessage = 'The verification token has expired. Please request a new one.';
-            return;
-          }
-
-          if (eventType === MultiStepActionEventType.failed) {
-            console.error(
-              'UpdateEmailDialog.multiStepActionListener: error.',
-              action.notificationResult,
-            );
-            errorMessage = 'A system error has occurred. Please try again later.';
-            return;
-          }
-
-          if (eventType === MultiStepActionEventType.success) {
-            // The token was accepted. The email has been updated now.
-            console.log(
-              'UpdateEmailDialog.multiStepActionListener: success.',
-              action.notificationResult,
-            );
-            await updateNewEmail(email);
-            currentStep = STEPS.CONFIRMATION;
-          }
-        },
-      });
+      return response.isAvailable;
     } catch (error) {
-      console.error('Error updating email:', error);
-      errorMessage = error instanceof Error ? error.message : 'Failed to send verification';
+      updateFormErrors(emailFieldName, translate(AppUiMessage.systemError));
+      return false;
     } finally {
       isLoading = false;
     }
   };
+
+  function resetDialogState() {
+    step = 1;
+    isLoading = false;
+    errorMessage = '';
+    isPasswordValid = false;
+    mfaActionId = undefined;
+  }
 
   const updateNewEmail = async (email: string): Promise<boolean> => {
     errorMessage = '';
@@ -178,71 +187,179 @@
     }
   };
 
-  // Handle verification token submission
-  const handleEmailVerificationSubmit = async (code: string) => {
-    try {
-      isLoading = true;
-      errorMessage = '';
+  const registerNewEmail = async () => {
+    isLoading = true;
 
-      if (!mfaActionId) {
-        console.error('UpdateEmailDialog.handleEmailVerificationSubmit: no mfaActionId.');
-        errorMessage = 'A system error occurred. Please try again.';
+    try {
+      const verificationResponse = await myUserContext.verifyMyEmail($formData.email);
+
+      if (
+        !verificationResponse ||
+        verificationResponse?.error ||
+        !verificationResponse.object ||
+        verificationResponse.object.error ||
+        !verificationResponse?.object.actionProgress?.actionId ||
+        !verificationResponse?.object.run
+      ) {
+        console.error('UpdateEmailForm.onEmailSubmit: verifyMyEmail failed.', {
+          verificationResponse,
+        });
+        updateFormErrors(emailFieldName, translate(AppUiMessage.systemError));
         return;
       }
 
-      const response = await myUserContext.verifyMultiStepActionToken(mfaActionId, code);
+      startResendTimer();
+
+      msaId = verificationResponse.object.actionProgress.actionId;
+      const onNotificationSent = () => {
+        step = 2;
+        isLoading = false;
+      };
+      const onFailure = () => {
+        console.error('onFailure');
+        isLoading = false;
+      };
+      const onSuccess = async () => {
+        await updateNewEmail($formData.email);
+        step = 3;
+        isLoading = false;
+      };
+
+      otpHandler = new MsaListenerHandler(
+        'UpdateEmailForm',
+        verificationResponse,
+        onNotificationSent,
+        onFailure,
+        onSuccess,
+      );
+    } catch (error) {
+      console.error('UpdateEmailForm.registerNewEmail:', { error });
+      msaStatus = MsaTokenStatus.verificationFailed;
+      updateFormErrors(emailFieldName, translate(AppUiMessage.systemError));
+    }
+  };
+
+  const verifyEmailToken = async (): Promise<void> => {
+    try {
+      if (!msaId) {
+        console.error('SignInForm.handleVerifyOtp: actionId missing:');
+        updateFormErrors(tokenFieldName, translate(AppUiMessage.systemError));
+        return;
+      }
+
+      updateFormErrors(tokenFieldName, '');
+      isLoading = true;
+
+      const response = await myUserContext.verifyMultiStepActionToken(msaId, $formData.token);
 
       if (response !== true) {
-        console.error(
-          'UpdateEmailDialog.handleEmailVerificationSubmit: verifyMultiStepActionToken failed.',
-          { result: response },
-        );
-        errorMessage = response || 'Failed to verify the token. Please try again.';
+        console.error('UpdateEmailForm.handleVerifyOtp: invalid response:', { result: response });
+        updateFormErrors(tokenFieldName, translate(AppUiMessage.systemError));
+        msaStatus = MsaTokenStatus.unset;
         return;
       }
 
-      // If verification is successful, update the email
-      await onSave(emailForm.data.email);
+      msaStatus = MsaTokenStatus.sending;
     } catch (error) {
-      console.error('Error verifying code:', error);
-      errorMessage = error instanceof Error ? error.message : 'A system error occurred';
+      console.error('UpdateEmailForm.handleVerifyOtp: error:', { error });
+      updateFormErrors(tokenFieldName, translate(AppUiMessage.systemError));
+      msaStatus = MsaTokenStatus.unset;
+    } finally {
+      // isLoading = false;  // Leave the button in a processing state until success event
+    }
+  };
+
+  $effect(() => {
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+      debounceTimer = null;
+    }
+
+    if (!$formData) {
+      isLoading = false;
+      return;
+    }
+
+    if (otpHandler) {
+      const currentErrorMessage = otpHandler.getErrorMessage();
+      if (currentErrorMessage) {
+        updateFormErrors(tokenFieldName, currentErrorMessage);
+      }
+    }
+
+    options.validators = getCurrentValidator();
+  });
+
+  let isEmailFormValid = $derived(
+    $formData.email && !$errors.email && $formData.currentPassword && !hasStepError,
+  );
+
+  let isTokenFormValid = $derived($formData.token && !$errors.token);
+
+  const resendToken = async () => {
+    msaStatus = MsaTokenStatus.unset;
+
+    if (!msaId) {
+      console.error('UpdateEmailDialog.handleResendOtp: actionId missing.');
+      updateFormErrors(tokenFieldName, translate(AppUiMessage.systemError));
+      return;
+    }
+
+    try {
+      isLoading = true;
+      const response = await myUserContext.sendMultiStepActionNotification(msaId, $formData.email);
+
+      if (typeof response === 'string') {
+        console.error('UpdateEmailDialog.handleResendOtp: error:', { error: response });
+        updateFormErrors(tokenFieldName, response);
+        return;
+      }
+
+      msaStatus = MsaTokenStatus.sending;
+      startResendTimer();
+    } catch (error) {
+      console.error('UpdateEmailDialog.resendToken: error:', { error });
+      updateFormErrors(tokenFieldName, translate(AppUiMessage.systemError));
     } finally {
       isLoading = false;
     }
   };
 
-  // Handle resend verification token
-  const handleResendVerificationToken = async () => {
-    if (!mfaActionId) {
-      console.error('UpdateEmailDialog.handleResend: no mfaActionId.');
-      errorMessage = 'A system error occurred. Please try again.';
-      return;
-    }
+  const startResendTimer = () => {
+    resendTimer = RESEND_TIMER_DURATION;
+    canResend = false;
 
-    const response = await myUserContext.sendMultiStepActionNotification(mfaActionId);
-
-    if (response !== true) {
-      errorMessage = response || 'We failed to send the verification token. Please try again.';
-      return;
-    }
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      resendTimer -= 1;
+      if (resendTimer <= 0) {
+        clearInterval(timerInterval);
+        canResend = true;
+      }
+    }, 1000);
   };
 
   const handleBack = () => {
-    currentStep = STEPS.EMAIL_FORM;
+    step = 1;
     errorMessage = '';
   };
+
+  onDestroy(() => {
+    clearInterval(timerInterval);
+    if (otpHandler) otpHandler.removeListener();
+  });
 </script>
 
 <button
   class="group flex w-full items-center justify-between rounded-lg py-2 hover:bg-muted/50"
-  onclick={() => (showEmailEdit = true)}
+  onclick={() => (showDialog = true)}
 >
   <div class="flex flex-col text-left sm:flex-row sm:items-center sm:gap-2">
     <p class="text-sm font-medium">Email</p>
   </div>
   <div class="flex items-center gap-2">
     <p class="text-right text-sm text-muted-foreground group-hover:text-foreground">
-      {currentEmail}
+      {myUserContext.myEmail}
     </p>
     <ChevronRight
       class="h-5 w-5 stroke-[2] text-muted-foreground transition-colors group-hover:text-foreground"
@@ -250,80 +367,60 @@
   </div>
 </button>
 
-<Dialog.Root
-  open={showEmailEdit}
-  onOpenChange={(open: boolean) => {
-    showEmailEdit = open;
-  }}
+<UpdateDialog
+  title={step === 1
+    ? 'Change email'
+    : step === 2
+      ? 'Verify your email'
+      : 'Email updated successfully'}
+  description={step === 1
+    ? 'Enter your new email address and current password to verify.'
+    : step === 2
+      ? 'Enter the verification code sent to your new email address.'
+      : `Your email has been successfully changed to ${$formData.email}. `}
+  {form}
+  shouldEnableSave={step === 2 ? isTokenFormValid : isEmailFormValid}
+  {isLoading}
+  {errorMessage}
+  onSave={handleFormSubmit}
+  onCancel={resetDialogState}
+  showCancel={step !== 2}
+  cancelButtonlabel={step === 3 ? 'Close' : 'Cancel'}
+  actionButtonlabel={step === 2 ? 'Verify my email' : 'Save changes'}
+  bind:showDialog
 >
-  <Dialog.Content class="sm:max-w-[425px]">
-    {#if currentStep === STEPS.VERIFICATION}
-      <Dialog.Header class="space-y-2">
-        <Dialog.Title class="text-xl font-semibold">Verify your email</Dialog.Title>
-        <Dialog.Description class="text-base text-muted-foreground">
-          Enter the verification code sent to your new email address.
-        </Dialog.Description>
-      </Dialog.Header>
+  {#if step === 1}
+    <div class="rounded-lg border bg-muted/50 p-4">
+      <p class="text-sm font-medium text-muted-foreground">Current Email</p>
+      <p class="mt-1 text-base">{currentEmail}</p>
+    </div>
 
-      <TokenForm
-        ident={emailForm.data.email}
-        onSubmit={handleEmailVerificationSubmit}
-        onResend={handleResendVerificationToken}
-        onBack={handleBack}
+    <div class="space-y-4">
+      <IdentFormInput
+        {form}
+        fieldName="email"
+        placeholder="Enter new email address"
+        label="New email address"
+        {isLoading}
       />
 
-      {#if errorMessage}
-        <ErrorAlert bind:errorMessage />
-      {/if}
-    {:else if currentStep === STEPS.CONFIRMATION}
-      <!-- Email confirmation screen -->
-      <Dialog.Header>
-        <Dialog.Title class="text-xl font-semibold">Email updated successfully</Dialog.Title>
-      </Dialog.Header>
-      <div class="mt-6 space-y-4">
-        <p class="text-sm text-muted-foreground">
-          Your email has been successfully changed to <span class="font-medium"
-            >{emailForm.data.email}</span
-          >.
-        </p>
-        <Dialog.Footer class="flex justify-end">
-          <Button
-            variant="outline"
-            onclick={() => {
-              showEmailEdit = false;
-              resetDialogState();
-            }}
-          >
-            Close
-          </Button>
-        </Dialog.Footer>
-      </div>
-    {:else}
-      <Dialog.Header class="space-y-2">
-        <Dialog.Title class="text-xl font-semibold">Change email</Dialog.Title>
-        <Dialog.Description class="text-base text-muted-foreground">
-          Enter your new email address and current password to verify.
-        </Dialog.Description>
-      </Dialog.Header>
-      <div class="rounded-lg border bg-muted/50 p-4">
-        <p class="text-sm font-medium text-muted-foreground">Current Email</p>
-        <p class="mt-1 text-base">{currentEmail}</p>
-      </div>
-
-      <UpdateEmailForm
-        {emailForm}
-        bind:isLoading
-        bind:isPasswordValid
-        onCancel={() => {
-          showEmailEdit = false;
-          resetDialogState();
-        }}
-        onSave={handleEmailChange}
+      <PasswordFormInput
+        {form}
+        fieldName={passwordFieldName}
+        label="Current password"
+        placeholder="Enter your password"
       />
-
-      {#if errorMessage}
-        <ErrorAlert bind:errorMessage />
-      {/if}
-    {/if}
-  </Dialog.Content>
-</Dialog.Root>
+    </div>
+  {:else if step === 2}
+    <OTPFormInput
+      {form}
+      fieldName="token"
+      label="Verification code"
+      length={6}
+      showResend={true}
+      {canResend}
+      {resendTimer}
+      onResendClick={resendToken}
+    />
+  {/if}
+</UpdateDialog>
