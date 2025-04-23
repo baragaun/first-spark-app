@@ -39,11 +39,11 @@
   let isPasswordValid = $state(false);
   let mfaActionId: string | undefined;
   const RESEND_TIMER_DURATION = 30; // s
-  const DEBOUNCE_DELAY = 1000;
+  const DEBOUNCE_DELAY = 500;
   const tokenFieldName = 'token';
   const emailFieldName = 'email';
   const passwordFieldName = 'currentPassword';
-  const currentEmail = myUserContext.myEmail ;
+  const currentEmail = myUserContext.myEmail;
 
   const steps = [zod(changeEmailschemaFirstStep), zod(changeEmailschemaLastStep)];
   const getCurrentValidator = () => steps[step - 1];
@@ -107,6 +107,8 @@
 
     switch (step) {
       case 1:
+        let isValid = await verifyCurrentPassword();
+        if (!isValid) return;
         await registerNewEmail();
         break;
       case 2:
@@ -158,13 +160,37 @@
     }
   };
 
-  function resetDialogState() {
-    step = 1;
-    isLoading = false;
-    errorMessage = '';
-    isPasswordValid = false;
-    mfaActionId = undefined;
-  }
+  const verifyCurrentPassword = async (): Promise<boolean> => {
+    const verifyMyPasswordResponse = await myUserContext.verifyMyPassword(
+      $formData.currentPassword,
+    );
+    if (
+      verifyMyPasswordResponse.object === false ||
+      verifyMyPasswordResponse.object?.toString() === 'false'
+    ) {
+      console.error('Incorrect password', {
+        verifyMyPasswordResponse,
+      });
+      updateFormErrors('currentPassword', 'Incorrect password. Please verify and try again.');
+      isLoading = false;
+      return false;
+    }
+
+    if (verifyMyPasswordResponse.error) {
+      console.error('Failed to verify password:', {
+        verifyMyPasswordResponse,
+      });
+      updateFormErrors(
+        'currentPassword',
+        verifyMyPasswordResponse.error || AppUiMessage.systemError,
+      );
+
+      isLoading = false;
+      return false;
+    }
+
+    return true;
+  };
 
   const updateNewEmail = async (email: string): Promise<boolean> => {
     errorMessage = '';
@@ -291,7 +317,7 @@
   });
 
   let isEmailFormValid = $derived(
-    $formData.email && !$errors.email && $formData.currentPassword && !hasStepError,
+    $formData.email && !$errors.email && $formData.currentPassword && !hasStepError && !$errors.currentPassword,
   );
 
   let isTokenFormValid = $derived($formData.token && !$errors.token);
@@ -387,6 +413,14 @@
     clearInterval(timerInterval);
     if (otpHandler) otpHandler.removeListener();
   });
+
+  function resetDialogState() {
+    step = 1;
+    isLoading = false;
+    errorMessage = '';
+    isPasswordValid = false;
+    mfaActionId = undefined;
+  }
 </script>
 
 <button
@@ -421,6 +455,7 @@
     showActionButton={dialogDetails.showActionButton}
     cancelButtonlabel={dialogDetails.cancelButtonlabel}
     actionButtonlabel={dialogDetails.actionButtonlabel}
+    actionButtonloadingText={dialogDetails.actionButtonloadingText}
     onBack={dialogDetails.onBackClick}
     bind:showDialog
   >
