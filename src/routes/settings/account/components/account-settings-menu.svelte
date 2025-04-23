@@ -62,7 +62,7 @@
   <div class="space-y-4 px-4">
     <UpdateUsernameDialog {currentUsername} {currentEmail} usernameForm={data.usernameForm} />
 
-    <UpdateEmailDialog {currentEmail} emailForm={data.emailForm} />
+    <UpdateEmailDialog emailForm={data.emailForm} />
 
     <UpdatePasswordDialog passwordForm={data.passwordForm} />
   </div>

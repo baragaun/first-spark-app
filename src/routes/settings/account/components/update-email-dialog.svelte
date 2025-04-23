@@ -20,14 +20,13 @@
   import UpdateDialog from './update-dialog-template.svelte';
 
   interface EmailInputProps {
-    currentEmail: string;
     emailForm: SuperValidated<UpdateEmailFormSchema>;
   }
-  let { currentEmail, emailForm }: EmailInputProps = $props();
+  let { emailForm }: EmailInputProps = $props();
 
   let step = $state(1);
   let isLoading = $state(false);
-  let hasStepError = $state(false); // Start with a disabled state
+  let hasStepError = $state(false);
   let canResend = $state(false);
   let resendTimer = $state(30);
   let otpHandler: MsaListenerHandler | undefined = $state(undefined);
@@ -44,6 +43,7 @@
   const tokenFieldName = 'token';
   const emailFieldName = 'email';
   const passwordFieldName = 'currentPassword';
+  const currentEmail = myUserContext.myEmail ;
 
   const steps = [zod(changeEmailschemaFirstStep), zod(changeEmailschemaLastStep)];
   const getCurrentValidator = () => steps[step - 1];
@@ -64,7 +64,7 @@
     },
   });
 
-  const { form: formData, errors, enhance, delayed, options, validateForm } = form;
+  const { form: formData, errors, options, delayed, validateForm } = form;
 
   const updateFormErrors = (field: keyof UpdateEmailFormSchema, message: string) => {
     errors.update((errors) => {
@@ -344,6 +344,45 @@
     errorMessage = '';
   };
 
+  const getDialogDetails = () => {
+    switch (step) {
+      case 1:
+        return {
+          title: 'Change email',
+          description: 'Enter your new email address and current password to verify.',
+          shouldEnableSave: isEmailFormValid,
+          showCancel: true,
+          showActionButton: true,
+          cancelButtonlabel: undefined,
+          actionButtonlabel: undefined,
+          actionButtonloadingText: 'Saving ...',
+        };
+      case 2:
+        return {
+          title: 'Verify your email',
+          description: 'Enter the verification code sent to your new email address.',
+          shouldEnableSave: isTokenFormValid,
+          showCancel: false,
+          showActionButton: true,
+          cancelButtonlabel: undefined,
+          actionButtonlabel: 'Verify my email',
+          actionButtonloadingText: 'Verifying...',
+          onBackClick: handleBack,
+        };
+      default:
+        return {
+          title: 'Email updated successfully',
+          description: `Your email has been successfully changed to ${$formData.email}.`,
+          shouldEnableSave: undefined,
+          showCancel: true,
+          showActionButton: false,
+          cancelButtonlabel: 'Close',
+          actionButtonlabel: undefined,
+          actionButtonloadingText: 'Verifying...',
+        };
+    }
+  };
+
   onDestroy(() => {
     clearInterval(timerInterval);
     if (otpHandler) otpHandler.removeListener();
@@ -367,61 +406,57 @@
   </div>
 </button>
 
-<UpdateDialog
-  title={step === 1
-    ? 'Change email'
-    : step === 2
-      ? 'Verify your email'
-      : 'Email updated successfully'}
-  description={step === 1
-    ? 'Enter your new email address and current password to verify.'
-    : step === 2
-      ? 'Enter the verification code sent to your new email address.'
-      : `Your email has been successfully changed to ${$formData.email}. `}
-  {form}
-  shouldEnableSave={step === 2 ? isTokenFormValid : isEmailFormValid}
-  {isLoading}
-  {errorMessage}
-  onSave={handleFormSubmit}
-  onCancel={resetDialogState}
-  showCancel={step !== 2}
-  showActionButton={step !== 3}
-  cancelButtonlabel={step === 3 ? 'Close' : 'Cancel'}
-  actionButtonlabel={step === 2 ? 'Verify my email' : 'Save changes'}
-  bind:showDialog
->
-  {#if step === 1}
-    <div class="rounded-lg border bg-muted/50 p-4">
-      <p class="text-sm font-medium text-muted-foreground">Current Email</p>
-      <p class="mt-1 text-base">{currentEmail}</p>
-    </div>
+{#key showDialog}
+  {@const dialogDetails = getDialogDetails()}
+  <UpdateDialog
+    title={dialogDetails.title}
+    description={dialogDetails.description}
+    {form}
+    shouldEnableSave={dialogDetails.shouldEnableSave || false}
+    {isLoading}
+    {errorMessage}
+    onAction={handleFormSubmit}
+    onCancel={resetDialogState}
+    showCancel={dialogDetails.showCancel}
+    showActionButton={dialogDetails.showActionButton}
+    cancelButtonlabel={dialogDetails.cancelButtonlabel}
+    actionButtonlabel={dialogDetails.actionButtonlabel}
+    onBack={dialogDetails.onBackClick}
+    bind:showDialog
+  >
+    {#if step === 1}
+      <div class="rounded-lg border bg-muted/50 p-4">
+        <p class="text-sm font-medium text-muted-foreground">Current Email</p>
+        <p class="mt-1 text-base">{currentEmail}</p>
+      </div>
 
-    <div class="space-y-4">
-      <IdentFormInput
-        {form}
-        fieldName="email"
-        placeholder="Enter new email address"
-        label="New email address"
-        {isLoading}
-      />
+      <div class="space-y-4">
+        <IdentFormInput
+          {form}
+          fieldName="email"
+          placeholder="Enter new email address"
+          label="New email address"
+          {isLoading}
+        />
 
-      <PasswordFormInput
+        <PasswordFormInput
+          {form}
+          fieldName={passwordFieldName}
+          label="Current password"
+          placeholder="Enter your password"
+        />
+      </div>
+    {:else if step === 2}
+      <OTPFormInput
         {form}
-        fieldName={passwordFieldName}
-        label="Current password"
-        placeholder="Enter your password"
+        fieldName="token"
+        label="Verification code"
+        length={6}
+        showResend={true}
+        {canResend}
+        {resendTimer}
+        onResendClick={resendToken}
       />
-    </div>
-  {:else if step === 2}
-    <OTPFormInput
-      {form}
-      fieldName="token"
-      label="Verification code"
-      length={6}
-      showResend={true}
-      {canResend}
-      {resendTimer}
-      onResendClick={resendToken}
-    />
-  {/if}
-</UpdateDialog>
+    {/if}
+  </UpdateDialog>
+{/key}
