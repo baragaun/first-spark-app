@@ -30,7 +30,7 @@
     },
   });
 
-  const { form: formData, enhance, delayed, errors } = form;
+  const { form: formData, errors } = form;
 
   const updateFormErrors = (field: keyof PasswordSchema, message: string) => {
     errors.update((errors) => {
@@ -114,6 +114,31 @@
 
     return true;
   };
+
+  const getDialogDetails = () => {
+    switch (step) {
+      case 1:
+        return {
+          title: 'Change password',
+          description: 'Enter your current password and a new password.',
+          showActionButton: true,
+          shouldEnableSave: hasFormValues,
+          cancelButtonlabel: undefined,
+          actionButtonlabel: undefined,
+          actionButtonloadingText: 'Saving ...',
+        };
+      default:
+        return {
+          title: 'Password updated',
+          description: `Your password has been successfully updated.`,
+          showActionButton: false,
+          shouldEnableSave: undefined,
+          cancelButtonlabel: 'Close',
+          actionButtonlabel: undefined,
+          actionButtonloadingText: undefined,
+        };
+    }
+  };
 </script>
 
 <button
@@ -133,37 +158,37 @@
   </div>
 </button>
 
-<UpdateDialog
-  title={step === 1 ? 'Change password' : 'Password updated'}
-  description={step === 1
-    ? 'Enter your current password and a new password.'
-    : 'Your password has been successfully updated.'}
-  {form}
-  shouldEnableSave={hasFormValues}
-  {isLoading}
-  {errorMessage}
-  onSave={handlePasswordChange}
-  onCancel={resetDialogState}
-  showActionButton={step === 1}
-  cancelButtonlabel={step === 2 ? 'Close' : 'Cancel'}
-  actionButtonlabel="Save changes"
-  bind:showDialog={showUpdatePasswordForm}
->
-  {#if step === 1}
-    <div class="space-y-4">
-      <PasswordFormInput
-        {form}
-        fieldName="currentPassword"
-        label="Current Password"
-        placeholder="Enter your current password"
-      />
+{#key showUpdatePasswordForm}
+  {@const dialogDetails = getDialogDetails()}
+  <UpdateDialog
+    title={dialogDetails.title}
+    description={dialogDetails.description}
+    {form}
+    shouldEnableSave={dialogDetails.shouldEnableSave || false}
+    {isLoading}
+    {errorMessage}
+    onAction={handlePasswordChange}
+    onCancel={resetDialogState}
+    showActionButton={dialogDetails.showActionButton}
+    cancelButtonlabel={ dialogDetails.cancelButtonlabel}
+    bind:showDialog={showUpdatePasswordForm}
+  >
+    {#if step === 1}
+      <div class="space-y-4">
+        <PasswordFormInput
+          {form}
+          fieldName="currentPassword"
+          label="Current Password"
+          placeholder="Enter your current password"
+        />
 
-      <PasswordFormInput
-        {form}
-        fieldName="newPassword"
-        label="New Password"
-        placeholder="Enter new password"
-      />
-    </div>
-  {/if}
-</UpdateDialog>
+        <PasswordFormInput
+          {form}
+          fieldName="newPassword"
+          label="New Password"
+          placeholder="Enter new password"
+        />
+      </div>
+    {/if}
+  </UpdateDialog>
+{/key}

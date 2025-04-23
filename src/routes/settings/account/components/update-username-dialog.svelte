@@ -9,8 +9,8 @@
   import { UserIdentType } from '@baragaun/bg-node-client';
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
-  import UpdateDialog from './update-dialog-template.svelte';
   import { usernameSchema, type UsernameSchema } from '../schema';
+  import UpdateDialog from './update-dialog-template.svelte';
 
   interface UpdateUsernameDialogProps {
     currentUsername: string;
@@ -37,21 +37,6 @@
 
   const { form: formData, errors, validateForm } = form;
 
-  let isInvalidFormOrUsernameUnavailable = $state(false);
-  let debounceTimer: number | null = null;
-  const DEBOUNCE_DELAY = 350; // ms
-
-  let isLoading = $state(false);
-  let showUsernameEdit = $state(false);
-  let identType = $state(UserIdentType.userHandle);
-
-  let hasFormValues = $derived(
-    $formData.username &&
-      !$errors.username &&
-      !isInvalidFormOrUsernameUnavailable &&
-      $formData.username !== currentUsername,
-  );
-
   const updateFormErrors = (field: keyof UsernameSchema, message: string) => {
     errors.update((errors) => {
       const newErrors = {
@@ -61,6 +46,21 @@
       return newErrors;
     });
   };
+
+  let isInvalidFormOrUsernameUnavailable = $state(false);
+  let debounceTimer: number | null = null;
+  let isLoading = $state(false);
+  let showDialog = $state(false);
+  let identType = $state(UserIdentType.userHandle);
+  let step = $state(1);
+  const DEBOUNCE_DELAY = 350; // ms
+
+  let hasFormValues = $derived(
+    $formData.username &&
+      !$errors.username &&
+      !isInvalidFormOrUsernameUnavailable &&
+      $formData.username !== currentUsername,
+  );
 
   const debounceFormValidation = async () => {
     if (debounceTimer) {
@@ -126,6 +126,8 @@
   };
 
   const getSuggestedUsername = async () => {
+    if (!currentEmail) return;
+
     try {
       isLoading = true;
       const result = await myUserContext.findAvailableUserHandle(currentEmail);
@@ -169,6 +171,7 @@
   };
 
   function resetDialogState() {
+    showDialog = false;
     form.reset();
   }
 
@@ -177,7 +180,7 @@
       isLoading = true;
       const success = await handleUsernameChange();
       if (success) {
-        showUsernameEdit = false;
+        step = 2;
       }
     } finally {
       isLoading = false;
@@ -195,11 +198,34 @@
       return;
     }
   });
+
+  const getDialogDetails = () => {
+    switch (step) {
+      case 1:
+        return {
+          title: 'Change Username',
+          description: 'Enter a new username for your account or use our suggestion.',
+          showActionButton: true,
+          shouldEnableSave: hasFormValues,
+          cancelButtonlabel: undefined,
+          actionButtonloadingText: 'Saving ...',
+        };
+      default:
+        return {
+          title: 'Username updated',
+          description: `Your Username has been successfully changed to ${$formData.username}.`,
+          showActionButton: false,
+          shouldEnableSave: undefined,
+          cancelButtonlabel: 'Close',
+          actionButtonloadingText: undefined,
+        };
+    }
+  };
 </script>
 
 <button
   class="group flex w-full items-center justify-between rounded-lg py-2 hover:bg-muted/50"
-  onclick={() => (showUsernameEdit = true)}
+  onclick={() => (showDialog = true)}
 >
   <div class="flex flex-col text-left sm:flex-row sm:items-center sm:gap-2">
     <p class="text-sm font-medium">Username</p>
@@ -214,32 +240,38 @@
   </div>
 </button>
 
-<UpdateDialog
-  title="Change Username"
-  description="Enter a new username for your account or use our suggestion."
-  {form}
-  shouldEnableSave={hasFormValues}
-  {isLoading}
-  errorMessage=""
-  onSave={saveUsername}
-  onCancel={resetDialogState}
-  bind:showDialog={showUsernameEdit}
->
-  <div class="space-y-4">
-    <div class="space-y-2">
-      <label for="current-username" class="text-sm font-medium leading-none">
-        Current Username
-      </label>
-      <Input id="current-username" value={currentUsername} disabled class="bg-muted" />
-    </div>
-    <IdentFormInput
-      {form}
-      fieldName="username"
-      placeholder="e.g. 'giraffe08'"
-      label="Username"
-      {identType}
-      suggestUsername={getSuggestedUsername}
-      {isLoading}
-    />
-  </div></UpdateDialog
->
+{#key showDialog}
+  {@const dialogDetails = getDialogDetails()}
+  <UpdateDialog
+    title={dialogDetails.title}
+    description={dialogDetails.description}
+    {form}
+    shouldEnableSave={dialogDetails.shouldEnableSave || false}
+    {isLoading}
+    onAction={saveUsername}
+    onCancel={resetDialogState}
+    showActionButton={dialogDetails.showActionButton}
+    cancelButtonlabel={dialogDetails.cancelButtonlabel}
+    bind:showDialog
+  >
+    {#if step === 1}
+      <div class="space-y-4">
+        <div class="space-y-2">
+          <label for="current-username" class="text-sm font-medium leading-none">
+            Current Username
+          </label>
+          <Input id="current-username" value={currentUsername} disabled class="bg-muted" />
+        </div>
+        <IdentFormInput
+          {form}
+          fieldName="username"
+          placeholder="e.g. 'giraffe08'"
+          label="Username"
+          {identType}
+          suggestUsername={getSuggestedUsername}
+          {isLoading}
+        />
+      </div>
+    {/if}
+  </UpdateDialog>
+{/key}
