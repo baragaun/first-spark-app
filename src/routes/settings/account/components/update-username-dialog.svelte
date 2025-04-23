@@ -36,7 +36,7 @@
   });
 
   const { form: formData, errors, validateForm } = form;
-
+  
   const updateFormErrors = (field: keyof UsernameSchema, message: string) => {
     errors.update((errors) => {
       const newErrors = {
@@ -172,6 +172,7 @@
 
   function resetDialogState() {
     showDialog = false;
+    step = 1;
     form.reset();
   }
 
@@ -268,8 +269,9 @@
           placeholder="e.g. 'giraffe08'"
           label="Username"
           {identType}
-          suggestUsername={getSuggestedUsername}
           {isLoading}
+          suggestUsername={getSuggestedUsername}
+          showInitialSuggestion={true}
         />
       </div>
     {/if}
