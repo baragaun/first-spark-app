@@ -9,9 +9,9 @@ are defined in `project.inlang/settings.json`, 3 are currently supported:
 - `de` - German
 - `hi` - Hindi
 
-When adding a new message, make sure to add it to all languages. If you are not a fluent speaker of a language, you 
+When adding a new message, make sure to add it to all languages. If you are not a fluent speaker of a language, you
 can machine translate the message and note the message's name in `messages/todo.txt` to be verified or corrected later
-by a fluent speaker. Alternatively, you can add `TODO` as a placeholder message and note the message's name in 
+by a fluent speaker. Alternatively, you can add `TODO` as a placeholder message and note the message's name in
 `messages/todo.txt` to be translated later.
 
 ## Compiling Messages
@@ -58,6 +58,7 @@ If the message key is a variable, you can use bracket notation with a variable:
 <script>
   let key = 'welcome';
 </script>
+
 <h1>{m[key]()}</h1>
 ```
 
@@ -75,11 +76,11 @@ Example `messages.json`:
 
 ```json
 {
-    "auth": {
+  "auth": {
     "login": "Log in",
     "logout": "Log out",
     "error": {
-        "invalid": "Invalid credentials"
+      "invalid": "Invalid credentials"
     }
   }
 }
@@ -88,8 +89,7 @@ Example `messages.json`:
 To access the nested message, use dot notation:
 
 ```svelte
-<p>{m['auth.login']()}</p>
-<p>{m['auth.error.invalid']()}</p>
+<p>{m['auth.login']()}</p><p>{m['auth.error.invalid']()}</p>
 ```
 
 ## Script Usage

@@ -17,7 +17,7 @@ export const FAQ_SECTIONS: FAQSection[] = [
       {
         question: 'Can I ask a pathfinder about job opportunities I found?',
         answer:
-          'Only discuss specific jobs with pathfinders you\'re already connected with. They may decline to discuss specific employers, as they aren\'t career counselors.',
+          "Only discuss specific jobs with pathfinders you're already connected with. They may decline to discuss specific employers, as they aren't career counselors.",
         isOpen: false,
       },
       {
@@ -42,7 +42,7 @@ export const FAQ_SECTIONS: FAQSection[] = [
         isOpen: false,
       },
       {
-        question: 'What if I don\'t like have the courage to ask someone to be my buddy?',
+        question: "What if I don't like have the courage to ask someone to be my buddy?",
         answer: 'Have First Spark send out an invitation for you.',
         isOpen: false,
       },
