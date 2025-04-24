@@ -1,4 +1,12 @@
 # Package Managers
 package-lock.json
 pnpm-lock.yaml
-yarn.lock
+
+# ESLint Config
+eslint.config.js
+
+# Docs
+docs/*
+
+# Paraglide Generated Files
+src/lib/paraglide/*
