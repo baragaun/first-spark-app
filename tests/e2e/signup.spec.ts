@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-var testId = 0; // Increment this for each test to mail different email id's
+let testId = 0; // Increment this for each test to mail different email id's
 
 test('Sign up page has correct UI elements', async ({ page }) => {
   await page.goto('/signup');
