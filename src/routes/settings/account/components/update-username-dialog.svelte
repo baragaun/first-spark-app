@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Input } from '$lib/components/ui/input';
   import IdentFormInput from '@/components/forms/form-ident-input.svelte';
-  import { ChevronRight } from 'lucide-svelte';
+  import { ChevronRight, Check } from 'lucide-svelte';
 
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import translate from '@/helpers/language/translate';
@@ -50,9 +50,9 @@
   let isInvalidFormOrUsernameUnavailable = $state(false);
   let debounceTimer: number | null = null;
   let isLoading = $state(false);
+  let isSuccess = $state(false);
   let showDialog = $state(false);
   let identType = $state(UserIdentType.userHandle);
-  let step = $state(1);
   const DEBOUNCE_DELAY = 350; // ms
 
   let hasFormValues = $derived(
@@ -172,7 +172,7 @@
 
   function resetDialogState() {
     showDialog = false;
-    step = 1;
+    isSuccess = false;
     form.reset();
   }
 
@@ -181,7 +181,11 @@
       isLoading = true;
       const success = await handleUsernameChange();
       if (success) {
-        step = 2;
+        isSuccess = true;
+        // Show success state briefly before closing
+        setTimeout(() => {
+          resetDialogState();
+        }, 1500);
       }
     } finally {
       isLoading = false;
@@ -199,29 +203,6 @@
       return;
     }
   });
-
-  const getDialogDetails = () => {
-    switch (step) {
-      case 1:
-        return {
-          title: 'Change Username',
-          description: 'Enter a new username for your account or use our suggestion.',
-          showActionButton: true,
-          shouldEnableSave: hasFormValues,
-          cancelButtonlabel: undefined,
-          actionButtonloadingText: 'Saving ...',
-        };
-      default:
-        return {
-          title: 'Username updated',
-          description: `Your Username has been successfully changed to ${$formData.username}.`,
-          showActionButton: false,
-          shouldEnableSave: undefined,
-          cancelButtonlabel: 'Close',
-          actionButtonloadingText: undefined,
-        };
-    }
-  };
 </script>
 
 <button
@@ -242,37 +223,37 @@
 </button>
 
 {#key showDialog}
-  {@const dialogDetails = getDialogDetails()}
   <UpdateDialog
-    title={dialogDetails.title}
-    description={dialogDetails.description}
+    title="Change Username"
+    description="Enter a new username for your account or use our suggestion."
     {form}
-    shouldEnableSave={dialogDetails.shouldEnableSave || false}
+    shouldEnableSave={isSuccess ? false : hasFormValues || false}
     {isLoading}
     onAction={saveUsername}
     onCancel={resetDialogState}
-    showActionButton={dialogDetails.showActionButton}
-    cancelButtonlabel={dialogDetails.cancelButtonlabel}
+    showActionButton={true}
+    actionButtonlabel={isSuccess ? 'Complete' : 'Save Changes'}
+    actionButtonloadingText="Saving..."
+    actionButtonExtraClass={isSuccess ? 'bg-green-600' : ''}
+    success={isSuccess}
     bind:showDialog
   >
-    {#if step === 1}
-      <div class="space-y-4">
-        <div class="space-y-2">
-          <label for="current-username" class="text-sm font-medium leading-none">
-            Current Username
-          </label>
-          <Input id="current-username" value={currentUsername} disabled class="bg-muted" />
-        </div>
-        <IdentFormInput
-          {form}
-          fieldName="username"
-          placeholder="e.g. 'giraffe08'"
-          label="Username"
-          {identType}
-          {isLoading}
-          suggestUsername={getSuggestedUsername}
-        />
+    <div class="space-y-4">
+      <div class="space-y-2">
+        <label for="current-username" class="text-sm font-medium leading-none">
+          Current Username
+        </label>
+        <Input id="current-username" value={currentUsername} disabled class="bg-muted" />
       </div>
-    {/if}
+      <IdentFormInput
+        {form}
+        fieldName="username"
+        placeholder="e.g. 'giraffe08'"
+        label="Username"
+        {identType}
+        {isLoading}
+        suggestUsername={getSuggestedUsername}
+      />
+    </div>
   </UpdateDialog>
 {/key}

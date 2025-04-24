@@ -16,7 +16,7 @@
   let { passwordForm }: PasswordInputProps = $props();
   let isLoading = $state(false);
   let showUpdatePasswordForm = $state(false);
-  let step = $state(1);
+  let isSuccess = $state(false);
   let errorMessage = $state('');
 
   // Initialize superForm
@@ -48,9 +48,9 @@
 
   // Reset dialog state when closed
   function resetDialogState() {
-    step = 1;
     isLoading = false;
     errorMessage = '';
+    isSuccess = false;
     form.reset();
   }
 
@@ -68,12 +68,17 @@
       );
 
       if (result === true) {
-        step = 2;
-        console.log('updateNewEmail: success.', result);
+        isSuccess = true;
+        // Show success state briefly before closing
+        setTimeout(() => {
+          showUpdatePasswordForm = false;
+          resetDialogState();
+        }, 1500);
+        console.log('updatePassword: success.', result);
       } else {
         // Show error message
         errorMessage = result || 'Failed to update password';
-        console.log('updateNewEmail: fail.', result);
+        console.log('updatePassword: fail.', result);
       }
     } catch (error) {
       console.error('Error updating password:', error);
@@ -114,31 +119,6 @@
 
     return true;
   };
-
-  const getDialogDetails = () => {
-    switch (step) {
-      case 1:
-        return {
-          title: 'Change password',
-          description: 'Enter your current password and a new password.',
-          showActionButton: true,
-          shouldEnableSave: hasFormValues,
-          cancelButtonlabel: undefined,
-          actionButtonlabel: undefined,
-          actionButtonloadingText: 'Saving ...',
-        };
-      default:
-        return {
-          title: 'Password updated',
-          description: 'Your password has been successfully updated.',
-          showActionButton: false,
-          shouldEnableSave: undefined,
-          cancelButtonlabel: 'Close',
-          actionButtonlabel: undefined,
-          actionButtonloadingText: undefined,
-        };
-    }
-  };
 </script>
 
 <button
@@ -159,36 +139,36 @@
 </button>
 
 {#key showUpdatePasswordForm}
-  {@const dialogDetails = getDialogDetails()}
   <UpdateDialog
-    title={dialogDetails.title}
-    description={dialogDetails.description}
+    title="Change password"
+    description="Enter your current password and a new password."
     {form}
-    shouldEnableSave={dialogDetails.shouldEnableSave || false}
+    shouldEnableSave={isSuccess ? false : hasFormValues || false}
     {isLoading}
     {errorMessage}
     onAction={handlePasswordChange}
     onCancel={resetDialogState}
-    showActionButton={dialogDetails.showActionButton}
-    cancelButtonlabel={ dialogDetails.cancelButtonlabel}
+    showActionButton={true}
+    actionButtonlabel={isSuccess ? 'Complete' : 'Save Changes'}
+    actionButtonloadingText="Saving..."
+    actionButtonExtraClass={isSuccess ? 'bg-green-600' : ''}
+    success={isSuccess}
     bind:showDialog={showUpdatePasswordForm}
   >
-    {#if step === 1}
-      <div class="space-y-4">
-        <PasswordFormInput
-          {form}
-          fieldName="currentPassword"
-          label="Current Password"
-          placeholder="Enter your current password"
-        />
+    <div class="space-y-4">
+      <PasswordFormInput
+        {form}
+        fieldName="currentPassword"
+        label="Current Password"
+        placeholder="Enter your current password"
+      />
 
-        <PasswordFormInput
-          {form}
-          fieldName="newPassword"
-          label="New Password"
-          placeholder="Enter new password"
-        />
-      </div>
-    {/if}
+      <PasswordFormInput
+        {form}
+        fieldName="newPassword"
+        label="New Password"
+        placeholder="Enter new password"
+      />
+    </div>
   </UpdateDialog>
 {/key}

@@ -19,11 +19,13 @@
     cancelButtonlabel = 'Cancel',
     actionButtonlabel = 'Save changes',
     actionButtonloadingText = 'Save ...',
+    success = false,
     onAction,
     onCancel,
     onBack,
     showCancel = true,
     showActionButton = true,
+    actionButtonExtraClass = '',
     showDialog = $bindable(false),
     children,
   } = $props<{
@@ -32,6 +34,7 @@
     cancelButtonlabel?: string;
     actionButtonlabel?: string;
     actionButtonloadingText?: string;
+    success?: boolean;
     form: SuperForm<T>;
     shouldEnableSave: boolean;
     isLoading: boolean;
@@ -43,6 +46,7 @@
     showActionButton?: boolean;
     children?: Snippet;
     showDialog: boolean;
+    actionButtonExtraClass?: string;
   }>();
 
   const { enhance, delayed } = form;
@@ -71,14 +75,25 @@
   <Dialog.Content class="sm:max-w-[425px]">
     <Dialog.Header class="space-y-2">
       {#if onBack}
-        <div class="flex items-center mb-2">
-          <button 
+        <div class="mb-2 flex items-center">
+          <button
             type="button"
             class="flex items-center text-sm text-muted-foreground hover:text-foreground"
             onclick={onBack}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
-              <path d="m15 18-6-6 6-6"/>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="mr-1"
+            >
+              <path d="m15 18-6-6 6-6" />
             </svg>
             Back
           </button>
@@ -108,10 +123,12 @@
         {#if showActionButton}
           <FormButton
             disabled={isLoading || $delayed || !shouldEnableSave}
-            loading={isLoading}
+            loading={isLoading && !success}
+            {success}
             fullWidth={false}
             buttonText={actionButtonlabel}
             loadingText={actionButtonloadingText}
+            extraClass={actionButtonExtraClass}
             onClick={onAction}
           />
         {/if}
