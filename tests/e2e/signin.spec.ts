@@ -34,9 +34,9 @@ test('Sign in with password flow', async ({ page }) => {
   await page.goto('/signin');
 
   // Fill in credentials
-  await page.getByLabel('Email or Username').fill('e2e@test.com');
+  await page.getByLabel('Email or Username').fill('e2e-test@example.com');
   // Use a more specific selector for password input
-  await page.getByRole('textbox', { name: 'Password' }).fill('Password123');
+  await page.getByRole('textbox', { name: 'Password' }).fill('SecurePassword123');
 
   // Intercept the authentication request
   await page.route('**/api/auth/signin', async (route) => {

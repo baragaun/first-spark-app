@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-var testId = 17; // Increment this for each test to mail different email id's
+var testId = 0; // Increment this for each test to mail different email id's
 
 test('Sign up page has correct UI elements', async ({ page }) => {
   await page.goto('/signup');
@@ -23,7 +23,7 @@ test('Sign up page has correct UI elements', async ({ page }) => {
 });
 
 test('Sign up flow - complete registration', async ({ page }) => {
-  // testId++;
+  testId++;
   test.setTimeout(60000); // Increase timeout for this test
   await page.goto('/signup');
 
@@ -111,7 +111,7 @@ test('Sign up flow - complete registration', async ({ page }) => {
 });
 
 test('Sign up - email availability check', async ({ page }) => {
-  // testId++;
+  testId++;
   await page.goto('/signup');
 
   // Intercept the availability check
@@ -152,7 +152,7 @@ test('Sign up - email availability check', async ({ page }) => {
 });
 
 test('Sign up - token resend functionality', async ({ page }) => {
-  // testId++;
+  testId++;
   test.setTimeout(40000);
   await page.goto('/signup');
 
@@ -211,7 +211,7 @@ test('Sign up - token resend functionality', async ({ page }) => {
 });
 
 test('Sign up - username availability check', async ({ page }) => {
-  // testId++;
+  testId++;
   // Navigate directly to step 3 by mocking the previous steps
   await page.goto('/signup');
 
