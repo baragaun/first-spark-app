@@ -106,11 +106,12 @@
     }
 
     switch (step) {
-      case 1:
+      case 1: {
         let isValid = await verifyCurrentPassword();
         if (!isValid) return;
         await registerNewEmail();
         break;
+      }
       case 2:
         await verifyEmailToken();
         break;
