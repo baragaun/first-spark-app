@@ -36,7 +36,7 @@
   });
 
   const { form: formData, errors, validateForm } = form;
-  
+
   const updateFormErrors = (field: keyof UsernameSchema, message: string) => {
     errors.update((errors) => {
       const newErrors = {
@@ -271,7 +271,6 @@
           {identType}
           {isLoading}
           suggestUsername={getSuggestedUsername}
-          showInitialSuggestion={true}
         />
       </div>
     {/if}

@@ -19,7 +19,6 @@
     disabled = false,
     identType = UserIdentType.email,
     isLoading = false,
-    showInitialSuggestion = false,
     suggestUsername = undefined,
   } = $props<{
     form: SuperForm<T>;
@@ -29,18 +28,11 @@
     disabled?: boolean;
     identType?: UserIdentType;
     isLoading?: boolean;
-    showInitialSuggestion?: boolean;
     suggestUsername?: () => Promise<void>;
   }>();
 
   const { form: formData, errors } = form;
   const isUserHandle = $derived(identType === UserIdentType.userHandle);
-
-  onMount(() => {
-    if (isUserHandle && !$formData.username && showInitialSuggestion) {
-      suggestUsername();
-    }
-  });
 </script>
 
 <Form.Field {form} name={fieldName}>
@@ -76,7 +68,7 @@
             {placeholder}
             {disabled}
           />
-          {#if isUserHandle}
+          {#if isUserHandle && $formData[fieldName]}
             {#if isLoading}
               <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
                 <div

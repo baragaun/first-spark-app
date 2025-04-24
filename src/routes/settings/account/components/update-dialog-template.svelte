@@ -1,3 +1,7 @@
+<script lang="ts" module>
+  type T = Record<string, unknown>;
+</script>
+
 <script lang="ts" generics="T extends Record<string, unknown>">
   import * as Dialog from '$lib/components/ui/dialog';
   import ErrorAlert from '@/components/error-alert.svelte';
