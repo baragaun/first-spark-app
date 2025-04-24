@@ -7,10 +7,10 @@
 
   let { data }: { data: PageData } = $props();
   const isSignedIn = $derived(myUserContext.isSignedIn);
-  
+
   onMount(async () => {
     if (isSignedIn) await goto('/');
-  })
+  });
 </script>
 
 <div class="flex h-full w-full items-center justify-center px-4">

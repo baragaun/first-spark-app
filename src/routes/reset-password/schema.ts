@@ -20,18 +20,13 @@ export const usernameSchema = z
   .min(3)
   .max(30);
 
+const otpSchema = z.string().min(6, {
+  message: 'Your one-time password must be at least 6 characters',
+});
 
-const otpSchema = z
-  .string()
-  .min(6, {
-    message: 'Your one-time password must be at least 6 characters',
-  });
-
-const passwordSchema = z
-  .string()
-  .min(8, {
-    message: 'Your password must be at least 8 characters',
-  });
+const passwordSchema = z.string().min(8, {
+  message: 'Your password must be at least 8 characters',
+});
 
 export const schemaFirstStep = z.object({
   ident: z

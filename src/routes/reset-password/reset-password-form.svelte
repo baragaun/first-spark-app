@@ -22,7 +22,7 @@
     type ResetPasswordFormSchema,
   } from './schema';
 
-  let { data }: { data: { form: SuperValidated<ResetPasswordFormSchema> }} = $props();
+  let { data }: { data: { form: SuperValidated<ResetPasswordFormSchema> } } = $props();
 
   const steps = [zod(schemaFirstStep), zod(schemaLastStep)];
   let step = $state(1);
@@ -73,11 +73,15 @@
     },
     async onSubmit({ cancel }) {
       cancel(); // Avoid any actual server-side validation form action
-      
+
       const result = await validateForm({ update: true, focusOnError: true });
       if (!result.valid) return;
 
-      step === 1 ? await startPasswordReset() : await updateMyPassword();
+      if (step === 1) {
+        await startPasswordReset();
+      } else {
+        await updateMyPassword();
+      }
 
       return;
     },
@@ -209,7 +213,10 @@
     }
 
     try {
-      const response = await myUserContext.sendMultiStepActionNotification($formData.actionId, $formData.ident);
+      const response = await myUserContext.sendMultiStepActionNotification(
+        $formData.actionId,
+        $formData.ident,
+      );
 
       if (response !== true) {
         updateFormErrors(
