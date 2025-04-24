@@ -27,8 +27,6 @@ export class MyUserContext {
   private _isInitializing = false;
 
   public async initialize(): Promise<void> {
-    console.log('MyUserContext.initialize called.');
-
     if (this.client.isInitialized || this._isInitializing) {
       console.warn('MyUserContext.initialize: already initialized.');
       return;
@@ -95,7 +93,6 @@ export class MyUserContext {
     // if (import.meta.env.MOCK_DATA === 'true') {
     //   config.useMockData = true;
     // }
-    // console.log('MyUserContext: BgNodeClient initialized:', { isSignedIn: this.client.isSignedIn });
 
     this._isInitializing = false;
   }
@@ -433,9 +430,6 @@ export class MyUserContext {
         token,
         newPassword,
       );
-
-      // TODO: This isn't appropriately returning false where the code was incorrect
-      console.log('verify response: ', response.object);
 
       if (response.error || !response.object) {
         console.error(
