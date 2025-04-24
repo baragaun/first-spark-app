@@ -2,7 +2,7 @@
   import SuperDebug, { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
   import { goto } from '$app/navigation';
-  import { onDestroy, onMount } from 'svelte';
+  import { onDestroy } from 'svelte';
   import translate from '@/helpers/language/translate.js';
   import { UserIdentType } from '@baragaun/bg-node-client';
   import AuthCard from '@/components/auth-card.svelte';
@@ -29,7 +29,7 @@
   const getCurrentValidator = () => steps[step - 1];
 
   let otpHandler: MsaListenerHandler | undefined = $state(undefined);
-  let msaActionId = $state<string | undefined>(undefined);
+  let msaId = $state<string | undefined>(undefined);
   let resendTimer = $state(30);
   let canResend = $state(false);
 
@@ -54,8 +54,8 @@
         clearTimeout(debounceTimer);
       }
 
-      if (msaActionId && !$formData.actionId) {
-        $formData.actionId = msaActionId;
+      if (msaId && !$formData.actionId) {
+        $formData.actionId = msaId;
       }
 
       debounceTimer = window.setTimeout(async () => {
@@ -179,7 +179,7 @@
         await goto('/');
       };
 
-      msaActionId = response.object.actionProgress.actionId;
+      msaId = response.object.actionProgress.actionId;
       otpHandler = new MsaListenerHandler(
         'ResetPassword',
         response,
@@ -202,14 +202,14 @@
     if (!canResend) return;
     isLoading = true;
 
-    if (!msaActionId) {
+    if (!msaId) {
       console.error('ResetPasswordForm.handleResendToken: actionId missing.');
       updateFormErrors('token', translate(AppUiMessage.systemError));
       return;
     }
 
     try {
-      const response = await myUserContext.sendMultiStepActionNotification($formData.ident);
+      const response = await myUserContext.sendMultiStepActionNotification($formData.actionId, $formData.ident);
 
       if (response !== true) {
         updateFormErrors(
@@ -231,7 +231,7 @@
   const updateMyPassword = async () => {
     isLoading = true;
 
-    if (!msaActionId) {
+    if (!msaId) {
       console.error('ResetPasswordForm.updateMyPassword: actionId missing:');
       updateFormErrors('token', translate(AppUiMessage.systemError));
       return;
@@ -262,7 +262,7 @@
         err instanceof Error ? err.message : 'Failed to verify code. Please try again.',
       );
     } finally {
-      isLoading = true;
+      isLoading = false;
     }
   };
 
@@ -272,8 +272,6 @@
         return 'Provide your username or email to get a verification code';
       case 2:
         return getOtpMessage($formData);
-      case 3:
-        return 'Now, update your password.';
     }
   };
 
