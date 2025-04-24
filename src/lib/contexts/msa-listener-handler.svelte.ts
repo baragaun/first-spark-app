@@ -71,11 +71,6 @@ export class MsaListenerHandler {
 
           if (eventType === MultiStepActionEventType.notificationSent) {
             // The notification has been sent out.
-            console.log(
-              `${this.listenerId}.multiStepActionListener: Notification sent out.`,
-              action.notificationResult,
-            );
-
             tokenStatus = MsaTokenStatus.notificationSent;
 
             // Proceed with any callback
@@ -84,10 +79,6 @@ export class MsaListenerHandler {
           }
 
           if (eventType === MultiStepActionEventType.tokenFailed) {
-            console.error(
-              `${this.listenerId}.multiStepActionListener: incorrect token.`,
-              action.notificationResult,
-            );
             errorMessage = 'We could not verify the token you entered. Please try again.';
             if (this.onFailure) this.onFailure();
             return;
@@ -120,11 +111,6 @@ export class MsaListenerHandler {
           }
 
           if (eventType === MultiStepActionEventType.success) {
-            // The token was accepted. The user is now signed in.
-            console.log(
-              `${this.listenerId}.multiStepActionListener: success.`,
-              action.notificationResult,
-            );
             tokenStatus = MsaTokenStatus.success;
 
             // Proceed with any callback
@@ -144,15 +130,12 @@ export class MsaListenerHandler {
   removeListener(): void {
     try {
       if (this.listenerRef && this.response.object?.run) {
-        console.log(`Removing listener with ref: ${this.listenerRef}`);
-
         if (this.response.object.run.abort) {
           this.response.object.run.abort();
         }
 
         if (this.response.object.run.removeListener) {
           this.response.object.run.removeListener(this.listenerRef);
-          console.log(`Successfully removed listener for ${this.listenerId}`);
         } else {
           console.error(`removeListener method not found on run object for ${this.listenerId}`);
         }
