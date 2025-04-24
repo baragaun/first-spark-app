@@ -61,7 +61,7 @@
       debounceTimer = window.setTimeout(async () => {
         try {
           isLoading = true;
-          const result = await validateForm({ update: true });
+          const result = await validateForm({ update: true, focusOnError: false });
           hasStepError = !result.valid;
         } catch (error) {
           console.error('Error validating form:', error);
