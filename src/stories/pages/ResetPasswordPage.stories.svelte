@@ -14,6 +14,17 @@
 
 <Story name="Default">
   <MockUserProvider>
-    <ResetPasswordPage />
+    <ResetPasswordPage
+      data={{
+        form: {
+          data: { ident: '', token: '', newPassword: '', actionId: '' },
+          errors: {},
+          constraints: {},
+          id: '',
+          valid: false,
+          posted: false,
+        },
+      }}
+    />
   </MockUserProvider>
 </Story>

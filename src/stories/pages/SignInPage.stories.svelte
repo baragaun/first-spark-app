@@ -15,7 +15,19 @@
 
 <Story name="Default">
   <MockUserProvider>
-    <SignIn />
+    <SignIn
+      data={{
+        userInitialized: true,
+        form: {
+          data: { ident: '', authType: 'password' },
+          id: '',
+          valid: false,
+          posted: false,
+          errors: {},
+          constraints: {},
+        },
+      }}
+    />
   </MockUserProvider>
 </Story>
 
@@ -70,7 +82,19 @@
   }}
 >
   <MockUserProvider>
-    <SignIn />
+    <SignIn
+      data={{
+        userInitialized: true,
+        form: {
+          data: { ident: '', authType: 'password' },
+          id: '',
+          valid: false,
+          posted: false,
+          errors: {},
+          constraints: {},
+        },
+      }}
+    />
   </MockUserProvider>
 </Story>
 
@@ -154,6 +178,18 @@
   }}
 >
   <MockUserProvider>
-    <SignIn />
+    <SignIn
+      data={{
+        userInitialized: true,
+        form: {
+          data: { ident: '', authType: 'password' },
+          id: '',
+          valid: false,
+          posted: false,
+          errors: {},
+          constraints: {},
+        },
+      }}
+    />
   </MockUserProvider>
 </Story>

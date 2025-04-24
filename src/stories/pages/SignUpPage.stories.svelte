@@ -17,10 +17,11 @@
   <MockUserProvider>
     <SignUp
       data={{
+        userInitialized: false,
         form: {
           data: {
             email: '',
-            emailOtp: '',
+            token: '',
             username: '',
             password: '',
           },
@@ -128,10 +129,11 @@
   <MockUserProvider>
     <SignUp
       data={{
+        userInitialized: false,
         form: {
           data: {
             email: '',
-            emailOtp: '',
+            token: '',
             username: '',
             password: '',
           },
