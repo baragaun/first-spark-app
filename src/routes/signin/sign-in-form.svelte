@@ -29,7 +29,7 @@
   const getCurrentValidator = () => steps[step - 1];
 
   let otpHandler: MsaListenerHandler | undefined = $state(undefined);
-  let msaActionId = $state<string | undefined>(undefined);
+  let msaId = $state<string | undefined>(undefined);
   let resendTimer = $state(30);
   let canResend = $state(false);
 
@@ -220,7 +220,7 @@
         return;
       }
       startResendTimer();
-      msaActionId = response.object.actionProgress.actionId;
+      msaId = response.object.actionProgress.actionId;
 
       const onNotificationSent = () => {
         step = 2;
@@ -254,13 +254,13 @@
     if (!$formData.token) return;
 
     try {
-      if (!msaActionId) {
+      if (!msaId) {
         console.error('SignInForm.handleVerifyOtp: actionId missing:');
         updateFormErrors('token', translate(AppUiMessage.systemError));
         return;
       }
 
-      const response = await myUserContext.verifyMultiStepActionToken(msaActionId, $formData.token);
+      const response = await myUserContext.verifyMultiStepActionToken(msaId, $formData.token);
 
       if (response !== true) {
         console.error('SignInForm.handleVerifyOtp: invalid response:', { result: response });
@@ -279,7 +279,7 @@
   const handleResendToken = async () => {
     if (!canResend) return;
 
-    if (!msaActionId) {
+    if (!msaId) {
       console.error('SignInForm.handleResendToken: actionId missing.');
       updateFormErrors('token', translate(AppUiMessage.systemError));
       return;
@@ -298,7 +298,7 @@
     try {
       isLoading = true;
 
-      const response = await myUserContext.sendMultiStepActionNotification(msaActionId, identifier);
+      const response = await myUserContext.sendMultiStepActionNotification(msaId, identifier);
 
       if (typeof response === 'string') {
         console.error('SignInForm.handleResendToken: error:', { error: response });
