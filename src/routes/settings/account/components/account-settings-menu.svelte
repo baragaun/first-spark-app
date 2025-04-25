@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { goto } from '$app/navigation';
   import { Separator } from '$lib/components/ui/separator';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { onMount } from 'svelte';
@@ -13,7 +12,6 @@
 
   let { data }: { data: PageData } = $props();
 
-  let isLoading = $state(false);
   let currentUsername = $state('');
   let currentEmail = $state('');
 
@@ -36,31 +34,16 @@
   const updateUserData = () => {
     console.log('myUser', myUser);
 
-    currentUsername =
-      data.currentUsername || myUserContext.myUserHandle || myUser?.userHandle || '';
-    currentEmail = data.email || myUserContext.myEmail || myUser?.email || '';
-  };
-
-  //TODO: dummy implementation
-  const handleAccountDeletion = async () => {
-    try {
-      isLoading = true;
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      goto('/signup');
-      return true;
-    } catch (error) {
-      console.error('Error deleting account:', error);
-      return false;
-    } finally {
-      isLoading = false;
-    }
+    currentUsername = myUserContext.myUserHandle || myUser?.userHandle || '';
+    currentEmail = myUserContext.myEmail || myUser?.email || '';
   };
 </script>
 
 <div>
   <h4 class="font-lexend mb-4 px-4 text-lg font-bold">General</h4>
-  <div class="space-y-4 px-4">
-    <UpdateUsernameDialog {currentUsername} {currentEmail} usernameForm={data.usernameForm} />
+
+  <div class="space-y-4 px-2">
+    <UpdateUsernameDialog usernameForm={data.usernameForm} />
 
     <UpdateEmailDialog emailForm={data.emailForm} />
 
@@ -70,13 +53,7 @@
   <Separator class="my-6" />
 
   <h4 class="font-lexend mb-4 px-4 text-lg font-bold">Danger Zone</h4>
-  <div class="space-y-4 px-4">
-    <DeleteAccountDialog
-      {currentEmail}
-      deleteAccountForm={data.deleteAccountForm}
-      onDelete={async () => {
-        await handleAccountDeletion();
-      }}
-    />
+  <div class="space-y-4 px-2">
+    <DeleteAccountDialog {currentEmail} deleteAccountForm={data.deleteAccountForm} />
   </div>
 </div>

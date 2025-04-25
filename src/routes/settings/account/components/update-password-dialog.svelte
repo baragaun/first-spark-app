@@ -46,13 +46,12 @@
     $formData.currentPassword && $formData.newPassword && !$errors.newPassword,
   );
 
-  // Reset dialog state when closed
-  function resetDialogState() {
+  const resetDialogState = () => {
     isLoading = false;
     errorMessage = '';
     isSuccess = false;
     form.reset();
-  }
+  };
 
   // Handle password change
   const handlePasswordChange = async () => {
@@ -122,7 +121,7 @@
 </script>
 
 <button
-  class="group flex w-full items-center justify-between rounded-lg py-2 hover:bg-muted/50"
+  class="group flex w-full items-center justify-between rounded-lg px-2 py-3 hover:bg-muted/50"
   onclick={() => (showUpdatePasswordForm = true)}
 >
   <div class="flex flex-col text-left sm:flex-row sm:items-center sm:gap-2">
@@ -146,7 +145,6 @@
     shouldEnableSave={isSuccess ? false : hasFormValues || false}
     {isLoading}
     {errorMessage}
-    onAction={handlePasswordChange}
     onCancel={resetDialogState}
     showActionButton={true}
     actionButtonlabel={isSuccess ? 'Complete' : 'Save Changes'}

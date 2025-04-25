@@ -24,6 +24,7 @@
   }
   let { emailForm }: EmailInputProps = $props();
 
+  let currentEmail = $derived(myUserContext.myEmail);
   let step = $state(1);
   let isLoading = $state(false);
   let hasStepError = $state(false);
@@ -43,7 +44,6 @@
   const tokenFieldName = 'token';
   const emailFieldName = 'email';
   const passwordFieldName = 'currentPassword';
-  const currentEmail = myUserContext.myEmail;
 
   const steps = [zod(changeEmailschemaFirstStep), zod(changeEmailschemaLastStep)];
   const getCurrentValidator = () => steps[step - 1];
@@ -318,7 +318,11 @@
   });
 
   let isEmailFormValid = $derived(
-    $formData.email && !$errors.email && $formData.currentPassword && !hasStepError && !$errors.currentPassword,
+    $formData.email &&
+      !$errors.email &&
+      $formData.currentPassword &&
+      !hasStepError &&
+      !$errors.currentPassword,
   );
 
   let isTokenFormValid = $derived($formData.token && !$errors.token);
@@ -368,6 +372,7 @@
 
   const handleBack = () => {
     step = 1;
+    $formData.token = '';
     errorMessage = '';
   };
 
@@ -415,17 +420,17 @@
     if (otpHandler) otpHandler.removeListener();
   });
 
-  function resetDialogState() {
+  const resetDialogState = () => {
     step = 1;
     isLoading = false;
     errorMessage = '';
     isPasswordValid = false;
     mfaActionId = undefined;
-  }
+  };
 </script>
 
 <button
-  class="group flex w-full items-center justify-between rounded-lg py-2 hover:bg-muted/50"
+  class="group flex w-full items-center justify-between rounded-lg px-2 py-3 hover:bg-muted/50"
   onclick={() => (showDialog = true)}
 >
   <div class="flex flex-col text-left sm:flex-row sm:items-center sm:gap-2">
@@ -450,7 +455,6 @@
     shouldEnableSave={dialogDetails.shouldEnableSave || false}
     {isLoading}
     {errorMessage}
-    onAction={handleFormSubmit}
     onCancel={resetDialogState}
     showCancel={dialogDetails.showCancel}
     showActionButton={dialogDetails.showActionButton}

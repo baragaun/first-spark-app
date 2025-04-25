@@ -13,12 +13,13 @@
   import UpdateDialog from './update-dialog-template.svelte';
 
   interface UpdateUsernameDialogProps {
-    currentUsername: string;
-    currentEmail: string;
     usernameForm: SuperValidated<UsernameSchema>;
   }
 
-  let { currentUsername, currentEmail, usernameForm }: UpdateUsernameDialogProps = $props();
+  let { usernameForm }: UpdateUsernameDialogProps = $props();
+
+  let currentEmail = $derived(myUserContext.myEmail);
+  let currentUsername = $derived(myUserContext.myUserHandle);
 
   const form = superForm(usernameForm, {
     validators: zod(usernameSchema),
@@ -31,7 +32,6 @@
     async onSubmit({ cancel }) {
       cancel(); // Avoid the server-side form action
       await saveUsername();
-      resetDialogState();
     },
   });
 
@@ -170,11 +170,11 @@
     }
   };
 
-  function resetDialogState() {
+  const resetDialogState = () => {
     showDialog = false;
     isSuccess = false;
     form.reset();
-  }
+  };
 
   const saveUsername = async () => {
     try {
@@ -206,7 +206,7 @@
 </script>
 
 <button
-  class="group flex w-full items-center justify-between rounded-lg py-2 hover:bg-muted/50"
+  class="group flex w-full items-center justify-between rounded-lg px-2 py-3 hover:bg-muted/50"
   onclick={() => (showDialog = true)}
 >
   <div class="flex flex-col text-left sm:flex-row sm:items-center sm:gap-2">
@@ -229,7 +229,6 @@
     {form}
     shouldEnableSave={isSuccess ? false : hasFormValues || false}
     {isLoading}
-    onAction={saveUsername}
     onCancel={resetDialogState}
     showActionButton={true}
     actionButtonlabel={isSuccess ? 'Complete' : 'Save Changes'}

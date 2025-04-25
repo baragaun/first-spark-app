@@ -41,8 +41,11 @@ export const passwordSchema = z.object({
 // Delete account schema
 export const deleteAccountSchema = z.object({
   confirmEmail: z.string().email('Please enter a valid email address'),
+  reason: z.string().optional(),
+  description: z.string().optional(),
 });
 
 export type UpdateEmailFormSchema = z.infer<typeof changeEmailschemaLastStep>;
 export type UsernameSchema = z.infer<typeof usernameSchema>;
 export type PasswordSchema = z.infer<typeof passwordSchema>;
+export type DeleteAccountSchema = z.infer<typeof deleteAccountSchema>;

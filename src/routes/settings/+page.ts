@@ -1,4 +1,3 @@
-import { myUserContext } from '@/contexts/my-user-context.svelte';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import {
@@ -10,11 +9,6 @@ import {
 
 export const load = async () => {
   return {
-    // Current user data (would come from API/database)
-    currentUsername: myUserContext.myUserHandle,
-    email: myUserContext.myEmail,
-
-    // Form schemas
     usernameForm: await superValidate(zod(usernameSchema)),
     emailForm: await superValidate(zod(changeEmailschemaLastStep)),
     passwordForm: await superValidate(zod(passwordSchema)),
