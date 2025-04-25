@@ -12,6 +12,10 @@
   let { children } = $props();
   let activeTab = $derived.by(() => {
     const path = page.url.pathname;
+    // If we're at /settings, default to account tab without changing URL
+    if (path === '/settings') {
+      return 'account';
+    }
     return tabs.find((tab) => path.startsWith(tab.path))?.id || 'account';
   });
 </script>
