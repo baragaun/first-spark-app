@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { deleteTestAccount } from './utils/test-account';
 
 test('Sign in page has correct UI elements', async ({ page }) => {
   await page.goto('/signin');
@@ -31,27 +32,60 @@ test('Sign in page has correct UI elements', async ({ page }) => {
 });
 
 test('Sign in with password flow', async ({ page }) => {
+  await page.goto('/signup');
+
+  // Step 1: Email submission
+  await page.getByLabel('Email address').fill('e2e@test.com');
+
+  // Click sign up button
+  await page.locator('#form-button').click();
+
+  // Step 2: Verification code
+  // Wait for the OTP input to appear
+  const otpInputs = page.locator('#verification-code');
+  await expect(otpInputs.first()).toBeVisible();
+
+  // Enter verification code
+  await page.locator('#verification-code input').first().focus();
+  await page.keyboard.type('666666');
+
+  // Click submit button
+  await page.locator('#form-button').click();
+
+  // Step 3: Username and password
+  // Wait for username and password fields to appear
+  const usernameInput = page.getByLabel('Username');
+  await expect(usernameInput).toBeVisible();
+
+  // Use a more specific selector for the password input
+  const passwordInput = page.getByRole('textbox', { name: 'Password' });
+  await expect(passwordInput).toBeVisible();
+
+  const testUsername = 'testuser';
+  // Fill in username and password
+  await usernameInput.fill(testUsername);
+  await passwordInput.fill('SecurePassword123');
+
+  // Click final sign up button
+  await page.locator('#form-button').click();
+
+  // Sign out the user
+  await page.getByTestId('avatar-menu-trigger').click();
+  await page.getByRole('menuitem', { name: /sign out/i }).click();
+
+  // Verify redirection to sign in page
+  await expect(page).toHaveURL('/signin');
+
   await page.goto('/signin');
 
   // Fill in credentials
-  await page.getByLabel('Email or Username').fill('e2e-test@example.com');
+  await page.getByLabel('Email or Username').fill('e2e@test.com');
   // Use a more specific selector for password input
   await page.getByRole('textbox', { name: 'Password' }).fill('SecurePassword123');
-
-  // Intercept the authentication request
-  await page.route('**/api/auth/signin', async (route) => {
-    // Mock successful authentication
-    await route.fulfill({
-      status: 200,
-      body: JSON.stringify({ success: true }),
-    });
-  });
 
   // Click sign in button
   await page.locator('#form-button').click();
 
-  // Wait for navigation to complete
-  await page.waitForURL('/');
   // Verify redirection to home page
   await expect(page).toHaveURL('/');
 });
@@ -62,24 +96,8 @@ test('Sign in with token flow', async ({ page }) => {
   // Fill in email
   await page.getByLabel('Email or Username').fill('e2e@test.com');
 
-  // Intercept the token request when clicking "Sign in with token"
-  await page.route('**/api/auth/signMeInWithToken', async (route) => {
-    await route.fulfill({
-      status: 200,
-      body: JSON.stringify({
-        object: {
-          actionProgress: { actionId: 'test-action-id' },
-          run: true,
-        },
-      }),
-    });
-  });
-
   // Click token sign in button
   await page.getByRole('button', { name: 'Sign in with token' }).click();
-
-  // Wait for verification step to appear
-  // await page.waitForSelector('#verification-code');
 
   // Find all input fields within the OTP component
   const otpInputs = page.locator('#verification-code');
@@ -88,14 +106,6 @@ test('Sign in with token flow', async ({ page }) => {
   // Alternative approach: type the OTP as a single action
   await page.locator('#verification-code input').first().focus();
   await page.keyboard.type('666666');
-
-  // Intercept the verification request
-  await page.route('**/api/auth/verifyMultiStepActionToken', async (route) => {
-    await route.fulfill({
-      status: 200,
-      body: JSON.stringify({ success: true }),
-    });
-  });
 
   // Click verify button
   await page.getByRole('button', { name: 'Verify' }).click();
@@ -110,19 +120,6 @@ test('Token resend functionality', async ({ page }) => {
 
   // Fill in email
   await page.getByLabel('Email or Username').fill('e2e@test.com');
-
-  // Intercept the initial token request
-  await page.route('**/api/auth/signMeInWithToken', async (route) => {
-    await route.fulfill({
-      status: 200,
-      body: JSON.stringify({
-        object: {
-          actionProgress: { actionId: 'test-action-id' },
-          run: true,
-        },
-      }),
-    });
-  });
 
   // Click token sign in button
   await page.getByRole('button', { name: 'Sign in with token' }).click();
@@ -140,17 +137,22 @@ test('Token resend functionality', async ({ page }) => {
   const resendButton = page.getByText('Resend');
   await expect(resendButton).toBeEnabled({ timeout: 10000 }); // Reduced timeout for testing
 
-  // Intercept the resend token request
-  await page.route('**/api/auth/sendMultiStepActionNotification', async (route) => {
-    await route.fulfill({
-      status: 200,
-      body: JSON.stringify({ success: true }),
-    });
-  });
-
   // Click resend button
   await resendButton.click();
 
   // Verify the resend timer is reset
   await expect(resendButton).toBeDisabled();
+
+  // Alternative approach: type the OTP as a single action
+  await page.locator('#verification-code input').first().focus();
+  await page.keyboard.type('666666');
+
+  // Click verify button
+  await page.getByRole('button', { name: 'Verify' }).click();
+
+  // Verify redirection to home page
+  await expect(page).toHaveURL('/');
+
+  // Clean up: Delete the test account
+  await deleteTestAccount(page);
 });

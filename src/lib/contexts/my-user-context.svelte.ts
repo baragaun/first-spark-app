@@ -568,3 +568,8 @@ export class MyUserContext {
 
 // Create a singleton instance
 export const myUserContext = new MyUserContext();
+
+// Expose myUserContext to window for E2E testing
+if (typeof window !== 'undefined') {
+  (window as any).__myUserContext = myUserContext;
+}
