@@ -20,13 +20,13 @@
     actionButtonlabel = 'Save changes',
     actionButtonloadingText = 'Save ...',
     success = false,
-    onAction,
     onCancel,
     onBack,
     showCancel = true,
     showActionButton = true,
     actionButtonExtraClass = '',
     showDialog = $bindable(false),
+    contentClass = '',
     children,
   } = $props<{
     title: string;
@@ -39,7 +39,6 @@
     shouldEnableSave: boolean;
     isLoading: boolean;
     errorMessage?: string;
-    onAction: () => Promise<void> | void;
     onCancel?: () => void | undefined;
     onBack?: () => void;
     showCancel?: boolean | undefined;
@@ -47,6 +46,7 @@
     children?: Snippet;
     showDialog: boolean;
     actionButtonExtraClass?: string;
+    contentClass?: string;
   }>();
 
   const { enhance, delayed } = form;
@@ -72,8 +72,8 @@
     if (!open) handleDialogClose();
   }}
 >
-  <Dialog.Content class="sm:max-w-[425px]">
-    <Dialog.Header class="space-y-2">
+  <Dialog.Content class={`sm:max-w-[425px] max-h-[90vh] flex flex-col ${contentClass}`}>
+    <Dialog.Header class="space-y-2 px-2">
       {#if onBack}
         <div class="mb-2 flex items-center">
           <button
@@ -105,10 +105,12 @@
       </Dialog.Description>
     </Dialog.Header>
 
-    <form method="POST" use:enhance class="grid gap-4 py-4">
-      {@render children?.()}
+    <form method="POST" use:enhance class="flex flex-col flex-1 overflow-hidden">
+      <div class="flex-1 overflow-y-auto py-4 px-2">
+        {@render children?.()}
+      </div>
 
-      <Dialog.Footer class="flex justify-end gap-3">
+      <Dialog.Footer class="flex justify-end gap-3 pt-4 mt-auto px-2">
         {#if showCancel}
           <FormButton
             disabled={isLoading || $delayed}
@@ -129,7 +131,6 @@
             buttonText={actionButtonlabel}
             loadingText={actionButtonloadingText}
             extraClass={actionButtonExtraClass}
-            onClick={onAction}
           />
         {/if}
       </Dialog.Footer>

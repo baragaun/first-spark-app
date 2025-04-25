@@ -496,6 +496,33 @@ export class MyUserContext {
     }
   }
 
+  async deleteMyUser(cause: string | undefined, description: string | undefined, deletePhysically: boolean): Promise<true | string> {
+    if (!this.client.isInitialized) {
+      console.error('MyUserContext.deleteMyUser: not initialized.');
+      return translate(AppUiMessage.systemError);
+    }
+
+    try {
+      isLoading = true;
+      const response = await this.client.operations.myUser.deleteMyUser(cause, description, deletePhysically);
+      if (response.error) {
+        console.error('MyUserContext.deleteMyUser: received error.', { response });
+        return translate(response.error, AppUiMessage.systemError);
+      }
+
+      return true;
+    } catch (error) {
+      console.error('MyUserContext.deleteMyUser: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return translate((error as Error).message, AppUiMessage.systemError);
+    } finally {
+      isLoading = false;
+    }
+  }
+
+
   public get isInitialized(): boolean {
     return this.client.isInitialized;
   }
