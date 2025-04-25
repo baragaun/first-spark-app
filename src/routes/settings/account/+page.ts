@@ -1,23 +1,5 @@
-import { myUserContext } from '@/contexts/my-user-context.svelte';
-import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
-import {
-  changeEmailschemaLastStep,
-  deleteAccountSchema,
-  passwordSchema,
-  usernameSchema,
-} from './schema';
+// Import the parent route's load function
+import { load as parentLoad } from '../+page';
 
-export const load = async () => {
-  return {
-    // Current user data (would come from API/database)
-    currentUsername: myUserContext.myUserHandle,
-    email: myUserContext.myEmail,
-
-    // Form schemas
-    usernameForm: await superValidate(zod(usernameSchema)),
-    emailForm: await superValidate(zod(changeEmailschemaLastStep)),
-    passwordForm: await superValidate(zod(passwordSchema)),
-    deleteAccountForm: await superValidate(zod(deleteAccountSchema)),
-  };
-};
+// Reuse the parent route's load function
+export const load = parentLoad;

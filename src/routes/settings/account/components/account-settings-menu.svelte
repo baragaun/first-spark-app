@@ -33,13 +33,13 @@
     }
   });
 
-  function updateUserData() {
+  const updateUserData = () => {
     console.log('myUser', myUser);
 
     currentUsername =
       data.currentUsername || myUserContext.myUserHandle || myUser?.userHandle || '';
     currentEmail = data.email || myUserContext.myEmail || myUser?.email || '';
-  }
+  };
 
   //TODO: dummy implementation
   const handleAccountDeletion = async () => {
