@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@baragaun/bg-node-client':
-        specifier: ^0.0.23
-        version: 0.0.23(prettier@3.5.3)
+        specifier: ^0.0.27
+        version: 0.0.27(prettier@3.5.3)
       formsnap:
         specifier: ^2.0.0
         version: 2.0.1(svelte@5.28.2)(sveltekit-superforms@2.24.1(@sveltejs/kit@2.20.7(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.28.2)(vite@6.3.2(@types/node@22.14.1)(jiti@1.21.7)(yaml@2.7.1)))(svelte@5.28.2)(vite@6.3.2(@types/node@22.14.1)(jiti@1.21.7)(yaml@2.7.1)))(@types/json-schema@7.0.15)(svelte@5.28.2)(typescript@5.8.3))
@@ -230,8 +230,8 @@ packages:
     resolution: {integrity: sha512-H45s8fVLYjbhFH62dIJ3WtmJ6RSPt/3DRO0ZcT2SUiYiQyz3BLVb9ADEnLl91m74aQPS3AzzeajZHYOalWe3bg==}
     engines: {node: '>=6.9.0'}
 
-  '@baragaun/bg-node-client@0.0.23':
-    resolution: {integrity: sha512-sCpM5LhddD46ycX+u8OOFhBZzpDw5gocLTweWt6zoAWrT2n6Ck/CMkAwfJfLTo2jAt4bQLlnJun2Ys/wqUFKFA==}
+  '@baragaun/bg-node-client@0.0.27':
+    resolution: {integrity: sha512-WrcTtO7y1cYlgUnn/1GHyEYq89V7xmh7++CF0x4jxdMnLVveIIwcR4Dd2cmAynVeIXfqoAkKwnoQ+vEPA3ebPg==}
     engines: {node: '>= 20'}
 
   '@bcoe/v8-coverage@1.0.2':
@@ -858,6 +858,24 @@ packages:
   '@mswjs/interceptors@0.37.6':
     resolution: {integrity: sha512-wK+5pLK5XFmgtH3aQ2YVvA3HohS3xqV/OxuVOdNx9Wpnz7VE/fnC+e1A7ln6LFYeck7gOJ/dsZV6OLplOtAJ2w==}
     engines: {node: '>=18'}
+
+  '@nats-io/jetstream@3.0.2':
+    resolution: {integrity: sha512-dR789x1xhMyEukXILPWDo6ODW53nHpBD9LnsnnywA+pTkwYFydEkYdyhv9HzFc6s6Nfrb2TpibrT4znijlg2dg==}
+
+  '@nats-io/nats-core@3.0.2':
+    resolution: {integrity: sha512-gACbRIhY3yQTO+5C4E1LY/qO2e5EhGUBeDsnPDT8Hd3qY9mfhNtluY6R7d7WX7/JMGsXRPbYdSLSADr/ECSy3w==}
+
+  '@nats-io/nkeys@2.0.3':
+    resolution: {integrity: sha512-JVt56GuE6Z89KUkI4TXUbSI9fmIfAmk6PMPknijmuL72GcD+UgIomTcRWiNvvJKxA01sBbmIPStqJs5cMRBC3A==}
+    engines: {node: '>=18.0.0'}
+
+  '@nats-io/nuid@2.0.3':
+    resolution: {integrity: sha512-TpA3HEBna/qMVudy+3HZr5M3mo/L1JPofpVT4t0HkFGkz2Cn9wrlrQC8tvR8Md5Oa9//GtGG26eN0qEWF5Vqew==}
+    engines: {node: '>= 18.x'}
+
+  '@nats-io/transport-node@3.0.2':
+    resolution: {integrity: sha512-hPuep/ObVepjAM1dFy+XhqMlIzga3bQpbgQiOWM5AxwNZ9CF7GHAtfaxG7WY6+t057tBW8axC0nBL71Q8chQBQ==}
+    engines: {node: '>= 18.0.0'}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -1962,9 +1980,6 @@ packages:
 
   dexie@4.0.10:
     resolution: {integrity: sha512-eM2RzuR3i+M046r2Q0Optl3pS31qTWf8aFuA7H9wnsHTwl8EPvroVLwvQene/6paAs39Tbk6fWZcn2aZaHkc/w==}
-
-  dexie@4.0.11:
-    resolution: {integrity: sha512-SOKO002EqlvBYYKQSew3iymBoN2EQ4BDw/3yprjh7kAfFzjBYkaMNa/pZvcA7HSWlcKSQb9XhPe3wKyQ0x4A8A==}
 
   didyoumean@1.2.2:
     resolution: {integrity: sha512-gxtyfqMg7GKyhQmb056K7M3xszy/myH8w+B4RT+QXBQsvAOdc3XymqDDPHx1BgPgsdAA5SIifona89YtRATDzw==}
@@ -4117,17 +4132,19 @@ snapshots:
       '@babel/helper-string-parser': 7.25.9
       '@babel/helper-validator-identifier': 7.25.9
 
-  '@baragaun/bg-node-client@0.0.23(prettier@3.5.3)':
+  '@baragaun/bg-node-client@0.0.27(prettier@3.5.3)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.10.0)
+      '@nats-io/jetstream': 3.0.2
+      '@nats-io/nats-core': 3.0.2
+      '@nats-io/transport-node': 3.0.2
       '@opentelemetry/api': 1.9.0
       ajv: 8.17.1
       ajv-formats: 3.0.1(ajv@8.17.1)
       chance: 1.1.12
-      dexie: 4.0.11
+      dexie: 4.0.10
       graffle: 8.0.0-next.157(@opentelemetry/api@1.9.0)(graphql@16.10.0)(prettier@3.5.3)
       graphql: 16.10.0
-      nats: 2.29.3
       rxdb: 16.11.0(rxjs@7.8.2)
       rxjs: 7.8.2
       tslib: 2.8.1
@@ -4859,6 +4876,27 @@ snapshots:
       is-node-process: 1.2.0
       outvariant: 1.4.3
       strict-event-emitter: 0.5.1
+
+  '@nats-io/jetstream@3.0.2':
+    dependencies:
+      '@nats-io/nats-core': 3.0.2
+
+  '@nats-io/nats-core@3.0.2':
+    dependencies:
+      '@nats-io/nkeys': 2.0.3
+      '@nats-io/nuid': 2.0.3
+
+  '@nats-io/nkeys@2.0.3':
+    dependencies:
+      tweetnacl: 1.0.3
+
+  '@nats-io/nuid@2.0.3': {}
+
+  '@nats-io/transport-node@3.0.2':
+    dependencies:
+      '@nats-io/nats-core': 3.0.2
+      '@nats-io/nkeys': 2.0.3
+      '@nats-io/nuid': 2.0.3
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
@@ -6058,8 +6096,6 @@ snapshots:
   devalue@5.1.1: {}
 
   dexie@4.0.10: {}
-
-  dexie@4.0.11: {}
 
   didyoumean@1.2.2: {}
 
