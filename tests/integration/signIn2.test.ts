@@ -32,6 +32,7 @@ function renderWithProvider(component: any, props = {}) {
   return render(MyUserProvider, {
     props: {
       children: () => component,
+      ...props,
     }
   });
 }
