@@ -14,10 +14,13 @@ export default defineConfig({
     svelteTesting(),
   ],
   test: {
-    name: 'unit',
+    name: 'unit or intigration',
     globals: true,
     environment: 'jsdom',
-    include: ['tests/unit/*.{test,spec}.{js,ts,svelte}'],
-    setupFiles: 'tests/setup.ts',
+    include: [
+      'tests/unit/*.{test,spec}.{js,ts,svelte}',
+      'tests/integration/*.{test,spec}.{js,ts,svelte}',
+    ],
+    setupFiles: ['tests/setup.ts', 'tests/setup-mocks.ts'],
   },
 });
