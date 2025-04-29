@@ -9,16 +9,24 @@ const isValidEmail = (email: string): boolean => {
 export const emailSchema = z
   .string()
   .email({
-    message: 'Please enter a valid email address.',
+    message: 'Please enter a valid email address',
   })
   .refine((email) => isValidEmail(email));
 
 export const usernameSchema = z
   .string({
-    message: 'A username must be at least 3 characters.',
+    message: 'A username must be at least 3 characters',
   })
   .min(3)
   .max(30);
+
+const otpSchema = z.string().min(6, {
+  message: 'Your one-time password must be at least 6 characters',
+});
+
+const passwordSchema = z.string().min(8, {
+  message: 'Your password must be at least 8 characters',
+});
 
 export const schemaFirstStep = z.object({
   ident: z
@@ -27,22 +35,15 @@ export const schemaFirstStep = z.object({
     .transform((val) => val.trim()),
 });
 
-export const schemaStepTwo = schemaFirstStep.extend({
-  token: z.string().min(6, {
-    message: 'Your one-time password must be at least 6 characters.',
-  }),
-});
-
-export const schemaLastStep = schemaStepTwo.extend({
-  newPassword: z.string().min(8, {
-    message: 'Your password must be at least 8 characters.',
-  }),
+export const schemaLastStep = schemaFirstStep.extend({
+  newPassword: passwordSchema.transform((val) => val.trim()),
+  token: otpSchema.transform((val) => val.trim()),
   actionId: z.string(),
 });
 
 export const getOtpMessage = (formData: { ident?: string }) => {
   const identifier = formData.ident || '';
-  return `Enter the verification code sent to ${identifier}`;
+  return `Enter a new password and the verification code we sent to ${identifier} to update your password`;
 };
 
 export const determineIdentifierType = (value: string): UserIdentType => {

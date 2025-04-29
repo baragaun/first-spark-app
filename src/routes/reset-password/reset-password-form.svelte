@@ -19,18 +19,17 @@
     getOtpMessage,
     schemaFirstStep,
     schemaLastStep,
-    schemaStepTwo,
     type ResetPasswordFormSchema,
   } from './schema';
 
   let { data }: { data: { form: SuperValidated<ResetPasswordFormSchema> } } = $props();
 
-  const steps = [zod(schemaFirstStep), zod(schemaStepTwo), zod(schemaLastStep)];
+  const steps = [zod(schemaFirstStep), zod(schemaLastStep)];
   let step = $state(1);
   const getCurrentValidator = () => steps[step - 1];
 
   let otpHandler: MsaListenerHandler | undefined = $state(undefined);
-  let msaActionId = $state<string | undefined>(undefined);
+  let msaId = $state<string | undefined>(undefined);
   let resendTimer = $state(30);
   let canResend = $state(false);
 
@@ -55,14 +54,14 @@
         clearTimeout(debounceTimer);
       }
 
-      if (msaActionId && !$formData.actionId) {
-        $formData.actionId = msaActionId;
+      if (msaId && !$formData.actionId) {
+        $formData.actionId = msaId;
       }
 
       debounceTimer = window.setTimeout(async () => {
         try {
           isLoading = true;
-          const result = await validateForm({ update: true });
+          const result = await validateForm({ update: true, focusOnError: false });
           hasStepError = !result.valid;
         } catch (error) {
           console.error('Error validating form:', error);
@@ -73,16 +72,14 @@
       }, DEBOUNCE_DELAY);
     },
     async onSubmit({ cancel }) {
-      cancel(); // Avoid the actual server-side validation form action
+      cancel(); // Avoid any actual server-side validation form action
 
       const result = await validateForm({ update: true, focusOnError: true });
       if (!result.valid) return;
 
       if (step === 1) {
         await startPasswordReset();
-      } else if (step === 2) {
-        await verifyResetPasswordToken();
-      } else if (step === 3) {
+      } else {
         await updateMyPassword();
       }
 
@@ -182,15 +179,11 @@
         isLoading = false;
       };
       const onSuccess = async () => {
-        if (step === 2) {
-          return;
-        } else {
-          step = 3;
-        }
         isLoading = false;
+        await goto('/');
       };
 
-      msaActionId = response.object.actionProgress.actionId;
+      msaId = response.object.actionProgress.actionId;
       otpHandler = new MsaListenerHandler(
         'ResetPassword',
         response,
@@ -213,14 +206,17 @@
     if (!canResend) return;
     isLoading = true;
 
-    if (!msaActionId) {
+    if (!msaId) {
       console.error('ResetPasswordForm.handleResendToken: actionId missing.');
       updateFormErrors('token', translate(AppUiMessage.systemError));
       return;
     }
 
     try {
-      const response = await myUserContext.sendMultiStepActionNotification($formData.ident);
+      const response = await myUserContext.sendMultiStepActionNotification(
+        $formData.actionId,
+        $formData.ident,
+      );
 
       if (response !== true) {
         updateFormErrors(
@@ -239,44 +235,16 @@
     }
   };
 
-  const verifyResetPasswordToken = async () => {
+  const updateMyPassword = async () => {
     isLoading = true;
 
-    if (!msaActionId) {
-      console.error('SignInForm.handleVerifyOtp: actionId missing:');
+    if (!msaId) {
+      console.error('ResetPasswordForm.updateMyPassword: actionId missing:');
       updateFormErrors('token', translate(AppUiMessage.systemError));
       return;
     }
 
-    if (!$formData.token) return;
-    try {
-      // We need to wait for the success event before going to to the next step
-      const response = await myUserContext.verifyMultiStepActionToken(
-        $formData.actionId,
-        $formData.token,
-        undefined,
-      );
-
-      if (response !== true) {
-        console.error('ResetPasswordForm.verifyResetPasswordToken: invalid response:', {
-          result: response,
-        });
-        updateFormErrors('token', translate(AppUiMessage.systemError));
-        return;
-      }
-    } catch (error) {
-      console.error('ResetPasswordForm.verifyResetPasswordToken: error:', { error });
-      updateFormErrors('token', translate(AppUiMessage.systemError));
-    } finally {
-      isLoading = true;
-      hasStepError = true; // This response does not determine validity while we poll for success
-    }
-  };
-
-  const updateMyPassword = async () => {
-    isLoading = true;
-
-    if (!$formData.newPassword) return;
+    if (!$formData.newPassword || !$formData.token) return;
 
     try {
       if (!validatePassword($formData.newPassword).isValid) {
@@ -294,19 +262,6 @@
         updateFormErrors('token', typeof result === 'string' ? result : 'Failed to verify code');
         return;
       }
-
-      const response = await myUserContext.signMeInWithPassword(
-        $formData.ident,
-        identType,
-        $formData.newPassword,
-      );
-
-      if (response !== true) {
-        updateFormErrors('newPassword', response);
-        return;
-      }
-
-      return await goto('/');
     } catch (err) {
       console.error('Error verifying reset code:', err);
       updateFormErrors(
@@ -324,8 +279,6 @@
         return 'Provide your username or email to get a verification code';
       case 2:
         return getOtpMessage($formData);
-      case 3:
-        return 'Now, update your password.';
     }
   };
 
@@ -334,8 +287,6 @@
       case 1:
         return 'Send me an email';
       case 2:
-        return 'Verify my email';
-      case 3:
         return 'Update my password';
     }
   };
@@ -387,6 +338,12 @@
           {isLoading}
         />
       {:else if step == 2}
+        <PasswordFormInput
+          {form}
+          fieldName="newPassword"
+          label="New password"
+          placeholder="Enter a new password"
+        />
         <OtpFormInput
           {form}
           fieldName="token"
@@ -396,13 +353,6 @@
           {canResend}
           {resendTimer}
           onResendClick={handleResendToken}
-        />
-      {:else if step == 3}
-        <PasswordFormInput
-          {form}
-          fieldName="newPassword"
-          label="New password"
-          placeholder="Your password must be at least 8 characters"
         />
       {/if}
       <FormButton
