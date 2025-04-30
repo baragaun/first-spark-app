@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { format, isToday, isYesterday, isSameDay } from 'date-fns';
+  import { format, isToday, isYesterday, } from 'date-fns';
   import {
     ChevronDown,
     Pencil,
@@ -22,7 +22,6 @@
   import { Separator } from '$lib/components/ui/separator/index.js';
   import type { ChannelMessage, Channel } from '@baragaun/bg-node-client';
   import { page } from '$app/state';
-  import { createEventDispatcher } from 'svelte';
 
   const MessageStatus = {
     SENDING: 'sending',
@@ -49,12 +48,14 @@
     messages,
     onEditMessage,
     onDeleteMessage,
+    onStartReply,
     channelId,
   }: {
     messages: ChannelMessage[];
     onEditMessage?: (id: string, newText: string) => void;
     onDeleteMessage?: (id: string) => void;
     onReplyMessage?: (replyToId: string, text: string) => void;
+    onStartReply?: (message: ChannelMessage) => void;
     channelId?: string;
   } = $props();
 
@@ -63,6 +64,7 @@
   let editText = $state<string | null | undefined>(null);
   let replyingToMessage = $state<ChannelMessage | null>(null);
   let copiedMessageId = $state<string | null>(null);
+  let showScrollButton = $state(false);
 
   let channel = $derived(() => {
     return page.data.channels.find((c: Channel) => c.id === channelId);
@@ -85,21 +87,7 @@
   // Auto-scroll to bottom when new messages arrive or when component mounts
   $effect(() => {
     if (messagesContainer && messages.length > 0) {
-      // Scroll to bottom immediately when messages load or change
-      setTimeout(() => {
-        scrollToBottom();
-      }, 0);
-    }
-  });
-
-  // Create a separate effect that watches specifically for changes in messages length
-  $effect(() => {
-    const messageCount = messages.length;
-    if (messagesContainer && messageCount > 0) {
-      // Scroll to bottom when new messages are added
-      setTimeout(() => {
-        scrollToBottom();
-      }, 0);
+      scrollToBottom();
     }
   });
 
@@ -124,11 +112,11 @@
     }
   };
 
-  const dispatch = createEventDispatcher();
-
   const startReplying = (message: ChannelMessage) => {
     replyingToMessage = message;
-    dispatch('startReply', { message });
+    if (onStartReply) {
+      onStartReply(message);
+    }
   };
 
   const copyToClipboard = async (text: string, messageId: string) => {
@@ -202,18 +190,16 @@
     return words.slice(0, 150).join(' ') + '...';
   };
 
-  // Add state variables for scroll button
-  let showScrollButton = $state(false);
-
   // Function to scroll to bottom
   const scrollToBottom = () => {
     if (messagesContainer) {
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      messagesContainer.scrollTo({ top: messagesContainer.scrollHeight, behavior: 'smooth' });
     }
   };
 
   // Check scroll position to show/hide button
   const handleScroll = () => {
+    console.log('scrolling');
     if (!messagesContainer) return;
     const { scrollTop, scrollHeight, clientHeight } = messagesContainer;
     // Show button when not at bottom (with small threshold)
@@ -222,7 +208,7 @@
   };
 </script>
 
-<div class="flex-1 overflow-y-auto p-4" bind:this={messagesContainer} onscroll={handleScroll}>
+<div class="h-full overflow-y-auto p-4" bind:this={messagesContainer} onscroll={handleScroll}>
   <div class="space-y-4">
     {#each groupMessagesByDate(messages) as group}
       <div class="relative my-6 flex items-center">

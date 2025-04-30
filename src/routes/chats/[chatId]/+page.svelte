@@ -170,7 +170,7 @@
           onEditMessage={handleEditMessage}
           onDeleteMessage={handleDeleteMessage}
           onReplyMessage={handleReplyMessage}
-          on:startReply={(event) => (replyingTo = event.detail.message)}
+          onStartReply={(message) => (replyingTo = message)}
         />
       </div>
     </div>
