@@ -72,7 +72,7 @@
     if (!open) handleDialogClose();
   }}
 >
-  <Dialog.Content class={`sm:max-w-[425px] max-h-[90vh] flex flex-col ${contentClass}`}>
+  <Dialog.Content class={`flex max-h-[90vh] flex-col sm:max-w-[425px] ${contentClass}`}>
     <Dialog.Header class="space-y-2 px-2">
       {#if onBack}
         <div class="mb-2 flex items-center">
@@ -105,12 +105,12 @@
       </Dialog.Description>
     </Dialog.Header>
 
-    <form method="POST" use:enhance class="flex flex-col flex-1 overflow-hidden">
-      <div class="flex-1 overflow-y-auto py-4 px-2">
+    <form method="POST" use:enhance class="flex flex-1 flex-col overflow-hidden">
+      <div class="flex-1 overflow-y-auto px-2 py-4">
         {@render children?.()}
       </div>
 
-      <Dialog.Footer class="flex justify-end gap-3 pt-4 mt-auto px-2">
+      <Dialog.Footer class="mt-auto flex justify-end gap-3 px-2 pt-4">
         {#if showCancel}
           <FormButton
             disabled={isLoading || $delayed}

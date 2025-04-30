@@ -9,7 +9,7 @@
 
   let { data }: { data: PageData } = $props();
   const isSignedIn = $derived(myUserContext.isSignedIn);
-  
+
   // Determine which tab to show based on the URL
   let activeTab = $derived.by(() => {
     const path = page.url.pathname;
