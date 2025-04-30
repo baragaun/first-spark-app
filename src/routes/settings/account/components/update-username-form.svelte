@@ -1,25 +1,27 @@
 <script lang="ts">
   import { Input } from '$lib/components/ui/input';
   import IdentFormInput from '@/components/forms/form-ident-input.svelte';
-  import { ChevronRight, Check } from 'lucide-svelte';
-
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import translate from '@/helpers/language/translate';
   import { AppUiMessage } from '@/types/enums';
   import { UserIdentType } from '@baragaun/bg-node-client';
-  import { superForm, type SuperValidated } from 'sveltekit-superforms';
+  import { superForm } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
-  import { usernameSchema, type UsernameSchema } from '../schema';
-  import UpdateDialog from './update-dialog-template.svelte';
+  import { usernameSchema, type UsernameSchema } from '../../(data)/schema';
+  import { usernameForm } from '../../(data)/account';
+  import FormButton from '@/components/forms/form-button.svelte';
+  import { Button } from '@/components/ui/button';
 
-  interface UpdateUsernameDialogProps {
-    usernameForm: SuperValidated<UsernameSchema>;
-  }
-
-  let { usernameForm }: UpdateUsernameDialogProps = $props();
+  let { onCancel } = $props<{ onCancel?: (() => void) | undefined }>();
 
   let currentEmail = $derived(myUserContext.myEmail);
   let currentUsername = $derived(myUserContext.myUserHandle);
+
+  let hasStepError = $state(false);
+  let debounceTimer: number | null = null;
+  let isLoading = $state(false);
+  let identType = $state(UserIdentType.userHandle);
+  const DEBOUNCE_DELAY = 350; // ms
 
   const form = superForm(usernameForm, {
     validators: zod(usernameSchema),
@@ -27,7 +29,7 @@
     dataType: 'json',
     validationMethod: 'submit-only',
     async onChange() {
-      debounceFormValidation();
+      await debounceFormValidation();
     },
     async onSubmit({ cancel }) {
       cancel(); // Avoid the server-side form action
@@ -35,7 +37,7 @@
     },
   });
 
-  const { form: formData, errors, validateForm } = form;
+  const { form: formData, delayed, enhance, errors, validateForm } = form;
 
   const updateFormErrors = (field: keyof UsernameSchema, message: string) => {
     errors.update((errors) => {
@@ -47,21 +49,6 @@
     });
   };
 
-  let isInvalidFormOrUsernameUnavailable = $state(false);
-  let debounceTimer: number | null = null;
-  let isLoading = $state(false);
-  let isSuccess = $state(false);
-  let showDialog = $state(false);
-  let identType = $state(UserIdentType.userHandle);
-  const DEBOUNCE_DELAY = 350; // ms
-
-  let hasFormValues = $derived(
-    $formData.username &&
-      !$errors.username &&
-      !isInvalidFormOrUsernameUnavailable &&
-      $formData.username !== currentUsername,
-  );
-
   const debounceFormValidation = async () => {
     if (debounceTimer) {
       clearTimeout(debounceTimer);
@@ -71,12 +58,11 @@
 
     debounceTimer = window.setTimeout(async () => {
       try {
-        // Validate the username
         isLoading = true;
         const result = await validateForm({ update: true, focusOnError: false });
 
         const availability = await checkUsernameAvailability();
-        isInvalidFormOrUsernameUnavailable = !availability || !result.valid;
+        hasStepError = !availability || !result.valid;
       } catch (error) {
         console.error('Error debouncing the form input:', error);
       } finally {
@@ -149,6 +135,8 @@
 
   const handleUsernameChange = async (): Promise<boolean> => {
     try {
+      isLoading = true;
+
       const result = await myUserContext.updateMyUser({
         userHandle: $formData.username,
       });
@@ -170,22 +158,16 @@
     }
   };
 
-  const resetDialogState = () => {
-    showDialog = false;
-    isSuccess = false;
-    form.reset();
-  };
-
   const saveUsername = async () => {
     try {
       isLoading = true;
       const success = await handleUsernameChange();
       if (success) {
-        isSuccess = true;
+        // isSuccess = true;
         // Show success state briefly before closing
-        setTimeout(() => {
-          resetDialogState();
-        }, 1500);
+        // setTimeout(() => {
+        //   // resetDialogState();
+        // }, 1500);
       }
     } finally {
       isLoading = false;
@@ -205,54 +187,29 @@
   });
 </script>
 
-<button
-  class="group flex w-full items-center justify-between rounded-lg px-2 py-3 hover:bg-muted/50"
-  onclick={() => (showDialog = true)}
->
-  <div class="flex flex-col text-left sm:flex-row sm:items-center sm:gap-2">
-    <p class="text-sm font-medium">Username</p>
-  </div>
-  <div class="flex items-center gap-2">
-    <p class="text-right text-sm text-muted-foreground group-hover:text-foreground">
-      {currentUsername}
-    </p>
-    <ChevronRight
-      class="h-5 w-5 stroke-[2] text-muted-foreground transition-colors group-hover:text-foreground"
+<form method="POST" use:enhance class="flex flex-1 flex-col space-y-8 overflow-hidden px-2">
+  <div class="space-y-4">
+    <div class="space-y-2">
+      <label for="current-username" class="text-sm font-medium leading-none">
+        Current username
+      </label>
+      <Input id="current-username" value={currentUsername} disabled class="bg-muted" />
+    </div>
+    <IdentFormInput
+      {form}
+      fieldName="username"
+      placeholder="e.g. 'giraffe08'"
+      label="New username"
+      {identType}
+      {isLoading}
+      suggestUsername={getSuggestedUsername}
     />
   </div>
-</button>
-
-{#key showDialog}
-  <UpdateDialog
-    title="Change Username"
-    description="Enter a new username for your account or use our suggestion."
-    {form}
-    shouldEnableSave={isSuccess ? false : hasFormValues || false}
-    {isLoading}
-    onCancel={resetDialogState}
-    showActionButton={true}
-    actionButtonlabel={isSuccess ? 'Complete' : 'Save Changes'}
-    actionButtonloadingText="Saving..."
-    actionButtonExtraClass={isSuccess ? 'bg-green-600' : ''}
-    success={isSuccess}
-    bind:showDialog
-  >
-    <div class="space-y-4">
-      <div class="space-y-2">
-        <label for="current-username" class="text-sm font-medium leading-none">
-          Current Username
-        </label>
-        <Input id="current-username" value={currentUsername} disabled class="bg-muted" />
-      </div>
-      <IdentFormInput
-        {form}
-        fieldName="username"
-        placeholder="e.g. 'giraffe08'"
-        label="Username"
-        {identType}
-        {isLoading}
-        suggestUsername={getSuggestedUsername}
-      />
-    </div>
-  </UpdateDialog>
-{/key}
+  <FormButton
+    disabled={isLoading || $delayed || hasStepError}
+    loading={isLoading}
+    buttonText="Save"
+    loadingText="Saving..."
+  />
+  <Button variant="outline" onclick={onCancel}>Cancel</Button>
+</form>
