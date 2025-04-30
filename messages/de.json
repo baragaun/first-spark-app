@@ -106,5 +106,12 @@
       "create_account": "Konto erstellen",
       "creating_account": "Konto wird erstellt..."
     }
+  },
+
+  "theme": {
+    "light_switch": "Lichtschalter",
+    "light": "Licht",
+    "dark": "dunkel",
+    "system": "System"
   }
 }

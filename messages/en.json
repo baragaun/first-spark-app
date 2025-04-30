@@ -131,5 +131,12 @@
       "back_to_login": "Back to Log In",
       "need_help": "Need help?"
     }
+  },
+
+  "theme": {
+    "light_switch": "Light switch",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
   }
 }
