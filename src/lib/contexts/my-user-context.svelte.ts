@@ -98,6 +98,64 @@ export class MyUserContext {
     this._isInitializing = false;
   }
 
+  public async testClientInitialize(): Promise<void> {
+    console.log('MyUserContext.initialize.test called.');
+
+    if (this.client.isInitialized || this._isInitializing) {
+      console.warn('MyUserContext.initialize: already initialized.');
+      return;
+    }
+
+    this._isInitializing = true;
+
+    const config: BgNodeClientConfig = {
+      inBrowser: false,
+      appEnvironment:AppEnvironment.test,
+      fsdata: {
+        url: import.meta.env.VITE_FSDATA_URL || 'http://localhost:8092/fsdata/api/graphql',
+        headers: {
+          [HttpHeaderName.consumer]: 'test',
+        },
+      },
+      clientInfoStoreType: ClientInfoStoreType.inMemory,
+      logLevel: 'debug',
+    };
+
+    if (import.meta.env.VITE_APP_ENVIRONMENT) {
+      config.appEnvironment = import.meta.env.VITE_APP_ENVIRONMENT as AppEnvironment;
+    }
+
+    try {
+      const listener: MyUserListener = {
+        id: 'MyUserContext',
+        topic: BgListenerTopic.myUser,
+        onSignedIn: () => {
+          isSignedIn = true;
+        },
+        onSignedOut: () => {
+          isSignedIn = false;
+        },
+        onMyUserUpdated: (updatedMyUser) => {
+          myUser = updatedMyUser;
+        },
+      };
+      await this.client.init({
+        config,
+        isOnline: true,
+        startSession: true,
+        listener,
+      });
+
+      isSignedIn = this.client.isSignedIn;
+    } catch (error) {
+      console.error('MyUserContext: Error initializing BgNodeClient:', { error });
+      this._isInitializing = false;
+      return;
+    }
+
+    this._isInitializing = false;
+  }
+
   /**
    * Sign up a new user
    * @param email The user's email address

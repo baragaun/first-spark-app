@@ -13,25 +13,25 @@ vi.mock('$app/navigation', () => ({
   preloadCode: vi.fn(),
 }));
 
-// Mock user context
-vi.mock('@/contexts/my-user-context.svelte', () => {
-  const mockMethods: Record<string, any> = {};
-  const methods = [
-    'signUpUser',
-    'verifyMyEmail',
-    'verifyMultiStepActionToken',
-    'updateMyUser',
-    'isUserIdentAvailable',
-    'findAvailableUserHandle',
-    'signMeInWithPassword',
-    'signMeInWithToken',
-  ];
+// // Mock user context
+// vi.mock('@/contexts/my-user-context.svelte', () => {
+//   const mockMethods: Record<string, any> = {};
+//   const methods = [
+//     'signUpUser',
+//     'verifyMyEmail',
+//     'verifyMultiStepActionToken',
+//     'updateMyUser',
+//     'isUserIdentAvailable',
+//     'findAvailableUserHandle',
+//     'signMeInWithPassword',
+//     'signMeInWithToken',
+//   ];
 
-  methods.forEach((method) => {
-    mockMethods[method] = vi.fn();
-  });
+//   methods.forEach((method) => {
+//     mockMethods[method] = vi.fn();
+//   });
 
-  return {
-    myUserContext: mockMethods,
-  };
-});
+//   return {
+//     myUserContext: mockMethods,
+//   };
+// });

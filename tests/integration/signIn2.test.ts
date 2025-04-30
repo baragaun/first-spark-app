@@ -2,10 +2,8 @@ import { goto } from '$app/navigation';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import SignInForm from '../../src/routes/signin/sign-in-form.svelte';
-import { mockBrowserAPIs } from '../utils/test-setup';
 import { myUserContext } from '@/contexts/my-user-context.svelte';
 import MyUserProvider from '@/contexts/my-user-provider.svelte';
-import type { Snippet } from 'svelte';
 
 // We're not mocking the myUserContext methods in this test
 // Instead, we'll use the real implementations
@@ -23,10 +21,6 @@ vi.mock('$app/navigation', () => ({
   preloadCode: vi.fn(),
 }));
 
-beforeAll(() => {
-  mockBrowserAPIs();
-});
-
 // Helper function to render components with MyUserProvider
 function renderWithProvider(component: any, props = {}) {
   return render(MyUserProvider, {
@@ -39,10 +33,15 @@ function renderWithProvider(component: any, props = {}) {
 
 describe('SignInForm Integration Tests with Real Client Functions', () => {
 
-  beforeEach(() => {
-    vi.resetAllMocks();
-    vi.mocked(goto).mockResolvedValue(undefined);
+  beforeAll(async () => {
+    // mockBrowserAPIs();
+    await myUserContext.testClientInitialize();
   });
+
+  // beforeEach(() => {
+  //   vi.resetAllMocks();
+  //   vi.mocked(goto).mockResolvedValue(undefined);
+  // });
 
   it('renders the sign-in form with all UI elements', () => {
     const { getByText, getByLabelText, getByRole } = renderWithProvider(SignInForm, {
@@ -87,11 +86,11 @@ describe('SignInForm Integration Tests with Real Client Functions', () => {
 
     // Fill in the form with test credentials
     await fireEvent.input(getByLabelText('Email or Username'), {
-      target: { value: 'test@example.com' },
+      target: { value: 'raghav@test.com' },
     });
 
     await fireEvent.input(getByLabelText('Password'), {
-      target: { value: 'password123' },
+      target: { value: '1234567890' },
     });
 
     // Submit the form
@@ -113,9 +112,9 @@ describe('SignInForm Integration Tests with Real Client Functions', () => {
     // Verify the auth method was called with correct parameters
     await waitFor(() => {
       expect(myUserContext.signMeInWithPassword).toHaveBeenCalledWith(
-        'test@example.com',
+        'raghav@test.com',
         'email',
-        'password123',
+        '1234567890',
       );
     });
 

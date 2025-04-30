@@ -33,16 +33,24 @@ export const mockBrowserAPIs = () => {
   window.ResizeObserver = MockResizeObserver as any;
 };
 
-// Create mock user context methods
-export const createMockUserContext = (methods: string[]) => {
-  const mockMethods: Record<string, any> = {};
+// Mock indexedDB globally
+global.indexedDB = {
+  open: vi.fn(),
+  deleteDatabase: vi.fn(),
+  databases: vi.fn(),
+  cmp: vi.fn(),
+} as IDBFactory;
 
-  methods.forEach((method) => {
-    mockMethods[method] = vi.fn();
-  });
+// // Create mock user context methods
+// export const createMockUserContext = (methods: string[]) => {
+//   const mockMethods: Record<string, any> = {};
 
-  return mockMethods;
-};
+//   methods.forEach((method) => {
+//     mockMethods[method] = vi.fn();
+//   });
+
+//   return mockMethods;
+// };
 
 // Remove this function or fix it by adding the contextPath parameter
 // export const mockUserContext = (methods: string[]) => {
