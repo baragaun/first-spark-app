@@ -9,11 +9,7 @@ export const load: LayoutLoad = async () => {
   if (typeof window !== 'undefined') {
     try {
       if (!myUserContext.isInitialized) {
-        // Check if we're in E2E testing mode
-        const isE2ETesting = import.meta.env.VITE_E2E_TESTING === 'true';
-        console.log('Initializing user context in E2E testing mode:', isE2ETesting);
-
-        await myUserContext.initialize({ enableMockMode: isE2ETesting });
+        await myUserContext.initialize();
       }
       return {
         userInitialized: true,

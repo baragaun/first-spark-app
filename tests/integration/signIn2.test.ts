@@ -42,17 +42,19 @@ describe('SignInForm Integration Tests with Real Client Functions', () => {
   //   vi.resetAllMocks();
   //   vi.mocked(goto).mockResolvedValue(undefined);
   // });
-
   it('renders the sign-in form with all UI elements', () => {
-    const { getByText, getByLabelText, getByRole } = renderWithProvider(SignInForm, {
-      data: {
-        form: {
-          data: { ident: '', password: '', authType: 'password' },
-          errors: {},
-          constraints: {},
-          id: 'signin-form',
-          valid: false,
-          posted: false,
+    const { getByText, getByLabelText, getByRole } = render(SignInForm, {
+      props: {
+        data: {
+          form: {
+            // Mock the superForm data structure
+            data: { ident: '', password: '', authType: 'password' },
+            errors: {},
+            constraints: {},
+            id: 'signin-form',
+            valid: false,
+            posted: false,
+          },
         },
       },
     });

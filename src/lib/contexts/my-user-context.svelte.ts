@@ -4,6 +4,7 @@ import {
   AppEnvironment,
   BgListenerTopic,
   BgNodeClient,
+  ClientInfoStore,
   ClientInfoStoreType,
   HttpHeaderName,
   MyUserChanges,
@@ -108,16 +109,22 @@ export class MyUserContext {
 
     this._isInitializing = true;
 
+    const _clientInfoStore = new ClientInfoStore(ClientInfoStoreType.inMemory);
+
+
     const config: BgNodeClientConfig = {
       inBrowser: false,
       appEnvironment:AppEnvironment.test,
+      clientInfoStore: _clientInfoStore,
+      clientInfoStoreType: ClientInfoStoreType.inMemory,
+
       fsdata: {
-        url: import.meta.env.VITE_FSDATA_URL || 'http://localhost:8092/fsdata/api/graphql',
+        url: import.meta.env.VITE_FSDATA_URL || 'http://localhost:8090/fsdata/api/graphql',
         headers: {
-          [HttpHeaderName.consumer]: 'test',
+          [HttpHeaderName.consumer]: 'first-spark-app',
         },
       },
-      clientInfoStoreType: ClientInfoStoreType.inMemory,
+
       logLevel: 'debug',
     };
 
