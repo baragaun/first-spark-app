@@ -1,14 +1,13 @@
 <script lang="ts" module>
+  import BookUser from 'lucide-svelte/icons/book-user';
   import House from 'lucide-svelte/icons/house';
   import Inbox from 'lucide-svelte/icons/inbox';
-  import Settings from 'lucide-svelte/icons/settings';
-  import BookUser from 'lucide-svelte/icons/book-user';
   import MessageSquare from 'lucide-svelte/icons/message-square';
   import Settings from 'lucide-svelte/icons/settings';
 
   import { m } from '$lib/paraglide/messages';
 
-  const allItems = [
+  const items = [
     {
       title: m['sidebar.menu.home'](),
       url: '/',
