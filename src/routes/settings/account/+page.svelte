@@ -6,5 +6,5 @@
 </script>
 
 <div class="container">
-  <AccountSettings data={data} />
+  <AccountSettings {data} />
 </div>

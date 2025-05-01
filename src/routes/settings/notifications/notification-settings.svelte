@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Separator } from '$lib/components/ui/separator';
   import { Switch } from '$lib/components/ui/switch';
-  
+
   interface NotificationSettings {
     emailNotifications: boolean;
     usernameChangeNotification: boolean;

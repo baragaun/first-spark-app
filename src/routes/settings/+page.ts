@@ -9,8 +9,8 @@ export const load: PageLoad = async ({ url }) => {
 
   const accountForms = await loadPrevalidatedAccountForms();
 
-  return { 
+  return {
     currentTab,
     accountForms,
-   };
+  };
 };

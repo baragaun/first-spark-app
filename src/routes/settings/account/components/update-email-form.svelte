@@ -11,12 +11,19 @@
   import { zod } from 'sveltekit-superforms/adapters';
   import { AppUiMessage } from '@/types/enums';
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
-  import { emailFormSchemaFirstStep, emailFormSchemaLastStep, type EmailFormSchema } from '../../(data)/schema';
+  import {
+    emailFormSchemaFirstStep,
+    emailFormSchemaLastStep,
+    type EmailFormSchema,
+  } from '../../(data)/schema';
   import { Button } from '@/components/ui/button';
 
-  let { preValidatedForm, onClose }: {
-    preValidatedForm: SuperValidated<EmailFormSchema>,
-      onClose?: (() => void)
+  let {
+    preValidatedForm,
+    onClose,
+  }: {
+    preValidatedForm: SuperValidated<EmailFormSchema>;
+    onClose?: () => void;
   } = $props();
 
   let currentEmail = $derived(myUserContext.myEmail);
@@ -100,10 +107,7 @@
     if (!$formData.email) return false;
 
     if ($formData.email === currentEmail) {
-      updateFormErrors(
-        emailFieldName,
-        'Please provide a different email address.',
-      );
+      updateFormErrors(emailFieldName, 'Please provide a different email address.');
       return false;
     }
 
@@ -334,14 +338,7 @@
   {/if}
 
   <div class="flex flex-col space-y-2">
-    <FormButton
-      {disabled}
-      {isLoading}
-      {isSuccess}
-      {buttonText}
-      {loadingText}
-    />
+    <FormButton {disabled} {isLoading} {isSuccess} {buttonText} {loadingText} />
     <Button variant="outline" onclick={onClose}>Cancel</Button>
   </div>
-
 </form>

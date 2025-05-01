@@ -14,9 +14,12 @@
   import { AppUiMessage } from '@/types/enums';
   import { deleteAccountFormSchema, type DeleteAccountFormSchema } from '../../(data)/schema';
 
-  let { preValidatedForm, onClose }: {
-    preValidatedForm: SuperValidated<DeleteAccountFormSchema>,
-      onClose?: (() => void)
+  let {
+    preValidatedForm,
+    onClose,
+  }: {
+    preValidatedForm: SuperValidated<DeleteAccountFormSchema>;
+    onClose?: () => void;
   } = $props();
 
   let currentEmail = $derived(myUserContext.myEmail);

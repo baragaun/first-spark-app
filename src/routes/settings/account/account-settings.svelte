@@ -8,7 +8,7 @@
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import type { PageData } from './$types';
   import { goto } from '$app/navigation';
-  
+
   let { data }: { data: PageData } = $props();
 
   let myEmail = $derived(myUserContext.myEmail);
@@ -29,7 +29,7 @@
   const handleDeleteAccount = () => {
     resetDialogStates();
     goto('/');
-  }
+  };
 </script>
 
 <div class="space-y-8 py-8">
@@ -42,7 +42,10 @@
       subtitle="You can change your username at anytime. Your previous username becomes immediately available for use."
       bind:showContent={showUpdateUsernameDialog}
     >
-      <UpdateUsernameForm preValidatedForm={data.accountForms.usernameForm} onClose={resetDialogStates} />
+      <UpdateUsernameForm
+        preValidatedForm={data.accountForms.usernameForm}
+        onClose={resetDialogStates}
+      />
     </SettingsDialog>
 
     <SettingsDialog
@@ -62,7 +65,10 @@
       subtitle="Your password should be unique and updated regularly."
       bind:showContent={showUpdatePasswordDialog}
     >
-      <UpdatePasswordForm preValidatedForm={data.accountForms.passwordForm} onClose={resetDialogStates} />
+      <UpdatePasswordForm
+        preValidatedForm={data.accountForms.passwordForm}
+        onClose={resetDialogStates}
+      />
     </SettingsDialog>
   </div>
 
@@ -78,7 +84,10 @@
       destructive={true}
       bind:showContent={showDeleteAccountDialog}
     >
-      <DeleteAccountForm preValidatedForm={data.accountForms.deleteAccountForm} onClose={handleDeleteAccount} />
+      <DeleteAccountForm
+        preValidatedForm={data.accountForms.deleteAccountForm}
+        onClose={handleDeleteAccount}
+      />
     </SettingsDialog>
   </div>
 </div>

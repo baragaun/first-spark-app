@@ -1,10 +1,10 @@
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
-import { 
-  deleteAccountFormSchema, 
-  emailFormSchemaLastStep, 
-  passwordFormSchema, 
-  usernameFormSchema 
+import {
+  deleteAccountFormSchema,
+  emailFormSchemaLastStep,
+  passwordFormSchema,
+  usernameFormSchema,
 } from './schema';
 
 export const loadPrevalidatedAccountForms = async () => {
@@ -19,4 +19,4 @@ export const loadPrevalidatedAccountForms = async () => {
     passwordForm,
     deleteAccountForm,
   };
-}
+};

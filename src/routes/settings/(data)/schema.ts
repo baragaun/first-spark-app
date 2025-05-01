@@ -24,7 +24,11 @@ export const otpSchema = z.string().min(6, {
 });
 
 export const usernameFormSchema = z.object({
-  username: z.string().min(3, 'Username must be at least 3 characters').max(30).transform((val) => val.trim()),
+  username: z
+    .string()
+    .min(3, 'Username must be at least 3 characters')
+    .max(30)
+    .transform((val) => val.trim()),
 });
 
 export const emailFormSchemaFirstStep = z.object({
@@ -42,8 +46,14 @@ export const passwordFormSchema = z.object({
 
 export const deleteAccountFormSchema = z.object({
   confirmEmail: emailSchema.transform((val) => val.trim()),
-  reason: z.string().optional().transform((val) => val?.trim()),
-  description: z.string().optional().transform((val) => val?.trim()),
+  reason: z
+    .string()
+    .optional()
+    .transform((val) => val?.trim()),
+  description: z
+    .string()
+    .optional()
+    .transform((val) => val?.trim()),
 });
 
 export type UsernameFormSchema = z.infer<typeof usernameFormSchema>;

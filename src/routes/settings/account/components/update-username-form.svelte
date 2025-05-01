@@ -11,9 +11,12 @@
   import { Button } from '@/components/ui/button';
   import { usernameFormSchema, type UsernameFormSchema } from '../../(data)/schema';
 
-  let { preValidatedForm, onClose }: {
-    preValidatedForm: SuperValidated<UsernameFormSchema>,
-      onClose?: (() => void)
+  let {
+    preValidatedForm,
+    onClose,
+  }: {
+    preValidatedForm: SuperValidated<UsernameFormSchema>;
+    onClose?: () => void;
   } = $props();
 
   let currentEmail = $derived(myUserContext.myEmail);
@@ -209,7 +212,7 @@
     />
   </div>
   <div class="flex flex-col space-y-2">
-    <FormButton 
+    <FormButton
       disabled={isLoading || $delayed || hasStepError}
       {isLoading}
       {isSuccess}

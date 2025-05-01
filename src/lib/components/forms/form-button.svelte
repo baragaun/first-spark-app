@@ -30,7 +30,7 @@
 </script>
 
 {#snippet icon()}
-  <div class='mx-2'>
+  <div class="mx-2">
     <SpinLoadIndicator {isLoading} {isSuccess} />
   </div>
 {/snippet}
@@ -47,12 +47,13 @@
     }
   }}
 >
-<div class="flex items-center justify-center">
-  {#if isLoading}
-     {loadingText}{@render icon()}
-  {:else if isSuccess}
-    {successText}{@render icon()}
-  {:else}
-    {buttonText}
-  {/if}
+  <div class="flex items-center justify-center">
+    {#if isLoading}
+      {loadingText}{@render icon()}
+    {:else if isSuccess}
+      {successText}{@render icon()}
+    {:else}
+      {buttonText}
+    {/if}
+  </div>
 </Form.Button>

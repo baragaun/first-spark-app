@@ -6,13 +6,20 @@
 
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
-  import { currentPasswordSchema, passwordFormSchema, type PasswordFormSchema } from '../../(data)/schema';
+  import {
+    currentPasswordSchema,
+    passwordFormSchema,
+    type PasswordFormSchema,
+  } from '../../(data)/schema';
   import FormButton from '@/components/forms/form-button.svelte';
   import { Button } from '@/components/ui/button';
 
-  let { preValidatedForm, onClose }: {
-    preValidatedForm: SuperValidated<PasswordFormSchema>,
-      onClose?: (() => void)
+  let {
+    preValidatedForm,
+    onClose,
+  }: {
+    preValidatedForm: SuperValidated<PasswordFormSchema>;
+    onClose?: () => void;
   } = $props();
 
   let isLoading = $state(false);
@@ -78,7 +85,7 @@
 
   const verifyCurrentPassword = async (): Promise<boolean> => {
     isLoading = true;
-    
+
     try {
       const verifyMyPasswordResponse = await myUserContext.verifyMyPassword(
         $formData.currentPassword,
@@ -172,8 +179,8 @@
   <div class="flex flex-col space-y-2">
     <FormButton
       disabled={isLoading || $delayed || hasStepError}
-      isLoading={isLoading}
-      isSuccess={isSuccess}
+      {isLoading}
+      {isSuccess}
       buttonText="Update"
       loadingText="Updating"
     />
