@@ -138,5 +138,12 @@
     "light": "Light",
     "dark": "Dark",
     "system": "System"
+  },
+  "connection": {
+    "offline": "Offline",
+    "online": "Online",
+    "offline.description": "You are not currently connected.",
+    "reconnected": "Reconnected",
+    "reconnected.description": "Reconnected to First Spark!"
   }
 }

@@ -8,6 +8,7 @@
   import LanguageButton from '../../language-button.svelte';
   import * as Sidebar from '$lib/components/ui/sidebar/index.js';
   import { LogIn } from 'lucide-svelte';
+  import ConnectionIndicator from './connection-indicator.svelte';
 
   const isSignedIn = $derived(myUserContext.isSignedIn);
 </script>
@@ -30,6 +31,7 @@
 
     <!-- Right side items -->
     <div class="flex flex-none items-center gap-2">
+      <ConnectionIndicator />
       <ThemeButton />
       <LanguageButton />
       {#if !isSignedIn}
