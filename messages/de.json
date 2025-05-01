@@ -106,5 +106,12 @@
       "create_account": "Konto erstellen",
       "creating_account": "Konto wird erstellt..."
     }
+  },
+  "connection": {
+    "offline": "Offline",
+    "online": "Online",
+    "offline.description": "Sie sind derzeit nicht verbunden.",
+    "reconnected": "Wieder verbunden",
+    "reconnected.description": "Wieder mit First Spark verbunden!"
   }
 }

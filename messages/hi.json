@@ -131,5 +131,12 @@
       "back_to_login": "लॉग इन पर वापस जाएं",
       "need_help": "मदद चाहिए?"
     }
+  },
+  "connection": {
+    "offline": "ऑफलाइन",
+    "online": "ऑनलाइन",
+    "offline.description": "आप वर्तमान में कनेक्ट नहीं हैं।",
+    "reconnected": "पुनः कनेक्ट हुआ",
+    "reconnected.description": "फर्स्ट स्पार्क से पुनः कनेक्ट हो गया!"
   }
 }

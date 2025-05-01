@@ -6,6 +6,7 @@
   import NavBar from '@/components/nav-bar/nav-bar.svelte';
   import Footer from '$lib/components/footer.svelte';
   import MyUserProvider from '@/contexts/my-user-provider.svelte';
+  import ConnectionSonner from '$lib/components/connection-sonner.svelte';
   import { locales, localizeHref } from '$lib/paraglide/runtime';
   import { page } from '$app/state';
 
@@ -15,6 +16,7 @@
 <MyUserProvider>
   <div class="flex min-h-screen flex-col bg-background font-sans antialiased">
     <ModeWatcher />
+    <ConnectionSonner />
     <Sidebar.Provider>
       <AppSidebar />
       <div class="flex flex-1 flex-col">
