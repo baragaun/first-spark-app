@@ -1,5 +1,8 @@
-// Import the parent route's load function
-import { load as parentLoad } from '../+page';
+import { loadPrevalidatedAccountForms } from '../(data)/account';
+import type { PageLoad } from './$types';
 
-// Reuse the parent route's load function
-export const load = parentLoad;
+export const load: PageLoad = async () => {
+  const accountForms = await loadPrevalidatedAccountForms();
+
+  return { accountForms };
+};

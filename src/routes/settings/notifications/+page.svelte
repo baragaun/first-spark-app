@@ -1,7 +1,7 @@
 <script lang="ts">
-  import NotificationSettingsMenu from './notification-settings-menu.svelte';
+  import NotificationSettingsMenu from './notification-settings.svelte';
 </script>
 
-<div class="space-y-6">
+<div class="container">
   <NotificationSettingsMenu />
 </div>
