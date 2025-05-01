@@ -41,12 +41,12 @@
   import type { ComponentProps } from 'svelte';
   import { page } from '$app/state';
 
-  function isItemActive(itemUrl: string, currentPath: string): boolean {
+  const isItemActive = (itemUrl: string, currentPath: string): boolean => {
     if (itemUrl === '/') {
       return currentPath === '/';
     }
     return itemUrl !== '#' && currentPath.startsWith(itemUrl);
-  }
+  };
 
   let {
     ref = $bindable(null),
@@ -54,6 +54,14 @@
     collapsible = 'icon',
     ...restProps
   }: ComponentProps<typeof Sidebar.Root> = $props();
+
+  const sidebar = Sidebar.useSidebar();
+
+  const handleItemClick = () => {
+    if (sidebar.isMobile) {
+      sidebar.setOpenMobile(false);
+    }
+  };
 </script>
 
 <Sidebar.Root bind:ref {collapsible} {...restProps}>
@@ -78,7 +86,7 @@
           <Sidebar.MenuItem>
             <Sidebar.MenuButton isActive={isItemActive(item.url, page.url.pathname)}>
               {#snippet child({ props })}
-                <a href={item.url} {...props}>
+                <a href={item.url} onclick={handleItemClick} {...props}>
                   <item.icon />
                   <span>{item.title}</span>
                 </a>
