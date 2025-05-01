@@ -162,10 +162,16 @@
       if (success) {
         isSuccess = true;
         // Show success state briefly before closing
-        return setTimeout(() => {
-          onClose && onClose();
+        setTimeout(() => {
+          return onClose && onClose();
         }, 1000);
       }
+    } catch (error) {
+      console.error('Error saving username:', error);
+      updateFormErrors(
+        'username',
+        error instanceof Error ? error.message : 'Failed to save username',
+      );
     } finally {
       isLoading = false;
     }
