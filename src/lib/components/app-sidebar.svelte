@@ -51,10 +51,7 @@
     return itemUrl !== '#' && currentPath.startsWith(itemUrl);
   };
 
-  let visibleItems = $derived(
-    authenticated ? items :
-      items.filter((item) => !item.requiresAuth)
-  );
+  let visibleItems = $derived(authenticated ? items : items.filter((item) => !item.requiresAuth));
 
   let {
     ref = $bindable(null),
