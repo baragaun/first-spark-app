@@ -1,13 +1,14 @@
 <script lang="ts">
   import * as Form from '$lib/components/ui/form/index.js';
-  import { Check, LoaderCircle } from 'lucide-svelte';
+  import SpinLoadIndicator from './spin-load-indicator.svelte';
 
   let {
     disabled = false,
-    loading = false,
-    success = false,
+    isLoading = false,
+    isSuccess = false,
     buttonText = 'Submit',
     loadingText = 'Processing...',
+    successText = 'Success!',
     variant = 'default',
     fullWidth = true,
     type = 'submit',
@@ -15,10 +16,11 @@
     extraClass = '',
   } = $props<{
     disabled?: boolean;
-    loading?: boolean;
-    success?: boolean;
+    isLoading?: boolean;
+    isSuccess?: boolean;
     buttonText?: string;
     loadingText?: string;
+    successText?: string;
     variant?: string;
     fullWidth?: boolean;
     type?: string;
@@ -27,11 +29,17 @@
   }>();
 </script>
 
+{#snippet icon()}
+  <div class="mx-2">
+    <SpinLoadIndicator {isLoading} {isSuccess} />
+  </div>
+{/snippet}
+
 <Form.Button
   {variant}
   {disabled}
   {type}
-  class={`${fullWidth ? 'w-full' : ''} ${extraClass}`}
+  class={`${isSuccess ? 'bg-green-700' : ''} ${fullWidth ? 'w-full' : ''} ${extraClass}`}
   onclick={(e) => {
     if (onClick) {
       e.preventDefault();
@@ -39,13 +47,13 @@
     }
   }}
 >
-  {#if loading}
-    <LoaderCircle class="mr-2 animate-spin" />
-    {loadingText}
-  {:else if success}
-    <Check class="mr-2 h-4 w-4" />
-    {buttonText}
-  {:else}
-    {buttonText}
-  {/if}
+  <div class="flex items-center justify-center">
+    {#if isLoading}
+      {loadingText}{@render icon()}
+    {:else if isSuccess}
+      {successText}{@render icon()}
+    {:else}
+      {buttonText}
+    {/if}
+  </div>
 </Form.Button>

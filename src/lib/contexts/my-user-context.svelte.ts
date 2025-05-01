@@ -499,7 +499,6 @@ export class MyUserContext {
   async deleteMyUser(
     cause: string | undefined,
     description: string | undefined,
-    deletePhysically: boolean,
   ): Promise<true | string> {
     if (!this.client.isInitialized) {
       console.error('MyUserContext.deleteMyUser: not initialized.');
@@ -508,11 +507,7 @@ export class MyUserContext {
 
     try {
       isLoading = true;
-      const response = await this.client.operations.myUser.deleteMyUser(
-        cause,
-        description,
-        deletePhysically,
-      );
+      const response = await this.client.operations.myUser.deleteMyUser(cause, description);
       if (response.error) {
         console.error('MyUserContext.deleteMyUser: received error.', { response });
         return translate(response.error, AppUiMessage.systemError);
