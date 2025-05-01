@@ -1,4 +1,4 @@
-import NavBar from '@/components/nav-bar/nav-bar.svelte';
+import NavBar from '@/components/global/nav-bar/nav-bar.svelte';
 import { render, screen } from '@testing-library/svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
