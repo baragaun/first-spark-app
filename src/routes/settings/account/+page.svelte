@@ -1,7 +1,10 @@
 <script lang="ts">
-  import AccountSettingsForm from './account-settings-form.svelte';
+  import type { PageData } from './$types';
+  import AccountSettings from './account-settings.svelte';
+
+  let { data }: { data: PageData } = $props();
 </script>
 
-<div class="space-y-6">
-  <AccountSettingsForm />
+<div class="container">
+  <AccountSettings {data} />
 </div>

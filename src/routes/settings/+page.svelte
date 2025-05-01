@@ -1,8 +1,14 @@
 <script lang="ts">
-  import { goto } from '$app/navigation';
-  import { onMount } from 'svelte';
+  import type { PageData } from './$types';
+  import AccountSettings from './account/+page.svelte';
+  import NotificationSettings from './notifications/+page.svelte';
 
-  onMount(() => {
-    goto('/settings/account', { replaceState: true });
-  });
+  let { data }: { data: PageData } = $props();
+  let currentTab = $derived(data.currentTab);
 </script>
+
+{#if currentTab === 'account'}
+  <AccountSettings {data} />
+{:else if currentTab === 'notifications'}
+  <NotificationSettings />
+{/if}
