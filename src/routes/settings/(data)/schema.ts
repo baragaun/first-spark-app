@@ -42,7 +42,6 @@ export const passwordFormSchema = z.object({
 });
 
 export const deleteAccountFormSchema = z.object({
-  // confirmEmail: z.string().email('You must enter your current email address.'),
   confirmEmail: emailSchema.transform((val) => val.trim()),
   reason: z.string().optional().transform((val) => val?.trim()),
   description: z.string().optional().transform((val) => val?.trim()),
