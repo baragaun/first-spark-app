@@ -1,5 +1,10 @@
 <script lang="ts">
-  import AccountSettingsMenu from './account-settings.svelte';
+  import type { PageData } from './$types';
+  import AccountSettings from './account-settings.svelte';
+
+  let { data }: { data: PageData } = $props();
 </script>
 
-<AccountSettingsMenu />
+<div class="container">
+  <AccountSettings data={data} />
+</div>

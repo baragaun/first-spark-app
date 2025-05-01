@@ -2,4 +2,6 @@
   import NotificationSettingsMenu from './notification-settings.svelte';
 </script>
 
-<NotificationSettingsMenu />
+<div class="container">
+  <NotificationSettingsMenu />
+</div>

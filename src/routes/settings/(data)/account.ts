@@ -1,13 +1,22 @@
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
-import {
-  changeEmailschemaLastStep,
-  deleteAccountSchema,
-  passwordSchema,
-  usernameSchema,
+import { 
+  deleteAccountFormSchema, 
+  emailFormSchemaLastStep, 
+  passwordFormSchema, 
+  usernameFormSchema 
 } from './schema';
 
-export const usernameForm = await superValidate(zod(usernameSchema));
-export const emailForm = await superValidate(zod(changeEmailschemaLastStep));
-export const passwordForm = await superValidate(zod(passwordSchema));
-export const deleteAccountForm = await superValidate(zod(deleteAccountSchema));
+export const loadPrevalidatedAccountForms = async () => {
+  const usernameForm = await superValidate(zod(usernameFormSchema));
+  const emailForm = await superValidate(zod(emailFormSchemaLastStep));
+  const passwordForm = await superValidate(zod(passwordFormSchema));
+  const deleteAccountForm = await superValidate(zod(deleteAccountFormSchema));
+
+  return {
+    usernameForm,
+    emailForm,
+    passwordForm,
+    deleteAccountForm,
+  };
+}

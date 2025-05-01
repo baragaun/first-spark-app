@@ -8,7 +8,7 @@
 </script>
 
 {#if currentTab === 'account'}
-  <AccountSettings />
+  <AccountSettings data={data} />
 {:else if currentTab === 'notifications'}
   <NotificationSettings />
 {/if}

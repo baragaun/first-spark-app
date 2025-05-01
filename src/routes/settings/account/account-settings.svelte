@@ -1,11 +1,14 @@
 <script lang="ts">
-  import UpdateUsernameForm from './components/update-username-form.svelte';
   import SettingsDialog from './components/settings-dialog.svelte';
+  import UpdateUsernameForm from './components/update-username-form.svelte';
   import UpdateEmailForm from './components/update-email-form.svelte';
   import UpdatePasswordForm from './components/update-password-form.svelte';
+  import DeleteAccountForm from './components/delete-account-form.svelte';
   import { Separator } from '$lib/components/ui/separator';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
-  import DeleteAccountForm from './components/delete-account-form.svelte';
+  import type { PageData } from './$types';
+  
+  let { data }: { data: PageData } = $props();
 
   let myEmail = $derived(myUserContext.myEmail);
   let myUsername = $derived(myUserContext.myUserHandle);
@@ -33,7 +36,7 @@
       subtitle="You can change your username at anytime. Your previous username becomes immediately available for use."
       bind:showContent={showUpdateUsernameDialog}
     >
-      <UpdateUsernameForm onCancel={resetDialogStates} />
+      <UpdateUsernameForm preValidatedForm={data.accountForms.usernameForm} onCancel={resetDialogStates} />
     </SettingsDialog>
 
     <SettingsDialog
@@ -43,7 +46,7 @@
       subtitle="Enter and different email and a verification code to update your account."
       bind:showContent={showUpdateEmailDialog}
     >
-      <UpdateEmailForm onCancel={resetDialogStates} />
+      <UpdateEmailForm preValidatedForm={data.accountForms.emailForm} onCancel={resetDialogStates} />
     </SettingsDialog>
 
     <SettingsDialog
@@ -53,7 +56,7 @@
       subtitle="Your password should be unique and updated regularly."
       bind:showContent={showUpdatePasswordDialog}
     >
-      <UpdatePasswordForm onCancel={resetDialogStates} />
+      <UpdatePasswordForm preValidatedForm={data.accountForms.passwordForm} onCancel={resetDialogStates} />
     </SettingsDialog>
   </div>
 
@@ -69,7 +72,7 @@
       destructive={true}
       bind:showContent={showDeleteAccountDialog}
     >
-      <DeleteAccountForm onCancel={resetDialogStates} />
+      <DeleteAccountForm preValidatedForm={data.accountForms.deleteAccountForm} onCancel={resetDialogStates} />
     </SettingsDialog>
   </div>
 </div>

@@ -1,9 +1,7 @@
 <script lang="ts">
   import { Separator } from '$lib/components/ui/separator';
   import { Switch } from '$lib/components/ui/switch';
-
-  import * as Tabs from '$lib/components/ui/tabs/index.js';
-
+  
   interface NotificationSettings {
     emailNotifications: boolean;
     usernameChangeNotification: boolean;
@@ -25,10 +23,10 @@
   };
 </script>
 
-<div class="space-y-4">
+<div class="space-y-8 py-8">
   <div>
-    <h4 class="font-lexend mb-4 px-4 text-lg font-bold">General</h4>
-    <div class="space-y-4 px-2">
+    <h4 class="font-lexend mb-4 text-lg font-bold">General</h4>
+    <div class="space-y-4">
       <div
         class="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 hover:bg-muted/50"
         onclick={() => toggleSetting('emailNotifications')}
@@ -53,8 +51,8 @@
 
   <!-- Security Section -->
   <div>
-    <h4 class="font-lexend mb-4 px-4 text-lg font-bold">Security</h4>
-    <div class="space-y-4 px-2">
+    <h4 class="font-lexend mb-4 text-lg font-bold">Security</h4>
+    <div class="space-y-4">
       <div
         class="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 hover:bg-muted/50"
         onclick={() => toggleSetting('usernameChangeNotification')}
