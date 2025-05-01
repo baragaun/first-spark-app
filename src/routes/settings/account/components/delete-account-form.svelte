@@ -6,26 +6,28 @@
   import IdentFormInput from '@/components/forms/form-ident-input.svelte';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { AlertTriangle } from 'lucide-svelte';
-  import { superForm } from 'sveltekit-superforms';
+  import { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zodClient } from 'sveltekit-superforms/adapters';
-  import { deleteAccountSchema, type DeleteAccountSchema } from '../../(data)/schema';
-  import { deleteAccountForm } from '../../(data)/account';
   import FormButton from '@/components/forms/form-button.svelte';
   import { Button } from '@/components/ui/button';
   import translate from '@/helpers/language/translate';
   import { AppUiMessage } from '@/types/enums';
+  import { deleteAccountFormSchema, type DeleteAccountFormSchema } from '../../(data)/schema';
 
-  let { onCancel } = $props<{ onCancel?: (() => void) | undefined }>();
+  let { preValidatedForm, onClose }: {
+    preValidatedForm: SuperValidated<DeleteAccountFormSchema>,
+      onClose?: (() => void)
+  } = $props();
 
   let currentEmail = $derived(myUserContext.myEmail);
   let isLoading = $state(false);
   let isSuccess = $state(false);
-  let hasStepError = $state(true); // Since this is a destructive form, we are going to start with a disabled button
+  let hasStepError = $state(true);
   let debounceTimer: number | null = null;
   const DEBOUNCE_DELAY = 500;
 
-  const form = superForm(deleteAccountForm, {
-    validators: zodClient(deleteAccountSchema),
+  const form = superForm(preValidatedForm, {
+    validators: zodClient(deleteAccountFormSchema),
     validationMethod: 'submit-only',
     dataType: 'json',
     resetForm: true,
@@ -40,7 +42,7 @@
 
   const { form: formData, delayed, enhance, errors, validateForm } = form;
 
-  const updateFormErrors = (field: keyof DeleteAccountSchema, message: string) => {
+  const updateFormErrors = (field: keyof DeleteAccountFormSchema, message: string) => {
     errors.update((errors) => {
       const newErrors = {
         ...errors,
@@ -67,9 +69,9 @@
     }, DEBOUNCE_DELAY);
   };
 
-  const deleteMyAccount = async (): Promise<boolean> => {
+  const deleteMyAccount = async () => {
     const validationResult = await validateForm({ update: true, focusOnError: true });
-    if (!validationResult.valid || $formData.confirmEmail !== currentEmail) return false;
+    if (!validationResult.valid || $formData.confirmEmail !== currentEmail) return;
 
     try {
       isLoading = true;
@@ -85,17 +87,20 @@
           result: response,
         });
         updateFormErrors('confirmEmail', 'Failed to delete account');
-        return false;
+        return;
       }
 
-      return true;
+      isSuccess = true;
+      // Show success state briefly before closing
+      setTimeout(() => {
+        return onClose && onClose();
+      }, 1000);
     } catch (error) {
       console.error('Error deleting account:', error);
       updateFormErrors('confirmEmail', translate(AppUiMessage.systemError));
-      return false;
+      return;
     } finally {
       isLoading = false;
-      isSuccess = true;
     }
   };
 </script>
@@ -152,11 +157,13 @@
     />
   </div>
   <FormButton
+    variant="destructive"
     disabled={isLoading || $delayed || hasStepError}
-    loading={isLoading}
+    {isLoading}
+    {isSuccess}
     buttonText="Delete my account"
     loadingText="Cleaning up..."
-    variant="destructive"
+    successText="Goodbye!"
   />
-  <Button variant="outline" onclick={onCancel}>Cancel</Button>
+  <Button variant="outline" onclick={onClose}>Cancel</Button>
 </form>

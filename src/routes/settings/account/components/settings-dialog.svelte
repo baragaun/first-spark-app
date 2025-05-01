@@ -1,7 +1,7 @@
 <script lang="ts">
   import * as Dialog from '$lib/components/ui/dialog';
   import { ChevronRight } from 'lucide-svelte';
-  import { onMount, type Snippet } from 'svelte';
+  import { type Snippet } from 'svelte';
 
   let {
     label = '',
@@ -11,7 +11,7 @@
     dialogContentClass = '',
     destructive = false,
     showContent = $bindable(false),
-    onCancel = undefined,
+    onClose = undefined,
     children,
   } = $props<{
     label: string;
@@ -21,7 +21,6 @@
     showContent?: boolean;
     dialogContentClass?: string;
     destructive?: boolean;
-    onCancel?: () => void;
     onClose?: () => void | undefined;
     children?: Snippet;
   }>();
@@ -30,10 +29,9 @@
   const textColor = destructive ? 'text-destructive' : '';
 
   $effect(() => {
-    if (onCancel) {
-      // showContent = !showContent
-      console.log('why isnt it bound');
+    if (onClose) {
       showContent = false;
+      onClose();
     }
   });
 </script>

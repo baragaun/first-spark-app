@@ -29,7 +29,6 @@ export const usernameFormSchema = z.object({
 
 export const emailFormSchemaFirstStep = z.object({
   email: emailSchema.transform((val) => val.trim()),
-  currentPassword: currentPasswordSchema.transform((val) => val.trim()),
 });
 
 export const emailFormSchemaLastStep = emailFormSchemaFirstStep.extend({

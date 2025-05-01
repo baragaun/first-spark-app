@@ -5,26 +5,29 @@
   import translate from '@/helpers/language/translate';
   import { AppUiMessage } from '@/types/enums';
   import { UserIdentType } from '@baragaun/bg-node-client';
-  import { superForm } from 'sveltekit-superforms';
+  import { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
-  import { usernameSchema, type UsernameSchema } from '../../(data)/schema';
-  import { usernameForm } from '../../(data)/account';
   import FormButton from '@/components/forms/form-button.svelte';
   import { Button } from '@/components/ui/button';
+  import { usernameFormSchema, type UsernameFormSchema } from '../../(data)/schema';
 
-  let { onCancel } = $props<{ onCancel?: (() => void) | undefined }>();
+  let { preValidatedForm, onClose }: {
+    preValidatedForm: SuperValidated<UsernameFormSchema>,
+      onClose?: (() => void)
+  } = $props();
 
   let currentEmail = $derived(myUserContext.myEmail);
   let currentUsername = $derived(myUserContext.myUserHandle);
 
-  let hasStepError = $state(false);
+  let hasStepError = $state(true);
   let debounceTimer: number | null = null;
   let isLoading = $state(false);
+  let isSuccess = $state(false);
   let identType = $state(UserIdentType.userHandle);
   const DEBOUNCE_DELAY = 350; // ms
 
-  const form = superForm(usernameForm, {
-    validators: zod(usernameSchema),
+  const form = superForm(preValidatedForm, {
+    validators: zod(usernameFormSchema),
     resetForm: true,
     dataType: 'json',
     validationMethod: 'submit-only',
@@ -39,7 +42,7 @@
 
   const { form: formData, delayed, enhance, errors, validateForm } = form;
 
-  const updateFormErrors = (field: keyof UsernameSchema, message: string) => {
+  const updateFormErrors = (field: keyof UsernameFormSchema, message: string) => {
     errors.update((errors) => {
       const newErrors = {
         ...errors,
@@ -50,15 +53,12 @@
   };
 
   const debounceFormValidation = async () => {
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
-    }
+    if (debounceTimer) clearTimeout(debounceTimer);
 
     if (!$formData.username) return;
 
     debounceTimer = window.setTimeout(async () => {
       try {
-        isLoading = true;
         const result = await validateForm({ update: true, focusOnError: false });
 
         const availability = await checkUsernameAvailability();
@@ -66,7 +66,6 @@
       } catch (error) {
         console.error('Error debouncing the form input:', error);
       } finally {
-        isLoading = false;
         debounceTimer = null;
       }
     }, DEBOUNCE_DELAY);
@@ -76,11 +75,13 @@
     isLoading = true;
 
     if ($formData.username === myUserContext.myUserHandle) {
+      isLoading = false;
       return true;
     }
 
-    const validationResult = usernameSchema.safeParse($formData);
+    const validationResult = usernameFormSchema.safeParse($formData);
     if (!validationResult.success) {
+      isLoading = false;
       return false;
     }
 
@@ -89,7 +90,6 @@
 
     try {
       const response = await myUserContext.isUserIdentAvailable($formData.username, identType);
-      console.log('checkIdentAvailability: response:', { response });
 
       if (response.error) {
         updateFormErrors('username', response.error);
@@ -115,7 +115,6 @@
     if (!currentEmail) return;
 
     try {
-      isLoading = true;
       const result = await myUserContext.findAvailableUserHandle(currentEmail);
       if (result && typeof result === 'object' && 'object' in result) {
         $formData.username = result.object ?? '';
@@ -128,8 +127,6 @@
         'username',
         error instanceof Error ? error.message : 'Failed to find handle',
       );
-    } finally {
-      isLoading = false;
     }
   };
 
@@ -163,11 +160,11 @@
       isLoading = true;
       const success = await handleUsernameChange();
       if (success) {
-        // isSuccess = true;
+        isSuccess = true;
         // Show success state briefly before closing
-        // setTimeout(() => {
-        //   // resetDialogState();
-        // }, 1500);
+        return setTimeout(() => {
+          onClose && onClose();
+        }, 1000);
       }
     } finally {
       isLoading = false;
@@ -205,11 +202,14 @@
       suggestUsername={getSuggestedUsername}
     />
   </div>
-  <FormButton
-    disabled={isLoading || $delayed || hasStepError}
-    loading={isLoading}
-    buttonText="Save"
-    loadingText="Saving..."
-  />
-  <Button variant="outline" onclick={onCancel}>Cancel</Button>
+  <div class="flex flex-col space-y-2">
+    <FormButton 
+      disabled={isLoading || $delayed || hasStepError}
+      {isLoading}
+      {isSuccess}
+      buttonText="Save"
+      loadingText="Updating"
+    />
+    <Button variant="outline" onclick={onClose}>Cancel</Button>
+  </div>
 </form>

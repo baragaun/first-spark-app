@@ -7,6 +7,7 @@
   import { Separator } from '$lib/components/ui/separator';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import type { PageData } from './$types';
+  import { goto } from '$app/navigation';
   
   let { data }: { data: PageData } = $props();
 
@@ -24,6 +25,11 @@
     showUpdatePasswordDialog = false;
     showDeleteAccountDialog = false;
   };
+
+  const handleDeleteAccount = () => {
+    resetDialogStates();
+    goto('/');
+  }
 </script>
 
 <div class="space-y-8 py-8">
@@ -36,7 +42,7 @@
       subtitle="You can change your username at anytime. Your previous username becomes immediately available for use."
       bind:showContent={showUpdateUsernameDialog}
     >
-      <UpdateUsernameForm preValidatedForm={data.accountForms.usernameForm} onCancel={resetDialogStates} />
+      <UpdateUsernameForm preValidatedForm={data.accountForms.usernameForm} onClose={resetDialogStates} />
     </SettingsDialog>
 
     <SettingsDialog
@@ -46,7 +52,7 @@
       subtitle="Enter and different email and a verification code to update your account."
       bind:showContent={showUpdateEmailDialog}
     >
-      <UpdateEmailForm preValidatedForm={data.accountForms.emailForm} onCancel={resetDialogStates} />
+      <UpdateEmailForm preValidatedForm={data.accountForms.emailForm} onClose={resetDialogStates} />
     </SettingsDialog>
 
     <SettingsDialog
@@ -56,7 +62,7 @@
       subtitle="Your password should be unique and updated regularly."
       bind:showContent={showUpdatePasswordDialog}
     >
-      <UpdatePasswordForm preValidatedForm={data.accountForms.passwordForm} onCancel={resetDialogStates} />
+      <UpdatePasswordForm preValidatedForm={data.accountForms.passwordForm} onClose={resetDialogStates} />
     </SettingsDialog>
   </div>
 
@@ -72,7 +78,7 @@
       destructive={true}
       bind:showContent={showDeleteAccountDialog}
     >
-      <DeleteAccountForm preValidatedForm={data.accountForms.deleteAccountForm} onCancel={resetDialogStates} />
+      <DeleteAccountForm preValidatedForm={data.accountForms.deleteAccountForm} onClose={handleDeleteAccount} />
     </SettingsDialog>
   </div>
 </div>

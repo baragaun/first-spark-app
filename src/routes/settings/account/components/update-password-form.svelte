@@ -4,22 +4,25 @@
   import { myUserContext } from '$lib/contexts/my-user-context.svelte';
   import { AppUiMessage } from '@/types/enums';
 
-  import { superForm } from 'sveltekit-superforms';
+  import { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
-  import { currentPasswordSchema, passwordSchema, type PasswordSchema } from '../../(data)/schema';
-  import { passwordForm } from '../../(data)/account';
+  import { currentPasswordSchema, passwordFormSchema, type PasswordFormSchema } from '../../(data)/schema';
   import FormButton from '@/components/forms/form-button.svelte';
   import { Button } from '@/components/ui/button';
 
-  let { onCancel } = $props<{ onCancel?: (() => void) | undefined }>();
+  let { preValidatedForm, onClose }: {
+    preValidatedForm: SuperValidated<PasswordFormSchema>,
+      onClose?: (() => void)
+  } = $props();
 
   let isLoading = $state(false);
-  let hasStepError = $state(false);
+  let isSuccess = $state(false);
+  let hasStepError = $state(true);
   let debounceTimer: number | null = null;
   const DEBOUNCE_DELAY = 500;
 
-  const form = superForm(passwordForm, {
-    validators: zod(passwordSchema),
+  const form = superForm(preValidatedForm, {
+    validators: zod(passwordFormSchema),
     validationMethod: 'submit-only',
     dataType: 'json',
     async onChange() {
@@ -33,7 +36,7 @@
 
   const { form: formData, delayed, enhance, errors, validateForm } = form;
 
-  const updateFormErrors = (field: keyof PasswordSchema, message: string) => {
+  const updateFormErrors = (field: keyof PasswordFormSchema, message: string) => {
     errors.update((errors) => {
       const newErrors = {
         ...errors,
@@ -74,46 +77,52 @@
   };
 
   const verifyCurrentPassword = async (): Promise<boolean> => {
-    const verifyMyPasswordResponse = await myUserContext.verifyMyPassword(
-      $formData.currentPassword,
-    );
-    if (
-      verifyMyPasswordResponse.object === false ||
-      verifyMyPasswordResponse.object?.toString() === 'false'
-    ) {
-      console.error('Incorrect password', {
-        verifyMyPasswordResponse,
-      });
-      updateFormErrors('currentPassword', 'Incorrect password. Please verify and try again.');
-      isLoading = false;
-      return false;
-    }
-
-    if (verifyMyPasswordResponse.error) {
-      console.error('Failed to verify password:', {
-        verifyMyPasswordResponse,
-      });
-      updateFormErrors(
-        'currentPassword',
-        verifyMyPasswordResponse.error || AppUiMessage.systemError,
+    isLoading = true;
+    
+    try {
+      const verifyMyPasswordResponse = await myUserContext.verifyMyPassword(
+        $formData.currentPassword,
       );
 
-      isLoading = false;
-      return false;
-    }
+      if (
+        verifyMyPasswordResponse.object === false ||
+        verifyMyPasswordResponse.object?.toString() === 'false'
+      ) {
+        console.error('Incorrect password', { verifyMyPasswordResponse });
+        updateFormErrors('currentPassword', 'Incorrect password. Please verify and try again.');
+        return false;
+      }
 
-    return true;
+      if (verifyMyPasswordResponse.error) {
+        console.error('Failed to verify password:', {
+          verifyMyPasswordResponse,
+        });
+        updateFormErrors(
+          'currentPassword',
+          verifyMyPasswordResponse.error || AppUiMessage.systemError,
+        );
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error verifying password:', error);
+      updateFormErrors(
+        'currentPassword',
+        error instanceof Error ? error.message : 'Failed to verify password',
+      );
+      return false;
+    } finally {
+      isLoading = false;
+    }
   };
 
-  const updatePassword = async (): Promise<boolean> => {
+  const updatePassword = async () => {
     try {
       isLoading = true;
 
       const currentPasswordValidation = await verifyCurrentPassword();
-
-      if (!currentPasswordValidation) {
-        return false;
-      }
+      if (!currentPasswordValidation) return;
 
       const result = await myUserContext.updateMyPassword(
         $formData.currentPassword,
@@ -126,17 +135,20 @@
         return false;
       }
 
-      console.log('updatePassword: success.', result);
-      return true;
+      isSuccess = true;
+      // Show success state briefly before closing
+      setTimeout(() => {
+        return onClose && onClose();
+      }, 1000);
     } catch (error) {
       console.error('Error updating password:', error);
       updateFormErrors(
         'newPassword',
         error instanceof Error ? error.message : 'Failed to update password',
       );
-      return false;
+      return;
     } finally {
-      isLoading = false;
+      // isLoading = false;
     }
   };
 </script>
@@ -157,11 +169,14 @@
       placeholder="Enter new password"
     />
   </div>
-  <FormButton
-    disabled={isLoading || $delayed || hasStepError}
-    loading={isLoading}
-    buttonText="Save"
-    loadingText="Saving..."
-  />
-  <Button variant="outline" onclick={onCancel}>Cancel</Button>
+  <div class="flex flex-col space-y-2">
+    <FormButton
+      disabled={isLoading || $delayed || hasStepError}
+      isLoading={isLoading}
+      isSuccess={isSuccess}
+      buttonText="Update"
+      loadingText="Updating"
+    />
+    <Button variant="outline" onclick={onClose}>Cancel</Button>
+  </div>
 </form>

@@ -10,21 +10,20 @@
   import { onDestroy } from 'svelte';
   import { zod } from 'sveltekit-superforms/adapters';
   import { AppUiMessage } from '@/types/enums';
-  import { superForm } from 'sveltekit-superforms';
-  import { emailForm } from '../../(data)/account';
-  import {
-    changeEmailschemaFirstStep,
-    changeEmailschemaLastStep,
-    type UpdateEmailFormSchema,
-  } from '../../(data)/schema';
+  import { superForm, type SuperValidated } from 'sveltekit-superforms';
+  import { emailFormSchemaFirstStep, emailFormSchemaLastStep, type EmailFormSchema } from '../../(data)/schema';
   import { Button } from '@/components/ui/button';
 
-  let { onCancel } = $props<{ onCancel?: (() => void) | undefined }>();
+  let { preValidatedForm, onClose }: {
+    preValidatedForm: SuperValidated<EmailFormSchema>,
+      onClose?: (() => void)
+  } = $props();
 
   let currentEmail = $derived(myUserContext.myEmail);
   let step = $state(1);
   let isLoading = $state(false);
-  let hasStepError = $state(false);
+  let isSuccess = $state(false);
+  let hasStepError = $state(true);
 
   let canResend = $state(false);
   let resendTimer = $state(30);
@@ -38,10 +37,10 @@
   const tokenFieldName = 'token';
   const emailFieldName = 'email';
 
-  const steps = [zod(changeEmailschemaFirstStep), zod(changeEmailschemaLastStep)];
+  const steps = [zod(emailFormSchemaFirstStep), zod(emailFormSchemaLastStep)];
   const getCurrentValidator = () => steps[step - 1];
 
-  const form = superForm(emailForm, {
+  const form = superForm(preValidatedForm, {
     dataType: 'json',
     validators: getCurrentValidator(),
     resetForm: true,
@@ -61,7 +60,11 @@
 
   const { form: formData, enhance, errors, options, delayed, validateForm } = form;
 
-  const updateFormErrors = (field: keyof UpdateEmailFormSchema, message: string) => {
+  const buttonText = $derived(step === 1 ? 'Update' : 'Verify');
+  const loadingText = $derived(step === 1 ? 'Updating' : 'Verifying');
+  const disabled = $derived(isLoading || $delayed || hasStepError);
+
+  const updateFormErrors = (field: keyof EmailFormSchema, message: string) => {
     errors.update((errors) => {
       const newErrors = {
         ...errors,
@@ -78,37 +81,31 @@
 
     debounceTimer = window.setTimeout(async () => {
       try {
-        isLoading = true;
-        const result = await validateForm({ update: true, focusOnError: false });
-        if (result.valid && step === 1) {
-          hasStepError = await checkIdentAvailability();
+        const validationResult = await validateForm({ update: true, focusOnError: false });
+        if (validationResult.valid && step === 1) {
+          const available = await checkIdentAvailability();
+          hasStepError = !available;
+        } else {
+          hasStepError = !validationResult.valid;
         }
-        hasStepError = !result.valid;
       } catch (error) {
         console.error('Error validating form input:', error);
       } finally {
-        isLoading = false;
         debounceTimer = null;
       }
     }, DEBOUNCE_DELAY);
   };
 
   const checkIdentAvailability = async (): Promise<boolean> => {
-    // We are not setting isLoading here until we have a better debounce
-    console.log('checling ident');
     if (!$formData.email) return false;
 
     if ($formData.email === currentEmail) {
       updateFormErrors(
         emailFieldName,
-        'Please enter a different email address than your current one.',
+        'Please provide a different email address.',
       );
       return false;
     }
-
-    const validationResult = changeEmailschemaFirstStep.safeParse($formData);
-
-    if (!validationResult.success) return false;
 
     const message = `This ${emailFieldName} is currently unavailable for use.`;
 
@@ -135,7 +132,7 @@
     }
   };
 
-  const updateEmail = async (email: string): Promise<boolean> => {
+  const updateEmail = async (email: string) => {
     isLoading = true;
     try {
       const result = await myUserContext.updateMyUser({
@@ -144,16 +141,20 @@
 
       if (result.error) {
         updateFormErrors(emailFieldName, result.error);
-        return false;
+        return;
       }
-      console.log('updateNewEmail: success.', result);
-      return true;
+
+      isSuccess = true;
+      // Show success state briefly before closing
+      setTimeout(() => {
+        return onClose && onClose();
+      }, 1000);
     } catch (error) {
       updateFormErrors(
         emailFieldName,
         error instanceof Error ? error.message : 'Failed to update email',
       );
-      return false;
+      return;
     } finally {
       isLoading = false;
     }
@@ -192,7 +193,6 @@
       };
       const onSuccess = async () => {
         await updateEmail($formData.email);
-        isLoading = false;
       };
 
       otpHandler = new MsaListenerHandler(
@@ -333,11 +333,15 @@
     />
   {/if}
 
-  <FormButton
-    disabled={isLoading || $delayed || hasStepError}
-    loading={isLoading}
-    buttonText="Submit"
-    loadingText="Processing..."
-  />
-  <Button variant="outline" onclick={onCancel}>Cancel</Button>
+  <div class="flex flex-col space-y-2">
+    <FormButton
+      {disabled}
+      {isLoading}
+      {isSuccess}
+      {buttonText}
+      {loadingText}
+    />
+    <Button variant="outline" onclick={onClose}>Cancel</Button>
+  </div>
+
 </form>
