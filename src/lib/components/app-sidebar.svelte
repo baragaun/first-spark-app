@@ -40,10 +40,10 @@
 <script lang="ts">
   import * as Sidebar from '$lib/components/ui/sidebar/index.js';
   import type { ComponentProps } from 'svelte';
-  import { isSignedIn } from '@/contexts/my-user-context.svelte';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { page } from '$app/state';
 
-  const authenticated = $derived(isSignedIn);
+  const isSignedIn = $derived(myUserContext.isSignedIn);
   const isItemActive = (itemUrl: string, currentPath: string): boolean => {
     if (itemUrl === '/') {
       return currentPath === '/';
@@ -51,7 +51,7 @@
     return itemUrl !== '#' && currentPath.startsWith(itemUrl);
   };
 
-  let visibleItems = $derived(authenticated ? items : items.filter((item) => !item.requiresAuth));
+  let visibleItems = $derived(isSignedIn ? items : items.filter((item) => !item.requiresAuth));
 
   let {
     ref = $bindable(null),
