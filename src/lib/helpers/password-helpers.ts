@@ -57,9 +57,9 @@ const getPasswordError = (password: string) => {
 
   const validation = validatePassword(password);
 
-  if (!validation.minLength) {
-    return `Password must be at least ${minLength} characters long.`;
-  }
+  // if (!validation.minLength) {
+  //   return `Password must be at least ${minLength} characters long.`;
+  // }
 
   if (
     !validation.notTooSimple ||

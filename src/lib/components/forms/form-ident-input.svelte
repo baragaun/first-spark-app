@@ -8,6 +8,7 @@
   import { cn } from '@/utils';
   import { UserIdentType } from '@baragaun/bg-node-client';
   import { AlertCircle, Check, RefreshCw } from 'lucide-svelte';
+  import { onMount } from 'svelte';
   import type { FormPathLeaves, SuperForm } from 'sveltekit-superforms';
 
   let {
@@ -67,7 +68,7 @@
             {placeholder}
             {disabled}
           />
-          {#if isUserHandle}
+          {#if isUserHandle && $formData[fieldName]}
             {#if isLoading}
               <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
                 <div
