@@ -19,6 +19,7 @@ import {
 } from '@baragaun/bg-node-client';
 
 let isSignedIn = $state(false);
+let isOffline = $state(false); // TODO: The client does not yet support toggline the connectivity state
 let isLoading = $state(false);
 let myUser = $state<MyUser | undefined>(undefined);
 
@@ -527,6 +528,14 @@ export class MyUserContext {
 
   public get isInitialized(): boolean {
     return this.client.isInitialized;
+  }
+
+  public get isOffline(): boolean {
+    return isOffline;
+  }
+
+  public set isOffline(value: boolean) {
+    isOffline = value;
   }
 
   public get isLoading(): boolean {
