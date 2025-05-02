@@ -150,6 +150,9 @@ importers:
       svelte-check:
         specifier: ^4.0.0
         version: 4.1.6(picomatch@4.0.2)(svelte@5.28.2)(typescript@5.8.3)
+      svelte-sonner:
+        specifier: ^0.3.28
+        version: 0.3.28(svelte@5.28.2)
       tailwind-merge:
         specifier: ^3.0.1
         version: 3.2.0
@@ -3585,6 +3588,11 @@ packages:
         optional: true
       typescript:
         optional: true
+
+  svelte-sonner@0.3.28:
+    resolution: {integrity: sha512-K3AmlySeFifF/cKgsYNv5uXqMVNln0NBAacOYgmkQStLa/UoU0LhfAACU6Gr+YYC8bOCHdVmFNoKuDbMEsppJg==}
+    peerDependencies:
+      svelte: ^3.0.0 || ^4.0.0 || ^5.0.0-next.1
 
   svelte-toolbelt@0.5.0:
     resolution: {integrity: sha512-t3tenZcnfQoIeRuQf/jBU7bvTeT3TGkcEE+1EUr5orp0lR7NEpprflpuie3x9Dn0W9nOKqs3HwKGJeeN5Ok1sQ==}
@@ -7724,6 +7732,10 @@ snapshots:
       postcss: 8.5.3
       postcss-load-config: 4.0.2(postcss@8.5.3)
       typescript: 5.8.3
+
+  svelte-sonner@0.3.28(svelte@5.28.2):
+    dependencies:
+      svelte: 5.28.2
 
   svelte-toolbelt@0.5.0(svelte@5.28.2):
     dependencies:
