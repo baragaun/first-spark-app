@@ -1,11 +1,27 @@
-<script lang="ts" module>
+<script lang="ts">
   import BookUser from 'lucide-svelte/icons/book-user';
   import House from 'lucide-svelte/icons/house';
   import Inbox from 'lucide-svelte/icons/inbox';
   import MessageSquare from 'lucide-svelte/icons/message-square';
   import Settings from 'lucide-svelte/icons/settings';
-
+  import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+  import type { ComponentProps } from 'svelte';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { m } from '$lib/paraglide/messages';
+  import { page } from '$app/state';
+  import { PlugZap, Zap } from 'lucide-svelte';
+  import { Button } from '../ui/button';
+
+  const isOnline = $derived(!myUserContext.isOffline);
+  const isSignedIn = $derived(myUserContext.isSignedIn);
+  const isDevEnv = $derived(import.meta.env.DEV);
+
+  const isItemActive = (itemUrl: string, currentPath: string): boolean => {
+    if (itemUrl === '/') {
+      return currentPath === '/';
+    }
+    return itemUrl !== '#' && currentPath.startsWith(itemUrl);
+  };
 
   const items = [
     {
@@ -35,23 +51,12 @@
       requiresAuth: true,
     },
   ];
-</script>
-
-<script lang="ts">
-  import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-  import type { ComponentProps } from 'svelte';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
-  import { page } from '$app/state';
-
-  const isSignedIn = $derived(myUserContext.isSignedIn);
-  const isItemActive = (itemUrl: string, currentPath: string): boolean => {
-    if (itemUrl === '/') {
-      return currentPath === '/';
-    }
-    return itemUrl !== '#' && currentPath.startsWith(itemUrl);
-  };
 
   let visibleItems = $derived(isSignedIn ? items : items.filter((item) => !item.requiresAuth));
+
+  const toggleConnection = () => {
+    myUserContext.isOffline = !myUserContext.isOffline;
+  }
 
   let {
     ref = $bindable(null),
@@ -99,6 +104,29 @@
             </Sidebar.MenuButton>
           </Sidebar.MenuItem>
         {/each}
+      </Sidebar.Menu>
+    </Sidebar.Group>
+    <Sidebar.Group class='mt-auto mb-2'>
+      <Sidebar.Menu>
+          <Sidebar.MenuItem>
+            <Sidebar.MenuButton>
+              {#snippet child({ props })}
+                <Button 
+                  {...props}
+                  disabled={!isDevEnv}
+                  onclick={toggleConnection}
+                  variant="ghost"
+                  >
+                  {#if isOnline}
+                    <Zap class="h-5 w-5" />
+                  {:else}
+                    <PlugZap class="h-5 w-5" />
+                  {/if}
+                  <span>{isOnline ? m['connection.online']() : m['connection.offline']()}</span>
+                </Button>
+              {/snippet}
+            </Sidebar.MenuButton>
+          </Sidebar.MenuItem>
       </Sidebar.Menu>
     </Sidebar.Group>
   </Sidebar.Content>

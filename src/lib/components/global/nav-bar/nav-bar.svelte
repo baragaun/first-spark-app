@@ -4,7 +4,6 @@
   import { m } from '$lib/paraglide/messages.js';
   import * as Sidebar from '$lib/components/ui/sidebar/index.js';
   import AvatarMenu from './avatar-menu.svelte';
-  import ConnectionIndicator from './connection-indicator.svelte';
   import LanguageButton from '../../language-button.svelte';
   import ThemeButton from '../../light-switch.svelte';
   import { Button } from '$lib/components/ui/button';
@@ -31,7 +30,6 @@
 
     <!-- Right side items -->
     <div class="flex flex-none items-center gap-2">
-      <ConnectionIndicator />
       <ThemeButton class="hidden md:flex" />
       <LanguageButton class="hidden md:flex" />
       {#if !isSignedIn}

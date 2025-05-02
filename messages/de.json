@@ -115,8 +115,8 @@
     "system": "System"
   },
   "connection": {
-    "offline": "Offline",
-    "online": "Online",
+    "offline": "Du bist offline",
+    "online": "Unterstützt von First Spark",
     "offline.description": "Sie sind derzeit nicht verbunden.",
     "reconnected": "Wieder verbunden",
     "reconnected.description": "Wieder mit First Spark verbunden!"

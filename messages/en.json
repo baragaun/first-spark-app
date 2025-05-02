@@ -140,8 +140,8 @@
     "system": "System"
   },
   "connection": {
-    "offline": "Offline",
-    "online": "Online",
+    "offline": "You're offline",
+    "online": "Powered by First Spark",
     "offline.description": "You are not currently connected.",
     "reconnected": "Reconnected",
     "reconnected.description": "Reconnected to First Spark!"
