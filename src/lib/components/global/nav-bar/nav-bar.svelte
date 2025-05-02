@@ -4,9 +4,10 @@
   import { m } from '$lib/paraglide/messages.js';
   import { Button } from '$lib/components/ui/button';
   import AvatarMenu from './avatar-menu.svelte';
-  import ThemeButton from '../theme-button.svelte';
-  import LanguageButton from '../language-button.svelte';
+  import ThemeButton from '../../light-switch.svelte';
+  import LanguageButton from '../../language-button.svelte';
   import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+  import { LogIn } from 'lucide-svelte';
 
   const isSignedIn = $derived(myUserContext.isSignedIn);
 </script>
@@ -29,17 +30,18 @@
 
     <!-- Right side items -->
     <div class="flex flex-none items-center gap-2">
+      <ThemeButton />
+      <LanguageButton />
       {#if !isSignedIn}
         <div class="flex flex-none items-center gap-2">
-          <ThemeButton class="hidden md:flex" />
-          <LanguageButton class="hidden md:flex" />
           <Button
             variant="ghost"
+            size="icon"
             onclick={() => goto('/signin')}
             aria-label={m['nav.auth.sign_in']()}
-            class="font-lexend hidden text-muted-foreground hover:text-foreground md:flex"
+            class="font-lexend text-muted-foreground hover:text-foreground"
           >
-            {m['nav.auth.sign_in']()}
+            <LogIn class="mr-2 h-4 w-4" />
           </Button>
           <span class="sr-only">Sign In</span>
           <Button
@@ -52,8 +54,9 @@
           </Button>
           <span class="sr-only">{m['nav.auth.sign_up']()}</span>
         </div>
+      {:else}
+        <AvatarMenu />
       {/if}
-      <AvatarMenu />
     </div>
   </div>
 </nav>

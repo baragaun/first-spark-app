@@ -1,11 +1,11 @@
 <script lang="ts">
+  import { goto } from '$app/navigation';
   import * as Avatar from '$lib/components/ui/avatar/index.js';
   import { Button } from '$lib/components/ui/button/index.js';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
-  import { goto } from '$app/navigation';
-  import { Languages, LogIn, LogOut, Moon, MoreHorizontal, Sun } from 'lucide-svelte';
+  import { m } from '$lib/paraglide/messages.js';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
-  import { toggleMode } from 'mode-watcher';
+  import { ArrowUpRight, LogIn, LogOut, MoreHorizontal, Settings } from 'lucide-svelte';
 
   const isSignedIn = $derived(myUserContext.isSignedIn);
   const username = $derived(myUserContext.myUserHandle);
@@ -15,13 +15,13 @@
     // TODO: add a confirmation dialog
     // Solution for putting a dialog in a dropdown menu:
     // https://stackoverflow.com/questions/77185827/shadcn-dialog-inside-of-dropdown-closes-automatically
-    const result = await myUserContext.signMeOut();
+    await myUserContext.signMeOut();
     await goto('/signin');
   };
 </script>
 
 <DropdownMenu.Root>
-  <DropdownMenu.Trigger class="ml-2 {!isSignedIn ? 'md:hidden' : ''}">
+  <DropdownMenu.Trigger class="ml-2">
     <Button variant="ghost" data-testid="avatar-menu-trigger" class="relative h-8 w-8 rounded-full">
       {#if isSignedIn}
         <Avatar.Root class="h-9 w-9">
@@ -33,6 +33,7 @@
       {/if}
     </Button>
   </DropdownMenu.Trigger>
+
   <DropdownMenu.Content class="mt-2 w-56" align="end">
     {#if isSignedIn}
       <DropdownMenu.Label class="font-normal">
@@ -50,33 +51,22 @@
       <DropdownMenu.Separator />
     {/if}
     <DropdownMenu.Group>
-      <DropdownMenu.Item onclick={toggleMode}>
-        <Sun
-          class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
-        />
-        <Moon
-          class="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
-        />
-        Toggle theme
-      </DropdownMenu.Item>
-      <DropdownMenu.Item>
-        <Languages class="h-5 w-5 transition-all" />
-        Change language
+      <DropdownMenu.Item onclick={() => goto('/settings')}>
+        <Settings class="mr-2 size-4" />
+        <span>{m['user_nav.settings']()}</span>
+        <DropdownMenu.Shortcut><ArrowUpRight /></DropdownMenu.Shortcut>
       </DropdownMenu.Item>
     </DropdownMenu.Group>
     <DropdownMenu.Separator />
     {#if isSignedIn}
-      <DropdownMenu.Item
-        onclick={handleLogout}
-        class="bg-destructive text-white focus:bg-destructive focus:text-white"
-      >
+      <DropdownMenu.Item onclick={handleLogout}>
         <LogOut class="mr-2 h-4 w-4" />
-        Sign out
+        {m['nav.auth.sign_out']()}
       </DropdownMenu.Item>
     {:else}
       <DropdownMenu.Item onclick={() => goto('/signin')}>
         <LogIn class="mr-2 h-4 w-4" />
-        Sign in
+        {m['nav.auth.sign_in']()}
       </DropdownMenu.Item>
     {/if}
   </DropdownMenu.Content>
