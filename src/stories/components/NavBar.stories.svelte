@@ -1,6 +1,6 @@
 <script module>
   import * as Sidebar from '$lib/components/ui/sidebar/index';
-  import NavBar from '@/components/nav-bar/nav-bar.svelte';
+  import NavBar from '@/components/global/nav-bar/nav-bar.svelte';
   import { defineMeta } from '@storybook/addon-svelte-csf';
   import MockUserProvider from '../mocks/mock-user-provider.svelte';
 

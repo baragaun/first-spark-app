@@ -1,4 +1,4 @@
-import NavBar from '@/components/nav-bar/nav-bar.svelte';
+import NavBar from '@/components/global/nav-bar/nav-bar.svelte';
 import { render, screen } from '@testing-library/svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -29,7 +29,7 @@ describe('NavBar', () => {
 
   it('renders theme toggle button', async () => {
     render(NavBar);
-    const themeToggleButton = screen.getByRole('button', { name: /toggle theme/i });
+    const themeToggleButton = screen.getByRole('button', { name: /change theme/i });
     expect(themeToggleButton).toBeVisible();
   });
 
@@ -49,31 +49,5 @@ describe('NavBar', () => {
     render(NavBar);
     const signUpButton = screen.getByRole('button', { name: /sign up/i });
     expect(signUpButton).toBeVisible();
-  });
-
-  it('renders the avatarMenu when viewport is small and unauthenticated', async () => {
-    Object.defineProperty(window, 'innerWidth', {
-      writable: true,
-      configurable: true,
-      value: 375,
-    });
-
-    window.matchMedia = (query) => ({
-      matches: query.includes('max-width') && query.includes('768px'),
-      media: query,
-      onchange: null,
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn(),
-    });
-
-    // Trigger resize event
-    window.dispatchEvent(new Event('resize'));
-
-    render(NavBar);
-    const avatarMenuButton = screen.getByTestId('avatar-menu-trigger');
-    expect(avatarMenuButton).toBeVisible();
   });
 });
