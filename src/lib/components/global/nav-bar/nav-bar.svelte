@@ -2,13 +2,13 @@
   import { goto } from '$app/navigation';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { m } from '$lib/paraglide/messages.js';
-  import { Button } from '$lib/components/ui/button';
-  import AvatarMenu from './avatar-menu.svelte';
-  import ThemeButton from '../../light-switch.svelte';
-  import LanguageButton from '../../language-button.svelte';
   import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-  import { LogIn } from 'lucide-svelte';
+  import AvatarMenu from './avatar-menu.svelte';
   import ConnectionIndicator from './connection-indicator.svelte';
+  import LanguageButton from '../../language-button.svelte';
+  import ThemeButton from '../../light-switch.svelte';
+  import { Button } from '$lib/components/ui/button';
+  import { LogIn } from 'lucide-svelte';
 
   const isSignedIn = $derived(myUserContext.isSignedIn);
 </script>
@@ -31,11 +31,11 @@
 
     <!-- Right side items -->
     <div class="flex flex-none items-center gap-2">
+      <ConnectionIndicator />
+      <ThemeButton class="hidden md:flex" />
+      <LanguageButton class="hidden md:flex" />
       {#if !isSignedIn}
         <div class="flex flex-none items-center gap-2">
-          <ConnectionIndicator />
-          <ThemeButton class="hidden md:flex" />
-          <LanguageButton class="hidden md:flex" />
           <Button
             variant="ghost"
             size="icon"
