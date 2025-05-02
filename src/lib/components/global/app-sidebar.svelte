@@ -56,7 +56,7 @@
 
   const toggleConnection = () => {
     myUserContext.isOffline = !myUserContext.isOffline;
-  }
+  };
 
   let {
     ref = $bindable(null),
@@ -106,27 +106,22 @@
         {/each}
       </Sidebar.Menu>
     </Sidebar.Group>
-    <Sidebar.Group class='mt-auto mb-2'>
+    <Sidebar.Group class="mb-2 mt-auto">
       <Sidebar.Menu>
-          <Sidebar.MenuItem>
-            <Sidebar.MenuButton>
-              {#snippet child({ props })}
-                <Button 
-                  {...props}
-                  disabled={!isDevEnv}
-                  onclick={toggleConnection}
-                  variant="ghost"
-                  >
-                  {#if isOnline}
-                    <Zap class="h-5 w-5" />
-                  {:else}
-                    <PlugZap class="h-5 w-5" />
-                  {/if}
-                  <span>{isOnline ? m['connection.online']() : m['connection.offline']()}</span>
-                </Button>
-              {/snippet}
-            </Sidebar.MenuButton>
-          </Sidebar.MenuItem>
+        <Sidebar.MenuItem>
+          <Sidebar.MenuButton>
+            {#snippet child({ props })}
+              <Button {...props} disabled={!isDevEnv} onclick={toggleConnection} variant="ghost">
+                {#if isOnline}
+                  <Zap class="h-5 w-5" />
+                {:else}
+                  <PlugZap class="h-5 w-5" />
+                {/if}
+                <span>{isOnline ? m['connection.online']() : m['connection.offline']()}</span>
+              </Button>
+            {/snippet}
+          </Sidebar.MenuButton>
+        </Sidebar.MenuItem>
       </Sidebar.Menu>
     </Sidebar.Group>
   </Sidebar.Content>

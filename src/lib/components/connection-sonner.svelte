@@ -19,7 +19,7 @@
       duration: Infinity,
       id: 'connection-offline',
     });
-  } ;
+  };
 
   const reconnectedToast = () => {
     toast.dismiss('connection-offline');
@@ -30,7 +30,7 @@
       duration: 5000,
       id: 'connection-online',
     });
-  } ;
+  };
 
   $effect(() => {
     // Do not toast when the client is already connected on mount
@@ -38,7 +38,7 @@
       initialLoad = false;
       return;
     }
-    
+
     if (isOffline) {
       // Only toast when a disconnection happens after the initial load
       if (!initialLoad) {
@@ -49,7 +49,7 @@
       // Only toast if we have restored our previously disconnected state
       reconnectedToast();
     }
-    
+
     // Always update initialLoad after first run
     initialLoad = false;
   });
@@ -59,17 +59,17 @@
     const handleOnline = () => {
       myUserContext.isOffline = false;
     };
-    
+
     const handleOffline = () => {
       myUserContext.isOffline = true;
     };
-    
+
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-    
+
     // Initialize status from browser until the node client does support this
     myUserContext.isOffline = !navigator.onLine;
-    
+
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
