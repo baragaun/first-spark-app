@@ -132,6 +132,13 @@
       "need_help": "मदद चाहिए?"
     }
   },
+
+  "theme": {
+    "light_switch": "विषय को परिवर्तित करें",
+    "light": "प्रकाश",
+    "dark": "अँधेरा",
+    "system": "सिस्टम"
+  },
   "connection": {
     "offline": "ऑफलाइन",
     "online": "ऑनलाइन",

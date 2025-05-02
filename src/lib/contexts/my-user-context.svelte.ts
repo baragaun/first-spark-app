@@ -298,8 +298,8 @@ export class MyUserContext {
       return translate(AppUiMessage.systemError);
     }
 
-    if (this.client.isSignedIn) {
-      console.error('MyUserContext.updateMyPassword: already signed in');
+    if (!this.client.isSignedIn) {
+      console.error('MyUserContext.updateMyPassword: not signed in');
       return translate(AppUiMessage.systemError);
     }
 
@@ -413,6 +413,26 @@ export class MyUserContext {
     }
   }
 
+  async verifyMyPassword(password: string): Promise<QueryResult<boolean>> {
+    if (!this.client.isInitialized) {
+      console.error('MyUserContext.verifyMyPassword: not initialized.');
+      return { error: translate(AppUiMessage.systemError) };
+    }
+
+    try {
+      isLoading = true;
+      return await this.client.operations.myUser.verifyMyPassword(password);
+    } catch (error) {
+      console.error('MyUserContext.verifyMyPassword: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return { error: translate((error as Error).message, AppUiMessage.systemError) };
+    } finally {
+      isLoading = false;
+    }
+  }
+
   async verifyMultiStepActionToken(
     actionId: string,
     token: string,
@@ -471,6 +491,35 @@ export class MyUserContext {
     } catch (error) {
       console.error('MyUserContext.sendMultiStepActionNotification: error', { error });
       return 'system-error';
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  async deleteMyUser(
+    cause: string | undefined,
+    description: string | undefined,
+  ): Promise<true | string> {
+    if (!this.client.isInitialized) {
+      console.error('MyUserContext.deleteMyUser: not initialized.');
+      return translate(AppUiMessage.systemError);
+    }
+
+    try {
+      isLoading = true;
+      const response = await this.client.operations.myUser.deleteMyUser(cause, description);
+      if (response.error) {
+        console.error('MyUserContext.deleteMyUser: received error.', { response });
+        return translate(response.error, AppUiMessage.systemError);
+      }
+
+      return true;
+    } catch (error) {
+      console.error('MyUserContext.deleteMyUser: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return translate((error as Error).message, AppUiMessage.systemError);
     } finally {
       isLoading = false;
     }

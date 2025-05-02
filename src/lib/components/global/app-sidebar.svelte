@@ -1,9 +1,9 @@
 <script lang="ts" module>
+  import BookUser from 'lucide-svelte/icons/book-user';
   import House from 'lucide-svelte/icons/house';
   import Inbox from 'lucide-svelte/icons/inbox';
-  import Settings from 'lucide-svelte/icons/settings';
-  import BookUser from 'lucide-svelte/icons/book-user';
   import MessageSquare from 'lucide-svelte/icons/message-square';
+  import Settings from 'lucide-svelte/icons/settings';
 
   import { m } from '$lib/paraglide/messages';
 
@@ -32,6 +32,7 @@
       title: m['sidebar.menu.settings'](),
       url: '/settings',
       icon: Settings,
+      requiresAuth: true,
     },
   ];
 </script>
@@ -39,14 +40,18 @@
 <script lang="ts">
   import * as Sidebar from '$lib/components/ui/sidebar/index.js';
   import type { ComponentProps } from 'svelte';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { page } from '$app/state';
 
-  function isItemActive(itemUrl: string, currentPath: string): boolean {
+  const isSignedIn = $derived(myUserContext.isSignedIn);
+  const isItemActive = (itemUrl: string, currentPath: string): boolean => {
     if (itemUrl === '/') {
       return currentPath === '/';
     }
     return itemUrl !== '#' && currentPath.startsWith(itemUrl);
-  }
+  };
+
+  let visibleItems = $derived(isSignedIn ? items : items.filter((item) => !item.requiresAuth));
 
   let {
     ref = $bindable(null),
@@ -54,6 +59,14 @@
     collapsible = 'icon',
     ...restProps
   }: ComponentProps<typeof Sidebar.Root> = $props();
+
+  const sidebar = Sidebar.useSidebar();
+
+  const handleItemClick = () => {
+    if (sidebar.isMobile) {
+      sidebar.setOpenMobile(false);
+    }
+  };
 </script>
 
 <Sidebar.Root bind:ref {collapsible} {...restProps}>
@@ -74,11 +87,11 @@
     </Sidebar.Header>
     <Sidebar.Group>
       <Sidebar.Menu>
-        {#each items as item, i (item.title)}
+        {#each visibleItems as item, i (item.title)}
           <Sidebar.MenuItem>
             <Sidebar.MenuButton isActive={isItemActive(item.url, page.url.pathname)}>
               {#snippet child({ props })}
-                <a href={item.url} {...props}>
+                <a href={item.url} onclick={handleItemClick} {...props}>
                   <item.icon />
                   <span>{item.title}</span>
                 </a>

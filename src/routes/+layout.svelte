@@ -2,9 +2,9 @@
   import '../app.css';
   import { ModeWatcher } from 'mode-watcher';
   import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-  import AppSidebar from '$lib/components/app-sidebar.svelte';
-  import NavBar from '@/components/nav-bar/nav-bar.svelte';
-  import Footer from '$lib/components/footer.svelte';
+  import AppSidebar from '@/components/global/app-sidebar.svelte';
+  import NavBar from '@/components/global/nav-bar/nav-bar.svelte';
+  import Footer from '@/components/global/footer.svelte';
   import MyUserProvider from '@/contexts/my-user-provider.svelte';
   import ConnectionSonner from '$lib/components/connection-sonner.svelte';
   import { locales, localizeHref } from '$lib/paraglide/runtime';

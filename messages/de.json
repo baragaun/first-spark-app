@@ -107,6 +107,13 @@
       "creating_account": "Konto wird erstellt..."
     }
   },
+
+  "theme": {
+    "light_switch": "Thema ändern",
+    "light": "Licht",
+    "dark": "dunkel",
+    "system": "System"
+  },
   "connection": {
     "offline": "Offline",
     "online": "Online",
