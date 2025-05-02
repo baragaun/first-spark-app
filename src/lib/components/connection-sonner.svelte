@@ -4,25 +4,21 @@
   import { toast } from 'svelte-sonner';
   import { PlugZap, PartyPopper } from 'lucide-svelte';
   import { m } from '$lib/paraglide/messages.js';
+  import { connectionStore } from '@/stores/connection-store.svelte';
 
-  let isOffline = $state(false);
-  let previousOfflineState = $state(false);
-  let offlineToastId: string | number | undefined;
+  let lastOfflineState = $state(connectionStore.isOffline);
 
   // Subscribe to connection status changes
   $effect(() => {
-    if (isOffline && !previousOfflineState) {
+    const isOffline = connectionStore.isOffline;
+
+    if (isOffline && !lastOfflineState) {
       // Connection lost
-      offlineToastId = toast.error(m['connection.offline'](), {
-        description: m['connection.offline.description'](),
-        icon: PlugZap,
-        duration: Infinity, // Keep showing until reconnected
-        id: 'connection-offline',
-      });
-    } else if (!isOffline && previousOfflineState) {
+      showOfflineSonner();
+    } else if (!isOffline && lastOfflineState) {
       // Connection restored
-      if (offlineToastId) {
-        toast.dismiss(offlineToastId);
+      if (connectionStore.offlineToastId) {
+        toast.dismiss(connectionStore.offlineToastId);
       }
 
       toast.success(m['connection.reconnected'](), {
@@ -33,20 +29,57 @@
       });
     }
 
-    previousOfflineState = isOffline;
+    // Update our local tracking state
+    lastOfflineState = isOffline;
+
+    // Update the store's previous state
+    connectionStore.updatePreviousState();
   });
 
   onMount(() => {
     // Check connection status on mount
-    if (isOffline) {
-      offlineToastId = toast.error(m['connection.offline'](), {
-        description: m['connection.offline.description'](),
-        icon: PlugZap,
-        duration: Infinity,
-        id: 'connection-offline',
-      });
+    if (connectionStore.isOffline) {
+      showOfflineSonner();
     }
   });
+
+  function showOfflineSonner() {
+    connectionStore.offlineToastId = toast.error(m['connection.offline'](), {
+      description: m['connection.offline.description'](),
+      icon: PlugZap,
+      duration: Infinity,
+      id: 'connection-offline',
+    });
+  }
 </script>
 
-<Toaster richColors closeButton />
+<Toaster
+  richColors
+  closeButton
+  position="bottom-right"
+  toastOptions={{
+    classes: {
+      toast: 'connection-toast',
+      title: 'connection-toast-title',
+      description: 'connection-toast-description',
+    },
+  }}
+/>
+
+<style>
+  :global(.connection-toaster) {
+    bottom: 4rem !important; /* Adjust this value based on your footer height */
+  }
+
+  :global(.connection-toast) {
+    margin-bottom: 4rem;
+  }
+
+  :global(.connection-toast-title) {
+    margin-left: 0.5rem;
+  }
+
+  :global(.connection-toast-description) {
+    margin-left: 0.5rem;
+  }
+</style>

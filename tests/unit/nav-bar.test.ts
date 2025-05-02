@@ -1,6 +1,6 @@
 import NavBar from '@/components/global/nav-bar/nav-bar.svelte';
 import { render, screen } from '@testing-library/svelte';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 describe('NavBar', () => {
   // beforeEach(() => {});

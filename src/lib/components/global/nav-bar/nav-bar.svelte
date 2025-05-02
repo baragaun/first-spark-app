@@ -31,9 +31,6 @@
 
     <!-- Right side items -->
     <div class="flex flex-none items-center gap-2">
-      <ConnectionIndicator />
-      <ThemeButton />
-      <LanguageButton />
       {#if !isSignedIn}
         <div class="flex flex-none items-center gap-2">
           <ConnectionIndicator />
