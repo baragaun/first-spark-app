@@ -116,10 +116,16 @@
           <h2 class="mb-3 text-sm font-bold">{m['join_first_spark']()}</h2>
           <h3 class="mb-3 text-sm font-medium">{m['welcome_subtitle']()}</h3>
           <div class="flex flex-col gap-2">
-            <Button href="/signup" size="sm" class="w-full">
+            <Button href="/signup" size="sm" class="w-full" onclick={handleItemClick}>
               {m['get_started']()}
             </Button>
-            <Button href="/signin" variant="outline" size="sm" class="w-full">
+            <Button
+              href="/signin"
+              variant="outline"
+              size="sm"
+              class="w-full"
+              onclick={handleItemClick}
+            >
               {m['nav.auth.sign_in']()}
             </Button>
           </div>
@@ -128,7 +134,7 @@
     {/if}
 
     <Sidebar.Group
-      class="mb-2 {!isSignedIn ? '' : 'mt-auto'} px-3 group-data-[collapsible=icon]:mt-auto"
+      class={`mb-2 ${!isSignedIn ? '' : 'mt-auto'} px-3 group-data-[collapsible=icon]:mt-auto`}
     >
       <Sidebar.Menu>
         <Sidebar.MenuItem>
