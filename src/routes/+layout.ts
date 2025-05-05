@@ -1,4 +1,4 @@
-import { myUserContext } from '@/contexts/my-user-context.svelte';
+import { myUserContext } from '@contexts/my-user-context.svelte';
 import type { LayoutLoad } from './$types';
 
 // Only initialize in browser environment

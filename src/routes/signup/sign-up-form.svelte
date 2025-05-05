@@ -1,13 +1,13 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import AuthCard from '@/components/auth-card.svelte';
-  import FormButton from '@/components/forms/form-button.svelte';
-  import IdentFormInput from '@/components/forms/form-ident-input.svelte';
-  import OTPFormInput from '@/components/forms/form-otp-input.svelte';
-  import PasswordFormInput from '@/components/forms/form-password-input.svelte';
-  import { MsaListenerHandler } from '@/contexts/msa-listener-handler.svelte';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
-  import translate from '@/helpers/language/translate';
+  import AuthCard from '@components/auth-card.svelte';
+  import FormButton from '@forms/form-button.svelte';
+  import IdentFormInput from '@forms/form-ident-input.svelte';
+  import OTPFormInput from '@forms/form-otp-input.svelte';
+  import PasswordFormInput from '@forms/form-password-input.svelte';
+  import { MsaListenerHandler } from '@contexts/msa-listener-handler.svelte';
+  import { myUserContext } from '@contexts/my-user-context.svelte';
+  import translate from '@helpers/language/translate';
   import { AppUiMessage } from '@/types/enums';
   import { UserIdentType } from '@baragaun/bg-node-client';
   import { onDestroy } from 'svelte';
@@ -442,7 +442,6 @@
       {/if}
       <FormButton
         disabled={$delayed || isLoading || hasStepError}
-        loading={$delayed || isLoading}
         buttonText="Sign Up"
         loadingText={steps[step - 1].buttonLabel}
       />

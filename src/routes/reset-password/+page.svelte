@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { myUserContext } from '@/contexts/my-user-context.svelte.js';
+  import { myUserContext } from '@contexts/my-user-context.svelte';
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
   import { type PageData } from './$types.js';

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { Button } from '$lib/components/ui/button';
-  import { m } from '$lib/paraglide/messages.js';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { Button } from '@components/ui/button';
+  import { m } from '@/paraglide/messages';
+  import { myUserContext } from '@contexts/my-user-context.svelte';
 
   const isSignedIn = $derived(myUserContext.isSignedIn);
 </script>
