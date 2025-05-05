@@ -1,5 +1,5 @@
 <script lang="ts">
-  import * as Form from '$lib/components/ui/form/index.js';
+  import * as Form from '$components/ui/form/index.js';
   import SpinLoadIndicator from './spin-load-indicator.svelte';
 
   let {

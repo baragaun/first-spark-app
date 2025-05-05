@@ -4,9 +4,9 @@
   import Inbox from 'lucide-svelte/icons/inbox';
   import MessageSquare from 'lucide-svelte/icons/message-square';
   import Settings from 'lucide-svelte/icons/settings';
-  import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+  import * as Sidebar from '$components/ui/sidebar/index.js';
   import type { ComponentProps } from 'svelte';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { myUserContext } from '$contexts/my-user-context.svelte';
   import { m } from '$lib/paraglide/messages';
   import { page } from '$app/state';
   import { PlugZap, Zap } from 'lucide-svelte';

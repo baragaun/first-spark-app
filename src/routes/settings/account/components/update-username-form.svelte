@@ -1,14 +1,14 @@
 <script lang="ts">
-  import { Input } from '$lib/components/ui/input';
-  import IdentFormInput from '@/components/forms/form-ident-input.svelte';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
-  import translate from '@/helpers/language/translate';
-  import { AppUiMessage } from '@/types/enums';
+  import { Input } from '$components/ui/input';
+  import IdentFormInput from '$forms/form-ident-input.svelte';
+  import { myUserContext } from '$contexts/my-user-context.svelte';
+  import translate from '$helpers/language/translate';
+  import { AppUiMessage } from '$types/enums';
   import { UserIdentType } from '@baragaun/bg-node-client';
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
-  import FormButton from '@/components/forms/form-button.svelte';
-  import { Button } from '@/components/ui/button';
+  import FormButton from '$forms/form-button.svelte';
+  import { Button } from '$components/ui/button';
   import { usernameFormSchema, type UsernameFormSchema } from '../../(data)/schema';
 
   let {

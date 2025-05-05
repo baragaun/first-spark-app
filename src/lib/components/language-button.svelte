@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { Button } from '$lib/components/ui/button/index.js';
+  import { Button } from '$components/ui/button/index.js';
   import { Languages } from 'lucide-svelte';
-  import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+  import * as DropdownMenu from '$components/ui/dropdown-menu';
   import { getLocale, setLocale, locales } from '$lib/paraglide/runtime.js';
   import { m } from '$lib/paraglide/messages.js';
 

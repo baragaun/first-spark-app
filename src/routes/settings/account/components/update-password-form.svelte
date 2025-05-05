@@ -1,8 +1,8 @@
 <script lang="ts">
-  import PasswordFormInput from '@/components/forms/form-password-input.svelte';
+  import PasswordFormInput from '$forms/form-password-input.svelte';
 
-  import { myUserContext } from '$lib/contexts/my-user-context.svelte';
-  import { AppUiMessage } from '@/types/enums';
+  import { myUserContext } from '$contexts/my-user-context.svelte';
+  import { AppUiMessage } from '$types/enums';
 
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
@@ -11,8 +11,8 @@
     passwordFormSchema,
     type PasswordFormSchema,
   } from '../../(data)/schema';
-  import FormButton from '@/components/forms/form-button.svelte';
-  import { Button } from '@/components/ui/button';
+  import FormButton from '$forms/form-button.svelte';
+  import { Button } from '$components/ui/button';
 
   let {
     preValidatedForm,

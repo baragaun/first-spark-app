@@ -1,17 +1,17 @@
 <script lang="ts">
-  import * as Alert from '$lib/components/ui/alert';
-  import * as Form from '$lib/components/ui/form/index';
-  import { Input } from '$lib/components/ui/input';
-  import { Textarea } from '$lib/components/ui/textarea';
-  import IdentFormInput from '@/components/forms/form-ident-input.svelte';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import * as Alert from '$components/ui/alert';
+  import * as Form from '$components/ui/form/index';
+  import { Input } from '$components/ui/input';
+  import { Textarea } from '$components/ui/textarea';
+  import IdentFormInput from '$forms/form-ident-input.svelte';
+  import { myUserContext } from '$contexts/my-user-context.svelte';
   import { AlertTriangle } from 'lucide-svelte';
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zodClient } from 'sveltekit-superforms/adapters';
-  import FormButton from '@/components/forms/form-button.svelte';
-  import { Button } from '@/components/ui/button';
-  import translate from '@/helpers/language/translate';
-  import { AppUiMessage } from '@/types/enums';
+  import FormButton from '$forms/form-button.svelte';
+  import { Button } from '$components/ui/button';
+  import translate from '$helpers/language/translate';
+  import { AppUiMessage } from '$types/enums';
   import { deleteAccountFormSchema, type DeleteAccountFormSchema } from '../../(data)/schema';
 
   let {

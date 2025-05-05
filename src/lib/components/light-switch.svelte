@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Button } from '$lib/components/ui/button/index.js';
-  import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+  import { Button } from '$components/ui/button/index.js';
+  import * as DropdownMenu from '$components/ui/dropdown-menu';
   import { m } from '$lib/paraglide/messages.js';
   import { Check, Moon, Sun } from 'lucide-svelte';
   import { resetMode, setMode, userPrefersMode } from 'mode-watcher';

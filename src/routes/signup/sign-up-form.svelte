@@ -1,14 +1,14 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import AuthCard from '@components/auth-card.svelte';
-  import FormButton from '@forms/form-button.svelte';
-  import IdentFormInput from '@forms/form-ident-input.svelte';
-  import OTPFormInput from '@forms/form-otp-input.svelte';
-  import PasswordFormInput from '@forms/form-password-input.svelte';
-  import { MsaListenerHandler } from '@contexts/msa-listener-handler.svelte';
-  import { myUserContext } from '@contexts/my-user-context.svelte';
-  import translate from '@helpers/language/translate';
-  import { AppUiMessage } from '@/types/enums';
+  import AuthCard from '$components/auth-card.svelte';
+  import FormButton from '$forms/form-button.svelte';
+  import IdentFormInput from '$forms/form-ident-input.svelte';
+  import OTPFormInput from '$forms/form-otp-input.svelte';
+  import PasswordFormInput from '$forms/form-password-input.svelte';
+  import { MsaListenerHandler } from '$contexts/msa-listener-handler.svelte';
+  import { myUserContext } from '$contexts/my-user-context.svelte';
+  import translate from '$helpers/language/translate';
+  import { AppUiMessage } from '$types/enums';
   import { UserIdentType } from '@baragaun/bg-node-client';
   import { onDestroy } from 'svelte';
   import SuperDebug, { superForm, type SuperValidated } from 'sveltekit-superforms';

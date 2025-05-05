@@ -3,12 +3,12 @@
 </script>
 
 <script lang="ts" generics="T extends Record<string, unknown>">
-  import * as Form from '$lib/components/ui/form/index.js';
-  import { Input } from '$lib/components/ui/input/index.js';
-  import { cn } from '@/utils';
+  import * as Form from '$components/ui/form/index.js';
+  import { Input } from '$components/ui/input/index.js';
+  import { cn } from '$lib/utils';
+
   import { UserIdentType } from '@baragaun/bg-node-client';
   import { AlertCircle, Check, RefreshCw } from 'lucide-svelte';
-  import { onMount } from 'svelte';
   import type { FormPathLeaves, SuperForm } from 'sveltekit-superforms';
 
   let {

@@ -3,17 +3,17 @@
   import { zod } from 'sveltekit-superforms/adapters';
   import { goto } from '$app/navigation';
   import { onDestroy } from 'svelte';
-  import translate from '@helpers/language/translate';
+  import translate from '$helpers/language/translate';
   import { UserIdentType } from '@baragaun/bg-node-client';
-  import AuthCard from '@components/auth-card.svelte';
-  import EmailFormInput from '@forms/form-ident-input.svelte';
-  import FormButton from '@forms/form-button.svelte';
-  import OtpFormInput from '@forms/form-otp-input.svelte';
-  import PasswordFormInput from '@forms/form-password-input.svelte';
-  import { MsaListenerHandler } from '@contexts/msa-listener-handler.svelte';
-  import { myUserContext } from '@contexts/my-user-context.svelte';
-  import passwordHelpers from '@helpers/password-helpers';
-  import { AppUiMessage } from '@/types/enums';
+  import AuthCard from '$components/auth-card.svelte';
+  import EmailFormInput from '$forms/form-ident-input.svelte';
+  import FormButton from '$forms/form-button.svelte';
+  import OtpFormInput from '$forms/form-otp-input.svelte';
+  import PasswordFormInput from '$forms/form-password-input.svelte';
+  import { MsaListenerHandler } from '$contexts/msa-listener-handler.svelte';
+  import { myUserContext } from '$contexts/my-user-context.svelte';
+  import passwordHelpers from '$helpers/password-helpers';
+  import { AppUiMessage } from '$types/enums';
   import {
     determineIdentifierType,
     getOtpMessage,

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import MetaTags from '$lib/components/shared/meta-tags.svelte';
+  import MetaTags from '$components/shared/meta-tags.svelte';
 
   const lastUpdated = new Date().toLocaleDateString('en-US', {
     year: 'numeric',

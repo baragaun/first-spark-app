@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button } from '$lib/components/ui/button';
+  import { Button } from '$components/ui/button';
   import { m } from '$lib/paraglide/messages.js';
   const currentYear = new Date().getFullYear();
 </script>

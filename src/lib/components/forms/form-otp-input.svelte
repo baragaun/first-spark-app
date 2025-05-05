@@ -3,8 +3,8 @@
 </script>
 
 <script lang="ts" generics="T extends Record<string, unknown>">
-  import * as Form from '$lib/components/ui/form/index.js';
-  import * as InputOTP from '$lib/components/ui/input-otp';
+  import * as Form from '$components/ui/form/index.js';
+  import * as InputOTP from '$components/ui/input-otp';
   import { REGEXP_ONLY_DIGITS } from 'bits-ui';
   import type { FormPathLeaves, SuperForm } from 'sveltekit-superforms';
 

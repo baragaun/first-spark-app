@@ -1,12 +1,12 @@
 <script lang="ts">
   import '../app.css';
   import { ModeWatcher } from 'mode-watcher';
-  import * as Sidebar from '@components/ui/sidebar/index';
-  import AppSidebar from '@components/global/app-sidebar.svelte';
-  import NavBar from '@components/global/nav-bar/nav-bar.svelte';
-  import Footer from '@components/global/footer.svelte';
-  import MyUserProvider from '@contexts/my-user-provider.svelte';
-  import ConnectionSonner from '@components/connection-sonner.svelte';
+  import * as Sidebar from '$components/ui/sidebar/index';
+  import AppSidebar from '$components/global/app-sidebar.svelte';
+  import NavBar from '$components/global/nav-bar/nav-bar.svelte';
+  import Footer from '$components/global/footer.svelte';
+  import MyUserProvider from '$contexts/my-user-provider.svelte';
+  import ConnectionSonner from '$components/connection-sonner.svelte';
   import { locales, localizeHref } from '@/paraglide/runtime';
   import { page } from '$app/state';
 

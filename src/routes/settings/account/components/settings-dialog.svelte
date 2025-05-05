@@ -1,5 +1,5 @@
 <script lang="ts">
-  import * as Dialog from '$lib/components/ui/dialog';
+  import * as Dialog from '$components/ui/dialog';
   import { ChevronRight } from 'lucide-svelte';
   import { type Snippet } from 'svelte';
 

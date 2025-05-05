@@ -1,8 +1,8 @@
 <script lang="ts">
   import { page } from '$app/state';
   import { goto } from '$app/navigation';
-  import * as Tabs from '$lib/components/ui/tabs/index.js';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import * as Tabs from '$components/ui/tabs/index.js';
+  import { myUserContext } from '$contexts/my-user-context.svelte';
   import { onMount } from 'svelte';
 
   const isSignedIn = $derived(myUserContext.isSignedIn);

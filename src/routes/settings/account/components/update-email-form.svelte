@@ -1,15 +1,15 @@
 <script lang="ts">
-  import FormButton from '@/components/forms/form-button.svelte';
-  import IdentFormInput from '@/components/forms/form-ident-input.svelte';
-  import OTPFormInput from '@/components/forms/form-otp-input.svelte';
-  import { Input } from '@/components/ui/input';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
-  import { MsaListenerHandler } from '@/contexts/msa-listener-handler.svelte';
+  import FormButton from '$forms/form-button.svelte';
+  import IdentFormInput from '$forms/form-ident-input.svelte';
+  import OTPFormInput from '$forms/form-otp-input.svelte';
+  import { Input } from '$components/ui/input';
+  import { myUserContext } from '$contexts/my-user-context.svelte';
+  import { MsaListenerHandler } from '$contexts/msa-listener-handler.svelte';
   import { UserIdentType } from '@baragaun/bg-node-client';
-  import translate from '@/helpers/language/translate';
+  import translate from '$helpers/language/translate';
   import { onDestroy } from 'svelte';
   import { zod } from 'sveltekit-superforms/adapters';
-  import { AppUiMessage } from '@/types/enums';
+  import { AppUiMessage } from '$types/enums';
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
   import {
     emailFormSchemaFirstStep,

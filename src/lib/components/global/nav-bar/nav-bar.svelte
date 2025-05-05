@@ -1,12 +1,12 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { myUserContext } from '$contexts/my-user-context.svelte';
   import { m } from '$lib/paraglide/messages.js';
-  import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+  import * as Sidebar from '$components/ui/sidebar/index.js';
   import AvatarMenu from './avatar-menu.svelte';
   import LanguageButton from '../../language-button.svelte';
   import ThemeButton from '../../light-switch.svelte';
-  import { Button } from '$lib/components/ui/button';
+  import { Button } from '$components/ui/button';
   import { LogIn } from 'lucide-svelte';
 
   const isSignedIn = $derived(myUserContext.isSignedIn);

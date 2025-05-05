@@ -1,10 +1,10 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import * as Avatar from '$lib/components/ui/avatar/index.js';
-  import { Button } from '$lib/components/ui/button/index.js';
-  import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
+  import * as Avatar from '$components/ui/avatar/index.js';
+  import { Button } from '$components/ui/button/index.js';
+  import * as DropdownMenu from '$components/ui/dropdown-menu/index.js';
   import { m } from '$lib/paraglide/messages.js';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { myUserContext } from '$contexts/my-user-context.svelte';
   import { ArrowUpRight, LogIn, LogOut, MoreHorizontal, Settings } from 'lucide-svelte';
 
   const isSignedIn = $derived(myUserContext.isSignedIn);

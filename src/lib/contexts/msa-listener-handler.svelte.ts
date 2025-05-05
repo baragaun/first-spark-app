@@ -1,5 +1,5 @@
-import translate from '@/helpers/language/translate';
-import { AppUiMessage, MsaTokenStatus } from '@/types/enums';
+import translate from '$helpers/language/translate';
+import { AppUiMessage, MsaTokenStatus } from '$types/enums';
 import {
   MultiStepActionEventType,
   type MultiStepActionProgressResult,

@@ -1,5 +1,5 @@
-import translate from '@/helpers/language/translate';
-import { AppUiMessage } from '@/types/enums';
+import translate from '$helpers/language/translate';
+import { AppUiMessage } from '$types/enums';
 import {
   AppEnvironment,
   BgListenerTopic,

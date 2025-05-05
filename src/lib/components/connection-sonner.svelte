@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { Toaster } from '$lib/components/ui/sonner/index.js';
+  import { Toaster } from '$components/ui/sonner/index.js';
   import { toast } from 'svelte-sonner';
   import { PlugZap, PartyPopper } from 'lucide-svelte';
   import { m } from '$lib/paraglide/messages.js';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { myUserContext } from '$contexts/my-user-context.svelte';
   import { onMount } from 'svelte';
 
   let isOffline = $derived(myUserContext.isOffline);

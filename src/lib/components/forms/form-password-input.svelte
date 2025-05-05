@@ -3,8 +3,8 @@
 </script>
 
 <script lang="ts" generics="T extends Record<string, unknown>">
-  import * as Form from '$lib/components/ui/form/index.js';
-  import { Input } from '$lib/components/ui/input/index.js';
+  import * as Form from '$components/ui/form/index.js';
+  import { Input } from '$components/ui/input/index.js';
   import { Eye, EyeOff } from 'lucide-svelte';
   import type { FormPathLeaves, SuperForm } from 'sveltekit-superforms';
 

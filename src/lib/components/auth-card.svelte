@@ -1,11 +1,5 @@
 <script lang="ts">
-  import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-  } from '$lib/components/ui/card';
+  import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$components/ui/card';
   import type { Snippet } from 'svelte';
   import Button from './ui/button/button.svelte';
 
