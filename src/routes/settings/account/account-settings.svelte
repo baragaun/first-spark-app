@@ -73,9 +73,8 @@
   </div>
 
   <Separator />
-
   <h4 class="font-lexend text-lg font-bold">Danger Zone</h4>
-  <div class="space-y-4">
+  <div class="flex cursor-pointer items-center justify-between rounded-lg hover:bg-muted/50">
     <SettingsDialog
       label="Delete my account"
       sublabel="Permanently delete your account and any associated data"
