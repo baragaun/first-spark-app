@@ -106,5 +106,19 @@
       "create_account": "Konto erstellen",
       "creating_account": "Konto wird erstellt..."
     }
+  },
+
+  "theme": {
+    "light_switch": "Thema ändern",
+    "light": "Licht",
+    "dark": "dunkel",
+    "system": "System"
+  },
+  "connection": {
+    "offline": "Du bist offline",
+    "online": "Unterstützt von First Spark",
+    "offline.description": "Sie sind derzeit nicht verbunden.",
+    "reconnected": "Wieder verbunden",
+    "reconnected.description": "Wieder mit First Spark verbunden!"
   }
 }

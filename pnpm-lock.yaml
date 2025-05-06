@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@baragaun/bg-node-client':
-        specifier: ^0.0.27
-        version: 0.0.27(prettier@3.5.3)
+        specifier: ^0.0.28
+        version: 0.0.28(prettier@3.5.3)
       formsnap:
         specifier: ^2.0.0
         version: 2.0.0(svelte@5.22.6)(sveltekit-superforms@2.24.0(@sveltejs/kit@2.19.0(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.22.6)(vite@6.3.3(@types/node@22.13.10)(jiti@1.21.7)(yaml@2.7.0)))(svelte@5.22.6)(vite@6.3.3(@types/node@22.13.10)(jiti@1.21.7)(yaml@2.7.0)))(@types/json-schema@7.0.15)(svelte@5.22.6)(typescript@5.8.2))
@@ -106,8 +106,8 @@ importers:
         specifier: ^10.4.20
         version: 10.4.21(postcss@8.5.3)
       bits-ui:
-        specifier: ^1.3.10
-        version: 1.3.10(svelte@5.22.6)
+        specifier: ^1.4.3
+        version: 1.4.6(svelte@5.22.6)
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -153,6 +153,9 @@ importers:
       svelte-check:
         specifier: ^4.0.0
         version: 4.1.5(picomatch@4.0.2)(svelte@5.22.6)(typescript@5.8.2)
+      svelte-sonner:
+        specifier: ^0.3.28
+        version: 0.3.28(svelte@5.22.6)
       tailwind-merge:
         specifier: ^3.0.1
         version: 3.0.2
@@ -241,8 +244,8 @@ packages:
     resolution: {integrity: sha512-emqcG3vHrpxUKTrxcblR36dcrcoRDvKmnL/dCL6ZsHaShW80qxCAcNhzQZrpeM765VzEos+xOi4s+r4IXzTwdQ==}
     engines: {node: '>=6.9.0'}
 
-  '@baragaun/bg-node-client@0.0.27':
-    resolution: {integrity: sha512-WrcTtO7y1cYlgUnn/1GHyEYq89V7xmh7++CF0x4jxdMnLVveIIwcR4Dd2cmAynVeIXfqoAkKwnoQ+vEPA3ebPg==}
+  '@baragaun/bg-node-client@0.0.28':
+    resolution: {integrity: sha512-LcNx+P7v5EjeRRDVg2QAbdbgsv3YyAbyFGVT8qsVgnJmiJ4fjBoctbxiVHmApZpwwwfKhH2vrVEP0Dsuc+XoPQ==}
     engines: {node: '>= 20'}
 
   '@bcoe/v8-coverage@1.0.2':
@@ -1709,8 +1712,8 @@ packages:
     resolution: {integrity: sha512-Ceh+7ox5qe7LJuLHoY0feh3pHuUDHAcRUeyL2VYghZwfpkNIy/+8Ocg0a3UuSoYzavmylwuLWQOf3hl0jjMMIw==}
     engines: {node: '>=8'}
 
-  bits-ui@1.3.10:
-    resolution: {integrity: sha512-Mg6ENVlI/dwHX9hR1cSiAp5gqzwzowPbXPRW32RxFdUKakuL8qYyewwr446VC7UkZLEpNeoHn7HICcBscJhYdw==}
+  bits-ui@1.4.6:
+    resolution: {integrity: sha512-EN2niBF9iBe03GzSJ64I369DA/pRdoC7sCKVAqIxMkxrk/ClfDurzNJkf4RMK6EFOxeqWzTVFJTGyPdmBAy6Lw==}
     engines: {node: '>=18', pnpm: '>=8.7.0'}
     peerDependencies:
       svelte: ^5.11.0
@@ -3620,6 +3623,11 @@ packages:
       typescript:
         optional: true
 
+  svelte-sonner@0.3.28:
+    resolution: {integrity: sha512-K3AmlySeFifF/cKgsYNv5uXqMVNln0NBAacOYgmkQStLa/UoU0LhfAACU6Gr+YYC8bOCHdVmFNoKuDbMEsppJg==}
+    peerDependencies:
+      svelte: ^3.0.0 || ^4.0.0 || ^5.0.0-next.1
+
   svelte-toolbelt@0.5.0:
     resolution: {integrity: sha512-t3tenZcnfQoIeRuQf/jBU7bvTeT3TGkcEE+1EUr5orp0lR7NEpprflpuie3x9Dn0W9nOKqs3HwKGJeeN5Ok1sQ==}
     engines: {node: '>=18', pnpm: '>=8.7.0'}
@@ -4193,7 +4201,7 @@ snapshots:
       '@babel/helper-string-parser': 7.25.9
       '@babel/helper-validator-identifier': 7.25.9
 
-  '@baragaun/bg-node-client@0.0.27(prettier@3.5.3)':
+  '@baragaun/bg-node-client@0.0.28(prettier@3.5.3)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.10.0)
       '@nats-io/jetstream': 3.0.2
@@ -5907,7 +5915,7 @@ snapshots:
 
   binary-extensions@2.3.0: {}
 
-  bits-ui@1.3.10(svelte@5.22.6):
+  bits-ui@1.4.6(svelte@5.22.6):
     dependencies:
       '@floating-ui/core': 1.6.9
       '@floating-ui/dom': 1.6.13
@@ -7799,6 +7807,10 @@ snapshots:
       postcss: 8.5.3
       postcss-load-config: 4.0.2(postcss@8.5.3)
       typescript: 5.8.2
+
+  svelte-sonner@0.3.28(svelte@5.22.6):
+    dependencies:
+      svelte: 5.22.6
 
   svelte-toolbelt@0.5.0(svelte@5.22.6):
     dependencies:

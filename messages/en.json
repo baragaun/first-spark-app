@@ -131,5 +131,19 @@
       "back_to_login": "Back to Log In",
       "need_help": "Need help?"
     }
+  },
+
+  "theme": {
+    "light_switch": "Change theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "connection": {
+    "offline": "You're offline",
+    "online": "Powered by First Spark",
+    "offline.description": "You are not currently connected.",
+    "reconnected": "Reconnected",
+    "reconnected.description": "Reconnected to First Spark!"
   }
 }
