@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
-import { deleteTestAccount } from './utils/test-account';
+import { deleteTestAccount } from './utils/delete-test-account';
+import { createTestAccount, signOut } from './utils/auth-helpers';
 
 test('Sign in page has correct UI elements', async ({ page }) => {
   await page.goto('/signin');
@@ -32,46 +33,11 @@ test('Sign in page has correct UI elements', async ({ page }) => {
 });
 
 test('Sign in with password flow', async ({ page }) => {
-  await page.goto('/signup');
+  // Create a test account
+  await createTestAccount(page);
 
-  // Step 1: Email submission
-  await page.getByLabel('Email address').fill('e2e@test.com');
-
-  // Click sign up button
-  await page.locator('#form-button').click();
-
-  // Step 2: Verification code
-  // Wait for the OTP input to appear
-  const otpInputs = page.locator('#verification-code');
-  await expect(otpInputs.first()).toBeVisible();
-
-  // Enter verification code
-  await page.locator('#verification-code input').first().focus();
-  await page.keyboard.type('666666');
-
-  // Click submit button
-  await page.locator('#form-button').click();
-
-  // Step 3: Username and password
-  // Wait for username and password fields to appear
-  const usernameInput = page.getByLabel('Username');
-  await expect(usernameInput).toBeVisible();
-
-  // Use a more specific selector for the password input
-  const passwordInput = page.getByRole('textbox', { name: 'Password' });
-  await expect(passwordInput).toBeVisible();
-
-  const testUsername = 'testuser';
-  // Fill in username and password
-  await usernameInput.fill(testUsername);
-  await passwordInput.fill('SecurePassword123');
-
-  // Click final sign up button
-  await page.locator('#form-button').click();
-
-  // Sign out the user
-  await page.getByTestId('avatar-menu-trigger').click();
-  await page.getByRole('menuitem', { name: /sign out/i }).click();
+  // Sign out
+  await signOut(page);
 
   // Verify redirection to sign in page
   await expect(page).toHaveURL('/signin');
@@ -88,9 +54,19 @@ test('Sign in with password flow', async ({ page }) => {
 
   // Verify redirection to home page
   await expect(page).toHaveURL('/');
+
+  // Clean up: Delete the test account
+  await deleteTestAccount(page);
 });
 
 test('Sign in with token flow', async ({ page }) => {
+
+  // Create a test account
+  await createTestAccount(page);
+
+  // Sign out
+  await signOut(page);
+
   await page.goto('/signin');
 
   // Fill in email
@@ -112,10 +88,20 @@ test('Sign in with token flow', async ({ page }) => {
 
   // Verify redirection to home page
   await expect(page).toHaveURL('/');
+
+   // Clean up: Delete the test account
+   await deleteTestAccount(page);
 });
 
 test('Token resend functionality', async ({ page }) => {
   test.setTimeout(40000);
+
+   // Create a test account
+   await createTestAccount(page);
+
+   // Sign out
+   await signOut(page);
+
   await page.goto('/signin');
 
   // Fill in email

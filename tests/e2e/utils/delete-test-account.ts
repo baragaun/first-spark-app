@@ -1,3 +1,4 @@
+import type { MyUserContext } from '@/contexts/my-user-context.svelte';
 import type { Page } from '@playwright/test';
 
 /**
@@ -16,10 +17,10 @@ export async function deleteTestAccount(
     async ({ reason, description }) => {
       try {
         // Access myUserContext through the window's global scope
-        const myUserContext = (window as any).__myUserContext;
-        if (myUserContext && typeof myUserContext.deleteMyAccount === 'function') {
+        const myUserContext = (window as Window & typeof globalThis & { __myUserContext: MyUserContext }).__myUserContext;
+        if (myUserContext && typeof myUserContext.deleteMyUser === 'function') {
           // Call the deleteMyAccount method with parameters for physical deletion
-          const result = await myUserContext.deleteMyAccount(reason, description, true);
+          const result = await myUserContext.deleteMyUser(reason, description);
 
           if (result === true) {
             console.log('Test account successfully deleted');

@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
-import { deleteTestAccount } from './utils/test-account';
+import { deleteTestAccount } from './utils/delete-test-account';
+import { createTestAccount, signOut } from './utils/auth-helpers';
 
 test('Reset password page has correct UI elements', async ({ page }) => {
   await page.goto('/reset-password');
@@ -19,28 +20,12 @@ test('Reset password page has correct UI elements', async ({ page }) => {
 });
 
 test('Reset password flow - complete process', async ({ page }) => {
-  await page.goto('/signup');
 
-  // Step 1: Email submission
-  await page.getByLabel('Email address').fill('e2e@test.com');
+  // Create a test account
+  await createTestAccount(page);
 
-  // Click sign up button
-  await page.locator('#form-button').click();
-
-  // Step 2: Verification code
-  // Wait for the OTP input to appear
-  const otpInput = page.locator('#verification-code');
-  await expect(otpInput.first()).toBeVisible();
-
-  // Enter verification code
-  await page.locator('#verification-code input').first().focus();
-  await page.keyboard.type('666666');
-
-  // Click submit button
-  await page.locator('#form-button').click();
-  // Sign out the user
-  await page.getByTestId('avatar-menu-trigger').click();
-  await page.getByRole('menuitem', { name: /sign out/i }).click();
+  // Sign out
+  await signOut(page);
 
   // Verify redirection to sign in page
   await expect(page).toHaveURL('/signin');

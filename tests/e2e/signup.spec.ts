@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
-import { deleteTestAccount } from './utils/test-account';
+import { deleteTestAccount } from './utils/delete-test-account';
+import { createTestAccount, signOut } from './utils/auth-helpers';
 
 test('Sign up page has correct UI elements', async ({ page }) => {
   await page.goto('/signup');
@@ -24,42 +25,9 @@ test('Sign up page has correct UI elements', async ({ page }) => {
 
 test('Sign up flow - complete registration', async ({ page }) => {
   test.setTimeout(60000); // Increase timeout for this test
-  await page.goto('/signup');
 
-  // Step 1: Email submission
-  await page.getByLabel('Email address').fill('e2e@test.com');
-
-  // Click sign up button
-  await page.locator('#form-button').click();
-
-  // Step 2: Verification code
-  // Wait for the OTP input to appear
-  const otpInputs = page.locator('#verification-code');
-  await expect(otpInputs.first()).toBeVisible();
-
-  // Enter verification code
-  await page.locator('#verification-code input').first().focus();
-  await page.keyboard.type('666666');
-
-  // Click submit button
-  await page.locator('#form-button').click();
-
-  // Step 3: Username and password
-  // Wait for username and password fields to appear
-  const usernameInput = page.getByLabel('Username');
-  await expect(usernameInput).toBeVisible();
-
-  // Use a more specific selector for the password input
-  const passwordInput = page.getByRole('textbox', { name: 'Password' });
-  await expect(passwordInput).toBeVisible();
-
-  const testUsername = 'testuser';
-  // Fill in username and password
-  await usernameInput.fill(testUsername);
-  await passwordInput.fill('SecurePassword123');
-
-  // Click final sign up button
-  await page.locator('#form-button').click();
+  // Create a test account
+  await createTestAccount(page);
 
   // Verify redirection to home page
   await expect(page).toHaveURL('/');
@@ -69,31 +37,12 @@ test('Sign up flow - complete registration', async ({ page }) => {
 });
 
 test('Sign up - email availability check', async ({ page }) => {
-  await page.goto('/signup');
 
-  // Step 1: Email submission
-  await page.getByLabel('Email address').fill('e2e@test.com');
+  // Create Account
+  await createTestAccount(page);
 
-  // Click sign up button
-  await page.locator('#form-button').click();
-
-  // Step 2: Verification code
-  // Wait for the OTP input to appear
-  const otpInputs = page.locator('#verification-code');
-  await expect(otpInputs.first()).toBeVisible();
-
-  // Enter verification code
-  await page.locator('#verification-code input').first().focus();
-  await page.keyboard.type('666666');
-
-  // Click submit button
-  await page.locator('#form-button').click();
-  // Sign out the user
-  await page.getByTestId('avatar-menu-trigger').click();
-  await page.getByRole('menuitem', { name: /sign out/i }).click();
-
-  // Verify redirection to sign in page
-  await expect(page).toHaveURL('/signin');
+  // Sign out
+  await signOut(page);
 
   await page.goto('/signup');
 
