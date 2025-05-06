@@ -111,10 +111,9 @@ export class MyUserContext {
 
     const _clientInfoStore = new ClientInfoStore(ClientInfoStoreType.inMemory);
 
-
     const config: BgNodeClientConfig = {
       inBrowser: false,
-      appEnvironment:AppEnvironment.test,
+      appEnvironment: AppEnvironment.test,
       clientInfoStore: _clientInfoStore,
       clientInfoStoreType: ClientInfoStoreType.inMemory,
 

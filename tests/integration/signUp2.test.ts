@@ -1,7 +1,6 @@
 import { goto } from '$app/navigation';
 import { myUserContext } from '@/contexts/my-user-context.svelte';
 import MyUserProvider from '@/contexts/my-user-provider.svelte';
-import { MultiStepActionResult, MultiStepActionType } from '@baragaun/bg-node-client';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import SignUpForm from '../../src/routes/signup/sign-up-form.svelte';
@@ -28,12 +27,11 @@ function renderWithProvider(component: any, props = {}) {
     props: {
       children: () => component,
       ...props,
-    }
+    },
   });
 }
 
 describe('SignUpForm Integration Tests with Real Client Functions', () => {
-
   beforeAll(async () => {
     // Initialize the client for testing
     await myUserContext.testClientInitialize();
@@ -91,7 +89,7 @@ describe('SignUpForm Integration Tests with Real Client Functions', () => {
 
     // Fill in the email
     await fireEvent.input(getByLabelText('Email address'), {
-      target: { value: 'test-integration@example.com' }
+      target: { value: 'test-integration@example.com' },
     });
 
     // Submit the form
@@ -106,7 +104,11 @@ describe('SignUpForm Integration Tests with Real Client Functions', () => {
 
     // Check for verification step UI
     try {
-      const verificationText = await findByText(/verification code sent to/i, {}, { timeout: 3000 });
+      const verificationText = await findByText(
+        /verification code sent to/i,
+        {},
+        { timeout: 3000 },
+      );
       expect(verificationText).toBeInTheDocument();
     } catch (e) {
       // If verification text isn't found, we might have an error message
@@ -124,7 +126,7 @@ describe('SignUpForm Integration Tests with Real Client Functions', () => {
             email: 'test-integration@example.com',
             token: '',
             username: '',
-            password: ''
+            password: '',
           },
           errors: {},
           constraints: {},
@@ -157,7 +159,7 @@ describe('SignUpForm Integration Tests with Real Client Functions', () => {
     await waitFor(() => {
       expect(myUserContext.verifyMultiStepActionToken).toHaveBeenCalledWith(
         'test-action-id',
-        '666666'
+        '666666',
       );
     });
 
@@ -181,7 +183,7 @@ describe('SignUpForm Integration Tests with Real Client Functions', () => {
             email: 'test-integration@example.com',
             token: '666666',
             username: '',
-            password: ''
+            password: '',
           },
           errors: {},
           constraints: {},
@@ -203,11 +205,11 @@ describe('SignUpForm Integration Tests with Real Client Functions', () => {
 
     // Fill in username and password
     await fireEvent.input(getByLabelText('Username'), {
-      target: { value: 'testuser123' }
+      target: { value: 'testuser123' },
     });
 
     await fireEvent.input(getByLabelText('Password'), {
-      target: { value: 'SecurePassword123' }
+      target: { value: 'SecurePassword123' },
     });
 
     // Submit the form
@@ -218,7 +220,7 @@ describe('SignUpForm Integration Tests with Real Client Functions', () => {
     await waitFor(() => {
       expect(myUserContext.updateMyUser).toHaveBeenCalledWith({
         username: 'testuser123',
-        password: 'SecurePassword123'
+        password: 'SecurePassword123',
       });
     });
 
@@ -242,7 +244,7 @@ describe('SignUpForm Integration Tests with Real Client Functions', () => {
 
     // Fill in email that might be unavailable
     await fireEvent.input(getByLabelText('Email address'), {
-      target: { value: 'existing@example.com' }
+      target: { value: 'existing@example.com' },
     });
 
     // Wait for availability check to be called
@@ -269,7 +271,7 @@ describe('SignUpForm Integration Tests with Real Client Functions', () => {
             email: 'test-integration@example.com',
             token: '666666',
             username: '',
-            password: ''
+            password: '',
           },
           errors: {},
           constraints: {},
@@ -290,7 +292,7 @@ describe('SignUpForm Integration Tests with Real Client Functions', () => {
 
     // Fill in username that might be unavailable
     await fireEvent.input(getByLabelText('Username'), {
-      target: { value: 'existinguser' }
+      target: { value: 'existinguser' },
     });
 
     // Wait for availability check to be called
@@ -317,7 +319,7 @@ describe('SignUpForm Integration Tests with Real Client Functions', () => {
             email: 'test-integration@example.com',
             token: '',
             username: '',
-            password: ''
+            password: '',
           },
           errors: {},
           constraints: {},
@@ -353,7 +355,9 @@ describe('SignUpForm Integration Tests with Real Client Functions', () => {
 
       // Verify resend was called
       await waitFor(() => {
-        expect(myUserContext.sendMultiStepActionNotification).toHaveBeenCalledWith('test-action-id');
+        expect(myUserContext.sendMultiStepActionNotification).toHaveBeenCalledWith(
+          'test-action-id',
+        );
       });
     }
   });
@@ -397,7 +401,7 @@ describe('SignUpForm Integration Tests with Real Client Functions', () => {
 
     // Fill in invalid email
     await fireEvent.input(getByLabelText('Email address'), {
-      target: { value: 'invalid-email' }
+      target: { value: 'invalid-email' },
     });
 
     // Submit the form

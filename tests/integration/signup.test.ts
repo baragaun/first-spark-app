@@ -92,7 +92,7 @@ describe('SignUpForm Integration Tests', () => {
           response: any,
           onNotificationSent: () => void,
           onFailure?: () => void,
-          onSuccess?: () => void
+          onSuccess?: () => void,
         ) {
           // Store original callbacks
           this.onNotificationSent = () => {
@@ -119,10 +119,16 @@ describe('SignUpForm Integration Tests', () => {
         onSuccess: () => void;
 
         removeListener() {}
-        getErrorMessage() { return ''; }
-        getTokenStatus() { return 0; }
-        isListening() { return true; }
-      }
+        getErrorMessage() {
+          return '';
+        }
+        getTokenStatus() {
+          return 0;
+        }
+        isListening() {
+          return true;
+        }
+      },
     }));
 
     const { getByLabelText, getByRole, findByText } = render(SignUpForm, {
@@ -133,21 +139,21 @@ describe('SignUpForm Integration Tests', () => {
               email: '',
               token: '',
               username: '',
-              password: ''
+              password: '',
             },
             errors: {},
             constraints: {},
             id: 'signup-form',
             valid: false,
-            posted: false
+            posted: false,
           },
-        }
-      }
+        },
+      },
     });
 
     // Fill in the email
     await fireEvent.input(getByLabelText('Email address'), {
-      target: { value: 'test@example.com' }
+      target: { value: 'test@example.com' },
     });
 
     // Submit the form
@@ -161,7 +167,9 @@ describe('SignUpForm Integration Tests', () => {
     });
 
     // Import the class from the mock
-    const { MsaListenerHandler } = vi.mocked(await import('@/contexts/msa-listener-handler.svelte'));
+    const { MsaListenerHandler } = vi.mocked(
+      await import('@/contexts/msa-listener-handler.svelte'),
+    );
     const msaHandlerInstances = vi.mocked(MsaListenerHandler, { partial: true }).mock.instances;
     if (msaHandlerInstances.length > 0) {
       const handler = msaHandlerInstances[0];

@@ -1,9 +1,9 @@
 import { goto } from '$app/navigation';
-import { fireEvent, render, waitFor } from '@testing-library/svelte';
-import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import SignInForm from '../../src/routes/signin/sign-in-form.svelte';
 import { myUserContext } from '@/contexts/my-user-context.svelte';
 import MyUserProvider from '@/contexts/my-user-provider.svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
+import SignInForm from '../../src/routes/signin/sign-in-form.svelte';
 
 // We're not mocking the myUserContext methods in this test
 // Instead, we'll use the real implementations
@@ -27,12 +27,11 @@ function renderWithProvider(component: any, props = {}) {
     props: {
       children: () => component,
       ...props,
-    }
+    },
   });
 }
 
 describe('SignInForm Integration Tests with Real Client Functions', () => {
-
   beforeAll(async () => {
     // mockBrowserAPIs();
     await myUserContext.testClientInitialize();
@@ -179,7 +178,11 @@ describe('SignInForm Integration Tests with Real Client Functions', () => {
     // Since we're using real functions with a non-existent email,
     // we expect to see an error message
     try {
-      const errorMessage = await findByText(/failed to send verification code/i, {}, { timeout: 3000 });
+      const errorMessage = await findByText(
+        /failed to send verification code/i,
+        {},
+        { timeout: 3000 },
+      );
       expect(errorMessage).toBeInTheDocument();
     } catch (e) {
       // If no error message is shown, we should at least see the verification UI
