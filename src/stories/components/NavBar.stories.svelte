@@ -8,7 +8,7 @@
     title: 'Components/NavBar',
     component: NavBar,
     parameters: {
-      layout: 'centered',
+      layout: 'fullscreen',
     },
   });
 </script>

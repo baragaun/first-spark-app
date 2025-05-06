@@ -1,10 +1,10 @@
 <script module>
-  import ThemeButton from '@/components/light-switch.svelte';
+  import LightSwitch from '@/components/light-switch.svelte';
   import { defineMeta } from '@storybook/addon-svelte-csf';
 
   const { Story } = defineMeta({
-    title: 'Components/ThemeButton',
-    component: ThemeButton,
+    title: 'Components/LightSwitch',
+    component: LightSwitch,
     parameters: {
       layout: 'centered',
     },
@@ -12,9 +12,9 @@
 </script>
 
 <Story name="Default">
-  <ThemeButton />
+  <LightSwitch />
 </Story>
 
 <Story name="With label">
-  <ThemeButton iconButton={false} />
+  <LightSwitch iconButton={false} />
 </Story>
