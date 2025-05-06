@@ -71,7 +71,7 @@
   const sidebar = Sidebar.useSidebar();
 
   const handleItemClick = () => {
-    if (sidebar.isMobile) {
+    if (sidebar && sidebar.isMobile) {
       sidebar.setOpenMobile(false);
     }
   };
