@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
-import { deleteTestAccount } from './utils/delete-test-account';
 import { createTestAccount, signOut } from './utils/auth-helpers';
+import { deleteTestAccount } from './utils/delete-test-account';
 
 test('Sign up page has correct UI elements', async ({ page }) => {
   await page.goto('/signup');
@@ -37,7 +37,6 @@ test('Sign up flow - complete registration', async ({ page }) => {
 });
 
 test('Sign up - email availability check', async ({ page }) => {
-
   // Create Account
   await createTestAccount(page);
 

@@ -17,7 +17,9 @@ export async function deleteTestAccount(
     async ({ reason, description }) => {
       try {
         // Access myUserContext through the window's global scope
-        const myUserContext = (window as Window & typeof globalThis & { __myUserContext: MyUserContext }).__myUserContext;
+        const myUserContext = (
+          window as Window & typeof globalThis & { __myUserContext: MyUserContext }
+        ).__myUserContext;
         if (myUserContext && typeof myUserContext.deleteMyUser === 'function') {
           // Call the deleteMyAccount method with parameters for physical deletion
           const result = await myUserContext.deleteMyUser(reason, description);

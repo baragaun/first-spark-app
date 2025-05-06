@@ -571,5 +571,7 @@ export const myUserContext = new MyUserContext();
 
 // Expose myUserContext to window for E2E testing
 if (typeof window !== 'undefined') {
-  (window as Window & typeof globalThis & { __myUserContext: typeof myUserContext }).__myUserContext = myUserContext;
+  (
+    window as Window & typeof globalThis & { __myUserContext: typeof myUserContext }
+  ).__myUserContext = myUserContext;
 }

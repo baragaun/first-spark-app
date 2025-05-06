@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
-import { deleteTestAccount } from './utils/delete-test-account';
 import { createTestAccount, signOut } from './utils/auth-helpers';
+import { deleteTestAccount } from './utils/delete-test-account';
 
 test('Sign in page has correct UI elements', async ({ page }) => {
   await page.goto('/signin');
@@ -60,7 +60,6 @@ test('Sign in with password flow', async ({ page }) => {
 });
 
 test('Sign in with token flow', async ({ page }) => {
-
   // Create a test account
   await createTestAccount(page);
 
@@ -89,18 +88,18 @@ test('Sign in with token flow', async ({ page }) => {
   // Verify redirection to home page
   await expect(page).toHaveURL('/');
 
-   // Clean up: Delete the test account
-   await deleteTestAccount(page);
+  // Clean up: Delete the test account
+  await deleteTestAccount(page);
 });
 
 test('Token resend functionality', async ({ page }) => {
   test.setTimeout(40000);
 
-   // Create a test account
-   await createTestAccount(page);
+  // Create a test account
+  await createTestAccount(page);
 
-   // Sign out
-   await signOut(page);
+  // Sign out
+  await signOut(page);
 
   await page.goto('/signin');
 
