@@ -30,8 +30,8 @@
 
     <!-- Right side items -->
     <div class="flex flex-none items-center gap-2">
-      <ThemeButton class="hidden md:flex" />
-      <LanguageButton class="hidden md:flex" />
+      <ThemeButton class="flex" />
+      <LanguageButton class="flex" />
       {#if !isSignedIn}
         <div class="flex flex-none items-center gap-2">
           <Button
