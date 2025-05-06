@@ -2,6 +2,7 @@
   "$schema": "https://inlang.com/schema/inlang-message-format",
   "welcome": "फर्स्ट स्पार्क में आपका स्वागत है",
   "welcome_subtitle": "जुड़ें, प्रेरित करें, विकसित हों!",
+  "join_first_spark": "फर्स्ट स्पार्क से जुड़ें",
   "get_started": "शुरू करें",
   "sidebar": {
     "logo": {

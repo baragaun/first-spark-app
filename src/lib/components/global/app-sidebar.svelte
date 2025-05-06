@@ -33,16 +33,19 @@
       title: m['sidebar.menu.inbox'](),
       url: '#',
       icon: Inbox,
+      requiresAuth: true,
     },
     {
       title: m['sidebar.menu.conversations'](),
       url: '#',
       icon: MessageSquare,
+      requiresAuth: true,
     },
     {
       title: m['sidebar.menu.contacts'](),
       url: '#',
       icon: BookUser,
+      requiresAuth: true,
     },
     {
       title: m['sidebar.menu.settings'](),
@@ -68,7 +71,7 @@
   const sidebar = Sidebar.useSidebar();
 
   const handleItemClick = () => {
-    if (sidebar.isMobile) {
+    if (sidebar && sidebar.isMobile) {
       sidebar.setOpenMobile(false);
     }
   };
@@ -106,7 +109,33 @@
         {/each}
       </Sidebar.Menu>
     </Sidebar.Group>
-    <Sidebar.Group class="mb-2 mt-auto">
+
+    {#if !isSignedIn}
+      <Sidebar.Group class="mb-2 mt-auto px-3 group-data-[collapsible=icon]:hidden">
+        <div class="rounded-lg border border-border bg-card p-4 shadow-sm">
+          <h2 class="mb-3 text-sm font-bold">{m['join_first_spark']()}</h2>
+          <h3 class="mb-3 text-sm font-medium">{m['welcome_subtitle']()}</h3>
+          <div class="flex flex-col gap-2">
+            <Button href="/signup" size="sm" class="w-full" onclick={handleItemClick}>
+              {m['get_started']()}
+            </Button>
+            <Button
+              href="/signin"
+              variant="outline"
+              size="sm"
+              class="w-full"
+              onclick={handleItemClick}
+            >
+              {m['nav.auth.sign_in']()}
+            </Button>
+          </div>
+        </div>
+      </Sidebar.Group>
+    {/if}
+
+    <Sidebar.Group
+      class={`mb-2 ${!isSignedIn ? '' : 'mt-auto'} px-3 group-data-[collapsible=icon]:mt-auto`}
+    >
       <Sidebar.Menu>
         <Sidebar.MenuItem>
           <Sidebar.MenuButton>
