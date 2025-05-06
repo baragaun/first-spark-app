@@ -25,7 +25,7 @@
     children?: Snippet;
   }>();
 
-  const hoverColor = destructive ? 'bg-destructive/10' : 'bg-secondary';
+  const hoverColor = destructive ? 'bg-destructive/10' : 'bg-muted/50';
   const textColor = destructive ? 'text-destructive' : '';
 
   $effect(() => {

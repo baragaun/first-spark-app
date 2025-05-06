@@ -2,6 +2,7 @@
   "$schema": "https://inlang.com/schema/inlang-message-format",
   "welcome": "Welcome to First Spark",
   "welcome_subtitle": "Connect, inspire, thrive!",
+  "join_first_spark": "Join First Spark",
   "get_started": "Get Started",
   "sidebar": {
     "logo": {

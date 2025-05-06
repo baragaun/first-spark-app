@@ -7,12 +7,14 @@ test('Landing page has welcome text, Get Started Button', async ({ page }) => {
   const welcomeText = page.getByText('Welcome to First Spark');
   await expect(welcomeText).toBeVisible();
 
-  // Verify the subtext is also present
-  const subtextElement = page.getByText('Connect, inspire, thrive!');
+  // Verify the subtext is also present - use a more specific selector
+  const subtextElement = page
+    .getByRole('paragraph')
+    .filter({ hasText: 'Connect, inspire, thrive!' });
   await expect(subtextElement).toBeVisible();
 
-  // Check for the Get Started button
-  const getStartedButton = page.getByText('Get Started');
+  // Check for the Get Started button in the main content area
+  const getStartedButton = page.getByRole('main').getByRole('link', { name: 'Get Started' });
   await expect(getStartedButton).toBeVisible();
 });
 
