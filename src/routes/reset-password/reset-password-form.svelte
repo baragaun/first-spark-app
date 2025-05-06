@@ -357,6 +357,7 @@
       {/if}
       <FormButton
         disabled={$delayed || isLoading || hasStepError}
+        isLoading={$delayed || isLoading}
         buttonText={getCurrentStepButtonLabel()}
         loadingText="Processing..."
       />

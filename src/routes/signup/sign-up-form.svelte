@@ -442,6 +442,7 @@
       {/if}
       <FormButton
         disabled={$delayed || isLoading || hasStepError}
+        isLoading={$delayed || isLoading}
         buttonText="Sign Up"
         loadingText={steps[step - 1].buttonLabel}
       />

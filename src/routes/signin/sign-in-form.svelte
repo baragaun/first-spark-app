@@ -378,6 +378,7 @@
         />
         <FormButton
           disabled={$delayed || isLoading || hasStepError}
+          isLoading={$delayed || isLoading}
           buttonText="Sign in"
           loadingText="Signing in..."
         />
@@ -402,6 +403,7 @@
         />
         <FormButton
           disabled={$delayed || isLoading || hasStepError}
+          isLoading={$delayed || isLoading}
           buttonText="Verify"
           loadingText="Verifying..."
         />
