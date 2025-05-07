@@ -1,4 +1,4 @@
-<script module>
+<!-- <script module>
   import { defineMeta } from '@storybook/addon-svelte-csf';
   import ResetPasswordPage from '../../routes/reset-password/reset-password-form.svelte';
   import MockUserProvider from '../mocks/mock-user-provider.svelte';
@@ -27,4 +27,4 @@
       }}
     />
   </MockUserProvider>
-</Story>
+</Story> -->

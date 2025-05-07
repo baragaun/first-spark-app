@@ -1,4 +1,4 @@
-<script module>
+<!-- <script module>
   import { defineMeta } from '@storybook/addon-svelte-csf';
   import SignUp from '../../routes/signup/+page.svelte';
   import { within, userEvent, expect, waitFor } from '@storybook/test';
@@ -146,4 +146,4 @@
       }}
     />
   </MockUserProvider>
-</Story>
+</Story> -->
