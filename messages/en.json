@@ -17,7 +17,6 @@
       "settings": "Settings"
     }
   },
-
   "nav": {
     "menu": "Menu",
     "open_menu": "Open Menu",
@@ -31,7 +30,6 @@
       "sign_out": "Sign Out"
     }
   },
-
   "footer": {
     "copyright": "© {year} First Spark. All rights reserved.",
     "navigation": {
@@ -40,14 +38,12 @@
       "terms_of_service": "Terms of Service"
     }
   },
-
   "user_nav": {
     "profile": "Profile",
     "inbox": "Inbox",
     "settings": "Settings",
     "logout": "Log out"
   },
-
   "language": {
     "change": "Change Language",
     "select": "Select Language"
@@ -133,7 +129,16 @@
       "need_help": "Need help?"
     }
   },
-
+  "verify_token": {
+    "verification_code": "Verification code",
+    "resend": "Resend code",
+    "resend_in": "Resend in",
+    "error": {
+      "dev_mode_error": "Notification failed, but you're in development.",
+      "min_length": "Your one-time password must be at least 6 characters",
+      "invalid": "We could not verify the token you entered. Please try again."
+    }
+  },
   "theme": {
     "light_switch": "Change theme",
     "light": "Light",
@@ -146,5 +151,86 @@
     "offline.description": "You are not currently connected.",
     "reconnected": "Reconnected",
     "reconnected.description": "Reconnected to First Spark!"
+  },
+  "setting": {
+    "setting_label": "Settings",
+    "account": "Account",
+    "notification": "Notification",
+    "username": {
+      "label": "My username",
+      "change_username": "Change your username",
+      "change_username_description": "You can change your username at anytime. Your previous username becomes immediately available for use.",
+      "current_username": "Current username",
+      "new_username": "New username",
+      "suggest_new": "Suggest new",
+      "generating": "Generating...",
+      "username_placeholder": "e.g. 'giraffe08'",
+      "error": {
+        "min_length": "Username must be at least 3 characters",
+        "max_length": "Username must contain at most 30 character(s)",
+        "unavailable": "This username is currently unavailable for use.",
+        "unable_to_find": "Failed to find handle"
+      }
+    },
+    "email": {
+      "label": "My email",
+      "change_email": "Change your registered email",
+      "change_email_description": "Enter and different email and a verification code to update your account.",
+      "current_email": "Current email",
+      "new_email": "New Email",
+      "email_placeholder": "e.g. anne@example.com",
+      "error": {
+        "invalid": "Please enter a valid email address.",
+        "unavailable": "This email is currently unavailable for use.",
+        "existing": "Please provide a different email address."
+      }
+    },
+    "password": {
+      "label": "My password",
+      "change_password": "Change your password",
+      "change_password_description": "Your password should be unique and updated regularly.",
+      "current_password": "Current password",
+      "new_password": "New password",
+      "current_password_placeholder": "Enter your current password",
+      "new_password_placeholder": "Enter your new password",
+      "error": {
+        "required": "Current password is required",
+        "min_length": "Your password must be at least 8 characters",
+        "incorrect": "Incorrect password. Please verify and try again."
+      }
+    },
+    "danger_zone": "Danger Zone",
+    "delete_account": {
+      "label": "Delete my account",
+      "sublabel": "Permanently delete your account and any associated data",
+      "your_account": "Delete your account",
+      "delete_account_description": "We're sorry to see you go! Please provide any feedback you may have before departing so that we can better improve.",
+      "alert_title": "Are you sure you want to proceed?",
+      "alert_subtitle": "Your profile and all of your data will be permanently deleted. This action cannot be recovered from.",
+      "reason": "Reason",
+      "reason_placeholder": "Why are you deleting your account?",
+      "addition_details": "Additional details",
+      "addition_details_placeholder": "Do you have any additional feedback?",
+      "confirm_email": "Confirm your email",
+      "error": {
+        "invalid": "Please enter a valid email address.",
+        "incorrect": "The email entered doesn’t match your account. Please check and try again."
+      }
+    },
+    "buttons": {
+      "update": "Update",
+      "updating": "Updating",
+      "delete_account": "Delete my account",
+      "cleaning": "Cleaning up...",
+      "goodbuy": "Goodbye!",
+      "cancel": "Cancel",
+      "verify": "Verify",
+      "verifying": "Verifing"
+    }
+  },
+  "form_button_default": {
+    "buttonText": "Submit",
+    "successText": "Success!",
+    "loadingText": "Processing"
   }
 }

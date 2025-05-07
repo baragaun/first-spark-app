@@ -1,32 +1,33 @@
+import { m } from '@/paraglide/messages';
 import { z } from 'zod';
 
 export const usernameSchema = z
   .string({
-    message: 'A username must be at least 3 characters',
+    message: m['setting.username.error.min_length'](),
   })
   .min(3)
   .max(30);
 
 export const currentPasswordSchema = z.string().min(8, {
-  message: 'Current password is required ',
+  message: m['setting.password.error.required'](),
 });
 
 export const newPasswordSchema = z.string().min(8, {
-  message: 'Your password must be at least 8 characters',
+  message: m['setting.password.error.min_length'](),
 });
 
 export const emailSchema = z.string().email({
-  message: 'Please enter a valid email address.',
+  message: m['setting.email.error.invalid'](),
 });
 
 export const otpSchema = z.string().min(6, {
-  message: 'Your one-time password must be at least 6 characters',
+  message: m['verify_token.error.min_length'](),
 });
 
 export const usernameFormSchema = z.object({
   username: z
     .string()
-    .min(3, 'Username must be at least 3 characters')
+    .min(3, m['setting.username.error.min_length']())
     .max(30)
     .transform((val) => val.trim()),
 });

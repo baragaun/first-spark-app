@@ -1,13 +1,13 @@
 <script lang="ts">
-  import SettingsDialog from './components/settings-dialog.svelte';
-  import UpdateUsernameForm from './components/update-username-form.svelte';
-  import UpdateEmailForm from './components/update-email-form.svelte';
-  import UpdatePasswordForm from './components/update-password-form.svelte';
-  import DeleteAccountForm from './components/delete-account-form.svelte';
   import { Separator } from '$lib/components/ui/separator';
+  import { m } from '$lib/paraglide/messages';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import type { PageData } from './$types';
-  import { goto } from '$app/navigation';
+  import DeleteAccountForm from './components/delete-account-form.svelte';
+  import SettingsDialog from './components/settings-dialog.svelte';
+  import UpdateEmailForm from './components/update-email-form.svelte';
+  import UpdatePasswordForm from './components/update-password-form.svelte';
+  import UpdateUsernameForm from './components/update-username-form.svelte';
 
   let { data }: { data: PageData } = $props();
 
@@ -25,21 +25,16 @@
     showUpdatePasswordDialog = false;
     showDeleteAccountDialog = false;
   };
-
-  const handleDeleteAccount = () => {
-    resetDialogStates();
-    goto('/');
-  };
 </script>
 
 <div class="space-y-8 py-8">
-  <h4 class="font-lexend text-lg font-bold">Account</h4>
+  <h4 class="font-lexend text-lg font-bold">{m['setting.account']()}</h4>
   <div class="space-y-4">
     <SettingsDialog
-      label="My username"
+      label={m['setting.username.label']()}
       sublabel={myUsername || ''}
-      title="Change your username"
-      subtitle="You can change your username at anytime. Your previous username becomes immediately available for use."
+      title={m['setting.username.change_username']()}
+      subtitle={m['setting.username.change_username_description']()}
       bind:showContent={showUpdateUsernameDialog}
     >
       <UpdateUsernameForm
@@ -49,20 +44,20 @@
     </SettingsDialog>
 
     <SettingsDialog
-      label="My email"
+      label={m['setting.email.label']()}
       sublabel={myEmail || ''}
-      title="Change your registered email"
-      subtitle="Enter and different email and a verification code to update your account."
+      title={m['setting.email.change_email']()}
+      subtitle={m['setting.email.change_email_description']()}
       bind:showContent={showUpdateEmailDialog}
     >
       <UpdateEmailForm preValidatedForm={data.accountForms.emailForm} onClose={resetDialogStates} />
     </SettingsDialog>
 
     <SettingsDialog
-      label="My password"
+      label={m['setting.password.label']()}
       sublabel="********"
-      title="Change your password"
-      subtitle="Your password should be unique and updated regularly."
+      title={m['setting.password.change_password']()}
+      subtitle={m['setting.password.change_password_description']()}
       bind:showContent={showUpdatePasswordDialog}
     >
       <UpdatePasswordForm
@@ -73,19 +68,19 @@
   </div>
 
   <Separator />
-  <h4 class="font-lexend text-lg font-bold">Danger Zone</h4>
+  <h4 class="font-lexend text-lg font-bold">{m['setting.danger_zone']()}</h4>
   <div class="flex cursor-pointer items-center justify-between rounded-lg hover:bg-muted/50">
     <SettingsDialog
-      label="Delete my account"
-      sublabel="Permanently delete your account and any associated data"
-      title="Delete your account"
-      subtitle={"We're sorry to see you go! Please provide any feedback you may have before departing so that we can better improve."}
+      label={m['setting.delete_account.label']()}
+      sublabel={m['setting.delete_account.sublabel']()}
+      title={m['setting.delete_account.your_account']()}
+      subtitle={m['setting.delete_account.delete_account_description']()}
       destructive={true}
       bind:showContent={showDeleteAccountDialog}
     >
       <DeleteAccountForm
         preValidatedForm={data.accountForms.deleteAccountForm}
-        onClose={handleDeleteAccount}
+        onClose={resetDialogStates}
       />
     </SettingsDialog>
   </div>

@@ -4,6 +4,9 @@
   import { myUserContext } from '$lib/contexts/my-user-context.svelte';
   import { AppUiMessage } from '@/types/enums';
 
+  import FormButton from '@/components/forms/form-button.svelte';
+  import { Button } from '@/components/ui/button';
+  import { m } from '@/paraglide/messages';
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
   import {
@@ -11,8 +14,6 @@
     passwordFormSchema,
     type PasswordFormSchema,
   } from '../../(data)/schema';
-  import FormButton from '@/components/forms/form-button.svelte';
-  import { Button } from '@/components/ui/button';
 
   let {
     preValidatedForm,
@@ -96,7 +97,7 @@
         verifyMyPasswordResponse.object?.toString() === 'false'
       ) {
         console.error('Incorrect password', { verifyMyPasswordResponse });
-        updateFormErrors('currentPassword', 'Incorrect password. Please verify and try again.');
+        updateFormErrors('currentPassword', m['setting.password.error.incorrect']());
         return false;
       }
 
@@ -165,15 +166,15 @@
     <PasswordFormInput
       {form}
       fieldName="currentPassword"
-      label="Current Password"
-      placeholder="Enter your current password"
+      label={m['setting.password.current_password']()}
+      placeholder={m['setting.password.current_password_placeholder']()}
     />
 
     <PasswordFormInput
       {form}
       fieldName="newPassword"
-      label="New Password"
-      placeholder="Enter new password"
+      label={m['setting.password.new_password']()}
+      placeholder={m['setting.password.new_password_placeholder']()}
     />
   </div>
   <div class="flex flex-col space-y-2">
@@ -181,9 +182,9 @@
       disabled={isLoading || $delayed || hasStepError}
       {isLoading}
       {isSuccess}
-      buttonText="Update"
-      loadingText="Updating"
+      buttonText={m['setting.buttons.update']()}
+      loadingText={m['setting.buttons.updating']()}
     />
-    <Button variant="outline" onclick={onClose}>Cancel</Button>
+    <Button variant="outline" onclick={onClose}>{m['setting.buttons.cancel']()}</Button>
   </div>
 </form>

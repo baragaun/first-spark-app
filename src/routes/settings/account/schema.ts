@@ -1,25 +1,29 @@
+import { m } from '@/paraglide/messages';
 import { z } from 'zod';
 
 const currentPasswordSchema = z
   .string()
   .min(1, {
-    message: 'Current password is required ',
+    message: m['setting.password.error.required'](),
   })
   .transform((val) => val.trim());
 
 export const emailSchema = z.string().email({
-  message: 'Please enter a valid email address.',
+  message: m['setting.email.error.invalid'](),
 });
 
 // Username schema
 export const usernameSchema = z.object({
-  username: z.string().min(3, 'Username must be at least 3 characters').max(30),
+  username: z
+    .string()
+    .min(3, m['setting.username.error.min_length']())
+    .max(30, m['setting.username.error.max_length']()),
 });
 
 const otpSchema = z
   .string()
   .min(6, {
-    message: 'Your one-time password must be at least 6 characters.',
+    message: m['verify_token.error.min_length'](),
   })
   .transform((val) => val.trim());
 
@@ -35,12 +39,12 @@ export const changeEmailschemaLastStep = changeEmailschemaFirstStep.extend({
 // Password schema without confirm password
 export const passwordSchema = z.object({
   currentPassword: currentPasswordSchema,
-  newPassword: z.string().min(8, 'Password must be at least 8 characters long.'),
+  newPassword: z.string().min(8, m['setting.password.error.min_length']()),
 });
 
 // Delete account schema
 export const deleteAccountSchema = z.object({
-  confirmEmail: z.string().email('Please enter a valid email address'),
+  confirmEmail: z.string().email(m['setting.email.error.invalid']()),
   reason: z.string().optional(),
   description: z.string().optional(),
 });

@@ -2,21 +2,22 @@
   import FormButton from '@/components/forms/form-button.svelte';
   import IdentFormInput from '@/components/forms/form-ident-input.svelte';
   import OTPFormInput from '@/components/forms/form-otp-input.svelte';
+  import { Button } from '@/components/ui/button';
   import { Input } from '@/components/ui/input';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { MsaListenerHandler } from '@/contexts/msa-listener-handler.svelte';
-  import { UserIdentType } from '@baragaun/bg-node-client';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
   import translate from '@/helpers/language/translate';
-  import { onDestroy } from 'svelte';
-  import { zod } from 'sveltekit-superforms/adapters';
+  import { m } from '@/paraglide/messages';
   import { AppUiMessage } from '@/types/enums';
+  import { UserIdentType } from '@baragaun/bg-node-client';
+  import { onDestroy } from 'svelte';
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
+  import { zod } from 'sveltekit-superforms/adapters';
   import {
     emailFormSchemaFirstStep,
     emailFormSchemaLastStep,
     type EmailFormSchema,
   } from '../../(data)/schema';
-  import { Button } from '@/components/ui/button';
 
   let {
     preValidatedForm,
@@ -67,8 +68,12 @@
 
   const { form: formData, enhance, errors, options, delayed, validateForm } = form;
 
-  const buttonText = $derived(step === 1 ? 'Update' : 'Verify');
-  const loadingText = $derived(step === 1 ? 'Updating' : 'Verifying');
+  const buttonText = $derived(
+    step === 1 ? m['setting.buttons.update']() : m['setting.buttons.verify'](),
+  );
+  const loadingText = $derived(
+    step === 1 ? m['setting.buttons.updating']() : m['setting.buttons.verifying'](),
+  );
   const disabled = $derived(isLoading || $delayed || hasStepError);
 
   const updateFormErrors = (field: keyof EmailFormSchema, message: string) => {
@@ -107,11 +112,11 @@
     if (!$formData.email) return false;
 
     if ($formData.email === currentEmail) {
-      updateFormErrors(emailFieldName, 'Please provide a different email address.');
+      updateFormErrors(emailFieldName, m['setting.email.error.existing']());
       return false;
     }
 
-    const message = `This ${emailFieldName} is currently unavailable for use.`;
+    const message = m['setting.email.error.unavailable']();
 
     try {
       const response = await myUserContext.isUserIdentAvailable(
@@ -313,14 +318,16 @@
   {#if step === 1}
     <div class="space-y-4">
       <div class="space-y-2">
-        <label for="current-email" class="text-sm font-medium leading-none"> Current email </label>
+        <label for="current-email" class="text-sm font-medium leading-none">
+          {m['setting.email.current_email']()}
+        </label>
         <Input id="current-email" value={currentEmail} disabled class="bg-muted" />
       </div>
       <IdentFormInput
         {form}
         fieldName="email"
-        placeholder="e.g. 'anne@example.com'"
-        label="New email"
+        placeholder={m['setting.email.email_placeholder']()}
+        label={m['setting.email.new_email']()}
         {isLoading}
       />
     </div>
@@ -328,7 +335,7 @@
     <OTPFormInput
       {form}
       fieldName="token"
-      label="Verification code"
+      label={m['verify_token.verification_code']()}
       length={6}
       showResend={true}
       {canResend}
@@ -339,6 +346,6 @@
 
   <div class="flex flex-col space-y-2">
     <FormButton {disabled} {isLoading} {isSuccess} {buttonText} {loadingText} />
-    <Button variant="outline" onclick={onClose}>Cancel</Button>
+    <Button variant="outline" onclick={onClose}>{m['setting.buttons.cancel']()}</Button>
   </div>
 </form>

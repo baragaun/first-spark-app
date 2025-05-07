@@ -1,19 +1,19 @@
 <script lang="ts">
-  import SuperDebug, { superForm, type SuperValidated } from 'sveltekit-superforms';
-  import { zod } from 'sveltekit-superforms/adapters';
   import { goto } from '$app/navigation';
-  import { onDestroy } from 'svelte';
-  import translate from '@/helpers/language/translate';
-  import { UserIdentType } from '@baragaun/bg-node-client';
   import AuthCard from '@/components/auth-card.svelte';
-  import EmailFormInput from '@/components/forms/form-ident-input.svelte';
   import FormButton from '@/components/forms/form-button.svelte';
+  import EmailFormInput from '@/components/forms/form-ident-input.svelte';
   import OTPFormInput from '@/components/forms/form-otp-input.svelte';
   import PasswordFormInput from '@/components/forms/form-password-input.svelte';
   import { Button } from '@/components/ui/button';
   import { MsaListenerHandler } from '@/contexts/msa-listener-handler.svelte';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import translate from '@/helpers/language/translate';
   import { AppUiMessage } from '@/types/enums';
+  import { UserIdentType } from '@baragaun/bg-node-client';
+  import { onDestroy } from 'svelte';
+  import { superForm, type SuperValidated } from 'sveltekit-superforms';
+  import { zod } from 'sveltekit-superforms/adapters';
   import {
     determineIdentifierType,
     getOtpMessage,
@@ -378,7 +378,7 @@
         />
         <FormButton
           disabled={$delayed || isLoading || hasStepError}
-          loading={$delayed || isLoading}
+          isLoading={$delayed || isLoading}
           buttonText="Sign in"
           loadingText="Signing in..."
         />
@@ -403,7 +403,7 @@
         />
         <FormButton
           disabled={$delayed || isLoading || hasStepError}
-          loading={$delayed || isLoading}
+          isLoading={$delayed || isLoading}
           buttonText="Verify"
           loadingText="Verifying..."
         />
@@ -423,6 +423,7 @@
     </div>
   </AuthCard>
 
-  <div class="mt-4"><SuperDebug data={$formData} /></div>
-  <div class="mt-4"><SuperDebug data={errors} /></div>
+  <!-- commenting as per the issue : https://github.com/baragaun/first-spark-app/issues/113 -->
+  <!--   <div class="mt-4"><SuperDebug data={$formData} /></div>
+  <div class="mt-4"><SuperDebug data={errors} /></div> -->
 </form>

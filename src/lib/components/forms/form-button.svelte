@@ -1,14 +1,15 @@
 <script lang="ts">
   import * as Form from '$lib/components/ui/form/index.js';
+  import { m } from '@/paraglide/messages';
   import SpinLoadIndicator from './spin-load-indicator.svelte';
 
   let {
     disabled = false,
     isLoading = false,
     isSuccess = false,
-    buttonText = 'Submit',
-    loadingText = 'Processing...',
-    successText = 'Success!',
+    buttonText = m['form_button_default.buttonText'](),
+    loadingText = m['form_button_default.loadingText'](),
+    successText = m['form_button_default.successText'](),
     variant = 'default',
     fullWidth = true,
     type = 'submit',

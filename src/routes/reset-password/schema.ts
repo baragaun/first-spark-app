@@ -1,3 +1,4 @@
+import { m } from '@/paraglide/messages';
 import { UserIdentType } from '@baragaun/bg-node-client';
 import { z } from 'zod';
 
@@ -21,7 +22,7 @@ export const usernameSchema = z
   .max(30);
 
 const otpSchema = z.string().min(6, {
-  message: 'Your one-time password must be at least 6 characters',
+  message: m['verify_token.error.min_length'](),
 });
 
 const passwordSchema = z.string().min(8, {

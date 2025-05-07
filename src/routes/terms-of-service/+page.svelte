@@ -1,4 +1,5 @@
-<script lang="ts">
+<!--TODO: Hidding as per the issue:  https://github.com/baragaun/first-spark-app/issues/111-->
+<!-- <script lang="ts">
   import MetaTags from '$lib/components/shared/meta-tags.svelte';
 
   const lastUpdated = new Date().toLocaleDateString('en-US', {
@@ -26,3 +27,4 @@
     <p class="mt-4 text-muted-foreground">Last updated: {lastUpdated}</p>
   </div>
 </div>
+ -->

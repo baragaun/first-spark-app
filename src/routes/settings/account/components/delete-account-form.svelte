@@ -1,17 +1,19 @@
 <script lang="ts">
+  import { goto } from '$app/navigation';
   import * as Alert from '$lib/components/ui/alert';
   import * as Form from '$lib/components/ui/form/index';
   import { Input } from '$lib/components/ui/input';
   import { Textarea } from '$lib/components/ui/textarea';
+  import FormButton from '@/components/forms/form-button.svelte';
   import IdentFormInput from '@/components/forms/form-ident-input.svelte';
+  import { Button } from '@/components/ui/button';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import translate from '@/helpers/language/translate';
+  import { m } from '@/paraglide/messages';
+  import { AppUiMessage } from '@/types/enums';
   import { AlertTriangle } from 'lucide-svelte';
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zodClient } from 'sveltekit-superforms/adapters';
-  import FormButton from '@/components/forms/form-button.svelte';
-  import { Button } from '@/components/ui/button';
-  import translate from '@/helpers/language/translate';
-  import { AppUiMessage } from '@/types/enums';
   import { deleteAccountFormSchema, type DeleteAccountFormSchema } from '../../(data)/schema';
 
   let {
@@ -64,6 +66,10 @@
       try {
         const result = await validateForm({ update: true, focusOnError: true });
         hasStepError = !result.valid;
+        if (result.valid && $formData.confirmEmail !== currentEmail) {
+          hasStepError = true;
+          updateFormErrors('confirmEmail', m['setting.delete_account.error.incorrect']());
+        }
       } catch (error) {
         console.error('Error validating form input:', error);
       } finally {
@@ -73,9 +79,6 @@
   };
 
   const deleteMyAccount = async () => {
-    const validationResult = await validateForm({ update: true, focusOnError: true });
-    if (!validationResult.valid || $formData.confirmEmail !== currentEmail) return;
-
     try {
       isLoading = true;
 
@@ -92,7 +95,7 @@
       isSuccess = true;
       // Show success state briefly before closing
       setTimeout(() => {
-        return onClose && onClose();
+        goto('/');
       }, 1000);
     } catch (error) {
       console.error('Error deleting account:', error);
@@ -108,10 +111,9 @@
   <div class="space-y-4">
     <Alert.Root variant="destructive" class="mb-4">
       <AlertTriangle class="h-4 w-4" />
-      <Alert.Title>Are you sure you want to proceed?</Alert.Title>
+      <Alert.Title>{m['setting.delete_account.alert_title']()}</Alert.Title>
       <Alert.Description>
-        Your profile and all of your data will be permanently deleted. This action cannot be
-        recovered from.
+        {m['setting.delete_account.alert_subtitle']()}
       </Alert.Description>
     </Alert.Root>
 
@@ -119,12 +121,12 @@
     <Form.Field {form} name="reason">
       <Form.Control>
         {#snippet children({ props })}
-          <Form.Label>Reason</Form.Label>
+          <Form.Label>{m['setting.delete_account.reason']()}</Form.Label>
           <Input
             {...props}
             id="reason"
             type="text"
-            placeholder="Why are you deleting your account?"
+            placeholder={m['setting.delete_account.reason_placeholder']()}
             bind:value={$formData.reason}
           />
         {/snippet}
@@ -135,11 +137,11 @@
     <Form.Field {form} name="description">
       <Form.Control>
         {#snippet children({ props })}
-          <Form.Label>Additional details</Form.Label>
+          <Form.Label>{m['setting.delete_account.addition_details']()}</Form.Label>
           <Textarea
             {...props}
             id="description"
-            placeholder="Do you have any additional feedback?"
+            placeholder={m['setting.delete_account.addition_details_placeholder']()}
             bind:value={$formData.description}
             rows={3}
           />
@@ -151,7 +153,7 @@
     <IdentFormInput
       {form}
       fieldName="confirmEmail"
-      label="Confirm your email"
+      label={m['setting.delete_account.confirm_email']()}
       placeholder={currentEmail || ''}
     />
   </div>
@@ -160,9 +162,9 @@
     disabled={isLoading || $delayed || hasStepError}
     {isLoading}
     {isSuccess}
-    buttonText="Delete my account"
-    loadingText="Cleaning up..."
-    successText="Goodbye!"
+    buttonText={m['setting.buttons.delete_account']()}
+    loadingText={m['setting.buttons.cleaning']()}
+    successText={m['setting.buttons.goodbuy']()}
   />
-  <Button variant="outline" onclick={onClose}>Cancel</Button>
+  <Button variant="outline" onclick={onClose}>{m['setting.buttons.cancel']()}</Button>
 </form>
