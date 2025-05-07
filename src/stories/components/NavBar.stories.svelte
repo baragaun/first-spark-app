@@ -13,16 +13,8 @@
   });
 </script>
 
-<Story name="Signed Out">
+<Story name="Default">
   <MockUserProvider signedIn={false}>
-    <Sidebar.Provider>
-      <NavBar />
-    </Sidebar.Provider>
-  </MockUserProvider>
-</Story>
-
-<Story name="Signed In">
-  <MockUserProvider signedIn={true}>
     <Sidebar.Provider>
       <NavBar />
     </Sidebar.Provider>

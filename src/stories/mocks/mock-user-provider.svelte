@@ -26,6 +26,7 @@
       spokenLanguagesTextIds: [],
       roles: [],
       trustLevel: 0,
+      isPhoneNumberVerified: false,
     });
     myUserContext.myUserId = '1234567890';
   } else {

@@ -20,7 +20,7 @@
         userInitialized: true,
         form: {
           data: { ident: '', authType: 'password' },
-          id: '',
+          id: 'sign-in-form',
           valid: false,
           posted: false,
           errors: {},

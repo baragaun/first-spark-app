@@ -1,6 +1,22 @@
 <script module>
   import AuthCard from '$lib/components/auth-card.svelte';
   import { defineMeta } from '@storybook/addon-svelte-csf';
+  import { Label } from '$lib/components/ui/label/index.js';
+  import { Input } from '$lib/components/ui/input/index.js';
+  import { within, userEvent, expect, waitFor } from '@storybook/test';
+  import Button from '@/components/ui/button/button.svelte';
+
+  // Add this for the form example
+  let framework = 'sveltekit';
+  let frameworkLabel = 'SvelteKit';
+
+  const frameworks = [
+    { value: 'sveltekit', label: 'SvelteKit' },
+    { value: 'react', label: 'React' },
+    { value: 'vue', label: 'Vue' },
+    { value: 'angular', label: 'Angular' },
+    { value: 'solid', label: 'Solid' },
+  ];
 
   const { Story } = defineMeta({
     title: 'Components/AuthCard',
@@ -8,7 +24,6 @@
     parameters: {
       layout: 'centered',
     },
-    tags: ['autodocs'],
     argTypes: {
       title: {
         control: { type: 'select' },
@@ -34,6 +49,9 @@
         action: 'onBack',
         description: 'Function called when the back button is clicked',
       },
+      children: {
+        description: 'Content to display inside the card',
+      },
     },
   });
 </script>
@@ -41,9 +59,87 @@
 <Story
   name="Default"
   args={{
-    title: 'Sign In',
-    description: 'Enter your credentials to access your account',
+    title: 'Card Title',
+    description: 'Enter your card details',
     onBack: () => {},
-    showBackButton: false,
+    showBackButton: true,
   }}
-/>
+  play={async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+
+    // Verify the card title and description
+    const title = canvas.getByRole('heading', { name: args.title });
+    expect(title).toBeInTheDocument();
+
+    if (args.description) {
+      const description = canvas.getByText(args.description);
+      expect(description).toBeInTheDocument();
+    }
+
+    // Verify back button is visible when showBackButton is true
+    if (args.showBackButton) {
+      const backButton = canvas.getByRole('button', { name: /back/i });
+      expect(backButton).toBeInTheDocument();
+
+      // Test back button click
+      await userEvent.click(backButton);
+      // In a real test, you might verify that args.onBack was called
+    }
+
+    // Test form interaction
+    // Fill in the email input
+    const emailInput = canvas.getByPlaceholderText('Please enter your email.');
+    await userEvent.type(emailInput, 'test@example.com');
+    expect(emailInput).toHaveValue('test@example.com');
+
+    // Fill in the password input
+    const passwordInput = canvas.getByPlaceholderText('Please enter your password.');
+    await userEvent.type(passwordInput, 'password123');
+    expect(passwordInput).toHaveValue('password123');
+
+    // Click the submit button
+    const submitButton = canvas.getByRole('button', { name: 'Submit' });
+    expect(submitButton).toBeInTheDocument();
+    await userEvent.click(submitButton);
+
+    // Add a success indicator
+    const successPopup = document.createElement('div');
+    successPopup.id = 'test-success-popup';
+    successPopup.style.position = 'fixed';
+    successPopup.style.top = '20px';
+    successPopup.style.right = '20px';
+    successPopup.style.padding = '15px 20px';
+    successPopup.style.background = '#4CAF50';
+    successPopup.style.color = 'white';
+    successPopup.style.borderRadius = '5px';
+    successPopup.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+    successPopup.style.zIndex = '9999';
+    successPopup.style.fontFamily = 'sans-serif';
+    successPopup.textContent = '✅ Form Interaction Test Completed Successfully!';
+
+    document.body.appendChild(successPopup);
+
+    // Remove the popup after 5 seconds
+    setTimeout(() => {
+      if (document.body.contains(successPopup)) {
+        document.body.removeChild(successPopup);
+      }
+    }, 5000);
+  }}
+>
+  <form>
+    <div class="grid w-full items-center gap-4">
+      <div class="flex flex-col space-y-1.5">
+        <Label for="email">Email</Label>
+        <Input id="email" placeholder="Please enter your email." />
+      </div>
+      <div class="flex flex-col space-y-1.5">
+        <Label for="password">Password</Label>
+        <Input id="password" type="password" placeholder="Please enter your password." />
+      </div>
+      <div class="flex flex-col space-y-1.5">
+        <Button>Submit</Button>
+      </div>
+    </div>
+  </form>
+</Story>
