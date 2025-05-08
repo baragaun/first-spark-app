@@ -1,33 +1,8 @@
-import { m } from '@/paraglide/messages';
 import { UserIdentType } from '@baragaun/bg-node-client';
 import { z } from 'zod';
+import { emailSchema, otpSchema, passwordSchema, usernameSchema } from '../../lib/schemas/common';
 
-const isValidEmail = (email: string): boolean => {
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  return emailRegex.test(email);
-};
-
-export const emailSchema = z
-  .string()
-  .email({
-    message: 'Please enter a valid email address',
-  })
-  .refine((email) => isValidEmail(email));
-
-export const usernameSchema = z
-  .string({
-    message: 'A username must be at least 3 characters',
-  })
-  .min(3)
-  .max(30);
-
-const otpSchema = z.string().min(6, {
-  message: m['verify_token.error.min_length'](),
-});
-
-const passwordSchema = z.string().min(8, {
-  message: 'Your password must be at least 8 characters',
-});
+export { emailSchema, usernameSchema };
 
 export const schemaFirstStep = z.object({
   ident: z

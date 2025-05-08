@@ -169,7 +169,8 @@
         "min_length": "Username must be at least 3 characters",
         "max_length": "Username must contain at most 30 character(s)",
         "unavailable": "This username is currently unavailable for use.",
-        "in_use": "You already use this username. Please choose a different one."
+        "in_use": "You already use this username. Please choose a different one.",
+        "alphanumeric": "Username must contain only letters and numbers"
       }
     },
     "email": {
