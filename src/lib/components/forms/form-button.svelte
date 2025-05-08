@@ -40,7 +40,7 @@
   {variant}
   {disabled}
   {type}
-  class={`${isSuccess ? 'bg-green-700' : ''} ${fullWidth ? 'w-full' : ''} ${extraClass}`}
+  class={`${isSuccess ? 'bg-green-700 hover:bg-green-700 pointer-events-none' : ''} ${fullWidth ? 'w-full' : ''} ${extraClass}`}
   onclick={(e) => {
     if (onClick) {
       e.preventDefault();

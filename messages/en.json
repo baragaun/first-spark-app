@@ -169,7 +169,7 @@
         "min_length": "Username must be at least 3 characters",
         "max_length": "Username must contain at most 30 character(s)",
         "unavailable": "This username is currently unavailable for use.",
-        "unable_to_find": "Failed to find handle"
+        "in_use": "You already use this username. Please choose a different one."
       }
     },
     "email": {

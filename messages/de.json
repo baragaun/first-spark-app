@@ -144,7 +144,7 @@
         "min_length": "Der Benutzername muss mindestens 3 Zeichen lang sein",
         "max_length": "Der Benutzername darf höchstens 30 Zeichen enthalten.",
         "unavailable": "Dieser Benutzername ist derzeit nicht verfügbar.",
-        "unable_to_find": "Handle konnte nicht gefunden werden"
+        "in_use": "Sie verwenden diesen Benutzernamen bereits. Bitte wählen Sie einen anderen."
       }
     },
     "email": {

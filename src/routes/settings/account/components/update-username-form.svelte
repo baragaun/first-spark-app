@@ -77,10 +77,14 @@
 
   const checkUsernameAvailability = async (): Promise<boolean> => {
     isLoading = true;
+    const fieldName = 'username';
 
     if ($formData.username === myUserContext.myUserHandle) {
+      // isLoading = false;
+      // return true;
       isLoading = false;
-      return true;
+      updateFormErrors(fieldName, m['setting.username.error.in_use']());
+      return false;
     }
 
     const validationResult = usernameFormSchema.safeParse($formData);
@@ -89,7 +93,6 @@
       return false;
     }
 
-    const fieldName = 'username';
     let message = m['setting.username.error.unavailable']();
 
     try {
@@ -129,7 +132,7 @@
       console.error('Error getting suggested handle:', error);
       updateFormErrors(
         'username',
-        error instanceof Error ? error.message : m['setting.username.error.unable_to_find'](),
+        error instanceof Error ? error.message : 'Failed to find handle',
       );
     }
   };

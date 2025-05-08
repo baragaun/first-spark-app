@@ -116,7 +116,7 @@
     }, 1000);
   };
 
-  const updateFormErrors = (field: keyof SignInFormSchema, message: string) => {
+  const updateFormErrors = (field: keyof SignInFormSchema, message?: string) => {
     errors.update((errors) => {
       const newErrors = {
         ...errors,
@@ -170,8 +170,8 @@
       );
 
       if (response !== true) {
-        updateFormErrors('password', 'Invalid credentials. Please try again.');
-
+        updateFormErrors('ident', undefined);
+        updateFormErrors('password', 'Invalid username, email or password. Please try again.');
         return;
       }
 

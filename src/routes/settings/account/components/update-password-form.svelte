@@ -73,7 +73,7 @@
           return;
         }
 
-        const formValidation = await validateForm({ update: true, focusOnError: true });
+        const formValidation = await validateForm({ update: true, focusOnError: false });
         hasStepError = !formValidation.valid;
       } catch (error) {
         console.error('Error validating form input:', error);
