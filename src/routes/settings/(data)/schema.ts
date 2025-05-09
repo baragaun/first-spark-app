@@ -1,34 +1,18 @@
+import { m } from '@/paraglide/messages';
 import { z } from 'zod';
-
-export const usernameSchema = z
-  .string({
-    message: 'A username must be at least 3 characters',
-  })
-  .min(3)
-  .max(30);
+import {
+  emailSchema,
+  otpSchema,
+  passwordSchema,
+  usernameSchema,
+} from '../../../lib/schemas/common';
 
 export const currentPasswordSchema = z.string().min(8, {
-  message: 'Current password is required ',
-});
-
-export const newPasswordSchema = z.string().min(8, {
-  message: 'Your password must be at least 8 characters',
-});
-
-export const emailSchema = z.string().email({
-  message: 'Please enter a valid email address.',
-});
-
-export const otpSchema = z.string().min(6, {
-  message: 'Your one-time password must be at least 6 characters',
+  message: m['setting.password.error.required'](),
 });
 
 export const usernameFormSchema = z.object({
-  username: z
-    .string()
-    .min(3, 'Username must be at least 3 characters')
-    .max(30)
-    .transform((val) => val.trim()),
+  username: usernameSchema.transform((val) => val.trim()),
 });
 
 export const emailFormSchemaFirstStep = z.object({
@@ -41,7 +25,7 @@ export const emailFormSchemaLastStep = emailFormSchemaFirstStep.extend({
 
 export const passwordFormSchema = z.object({
   currentPassword: currentPasswordSchema.transform((val) => val.trim()),
-  newPassword: newPasswordSchema.transform((val) => val.trim()),
+  newPassword: passwordSchema.transform((val) => val.trim()),
 });
 
 export const deleteAccountFormSchema = z.object({

@@ -5,10 +5,10 @@
 <script lang="ts" generics="T extends Record<string, unknown>">
   import * as Form from '$lib/components/ui/form/index.js';
   import { Input } from '$lib/components/ui/input/index.js';
+  import { m } from '@/paraglide/messages';
   import { cn } from '@/utils';
   import { UserIdentType } from '@baragaun/bg-node-client';
   import { AlertCircle, Check, RefreshCw } from 'lucide-svelte';
-  import { onMount } from 'svelte';
   import type { FormPathLeaves, SuperForm } from 'sveltekit-superforms';
 
   let {
@@ -56,7 +56,7 @@
               onclick={() => suggestUsername()}
             >
               <RefreshCw class={cn('mr-1 h-3 w-3', isLoading && 'animate-spin')} />
-              {isLoading ? 'Generating...' : 'Suggest new'}
+              {isLoading ? m['setting.username.generating']() : m['setting.username.suggest_new']()}
             </button>
           {/if}
         </div>

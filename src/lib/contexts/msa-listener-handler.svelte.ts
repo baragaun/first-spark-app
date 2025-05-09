@@ -1,4 +1,5 @@
 import translate from '@/helpers/language/translate';
+import { m } from '@/paraglide/messages';
 import { AppUiMessage, MsaTokenStatus } from '@/types/enums';
 import {
   MultiStepActionEventType,
@@ -51,7 +52,7 @@ export class MsaListenerHandler {
           if (eventType === MultiStepActionEventType.notificationFailed) {
             // The notification failed to go out.
             if (import.meta.env.VITE_APP_ENVIRONMENT === 'development') {
-              errorMessage = "Notification failed, but you're in development.";
+              errorMessage = m['verify_token.error.dev_mode_error']();
 
               // Advance, ignoring the failure to send in development
               if (this.onNotificationSent) this.onNotificationSent();
@@ -77,7 +78,7 @@ export class MsaListenerHandler {
           }
 
           if (eventType === MultiStepActionEventType.tokenFailed) {
-            errorMessage = 'We could not verify the token you entered. Please try again.';
+            errorMessage = m['verify_token.error.invalid']();
             if (this.onFailure) this.onFailure();
             return;
           }

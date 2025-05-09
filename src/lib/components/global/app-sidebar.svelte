@@ -1,15 +1,12 @@
 <script lang="ts">
-  import BookUser from 'lucide-svelte/icons/book-user';
-  import House from 'lucide-svelte/icons/house';
-  import Inbox from 'lucide-svelte/icons/inbox';
-  import MessageSquare from 'lucide-svelte/icons/message-square';
-  import Settings from 'lucide-svelte/icons/settings';
-  import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-  import type { ComponentProps } from 'svelte';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
-  import { m } from '$lib/paraglide/messages';
   import { page } from '$app/state';
+  import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+  import { m } from '$lib/paraglide/messages';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { PlugZap, Zap } from 'lucide-svelte';
+  import House from 'lucide-svelte/icons/house';
+  import Settings from 'lucide-svelte/icons/settings';
+  import type { ComponentProps } from 'svelte';
   import { Button } from '../ui/button';
 
   const isOnline = $derived(!myUserContext.isOffline);
@@ -29,7 +26,8 @@
       url: '/',
       icon: House,
     },
-    {
+    /* TODO: Hidding the following sidebar buttons as per the issue: https://github.com/baragaun/first-spark-app/issues/112 */
+    /* {
       title: m['sidebar.menu.inbox'](),
       url: '#',
       icon: Inbox,
@@ -46,7 +44,7 @@
       url: '#',
       icon: BookUser,
       requiresAuth: true,
-    },
+    }, */
     {
       title: m['sidebar.menu.settings'](),
       url: '/settings',

@@ -1,51 +1,42 @@
+import { m } from '@/paraglide/messages';
 import { z } from 'zod';
+import {
+  emailSchema,
+  otpSchema,
+  passwordSchema,
+  usernameSchema,
+} from '../../../lib/schemas/common';
 
 const currentPasswordSchema = z
   .string()
   .min(1, {
-    message: 'Current password is required ',
+    message: m['setting.password.error.required'](),
   })
   .transform((val) => val.trim());
 
-export const emailSchema = z.string().email({
-  message: 'Please enter a valid email address.',
-});
-
-// Username schema
-export const usernameSchema = z.object({
-  username: z.string().min(3, 'Username must be at least 3 characters').max(30),
-});
-
-const otpSchema = z
-  .string()
-  .min(6, {
-    message: 'Your one-time password must be at least 6 characters.',
-  })
-  .transform((val) => val.trim());
-
-export const changeEmailschemaFirstStep = z.object({
-  email: emailSchema,
+const changeEmailschemaFirstStep = z.object({
+  email: emailSchema.transform((val) => val.trim()),
   currentPassword: currentPasswordSchema,
 });
 
-export const changeEmailschemaLastStep = changeEmailschemaFirstStep.extend({
-  token: otpSchema,
+const changeEmailschemaLastStep = changeEmailschemaFirstStep.extend({
+  token: otpSchema.transform((val) => val.trim()),
 });
 
-// Password schema without confirm password
-export const passwordSchema = z.object({
+// update password schema
+const updatePasswordSchema = z.object({
   currentPassword: currentPasswordSchema,
-  newPassword: z.string().min(8, 'Password must be at least 8 characters long.'),
+  newPassword: passwordSchema.transform((val) => val.trim()),
 });
 
 // Delete account schema
-export const deleteAccountSchema = z.object({
-  confirmEmail: z.string().email('Please enter a valid email address'),
+const deleteAccountSchema = z.object({
+  confirmEmail: emailSchema.transform((val) => val.trim()),
   reason: z.string().optional(),
   description: z.string().optional(),
 });
 
 export type UpdateEmailFormSchema = z.infer<typeof changeEmailschemaLastStep>;
 export type UsernameSchema = z.infer<typeof usernameSchema>;
-export type PasswordSchema = z.infer<typeof passwordSchema>;
+export type PasswordSchema = z.infer<typeof updatePasswordSchema>;
 export type DeleteAccountSchema = z.infer<typeof deleteAccountSchema>;

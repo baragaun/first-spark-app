@@ -11,7 +11,7 @@
   import { AppUiMessage } from '@/types/enums';
   import { UserIdentType } from '@baragaun/bg-node-client';
   import { onDestroy } from 'svelte';
-  import SuperDebug, { superForm, type SuperValidated } from 'sveltekit-superforms';
+  import { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
   import {
     emailSchema,
@@ -442,7 +442,7 @@
       {/if}
       <FormButton
         disabled={$delayed || isLoading || hasStepError}
-        loading={$delayed || isLoading}
+        isLoading={$delayed || isLoading}
         buttonText="Sign Up"
         loadingText={steps[step - 1].buttonLabel}
       />
@@ -452,6 +452,8 @@
       </div>
     </div></AuthCard
   >
-  <div class="mt-4"><SuperDebug data={$formData} /></div>
-  <div class="mt-4"><SuperDebug data={errors} /></div>
+
+  <!-- commenting as per the issue : https://github.com/baragaun/first-spark-app/issues/113 -->¯
+  <!--   <div class="mt-4"><SuperDebug data={$formData} /></div>
+  <div class="mt-4"><SuperDebug data={errors} /></div> -->
 </form>

@@ -19,9 +19,10 @@
         class="flex flex-wrap items-center justify-center gap-4 text-sm"
         aria-label="Footer navigation"
       >
-        <Button variant="link" href="/faq" class="text-muted-foreground hover:text-primary">
+        <!--TODO: Hidding FAQ section as per the issue:  https://github.com/baragaun/first-spark-app/issues/110 -->
+        <!--<Button variant="link" href="/faq" class="text-muted-foreground hover:text-primary">
           {m['footer.navigation.faq']()}
-        </Button>
+        </Button> -->
         <Button
           variant="link"
           href="/privacy-policy"
@@ -29,13 +30,14 @@
         >
           {m['footer.navigation.privacy_policy']()}
         </Button>
-        <Button
+        <!--TODO: Hidding Tos section as per the issue:  https://github.com/baragaun/first-spark-app/issues/111 -->
+        <!-- <Button
           variant="link"
           href="/terms-of-service"
           class="text-muted-foreground hover:text-primary"
         >
           {m['footer.navigation.terms_of_service']()}
-        </Button>
+        </Button> -->
       </nav>
     </div>
   </div>

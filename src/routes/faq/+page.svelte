@@ -1,4 +1,5 @@
-<script lang="ts">
+<!--TODO: Hidding FAQ section as per the issue:  https://github.com/baragaun/first-spark-app/issues/110 -->
+<!-- <script lang="ts">
   import { slide } from 'svelte/transition';
   import { ChevronDown } from 'lucide-svelte';
   import MetaTags from '$lib/components/shared/meta-tags.svelte';
@@ -92,3 +93,4 @@
     {/each}
   </div>
 </section>
+ -->
