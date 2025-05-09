@@ -1,4 +1,5 @@
-export interface TermsSection {
+/*TODO: Hidding as per the issue:  https://github.com/baragaun/first-spark-app/issues/111 */
+/* export interface TermsSection {
   title: string;
   content: string;
   listItems?: string[];
@@ -33,3 +34,4 @@ export const TERMS_SECTIONS: TermsSection[] = [
     ],
   },
 ];
+ */

@@ -5,20 +5,21 @@
 <script lang="ts" generics="T extends Record<string, unknown>">
   import * as Form from '$lib/components/ui/form/index.js';
   import * as InputOTP from '$lib/components/ui/input-otp';
+  import { m } from '@/paraglide/messages';
   import { REGEXP_ONLY_DIGITS } from 'bits-ui';
   import type { FormPathLeaves, SuperForm } from 'sveltekit-superforms';
 
   let {
     form,
     fieldName = 'emailOtp',
-    label = 'Verification code',
+    label = m['verify_token.verification_code'](),
     length = 6,
     id = 'verification-code',
     pattern = REGEXP_ONLY_DIGITS,
     showResend = false,
     canResend = false,
-    resendLabel = 'Resend code',
-    resendTimerLabel = 'Resend in',
+    resendLabel = m['verify_token.resend'](),
+    resendTimerLabel = m['verify_token.resend_in'](),
     resendTimer = 0,
     onResendClick = undefined,
   } = $props<{

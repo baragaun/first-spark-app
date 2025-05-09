@@ -1,4 +1,5 @@
-export interface FAQItem {
+/* TODO: Hidding FAQ section as per the issue:  https://github.com/baragaun/first-spark-app/issues/110 */
+/* export interface FAQItem {
   question: string;
   answer: string;
   isOpen: boolean;
@@ -23,3 +24,4 @@ export const FAQ_SECTIONS: FAQSection[] = [
   },
   // Add more sections as needed
 ];
+ */

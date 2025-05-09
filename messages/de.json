@@ -17,7 +17,6 @@
       "settings": "Einstellungen"
     }
   },
-
   "nav": {
     "menu": "Menü",
     "open_menu": "Menü öffnen",
@@ -31,7 +30,6 @@
       "sign_out": "Abmelden"
     }
   },
-
   "footer": {
     "copyright": "© {year} First Spark. Alle Rechte vorbehalten.",
     "navigation": {
@@ -40,14 +38,12 @@
       "terms_of_service": "Nutzungsbedingungen"
     }
   },
-
   "user_nav": {
     "profile": "Profil",
     "inbox": "Posteingang",
     "settings": "Einstellungen",
     "logout": "Abmelden"
   },
-
   "language": {
     "change": "Sprache ändern",
     "select": "Sprache auswählen"
@@ -108,11 +104,20 @@
       "creating_account": "Konto wird erstellt..."
     }
   },
-
+  "verify_token": {
+    "verification_code": "Verifizierungscode",
+    "resend": "Code erneut senden",
+    "resend_in": "Erneut senden in",
+    "error": {
+      "dev_mode_error": "Benachrichtigung fehlgeschlagen, aber Sie befinden sich im Entwicklungsmodus.",
+      "min_length": "Ihr Einmalpasswort muss mindestens 6 Zeichen lang sein",
+      "invalid": "Wir konnten den eingegebenen Token nicht verifizieren. Bitte versuchen Sie es erneut."
+    }
+  },
   "theme": {
     "light_switch": "Thema ändern",
-    "light": "Licht",
-    "dark": "dunkel",
+    "light": "Hell",
+    "dark": "Dunkel",
     "system": "System"
   },
   "connection": {
@@ -121,5 +126,87 @@
     "offline.description": "Sie sind derzeit nicht verbunden.",
     "reconnected": "Wieder verbunden",
     "reconnected.description": "Wieder mit First Spark verbunden!"
+  },
+  "setting": {
+    "setting_label": "Einstellungen",
+    "account": "Konto",
+    "notification": "Benachrichtigung",
+    "username": {
+      "label": "Mein Benutzername",
+      "change_username": "Benutzernamen ändern",
+      "change_username_description": "Du kannst deinen Benutzernamen jederzeit ändern. Dein vorheriger Benutzername wird sofort wieder verfügbar.",
+      "current_username": "Aktueller Benutzername",
+      "new_username": "Neuer Benutzername",
+      "suggest_new": "Neuen Vorschlag machen",
+      "generating": "Generiere...",
+      "username_placeholder": "z. B. 'giraffe08'",
+      "error": {
+        "min_length": "Der Benutzername muss mindestens 3 Zeichen lang sein",
+        "max_length": "Der Benutzername darf höchstens 30 Zeichen enthalten.",
+        "unavailable": "Dieser Benutzername ist derzeit nicht verfügbar.",
+        "in_use": "Sie verwenden diesen Benutzernamen bereits. Bitte wählen Sie einen anderen.",
+        "alphanumeric": "Der Benutzername darf nur Buchstaben und Zahlen enthalten"
+      }
+    },
+    "email": {
+      "label": "Meine E-Mail",
+      "change_email": "Registrierte E-Mail ändern",
+      "change_email_description": "Gib eine andere E-Mail-Adresse und einen Bestätigungscode ein, um dein Konto zu aktualisieren.",
+      "current_email": "Aktuelle E-Mail",
+      "new_email": "Neue E-Mail",
+      "email_placeholder": "z.B. anne@beispiel.de",
+      "error": {
+        "invalid": "Bitte gib eine gültige E-Mail-Adresse ein.",
+        "unavailable": "Diese E-Mail ist derzeit nicht verfügbar.",
+        "existing": "Bitte geben Sie eine andere E-Mail-Adresse an."
+      }
+    },
+    "password": {
+      "label": "Mein Passwort",
+      "change_password": "Passwort ändern",
+      "change_password_description": "Dein Passwort sollte einzigartig sein und regelmäßig aktualisiert werden.",
+      "current_password": "Aktuelles Passwort",
+      "new_password": "Neues Passwort",
+      "current_password_placeholder": "Gib dein aktuelles Passwort ein",
+      "new_password_placeholder": "Gib dein neues Passwort ein",
+      "error": {
+        "required": "Aktuelles Passwort ist erforderlich",
+        "min_length": "Das Passwort muss mindestens 8 Zeichen lang sein",
+        "incorrect": "Falsches Passwort. Bitte überprüfe es und versuche es erneut."
+      }
+    },
+    "danger_zone": "Gefahrenbereich",
+    "delete_account": {
+      "label": "Konto löschen",
+      "sublabel": "Lösche dein Konto und alle zugehörigen Daten dauerhaft",
+      "your_account": "Dein Konto löschen",
+      "delete_account_description": "Es tut uns leid, dich gehen zu sehen! Bitte hinterlasse uns dein Feedback, damit wir uns verbessern können.",
+      "alert_title": "Bist du sicher, dass du fortfahren möchtest?",
+      "alert_subtitle": "Dein Profil und alle Daten werden dauerhaft gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.",
+      "reason": "Grund",
+      "reason_placeholder": "Warum möchtest du dein Konto löschen?",
+      "addition_details": "Weitere Details",
+      "addition_details_placeholder": "Hast du weiteres Feedback für uns?",
+      "confirm_email": "E-Mail bestätigen",
+      "error": {
+        "invalid": "Bitte gib eine gültige E-Mail-Adresse ein.",
+        "incorrect": "Die eingegebene E-Mail-Adresse stimmt nicht mit Ihrem Konto überein. Bitte überprüfen Sie sie und versuchen Sie es erneut."
+      }
+    },
+    "buttons": {
+      "update": "Aktualisieren",
+      "updating": "Wird aktualisiert...",
+      "delete_account": "Konto löschen",
+      "cleaning": "Wird bereinigt...",
+      "goodbuy": "Auf Wiedersehen!",
+      "cancel": "Abbrechen",
+      "verify": "Bestätigen",
+      "verifying": "Wird bestätigt..."
+    }
+  },
+  "form_button_default": {
+    "buttonText": "Absenden",
+    "successText": "Erfolgreich!",
+    "loadingText": "Wird verarbeitet"
   }
 }

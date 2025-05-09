@@ -1,15 +1,16 @@
 <script lang="ts">
-  import { page } from '$app/state';
   import { goto } from '$app/navigation';
+  import { page } from '$app/state';
   import * as Tabs from '$lib/components/ui/tabs/index.js';
+  import { m } from '$lib/paraglide/messages';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { onMount } from 'svelte';
 
   const isSignedIn = $derived(myUserContext.isSignedIn);
 
   const tabs = [
-    { id: 'account', label: 'Account', path: '/settings/account' },
-    { id: 'notifications', label: 'Notifications', path: '/settings/notifications' },
+    { id: 'account', label: m['setting.account'](), path: '/settings/account' },
+    { id: 'notifications', label: m['setting.notification'](), path: '/settings/notifications' },
   ];
 
   let { children } = $props();
@@ -32,7 +33,7 @@
 </script>
 
 <div class="container py-8">
-  <h1 class="font-lexend text-3xl font-bold tracking-tight">Settings</h1>
+  <h1 class="font-lexend text-3xl font-bold tracking-tight">{m['setting.setting_label']()}</h1>
 
   <Tabs.Root value={activeTab} class="my-8">
     <Tabs.List class="mx-auto grid w-3/5 grid-cols-2 border-b">

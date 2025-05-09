@@ -1,14 +1,15 @@
 <script lang="ts">
   import { Input } from '$lib/components/ui/input';
+  import { m } from '$lib/paraglide/messages';
+  import FormButton from '@/components/forms/form-button.svelte';
   import IdentFormInput from '@/components/forms/form-ident-input.svelte';
+  import { Button } from '@/components/ui/button';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import translate from '@/helpers/language/translate';
   import { AppUiMessage } from '@/types/enums';
   import { UserIdentType } from '@baragaun/bg-node-client';
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
-  import FormButton from '@/components/forms/form-button.svelte';
-  import { Button } from '@/components/ui/button';
   import { usernameFormSchema, type UsernameFormSchema } from '../../(data)/schema';
 
   let {
@@ -76,10 +77,14 @@
 
   const checkUsernameAvailability = async (): Promise<boolean> => {
     isLoading = true;
+    const fieldName = 'username';
 
     if ($formData.username === myUserContext.myUserHandle) {
+      // isLoading = false;
+      // return true;
       isLoading = false;
-      return true;
+      updateFormErrors(fieldName, m['setting.username.error.in_use']());
+      return false;
     }
 
     const validationResult = usernameFormSchema.safeParse($formData);
@@ -88,14 +93,13 @@
       return false;
     }
 
-    const fieldName = 'username';
-    const message = `This ${fieldName} is currently unavailable for use.`;
+    let message = m['setting.username.error.unavailable']();
 
     try {
       const response = await myUserContext.isUserIdentAvailable($formData.username, identType);
 
       if (response.error) {
-        updateFormErrors('username', response.error);
+        updateFormErrors(fieldName, response.error);
         return false;
       }
 
@@ -197,15 +201,15 @@
   <div class="space-y-4">
     <div class="space-y-2">
       <label for="current-username" class="text-sm font-medium leading-none">
-        Current username
+        {m['setting.username.current_username']()}
       </label>
       <Input id="current-username" value={currentUsername} disabled class="bg-muted" />
     </div>
     <IdentFormInput
       {form}
       fieldName="username"
-      placeholder="e.g. 'giraffe08'"
-      label="New username"
+      placeholder={m['setting.username.username_placeholder']()}
+      label={m['setting.username.new_username']()}
       {identType}
       {isLoading}
       suggestUsername={getSuggestedUsername}
@@ -216,9 +220,9 @@
       disabled={isLoading || $delayed || hasStepError}
       {isLoading}
       {isSuccess}
-      buttonText="Save"
-      loadingText="Updating"
+      buttonText={m['setting.buttons.update']()}
+      loadingText={m['setting.buttons.updating']()}
     />
-    <Button variant="outline" onclick={onClose}>Cancel</Button>
+    <Button variant="outline" onclick={onClose}>{m['setting.buttons.cancel']()}</Button>
   </div>
 </form>
