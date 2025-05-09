@@ -326,7 +326,7 @@
   });
 </script>
 
-<form method="POST" id="reset-password-form" use:enhance>
+<form method="POST" id="reset-password-form" class="w-full max-w-md" use:enhance>
   <AuthCard title="Reset your password" description={getCurrentStepDescription()}>
     <div class="space-y-4">
       {#if step == 1}

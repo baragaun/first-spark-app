@@ -44,6 +44,8 @@
   const DEBOUNCE_DELAY = 350; // ms
   const emailCooldowns = $state(new Map<string, number>()); // Track emails that have active cooldowns
 
+  console.log('form', data?.form || 'Form not properly initialized');
+
   const form = superForm(data.form, {
     dataType: 'json',
     validators: getCurrentValidator(),

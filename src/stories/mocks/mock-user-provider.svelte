@@ -13,6 +13,9 @@
   // Create a new instance of the mock context
   const myUserContext = new MockMyUserContext();
 
+  // Initialize the context immediately
+  myUserContext.isInitialized = true;
+
   // Set the user's signed-in state based on the prop
   if (signedIn) {
     // Set the mock user
@@ -28,22 +31,21 @@
       trustLevel: 0,
       isPhoneNumberVerified: false,
     });
-    myUserContext.myUserId = '1234567890';
+    myUserContext.myUser.id = '1234567890';
   } else {
     // Clear the user
     myUserContext.myUser.set(null);
-    myUserContext.myUserId = '';
+    myUserContext.myUser.id = '';
   }
 
   // Set the mock user context for child components to consume
   setContext('myUserContext', myUserContext);
 
   onMount(() => {
-    if (!myUserContext.isInitialized) {
-      myUserContext.initialize().catch((error) => {
-        console.error('MockUserProvider.onMount: Error initializing MockMyUserContext:', error);
-      });
-    }
+    // Ensure the context is initialized
+    myUserContext.initialize().catch((error) => {
+      console.error('MockUserProvider.onMount: Error initializing MockMyUserContext:', error);
+    });
   });
 </script>
 

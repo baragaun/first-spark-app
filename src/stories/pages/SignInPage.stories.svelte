@@ -1,8 +1,21 @@
-<!-- <script module>
+<script module>
   import { defineMeta } from '@storybook/addon-svelte-csf';
   import SignIn from '../../routes/signin/+page.svelte';
   import { within, userEvent, expect, waitFor } from '@storybook/test';
   import MockUserProvider from '../mocks/mock-user-provider.svelte';
+  import { zod } from 'sveltekit-superforms/adapters';
+  import { superValidate } from 'sveltekit-superforms/server';
+  import { signInFormSchema } from '../../routes/signin/schema';
+  import { mockMyUserContext } from '../mocks/mock-user-context';
+
+  // Create a properly validated form for the story
+  const getValidatedForm = async () => {
+    return await superValidate(zod(signInFormSchema));
+  };
+
+  // Ensure the mock context is initialized
+  mockMyUserContext.isInitialized = true;
+  mockMyUserContext.client.isInitialized = true;
 
   const { Story } = defineMeta({
     title: 'Page/Sign In',
@@ -10,24 +23,33 @@
     parameters: {
       layout: 'fullscreen',
     },
+    args: {
+      // This will be available to all stories
+      data: {
+        userInitialized: true,
+        form: {
+          data: { ident: '', authType: 'password' },
+          id: '',
+          valid: false,
+          posted: false,
+          errors: {},
+          constraints: {}
+        } // Will be set in the loader
+      }
+    },
+    loaders: [
+      async ({ args }) => {
+        // Set the validated form in the args
+        args.data.form = await getValidatedForm();
+        return args;
+      }
+    ]
   });
 </script>
 
 <Story name="Default">
   <MockUserProvider>
-    <SignIn
-      data={{
-        userInitialized: true,
-        form: {
-          data: { ident: '', authType: 'password' },
-          id: 'sign-in-form',
-          valid: false,
-          posted: false,
-          errors: {},
-          constraints: {},
-        },
-      }}
-    />
+    <SignIn data={$$props.data} />
   </MockUserProvider>
 </Story>
 
@@ -37,24 +59,21 @@
     const canvas = within(canvasElement);
 
     // Fill in the email/username field
-    const identifierInput = canvas.getByPlaceholderText(/me@example.com, myusername/i);
+    const identifierInput = canvas.getByPlaceholderText(/Enter your email or username/i);
     await userEvent.type(identifierInput, 'test@example.com');
 
-    // Click the "Sign in with password" button to show password field
-    const showPasswordButton = canvas.getByRole('button', { name: /Sign in with password/i });
-    await userEvent.click(showPasswordButton);
-
     // Fill in the password field
-    const passwordInput = canvas.getByPlaceholderText(/Password/i);
+    const passwordInput = canvas.getByPlaceholderText(/Enter your password/i);
     await userEvent.type(passwordInput, '123456789');
 
     // Click the sign in button
-    const signInButton = canvas.getByRole('button', { name: /Sign in$/i });
+    const signInButton = canvas.getByRole('button', { name: /Sign in/i });
     await userEvent.click(signInButton);
+
+    //todo add verfication code test
 
     // Wait for the sign-in process to complete
     await waitFor(() => {
-      // Check for successful sign up
       // Add a success popup to the DOM
       const successPopup = document.createElement('div');
       successPopup.id = 'test-success-popup';
@@ -82,19 +101,7 @@
   }}
 >
   <MockUserProvider>
-    <SignIn
-      data={{
-        userInitialized: true,
-        form: {
-          data: { ident: '', authType: 'password' },
-          id: '',
-          valid: false,
-          posted: false,
-          errors: {},
-          constraints: {},
-        },
-      }}
-    />
+    <SignIn data={$$props.data} />
   </MockUserProvider>
 </Story>
 
@@ -103,44 +110,43 @@
   play={async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
+    // Wait for the context to be initialized
+    await new Promise(resolve => setTimeout(resolve, 500));
+
     // Fill in the email/username field
-    const identifierInput = canvas.getByPlaceholderText(/me@example.com, myusername/i);
+    const identifierInput = canvas.getByPlaceholderText(/Enter your email or username/i);
     await userEvent.type(identifierInput, 'test@example.com');
 
     // Click the "Sign in with token" button
-    const tokenButton = canvas.getByRole('button', { name: 'Sign in' });
+    const tokenButton = canvas.getByRole('button', { name: /Sign in with token/i });
     await userEvent.click(tokenButton);
 
     // Wait for the token form to appear
     await waitFor(() => {
       // Look for the verification code heading/text
-      const verificationTitle = canvas.getByText(/Verify your email/i);
+      const verificationTitle = canvas.getByText(/Enter the verification code sent to/);
       expect(verificationTitle).toBeInTheDocument();
     });
 
-    // Find all input elements in the OTP component
-    // We need to use a more direct approach since the OTP component has a complex structure
+        // Find all input elements in the OTP component
     const otpInputs = Array.from(canvasElement.querySelectorAll('input[type="text"]'));
 
-    // If no inputs are found, try with a more generic selector
-    if (otpInputs.length === 0) {
+    // If we found the specific OTP inputs, type each digit
+    if (otpInputs.length > 0) {
+      for (let i = 0; i < Math.min(otpInputs.length, 6); i++) {
+        await userEvent.type(otpInputs[i], (i + 1).toString());
+      }
+    } else {
+      // Fallback: try to find any inputs that might be OTP fields
       const allInputs = Array.from(canvasElement.querySelectorAll('input'));
-      // Filter to likely OTP inputs (usually small, single-character inputs)
       const likelyOtpInputs = allInputs.filter(
         (input) =>
           !input.getAttribute('placeholder')?.includes('@') &&
           !input.getAttribute('type')?.includes('password'),
       );
 
-      // Type the verification code
       if (likelyOtpInputs.length > 0) {
-        // Type '123456' into the first input - many OTP components handle distribution automatically
         await userEvent.type(likelyOtpInputs[0], '123456');
-      }
-    } else {
-      // If we found the specific OTP inputs, type each digit
-      for (let i = 0; i < Math.min(otpInputs.length, 6); i++) {
-        await userEvent.type(otpInputs[i], (i + 1).toString());
       }
     }
 
@@ -150,7 +156,6 @@
 
     // Wait for verification to complete
     await waitFor(() => {
-      // Check for successful sign up
       // Add a success popup to the DOM
       const successPopup = document.createElement('div');
       successPopup.id = 'test-success-popup';
@@ -178,18 +183,6 @@
   }}
 >
   <MockUserProvider>
-    <SignIn
-      data={{
-        userInitialized: true,
-        form: {
-          data: { ident: '', authType: 'password' },
-          id: '',
-          valid: false,
-          posted: false,
-          errors: {},
-          constraints: {},
-        },
-      }}
-    />
+    <SignIn data={$$props.data} />
   </MockUserProvider>
-</Story> -->
+</Story>

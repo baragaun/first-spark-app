@@ -1,38 +1,50 @@
-<!-- <script module>
+<script module>
   import { defineMeta } from '@storybook/addon-svelte-csf';
   import SignUp from '../../routes/signup/+page.svelte';
   import { within, userEvent, expect, waitFor } from '@storybook/test';
   import MockUserProvider from '../mocks/mock-user-provider.svelte';
+  import { zod } from 'sveltekit-superforms/adapters';
+  import { superValidate } from 'sveltekit-superforms/server';
+  import { schemaLastStep } from '../../routes/signup/schema';
+
+  // Create a properly validated form for the story
+  const getValidatedForm = async () => {
+    return await superValidate(zod(schemaLastStep));
+  };
 
   const { Story } = defineMeta({
     title: 'Page/Sign Up',
     component: SignUp,
     parameters: {
-      layout: 'fullscreen',
+      layout: 'centered',
     },
+     args: {
+      // This will be available to all stories
+      data: {
+        userInitialized: false,
+        form: {
+          data: { email: '', token: '', username: '', password: '' },
+          id: '',
+          valid: false,
+          posted: false,
+          errors: {},
+          constraints: {}
+        } // Will be set in the loader
+      }
+    },
+    loaders: [
+      async ({ args }) => {
+        // Set the validated form in the args
+        args.data.form = await getValidatedForm();
+        return args;
+      }
+    ]
   });
 </script>
 
 <Story name="Default">
   <MockUserProvider>
-    <SignUp
-      data={{
-        userInitialized: false,
-        form: {
-          data: {
-            email: '',
-            token: '',
-            username: '',
-            password: '',
-          },
-          errors: {},
-          constraints: {},
-          id: '',
-          valid: false,
-          posted: false,
-        },
-      }}
-    />
+    <SignUp data={$$props.data} />
   </MockUserProvider>
 </Story>
 
@@ -127,23 +139,7 @@
   }}
 >
   <MockUserProvider>
-    <SignUp
-      data={{
-        userInitialized: false,
-        form: {
-          data: {
-            email: '',
-            token: '',
-            username: '',
-            password: '',
-          },
-          errors: {},
-          constraints: {},
-          id: '',
-          valid: false,
-          posted: false,
-        },
-      }}
+    <SignUp data={$$props.data}
     />
   </MockUserProvider>
-</Story> -->
+</Story>
