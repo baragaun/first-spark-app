@@ -63,7 +63,6 @@
         try {
           isLoading = true;
           const result = await validateForm({ update: true, focusOnError: false });
-          console.log('result', result);
           hasStepError = !result.valid;
         } catch (error) {
           console.error('Error validating form:', error);
@@ -170,7 +169,7 @@
         !response?.object.run
       ) {
         updateFormErrors('ident', 'Failed to send verification code. Please try again.');
-        hasStepError = true;
+        hasStepError = true; // Set to true since we failed to send the verification code
         return;
       }
 

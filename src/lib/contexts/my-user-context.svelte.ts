@@ -566,14 +566,12 @@ export class MyUserContext {
     if (!this.myUserHandle) return '';
 
     const parts = this.myUserHandle.split(/[^a-zA-Z]/).filter(Boolean);
-    if (parts.length === 0) return '🙃';
+    if (parts.length === 0) return '';
 
     if (parts.length > 1) {
-      // Multiple words: first char of first and last words
       return (parts[0][0] + parts[parts.length - 1][0]).substring(0, 2);
     }
 
-    // Single word: first char + first uppercase after position 0
     const word = parts[0];
     const firstChar = word[0];
     const firstUpperAfterStart = word.slice(1).match(/[A-Z]/)?.[0] || '';
