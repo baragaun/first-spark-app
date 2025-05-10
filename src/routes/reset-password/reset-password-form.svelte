@@ -9,6 +9,7 @@
   import { myUserContext } from '@/contexts/my-user-context.svelte.js';
   import translate from '@/helpers/language/translate.js';
   import passwordHelpers from '@/helpers/password-helpers.js';
+  import { m } from '@/paraglide/messages';
   import { AppUiMessage } from '@/types/enums.js';
   import { UserIdentType } from '@baragaun/bg-node-client';
   import { onDestroy } from 'svelte';
@@ -34,7 +35,7 @@
   let canResend = $state(false);
 
   let isLoading = $state(false);
-  let hasStepError = $state(false);
+  let hasStepError = $state(true);
 
   let identifier = $state('');
   let identType = $state(UserIdentType.email);
@@ -62,6 +63,7 @@
         try {
           isLoading = true;
           const result = await validateForm({ update: true, focusOnError: false });
+          console.log('result', result);
           hasStepError = !result.valid;
         } catch (error) {
           console.error('Error validating form:', error);
@@ -168,6 +170,7 @@
         !response?.object.run
       ) {
         updateFormErrors('ident', 'Failed to send verification code. Please try again.');
+        hasStepError = true;
         return;
       }
 
@@ -193,6 +196,7 @@
       );
 
       startResendTimer();
+      hasStepError = true;
       return;
     } catch (err) {
       console.error('Error resetting password:', err);
@@ -276,7 +280,7 @@
   const getCurrentStepDescription = () => {
     switch (step) {
       case 1:
-        return 'Provide your username or email to get a verification code';
+        return m['reset_password.description']();
       case 2:
         return getOtpMessage($formData);
     }
@@ -285,9 +289,9 @@
   const getCurrentStepButtonLabel = () => {
     switch (step) {
       case 1:
-        return 'Send me an email';
+        return m['reset_password.buttons.send_email']();
       case 2:
-        return 'Update my password';
+        return m['reset_password.buttons.update_password']();
     }
   };
 
@@ -327,27 +331,27 @@
 </script>
 
 <form method="POST" id="reset-password-form" use:enhance>
-  <AuthCard title="Reset your password" description={getCurrentStepDescription()}>
+  <AuthCard title={m['reset_password.title']()} description={getCurrentStepDescription()}>
     <div class="space-y-4">
       {#if step == 1}
         <EmailFormInput
           {form}
           fieldName="ident"
-          placeholder="Enter your username or email"
-          label="Username or email"
+          placeholder={m['reset_password.form.identifier_placeholder']()}
+          label={m['reset_password.form.identifier_label']()}
           {isLoading}
         />
       {:else if step == 2}
         <PasswordFormInput
           {form}
           fieldName="newPassword"
-          label="New password"
-          placeholder="Enter a new password"
+          label={m['reset_password.new_password_form.label']()}
+          placeholder={m['reset_password.new_password_form.placeholder']()}
         />
         <OtpFormInput
           {form}
           fieldName="token"
-          label="Verification code"
+          label={m['verify_token.verification_code']()}
           length={6}
           showResend={true}
           {canResend}
@@ -359,12 +363,12 @@
         disabled={$delayed || isLoading || hasStepError}
         isLoading={$delayed || isLoading}
         buttonText={getCurrentStepButtonLabel()}
-        loadingText="Processing..."
+        loadingText={m['reset_password.buttons.processing']()}
       />
     </div>
     <div class="mt-4 text-center text-sm">
-      Don't have an account?
-      <a href="/signup" class="underline"> Sign up </a>
+      {m['reset_password.buttons.have_account']()}
+      <a href="/signup" class="underline"> {m['reset_password.buttons.signup']()} </a>
     </div>
   </AuthCard>
 

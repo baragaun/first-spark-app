@@ -50,58 +50,95 @@
   },
   "signin": {
     "title": "Anmelden",
-    "terms_agreement": "Indem Sie fortfahren, stimmen Sie unserer Benutzervereinbarung zu und bestätigen, dass Sie unsere Datenschutzerklärung verstehen und ihr zustimmen.",
+    "description": "Geben Sie unten Ihre E-Mail-Adresse ein, um sich bei Ihrem Konto anzumelden",
+    "sign_with_token_description": "Geben Sie den Bestätigungscode ein, der an {identifier} gesendet wurde",
+    "sign_with_password_description": "Geben Sie Ihr Passwort ein, um sich als {identifier} anzumelden",
     "have_account": "Neu bei First Spark?",
-    "auth_method": "Wie möchten Sie sich anmelden?",
-    "auth_method1": "Passwort",
-    "auth_method2": "Einmalpasswort",
     "forgot_password": "Passwort vergessen?",
     "username_or_email_placeholder": "Benutzername oder E-Mail",
+    "identifier_label": "E-Mail oder Benutzername",
+    "password_label": "Passwort",
     "email_placeholder": "E-Mail",
-    "password_placeholder": "Passwort",
-    "otp_title": "Überprüfen Sie Ihren Posteingang",
-    "otp_subtitle": "Wir haben einen Magic-Link gesendet an ",
-    "otp_expiration": "Der Verifizierungscode läuft in 10 Minuten ab. Geben Sie den Code unten ein, um sich anzumelden.",
-    "otp_timer": "Erneut senden in ",
-    "otp_renewal": "Keine E-Mail erhalten?",
+    "identifier_placeholder": "Geben Sie Ihre E-Mail oder Ihren Benutzernamen ein",
+    "password_placeholder": "Geben Sie Ihr Passwort ein",
     "buttons": {
+      "signin": "Anmelden",
+      "signin_with_token": "Mit Token anmelden",
+      "signin_with_password": "Mit Passwort anmelden",
+      "forgot_password": "Passwort vergessen?",
       "back": "← Zurück zur Anmeldung",
-      "continue": "Anmelden",
-      "continue_otp": "Code zusenden",
-      "resend_otp": "E-Mail erneut senden",
-      "verify": "Verifizieren",
-      "sending": "OTP wird gesendet...",
-      "verifying": "Anmeldung läuft...",
+      "verify": "Bestätigen",
+      "verifying": "Überprüfung läuft...",
+      "Signing_in": "Anmeldung läuft...",
       "signup": "Registrieren"
+    },
+    "error": {
+      "required": "Benutzername oder E-Mail ist erforderlich",
+      "invalid_credentials": "Ungültiger Benutzername, E-Mail oder Passwort. Bitte versuchen Sie es erneut."
     }
   },
   "signup": {
-    "title": "Registrierung",
-    "verify_email_title": "E-Mail bestätigen",
-    "terms_agreement": "Mit dem Fortfahren stimmen Sie unseren Nutzungsbedingungen zu und bestätigen, dass Sie unsere Datenschutzerklärung verstanden haben.",
-    "verify_code_message": "Geben Sie den sechsstelligen Code ein, den wir an {email} gesendet haben",
-    "have_account": "Bereits ein Konto?",
-    "login_link": "Anmelden",
-    "create_credentials_title": "Benutzername und Passwort erstellen",
-    "username_description": "Benutzernamen sind einzigartige Kennungen. Wir überprüfen, ob Ihrer noch verfügbar ist.",
-    "username_placeholder": "Benutzername (z.B. KosmoEntdecker, PixelPionier)",
-    "password_placeholder": "Passwort",
-    "password_requirements": {
-      "title": "Passwortanforderungen:",
-      "min_length": "Mindestens 8 Zeichen"
-    },
-    "password_errors": {
-      "min_length": "Das Passwort muss mindestens 8 Zeichen lang sein",
-      "too_simple": "Das Passwort ist zu einfach oder zu leicht zu erraten"
+    "title": "Registrieren",
+    "email_description": "Geben Sie eine E-Mail-Adresse ein, um Ihr First Spark-Konto zu erstellen.",
+    "verification_description": "Geben Sie den Bestätigungscode ein, den wir an {email} gesendet haben.",
+    "create_credentials_description": "Wählen Sie einen Benutzernamen und ein Passwort für Ihr Konto.",
+    "email_title": "E-Mail-Adresse",
+    "username": "Benutzername",
+    "password": "Passwort",
+    "email_placeholder": "z. B. 'student@example.com'",
+    "username_description": "Benutzernamen sind eindeutige Kennungen. Wir prüfen, ob Ihrer bereits vergeben ist.",
+    "username_placeholder": "z. B. 'giraffe08'",
+    "password_placeholder": "Geben Sie Ihr Passwort ein",
+    "errors": {
+      "email_unavailable": "Diese E-Mail-Adresse ist derzeit nicht verfügbar.",
+      "username_unavailable": "Dieser Benutzername ist derzeit nicht verfügbar."
     },
     "buttons": {
-      "back": "← Zurück",
-      "continue": "Weiter",
-      "verify": "Bestätigen",
+      "sign_up": "Registrieren",
+      "sign_in": "Anmelden",
+      "have_account": "Haben Sie bereits ein Konto?",
+      "verify": "Verifizieren",
       "sending": "Wird gesendet...",
       "verifying": "Wird überprüft...",
       "create_account": "Konto erstellen",
       "creating_account": "Konto wird erstellt..."
+    }
+  },
+  "reset_password": {
+    "title": "Setze dein Passwort zurück",
+    "description": "Gib deinen Benutzernamen oder deine E-Mail-Adresse ein, um einen Bestätigungscode zu erhalten",
+    "check_inbox": {
+      "title": "Posteingang überprüfen",
+      "description": "Wir haben einen Bestätigungscode an {email} gesendet",
+      "code_expiration": "Hinweis: Der Bestätigungscode läuft in 10 Minuten ab.",
+      "didnt_get_email": "Keine E-Mail erhalten?"
+    },
+    "form": {
+      "identifier_label": "E-Mail oder Benutzername",
+      "identifier_placeholder": "Gib deine E-Mail oder deinen Benutzernamen ein",
+      "errors": {
+        "account_not_found": "Kein Konto mit dieser E-Mail-Adresse gefunden",
+        "default_error": "Deine Anfrage konnte nicht verarbeitet werden. Bitte versuche es erneut.",
+        "valid_ident_required": "Ein gültiger Benutzername oder eine gültige E-Mail-Adresse ist erforderlich"
+      }
+    },
+    "new_password_form": {
+      "description": "Gib ein neues Passwort und den Bestätigungscode ein, um dein Passwort zu aktualisieren",
+      "label": "Neues Passwort",
+      "placeholder": "Gib ein neues Passwort ein",
+      "otp_description": "Geben Sie ein neues Passwort und den Bestätigungscode ein, den wir an {identifier} gesendet haben, um Ihr Passwort zu aktualisieren"
+    },
+    "buttons": {
+      "send_email": "E-Mail senden",
+      "sending_email": "E-Mail wird gesendet...",
+      "resend_email": "E-Mail erneut senden",
+      "resend_timer": "Erneut senden in {time}",
+      "back_to_login": "Zurück zur Anmeldung",
+      "need_help": "Brauchst du Hilfe?",
+      "have_account": "Noch kein Konto?",
+      "update_password": "Mein Passwort aktualisieren",
+      "processing": "Wird verarbeitet...",
+      "signup": "Registrieren"
     }
   },
   "verify_token": {

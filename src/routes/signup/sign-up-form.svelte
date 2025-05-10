@@ -21,35 +21,41 @@
     usernameSchema,
     type SignUpFormSchema,
   } from './schema';
+  import { m } from '@/paraglide/messages';
 
   let { data }: { data: { form: SuperValidated<SignUpFormSchema> } } = $props();
 
   const steps = [
     {
       schema: zod(schemaFirstStep),
-      description: 'Provide an email address to create your First Spark account.',
-      buttonLabel: 'Sign up',
+      description: m['signup.email_description'](),
+      buttonLabel: m['signup.buttons.sign_up'](),
+      loadingLabel: m['signup.buttons.sign_up'](),
     },
     {
       schema: zod(schemaSecondStep),
-      description: 'Enter the verification code we sent to {email}.',
-      buttonLabel: 'Submit',
+      description: '',
+      buttonLabel: m['signup.buttons.verify'](),
+      loadingLabel: m['signup.buttons.verifying'](),
     },
     {
       schema: zod(schemaLastStep),
-      description: 'Choose a username and a password for your account.',
-      buttonLabel: 'Sign Up',
+      description: m['signup.create_credentials_description'](),
+      buttonLabel: m['signup.buttons.create_account'](),
+      loadingLabel: m['signup.buttons.creating_account'](),
     },
   ];
 
   const getCurrentStepDescription = (): string => {
     const description = steps[step - 1].description;
-    return step === 2 ? description.replace('{email}', $formData.email) : description;
+    return step === 2
+      ? m['signup.verification_description']({ email: $formData.email })
+      : description;
   };
 
   let step = $state(1);
   let isLoading = $state(false);
-  let hasStepError = $state(false);
+  let hasStepError = $state(true);
 
   let canResend = $state(false);
   let resendTimer = $state(30);
@@ -175,7 +181,10 @@
     }
 
     const fieldName = identType === UserIdentType.email ? 'email' : 'username';
-    const message = `This ${fieldName} is currently unavailable for use.`;
+    const message =
+      identType === UserIdentType.email
+        ? m['signup.errors.email_unavailable']()
+        : m['signup.errors.username_unavailable'](); //`This ${fieldName} is currently unavailable for use.`;
 
     try {
       const response = await myUserContext.isUserIdentAvailable(identifier, identType);
@@ -402,21 +411,21 @@
 </script>
 
 <form method="POST" id="sign-up-form" use:enhance>
-  <AuthCard title="Sign up" description={getCurrentStepDescription()}>
+  <AuthCard title={m['signup.title']()} description={getCurrentStepDescription()}>
     <div class="space-y-4">
       {#if step === 1}
         <!-- TODO: this should be called identinput -->
         <IdentFormInput
           {form}
           fieldName="email"
-          placeholder="e.g. 'student@example.com'"
-          label="Email address"
+          placeholder={m['signup.email_placeholder']()}
+          label={m['signup.email_title']()}
         />
       {:else if step === 2}
         <OTPFormInput
           {form}
           fieldName="token"
-          label="Verification code"
+          label={m['verify_token.verification_code']()}
           length={6}
           showResend={true}
           {canResend}
@@ -427,8 +436,8 @@
         <IdentFormInput
           {form}
           fieldName="username"
-          placeholder="e.g. 'giraffe08'"
-          label="Username"
+          placeholder={m['signup.username_placeholder']()}
+          label={m['signup.username']()}
           {identType}
           suggestUsername={getSuggestedUsername}
           {isLoading}
@@ -436,19 +445,19 @@
         <PasswordFormInput
           {form}
           fieldName="password"
-          label="Password"
-          placeholder="Enter your password"
+          label={m['signup.password']()}
+          placeholder={m['signup.password_placeholder']()}
         />
       {/if}
       <FormButton
         disabled={$delayed || isLoading || hasStepError}
         isLoading={$delayed || isLoading}
-        buttonText="Sign Up"
-        loadingText={steps[step - 1].buttonLabel}
+        buttonText={steps[step - 1].buttonLabel}
+        loadingText={steps[step - 1].loadingLabel}
       />
       <div class="mt-4 text-center text-sm">
-        Do you already have an account?
-        <a href="/signin" class="underline"> Sign in </a>
+        {m['signup.buttons.have_account']()}
+        <a href="/signin" class="underline">{m['signup.buttons.sign_in']()} </a>
       </div>
     </div></AuthCard
   >

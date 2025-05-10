@@ -49,84 +49,96 @@
     "select": "भाषा चुनें"
   },
   "signin": {
-    "title": "लॉग इन",
-    "terms_agreement": "जारी रखकर, आप हमारे उपयोगकर्ता समझौते से सहमत होते हैं और स्वीकार करते हैं कि आप हमारी गोपनीयता नीति को समझते हैं और उससे सहमत हैं।",
+    "title": "साइन इन",
+    "description": "अपने खाते में साइन इन करने के लिए नीचे अपना ईमेल पता दर्ज करें",
+    "sign_with_token_description": "{identifier} पर भेजा गया सत्यापन कोड दर्ज करें",
+    "sign_with_password_description": "{identifier} के रूप में साइन इन करने के लिए अपना पासवर्ड दर्ज करें",
     "have_account": "फर्स्ट स्पार्क पर नए हैं?",
-    "auth_method": "आप कैसे लॉगिन करना चाहेंगे?",
-    "auth_method1": "पासवर्ड",
-    "auth_method2": "एक बार का पासवर्ड",
-    "forgot_password": "अपना पासवर्ड भूल गए?",
+    "forgot_password": "पासवर्ड भूल गए?",
     "username_or_email_placeholder": "उपयोगकर्ता नाम या ईमेल",
+    "identifier_label": "ईमेल या उपयोगकर्ता नाम",
+    "password_label": "पासवर्ड",
     "email_placeholder": "ईमेल",
-    "password_placeholder": "पासवर्ड",
-    "otp_title": "अपना इनबॉक्स देखें",
-    "otp_subtitle": "हमने एक मैजिक लिंक भेजा है ",
-    "otp_expiration": "सत्यापन कोड 10 मिनट में समाप्त हो जाएगा। लॉग इन करने के लिए नीचे कोड दर्ज करें।",
-    "otp_timer": "इसमें पुनः भेजें ",
-    "otp_renewal": "ईमेल नहीं मिला?",
+    "identifier_placeholder": "अपना ईमेल या उपयोगकर्ता नाम दर्ज करें",
+    "password_placeholder": "अपना पासवर्ड दर्ज करें",
     "buttons": {
+      "signin": "साइन इन करें",
+      "signin_with_token": "टोकन से साइन इन करें",
+      "signin_with_password": "पासवर्ड से साइन इन करें",
+      "forgot_password": "पासवर्ड भूल गए?",
       "back": "← लॉग इन पर वापस जाएं",
-      "continue": "लॉग इन",
-      "continue_otp": "मुझे मेरा कोड भेजें",
-      "resend_otp": "ईमेल पुनः भेजें",
       "verify": "सत्यापित करें",
-      "sending": "OTP भेज रहा है...",
-      "verifying": "लॉग इन हो रहा है...",
-      "signup": "साइन अप"
+      "verifying": "सत्यापन किया जा रहा है...",
+      "Signing_in": "साइन इन किया जा रहा है...",
+      "signup": "साइन अप करें"
+    },
+    "error": {
+      "required": "उपयोगकर्ता नाम या ईमेल आवश्यक है",
+      "invalid_credentials": "अमान्य उपयोगकर्ता नाम, ईमेल या पासवर्ड। कृपया पुन: प्रयास करें।"
     }
   },
   "signup": {
     "title": "साइन अप",
-    "verify_email_title": "अपना ईमेल सत्यापित करें",
-    "terms_agreement": "जारी रखकर, आप हमारी उपयोगकर्ता सहमति और गोपनीयता नीति से सहमत हैं।",
-    "verify_code_message": "{email} पर भेजा गया छह अंकों का कोड दर्ज करें",
-    "have_account": "क्या पहले से खाता है?",
-    "login_link": "लॉग इन",
-    "create_credentials_title": "अपना यूजरनेम और पासवर्ड बनाएं",
-    "username_description": "यूजरनेम एक विशिष्ट पहचान है। हम जांच करेंगे कि आपका चुना हुआ नाम उपलब्ध है या नहीं।",
-    "username_placeholder": "यूजरनेम (उदाहरण: कॉस्मोएक्सप्लोरर, पिक्सलपायनियर)",
-    "password_placeholder": "पासवर्ड",
-    "password_requirements": {
-      "title": "पासवर्ड की आवश्यकताएं:",
-      "min_length": "कम से कम 8 अक्षर"
-    },
-    "password_errors": {
-      "min_length": "पासवर्ड में कम से कम 8 अक्षर होने चाहिए",
-      "too_simple": "पासवर्ड बहुत सरल या आसानी से अनुमान लगाने योग्य है"
+    "email_description": "अपना फर्स्ट स्पार्क खाता बनाने के लिए एक ईमेल पता प्रदान करें।",
+    "verification_description": "हमने {email} पर जो सत्यापन कोड भेजा है उसे दर्ज करें।",
+    "create_credentials_description": "अपने खाते के लिए एक उपयोगकर्ता नाम और पासवर्ड चुनें।",
+    "email_title": "ईमेल पता",
+    "username": "उपयोगकर्ता नाम",
+    "password": "पासवर्ड",
+    "email_placeholder": "उदाहरण: 'student@example.com'",
+    "username_description": "उपयोगकर्ता नाम अद्वितीय होते हैं। हम जांचेंगे कि आपका पहले से उपयोग में नहीं है।",
+    "username_placeholder": "उदाहरण: 'giraffe08'",
+    "password_placeholder": "अपना पासवर्ड दर्ज करें",
+    "errors": {
+      "email_unavailable": "यह ईमेल वर्तमान में उपयोग के लिए उपलब्ध नहीं है।",
+      "username_unavailable": "यह उपयोगकर्ता नाम वर्तमान में उपयोग के लिए उपलब्ध नहीं है।"
     },
     "buttons": {
-      "back": "← वापस",
-      "continue": "जारी रखें",
+      "sign_up": "साइन अप करें",
+      "sign_in": "साइन इन करें",
+      "have_account": "क्या आपके पास पहले से खाता है?",
       "verify": "सत्यापित करें",
       "sending": "भेजा जा रहा है...",
-      "verifying": "सत्यापित किया जा रहा है...",
+      "verifying": "सत्यापन हो रहा है...",
       "create_account": "खाता बनाएं",
       "creating_account": "खाता बनाया जा रहा है..."
     }
   },
   "reset_password": {
     "title": "अपना पासवर्ड रीसेट करें",
-    "description": "यदि हमें यह ईमेल पता मिल जाता है तो हम आपको एक सत्यापन कोड ईमेल करेंगे।",
+    "description": "सत्यापन कोड प्राप्त करने के लिए अपना उपयोगकर्ता नाम या ईमेल दर्ज करें",
     "check_inbox": {
-      "title": "अपना इनबॉक्स जांचें",
+      "title": "अपने इनबॉक्स की जांच करें",
       "description": "हमने {email} पर एक सत्यापन कोड भेजा है",
       "code_expiration": "नोट: सत्यापन कोड 10 मिनट में समाप्त हो जाएगा।",
       "didnt_get_email": "ईमेल नहीं मिला?"
     },
     "form": {
-      "identifier_placeholder": "ईमेल या यूजरनेम",
+      "identifier_label": "ईमेल या उपयोगकर्ता नाम",
+      "identifier_placeholder": "अपना ईमेल या उपयोगकर्ता नाम दर्ज करें",
       "errors": {
         "account_not_found": "इस ईमेल पते से कोई खाता नहीं मिला",
-        "default_error": "आपका अनुरोध प्रोसेस नहीं किया जा सका। कृपया पुनः प्रयास करें।"
+        "default_error": "आपका अनुरोध संसाधित नहीं किया जा सका। कृपया पुनः प्रयास करें।",
+        "valid_ident_required": "एक मान्य उपयोगकर्ता नाम या ईमेल आवश्यक है"
       }
     },
+    "new_password_form": {
+      "description": "अपना पासवर्ड अपडेट करने के लिए नया पासवर्ड और सत्यापन कोड दर्ज करें",
+      "label": "नया पासवर्ड",
+      "placeholder": "नया पासवर्ड दर्ज करें",
+      "otp_description": "{identifier} पर भेजे गए सत्यापन कोड और नया पासवर्ड दर्ज करें ताकि आप अपना पासवर्ड अपडेट कर सकें"
+    },
     "buttons": {
-      "send_email": "ईमेल भेजें",
+      "send_email": "मुझे ईमेल भेजें",
       "sending_email": "ईमेल भेजा जा रहा है...",
       "resend_email": "ईमेल पुनः भेजें",
       "resend_timer": "{time} में पुनः भेजें",
       "back_to_login": "लॉग इन पर वापस जाएं",
-      "need_help": "मदद चाहिए?"
+      "need_help": "मदद चाहिए?",
+      "have_account": "खाता नहीं है?",
+      "update_password": "मेरा पासवर्ड अपडेट करें",
+      "processing": "प्रसंस्करण हो रहा है...",
+      "signup": "साइन अप करें"
     }
   },
   "verify_token": {
