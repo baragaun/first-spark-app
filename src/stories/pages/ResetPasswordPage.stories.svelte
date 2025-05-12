@@ -23,21 +23,20 @@
           valid: false,
           posted: false,
           errors: {},
-          constraints: {}
-        } // Will be set in the loader
-      }
+          constraints: {},
+        }, // Will be set in the loader
+      },
     },
     loaders: [
       async ({ args }) => {
         // Set the validated form in the args
         args.data.form = await getValidatedForm();
         return args;
-      }
+      },
     ],
     parameters: {
       layout: 'centered',
     },
-
   });
 </script>
 

@@ -1,52 +1,43 @@
 <script lang="ts">
-  import { setContext, type Snippet } from 'svelte';
+  import { onMount, setContext } from 'svelte';
   import { MockMyUserContext } from './mock-user-context';
-  import { onMount } from 'svelte';
 
-  interface Props {
-    children?: Snippet;
-    signedIn?: boolean;
-  }
+  let { children } = $props();
 
-  const { children, signedIn = false }: Props = $props();
-
-  // Create a new instance of the mock context
+  // Create a mock user context instance
   const myUserContext = new MockMyUserContext();
-
-  // Initialize the context immediately
-  myUserContext.isInitialized = true;
-
-  // Set the user's signed-in state based on the prop
-  if (signedIn) {
-    // Set the mock user
-    myUserContext.myUser.set({
-      id: '1234567890',
-      email: 'test@example.com',
-      userHandle: 'testuser',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      isEmailVerified: true,
-      spokenLanguagesTextIds: [],
-      roles: [],
-      trustLevel: 0,
-      isPhoneNumberVerified: false,
-    });
-    myUserContext.myUser.id = '1234567890';
-  } else {
-    // Clear the user
-    myUserContext.myUser.set(null);
-    myUserContext.myUser.id = '';
-  }
 
   // Set the mock user context for child components to consume
   setContext('myUserContext', myUserContext);
 
+  let isInitialized = $state(false);
+  let error = $state<string | null>(null);
+
+  // Initialize the context immediately
+  const initContext = async () => {
+    try {
+      await myUserContext.initialize({ enableMockMode: true });
+      isInitialized = true;
+    } catch (err) {
+      console.error('MockUserProvider: Error initializing MockMyUserContext:', err);
+      error = err instanceof Error ? err.message : 'Unknown error initializing context';
+    }
+  };
+
   onMount(() => {
     // Ensure the context is initialized
-    myUserContext.initialize().catch((error) => {
-      console.error('MockUserProvider.onMount: Error initializing MockMyUserContext:', error);
-    });
+    initContext();
   });
 </script>
 
-{@render children?.()}
+{#if error}
+  <div style="color: red; padding: 20px; border: 1px solid red; margin: 20px;">
+    Error initializing mock user context: {error}
+  </div>
+{:else if isInitialized}
+  {#if children}
+    {@render children()}
+  {/if}
+{:else}
+  <div style="padding: 20px; text-align: center;">Initializing mock user context...</div>
+{/if}

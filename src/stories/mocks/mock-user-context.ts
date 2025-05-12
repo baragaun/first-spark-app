@@ -5,13 +5,10 @@ import {
   MultiStepActionSendNotificationResult,
   MultiStepActionType,
   MutationType,
-
   UserIdentType,
-
   type MultiStepActionProgressResult,
   type MyUser,
   type MyUserChanges,
-
   type QueryResult,
   type SignInSignUpResponse,
 } from '@baragaun/bg-node-client';
@@ -57,7 +54,7 @@ export class MockMyUserContext {
       },
       multiStepAction: {
         verifyMultiStepActionToken: this.verifyMultiStepActionToken.bind(this),
-      }
+      },
     },
     init: async (options: any) => {
       this.client.isInitialized = true;
@@ -66,7 +63,7 @@ export class MockMyUserContext {
         this._listeners[options.listener.id] = options.listener;
       }
       return Promise.resolve();
-    }
+    },
   };
 
   isInitialized = false;
@@ -80,6 +77,10 @@ export class MockMyUserContext {
     // Initialize with no user by default
     this._myUser = undefined;
     this._isSignedIn = false;
+
+    // Pre-initialize the client for Storybook
+    this.client.isInitialized = true;
+    this.isInitialized = true;
   }
 
   public async initialize({ enableMockMode = false } = {}): Promise<void> {
@@ -93,10 +94,23 @@ export class MockMyUserContext {
     this._isInitializing = true;
 
     try {
+      // Simulate a short delay for initialization
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
       this.client.isInitialized = true;
       this.isInitialized = true;
+
+      // Call any listeners that might be waiting
+      if (this._listeners) {
+        Object.values(this._listeners).forEach((listener) => {
+          if (listener.onMyUserUpdated) {
+            listener.onMyUserUpdated(this._myUser);
+          }
+        });
+      }
     } catch (error) {
       console.error('MockMyUserContext: Error initializing:', { error });
+      throw error;
     } finally {
       this._isInitializing = false;
     }
@@ -157,7 +171,7 @@ export class MockMyUserContext {
 
   async signMeInWithToken(
     userIdent: string,
-    options?: { polling?: { enabled: boolean; interval: number; timeout: number } }
+    options?: { polling?: { enabled: boolean; interval: number; timeout: number } },
   ): Promise<QueryResult<MultiStepActionProgressResult>> {
     if (!this.client.isInitialized) {
       console.error('MockMyUserContext.signMeInWithToken: not initialized.');
@@ -250,7 +264,7 @@ export class MockMyUserContext {
     if (actionId.includes('reset-password')) {
       // Trigger success event for reset password listeners
       if (this._listeners['resetPassword']) {
-        this._listeners['resetPassword'].forEach((l:any) => {
+        this._listeners['resetPassword'].forEach((l: any) => {
           l.onEvent(MultiStepActionEventType.success, {
             actionId: actionId,
             notificationResult: MultiStepActionSendNotificationResult.ok,
@@ -282,7 +296,7 @@ export class MockMyUserContext {
       if (actionId.includes('token-signin')) {
         // Trigger success event for token sign-in listeners
         if (this._listeners['tokenSignIn']) {
-          this._listeners['tokenSignIn'].forEach((l:any) => {
+          this._listeners['tokenSignIn'].forEach((l: any) => {
             l.onEvent(MultiStepActionEventType.success, {
               actionId: actionId,
               notificationResult: MultiStepActionSendNotificationResult.ok,
@@ -298,7 +312,7 @@ export class MockMyUserContext {
       } else {
         // Trigger success event for email verification listeners
         if (this._listeners['verifyEmail']) {
-          this._listeners['verifyEmail'].forEach((l:any) => {
+          this._listeners['verifyEmail'].forEach((l: any) => {
             l.onEvent(MultiStepActionEventType.success, {
               actionId: actionId,
               notificationResult: MultiStepActionSendNotificationResult.ok,
@@ -326,7 +340,7 @@ export class MockMyUserContext {
     // Mock failed verification
     console.log('Token verification failed:', token);
     this._isLoading = false;
-    return "Invalid verification code";
+    return 'Invalid verification code';
   }
 
   async signUpUser(email: string): Promise<QueryResult<SignInSignUpResponse>> {
@@ -416,7 +430,7 @@ export class MockMyUserContext {
             // Simulate success event after a longer delay (after user enters code)
             setTimeout(() => {
               if (this._listeners['verifyEmail']) {
-                this._listeners['verifyEmail'].forEach((l:any) => {
+                this._listeners['verifyEmail'].forEach((l: any) => {
                   l.onEvent(MultiStepActionEventType.success, {
                     actionId: 'mock-verify-email-action-123456',
                     notificationResult: MultiStepActionSendNotificationResult.ok,
@@ -465,9 +479,7 @@ export class MockMyUserContext {
     };
   }
 
-  async updateMyUser(
-    changes: Partial<MyUserChanges>,
-  ): Promise<QueryResult<MyUser>> {
+  async updateMyUser(changes: Partial<MyUserChanges>): Promise<QueryResult<MyUser>> {
     this._isLoading = true;
 
     // Simulate API delay
@@ -494,7 +506,7 @@ export class MockMyUserContext {
     // Verify current password
     if (currentPassword !== '123456789') {
       this._isLoading = false;
-      return "Current password is incorrect";
+      return 'Current password is incorrect';
     }
 
     // Update password successful
@@ -612,7 +624,7 @@ export class MockMyUserContext {
             // Simulate notification sent event after a short delay
             setTimeout(() => {
               if (this._listeners['resetPassword']) {
-                this._listeners['resetPassword'].forEach((l:any) => {
+                this._listeners['resetPassword'].forEach((l: any) => {
                   l.onEvent(MultiStepActionEventType.notificationSent, {
                     actionId: 'mock-reset-password-action-123456',
                     notificationResult: MultiStepActionSendNotificationResult.ok,
@@ -657,7 +669,7 @@ export class MockMyUserContext {
 
     actionTypes.forEach((type) => {
       if (this._listeners[type]) {
-        this._listeners[type].forEach((l:any) => {
+        this._listeners[type].forEach((l: any) => {
           l.onEvent(MultiStepActionEventType.notificationSent, {
             actionId: `mock-${type}-action-123456`,
             notificationResult: MultiStepActionSendNotificationResult.ok,
