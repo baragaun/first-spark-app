@@ -14,10 +14,10 @@
   import type { MyUser } from '@baragaun/bg-node-client';
 
   let { children } = $props();
-  let isOffline: boolean = $derived(myUserContext.isOffline)
-  let isAuthenticated: boolean = $derived(myUserContext.isSignedIn)
-  let myUser: MyUser | undefined = $derived(myUserContext.myUser)
-  
+  let isOffline: boolean = $derived(myUserContext.isOffline);
+  let isAuthenticated: boolean = $derived(myUserContext.isSignedIn);
+  let myUser: MyUser | undefined = $derived(myUserContext.myUser);
+
   const onSignOut = async () => {
     // TODO: add a confirmation dialog
     // Solution for putting a dialog in a dropdown menu:
@@ -32,7 +32,7 @@
     <ModeWatcher />
     <ConnectionSonner clientConnection={isOffline} />
     <SidebarProvider>
-      <AppSidebar bind:isOffline={isOffline} {isAuthenticated} />
+      <AppSidebar bind:isOffline {isAuthenticated} />
       <div class="flex flex-1 flex-col">
         <NavBar {myUser} {isAuthenticated} {onSignOut} />
         <main class="flex flex-1 flex-col">

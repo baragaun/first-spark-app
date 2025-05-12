@@ -7,10 +7,7 @@
   import UpdatePasswordForm from './components/update-password-form.svelte';
   import UpdateUsernameForm from './components/update-username-form.svelte';
 
-  let { 
-    data,
-    myUser,
-   } = $props();
+  let { data, myUser } = $props();
 
   let showUpdateUsernameDialog = $state(false);
   let showUpdateEmailDialog = $state(false);

@@ -42,7 +42,7 @@
   let {
     ref = $bindable(null),
     collapsible = 'icon' as ComponentProps<typeof Sidebar.Root>['collapsible'],
-    isOffline = $bindable(false), 
+    isOffline = $bindable(false),
     isAuthenticated = false,
     ...restProps
   } = $props();
@@ -53,7 +53,7 @@
     }
     return itemUrl !== '#' && currentPath.startsWith(itemUrl);
   };
-  
+
   const isDevEnv = $derived(import.meta.env.DEV);
   const toggleConnection = () => {
     isOffline = !isOffline;
