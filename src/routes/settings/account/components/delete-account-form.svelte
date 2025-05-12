@@ -68,7 +68,7 @@
         hasStepError = !result.valid;
         if (result.valid && $formData.confirmEmail !== currentEmail) {
           hasStepError = true;
-          updateFormErrors('confirmEmail', m['setting.delete_account.error.incorrect']());
+          updateFormErrors('confirmEmail', m['setting.delete_account.error.not_found']());
         }
       } catch (error) {
         console.error('Error validating form input:', error);

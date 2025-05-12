@@ -119,7 +119,8 @@
       "errors": {
         "account_not_found": "No account found with this email address",
         "default_error": "Unable to process your request. Please try again.",
-        "valid_ident_required": "A valid username or email is required"
+        "valid_ident_required": "A valid username or email is required",
+        "not_found": "We couldn't find an account with this email or username. Please check and try again."
       }
     },
     "new_password_form": {
@@ -228,7 +229,7 @@
       "confirm_email": "Confirm your email",
       "error": {
         "invalid": "Please enter a valid email address.",
-        "incorrect": "The email entered doesn’t match your account. Please check and try again."
+        "not_found": "The email entered doesn’t match your account. Please check and try again."
       }
     },
     "buttons": {

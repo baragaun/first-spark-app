@@ -115,6 +115,9 @@
         if (step === 1 || step === 3) {
           const availability = await checkIdentAvailability();
           hasStepError = !availability || !result.valid;
+        } else if (step === 2) {
+          // For OTP verification step, only check if the form is valid
+          hasStepError = !result.valid || !$formData.token || $formData.token.length < 6;
         }
       } catch (error) {
         console.error('Error debouncing the form input:', error);
@@ -157,6 +160,11 @@
         canResend = true;
       }
     }, 1000);
+  };
+
+  const setStep = (newStep: number) => {
+    step = newStep;
+    hasStepError = true; // Disable button initially when step changes
   };
 
   const checkIdentAvailability = async (): Promise<boolean> => {
@@ -245,7 +253,7 @@
 
       msaId = verificationResponse.object.actionProgress.actionId;
       const onNotificationSent = () => {
-        step = 2;
+        setStep(2);
         isLoading = false;
       };
       const onFailure = () => {
@@ -253,7 +261,7 @@
         isLoading = false;
       };
       const onSuccess = async () => {
-        step = 3;
+        setStep(3);
         isLoading = false;
       };
 

@@ -119,7 +119,8 @@
       "errors": {
         "account_not_found": "Kein Konto mit dieser E-Mail-Adresse gefunden",
         "default_error": "Deine Anfrage konnte nicht verarbeitet werden. Bitte versuche es erneut.",
-        "valid_ident_required": "Ein gültiger Benutzername oder eine gültige E-Mail-Adresse ist erforderlich"
+        "valid_ident_required": "Ein gültiger Benutzername oder eine gültige E-Mail-Adresse ist erforderlich",
+        "not_found": "Wir konnten kein Konto mit dieser E-Mail-Adresse oder diesem Benutzernamen finden. Bitte überprüfen Sie die Angaben und versuchen Sie es erneut."
       }
     },
     "new_password_form": {
@@ -227,7 +228,7 @@
       "confirm_email": "E-Mail bestätigen",
       "error": {
         "invalid": "Bitte gib eine gültige E-Mail-Adresse ein.",
-        "incorrect": "Die eingegebene E-Mail-Adresse stimmt nicht mit Ihrem Konto überein. Bitte überprüfen Sie sie und versuchen Sie es erneut."
+        "not_found": "Die eingegebene E-Mail-Adresse stimmt nicht mit Ihrem Konto überein. Bitte überprüfen Sie sie und versuchen Sie es erneut."
       }
     },
     "buttons": {
