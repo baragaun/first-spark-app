@@ -19,7 +19,7 @@ import {
 } from '@baragaun/bg-node-client';
 
 let isSignedIn = $state(false);
-let isOffline = $state(false); // TODO: The client does not yet support toggline the connectivity state
+let isOffline = $state(false); // TODO: The client does not yet support toggling the connectivity state
 let isLoading = $state(false);
 let myUser = $state<MyUser | undefined>(undefined);
 

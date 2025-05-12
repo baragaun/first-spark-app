@@ -1,18 +1,16 @@
 <script lang="ts">
   import { Separator } from '$lib/components/ui/separator';
   import { m } from '$lib/paraglide/messages';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
-  import type { PageData } from './$types';
   import DeleteAccountForm from './components/delete-account-form.svelte';
   import SettingsDialog from './components/settings-dialog.svelte';
   import UpdateEmailForm from './components/update-email-form.svelte';
   import UpdatePasswordForm from './components/update-password-form.svelte';
   import UpdateUsernameForm from './components/update-username-form.svelte';
 
-  let { data }: { data: PageData } = $props();
-
-  let myEmail = $derived(myUserContext.myEmail);
-  let myUsername = $derived(myUserContext.myUserHandle);
+  let { 
+    data,
+    myUser,
+   } = $props();
 
   let showUpdateUsernameDialog = $state(false);
   let showUpdateEmailDialog = $state(false);
@@ -32,7 +30,7 @@
   <div class="space-y-4">
     <SettingsDialog
       label={m['setting.username.label']()}
-      sublabel={myUsername || ''}
+      sublabel={myUser?.userHandle || ''}
       title={m['setting.username.change_username']()}
       subtitle={m['setting.username.change_username_description']()}
       bind:showContent={showUpdateUsernameDialog}
@@ -45,7 +43,7 @@
 
     <SettingsDialog
       label={m['setting.email.label']()}
-      sublabel={myEmail || ''}
+      sublabel={myUser?.email || ''}
       title={m['setting.email.change_email']()}
       subtitle={m['setting.email.change_email_description']()}
       bind:showContent={showUpdateEmailDialog}

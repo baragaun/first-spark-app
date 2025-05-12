@@ -1,12 +1,11 @@
 <script lang="ts">
-  import { Toaster } from '$lib/components/ui/sonner/index.js';
+  import { Toaster } from '$lib/components/ui/sonner';
   import { toast } from 'svelte-sonner';
   import { PlugZap, PartyPopper } from 'lucide-svelte';
   import { m } from '$lib/paraglide/messages.js';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { onMount } from 'svelte';
 
-  let isOffline = $derived(myUserContext.isOffline);
+  let { clientConnection } = $props();
   let hasDisconnected = $state(false);
   let initialLoad = $state(true);
 
@@ -34,12 +33,12 @@
 
   $effect(() => {
     // Do not toast when the client is already connected on mount
-    if (initialLoad && !isOffline) {
+    if (initialLoad && !clientConnection) {
       initialLoad = false;
       return;
     }
 
-    if (isOffline) {
+    if (clientConnection) {
       // Only toast when a disconnection happens after the initial load
       if (!initialLoad) {
         hasDisconnected = true;
@@ -57,18 +56,18 @@
   // Listen to browser's online/offline events
   onMount(() => {
     const handleOnline = () => {
-      myUserContext.isOffline = false;
+      clientConnection = false;
     };
 
     const handleOffline = () => {
-      myUserContext.isOffline = true;
+      clientConnection = true;
     };
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
     // Initialize status from browser until the node client does support this
-    myUserContext.isOffline = !navigator.onLine;
+    clientConnection = !navigator.onLine;
 
     return () => {
       window.removeEventListener('online', handleOnline);

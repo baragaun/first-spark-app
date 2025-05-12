@@ -1,15 +1,14 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
-  import { m } from '$lib/paraglide/messages.js';
-  import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+  import * as Sidebar from '@/components/ui/sidebar';
+  import { Button } from '@/components/ui/button';
+  import { m } from '@/paraglide/messages.js';
+  import { LogIn } from 'lucide-svelte';
   import AvatarMenu from './avatar-menu.svelte';
   import LanguageButton from '../../language-button.svelte';
   import ThemeButton from '../../light-switch.svelte';
-  import { Button } from '$lib/components/ui/button';
-  import { LogIn } from 'lucide-svelte';
 
-  const isSignedIn = $derived(myUserContext.isSignedIn);
+  let { myUser, isAuthenticated, onSignOut } = $props();
 </script>
 
 <nav
@@ -32,7 +31,7 @@
     <div class="flex flex-none items-center gap-2">
       <ThemeButton class="flex" />
       <LanguageButton class="flex" />
-      {#if !isSignedIn}
+      {#if !isAuthenticated}
         <div class="flex flex-none items-center gap-2">
           <Button
             variant="ghost"
@@ -55,7 +54,7 @@
           <span class="sr-only">{m['nav.auth.sign_up']()}</span>
         </div>
       {:else}
-        <AvatarMenu />
+        <AvatarMenu {myUser} {onSignOut} />
       {/if}
     </div>
   </div>
