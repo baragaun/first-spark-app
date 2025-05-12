@@ -10,7 +10,7 @@ export const load: PageLoad = async ({ url }) => {
   const accountForms = await loadPrevalidatedAccountForms();
 
   return {
-    currentTab,
     accountForms,
+    currentTab,
   };
 };

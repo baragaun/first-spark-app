@@ -1,10 +1,10 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
-  import * as Tabs from '$lib/components/ui/tabs/index.js';
-  import { m } from '$lib/paraglide/messages';
+  import * as Tabs from '@/components/ui/tabs';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
-  import { onMount } from 'svelte';
+  import { m } from '@/paraglide/messages';
 
   const isSignedIn = $derived(myUserContext.isSignedIn);
 
