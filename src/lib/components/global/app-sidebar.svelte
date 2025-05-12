@@ -1,24 +1,10 @@
 <script lang="ts">
   import { page } from '$app/state';
-  import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-  import { m } from '$lib/paraglide/messages';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
-  import { PlugZap, Zap } from 'lucide-svelte';
-  import House from 'lucide-svelte/icons/house';
-  import Settings from 'lucide-svelte/icons/settings';
   import type { ComponentProps } from 'svelte';
+  import * as Sidebar from '@/components/ui/sidebar';
+  import { m } from '@/paraglide/messages';
+  import { House, PlugZap, Settings, Zap } from 'lucide-svelte';
   import { Button } from '../ui/button';
-
-  const isOnline = $derived(!myUserContext.isOffline);
-  const isSignedIn = $derived(myUserContext.isSignedIn);
-  const isDevEnv = $derived(import.meta.env.DEV);
-
-  const isItemActive = (itemUrl: string, currentPath: string): boolean => {
-    if (itemUrl === '/') {
-      return currentPath === '/';
-    }
-    return itemUrl !== '#' && currentPath.startsWith(itemUrl);
-  };
 
   const items = [
     {
@@ -53,18 +39,27 @@
     },
   ];
 
-  let visibleItems = $derived(isSignedIn ? items : items.filter((item) => !item.requiresAuth));
-
-  const toggleConnection = () => {
-    myUserContext.isOffline = !myUserContext.isOffline;
-  };
-
   let {
     ref = $bindable(null),
-    class: className,
-    collapsible = 'icon',
+    collapsible = 'icon' as ComponentProps<typeof Sidebar.Root>['collapsible'],
+    isOffline = $bindable(false),
+    isAuthenticated = false,
     ...restProps
-  }: ComponentProps<typeof Sidebar.Root> = $props();
+  } = $props();
+
+  const isItemActive = (itemUrl: string, currentPath: string): boolean => {
+    if (itemUrl === '/') {
+      return currentPath === '/';
+    }
+    return itemUrl !== '#' && currentPath.startsWith(itemUrl);
+  };
+
+  const isDevEnv = $derived(import.meta.env.DEV);
+  const toggleConnection = () => {
+    isOffline = !isOffline;
+  };
+
+  let visibleItems = $derived(isAuthenticated ? items : items.filter((item) => !item.requiresAuth));
 
   const sidebar = Sidebar.useSidebar();
 
@@ -108,7 +103,7 @@
       </Sidebar.Menu>
     </Sidebar.Group>
 
-    {#if !isSignedIn}
+    {#if !isAuthenticated}
       <Sidebar.Group class="mb-2 mt-auto px-3 group-data-[collapsible=icon]:hidden">
         <div class="rounded-lg border border-border bg-card p-4 shadow-sm">
           <h2 class="mb-3 text-sm font-bold">{m['join_first_spark']()}</h2>
@@ -132,19 +127,19 @@
     {/if}
 
     <Sidebar.Group
-      class={`mb-2 ${!isSignedIn ? '' : 'mt-auto'} px-3 group-data-[collapsible=icon]:mt-auto`}
+      class={`mb-2 ${!isAuthenticated ? '' : 'mt-auto'} px-3 group-data-[collapsible=icon]:mt-auto`}
     >
       <Sidebar.Menu>
         <Sidebar.MenuItem>
           <Sidebar.MenuButton>
             {#snippet child({ props })}
               <Button {...props} disabled={!isDevEnv} onclick={toggleConnection} variant="ghost">
-                {#if isOnline}
+                {#if !isOffline}
                   <Zap class="h-5 w-5" />
                 {:else}
                   <PlugZap class="h-5 w-5" />
                 {/if}
-                <span>{isOnline ? m['connection.online']() : m['connection.offline']()}</span>
+                <span>{isOffline ? m['connection.offline']() : m['connection.online']()}</span>
               </Button>
             {/snippet}
           </Sidebar.MenuButton>

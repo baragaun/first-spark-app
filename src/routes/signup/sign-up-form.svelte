@@ -453,7 +453,7 @@
     </div></AuthCard
   >
 
-  <!-- commenting as per the issue : https://github.com/baragaun/first-spark-app/issues/113 -->¯
+  <!-- commenting as per the issue : https://github.com/baragaun/first-spark-app/issues/113 -->
   <!--   <div class="mt-4"><SuperDebug data={$formData} /></div>
   <div class="mt-4"><SuperDebug data={errors} /></div> -->
 </form>
