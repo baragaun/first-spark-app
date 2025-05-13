@@ -138,7 +138,8 @@
       "have_account": "खाता नहीं है?",
       "update_password": "मेरा पासवर्ड अपडेट करें",
       "processing": "प्रसंस्करण हो रहा है...",
-      "signup": "साइन अप करें"
+      "signup": "साइन अप करें",
+      "change_email_username": "ईमेल या उपयोगकर्ता नाम बदलें"
     }
   },
   "verify_token": {
@@ -238,7 +239,8 @@
       "goodbuy": "नमस्ते!",
       "cancel": "रद्द करें",
       "verify": "सत्यापित करें",
-      "verifying": "सत्यापित किया जा रहा है"
+      "verifying": "सत्यापन किया जा रहा है...",
+      "change_email": "ईमेल बदलें"
     }
   },
   "form_button_default": {

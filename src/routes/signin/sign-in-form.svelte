@@ -15,6 +15,7 @@
   import { onDestroy } from 'svelte';
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
+  import { debounce } from 'throttle-debounce';
   import {
     determineIdentifierType,
     getOtpMessage,
@@ -41,45 +42,41 @@
   let identType = $state(UserIdentType.email);
 
   let timerInterval: ReturnType<typeof setInterval>;
-  let debounceTimer: number | null = null;
   const DEBOUNCE_DELAY = 350; // ms
   const emailCooldowns = $state(new Map<string, number>()); // Track emails that have active cooldowns
+
+  // Create debounced validation function
+  const debouncedValidation = debounce(DEBOUNCE_DELAY, async () => {
+    try {
+      // ============================================================
+      // Skip the empty validating to allow for error free authType swapping
+      if (step === 1 && (!$formData.ident || !$formData.password)) {
+        return;
+      } else if (step === 2 && !$formData.token) {
+        return;
+      }
+      // ============================================================
+
+      // This form is friendlier without the automatic error focusing
+      const result = await validateForm({ update: true, focusOnError: false });
+
+      hasStepError = !result.valid;
+    } catch (error) {
+      console.error('Error validating form:', error);
+    } finally {
+      isLoading = false;
+    }
+  });
 
   const form = superForm(data.form, {
     dataType: 'json',
     validators: getCurrentValidator(),
     resetForm: false,
     async onChange() {
-      if (debounceTimer) {
-        clearTimeout(debounceTimer);
-      }
-
       if (!$formData) return;
 
       isLoading = true;
-
-      debounceTimer = window.setTimeout(async () => {
-        try {
-          // ============================================================
-          // Skip the empty validating to allow for error free authType swapping
-          if (step === 1 && (!$formData.ident || !$formData.password)) {
-            return;
-          } else if (step === 2 && !$formData.token) {
-            return;
-          }
-          // ============================================================
-
-          // This form is friendlier without the automatic error focusing
-          const result = await validateForm({ update: true, focusOnError: false });
-
-          hasStepError = !result.valid;
-        } catch (error) {
-          console.error('Error validating form:', error);
-        } finally {
-          isLoading = false;
-          debounceTimer = null;
-        }
-      }, DEBOUNCE_DELAY);
+      debouncedValidation();
     },
     async onSubmit({ cancel }) {
       // Bail on any server side action
@@ -173,6 +170,7 @@
       if (response !== true) {
         updateFormErrors('ident', undefined);
         updateFormErrors('password', m['signin.error.invalid_credentials']());
+        hasStepError = true;
         return;
       }
 
@@ -318,22 +316,15 @@
   onDestroy(() => {
     clearInterval(timerInterval);
 
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
-      debounceTimer = null;
-    }
-
     if (otpHandler) {
       otpHandler.removeListener();
     }
+
+    // Cancel the debounced function
+    debouncedValidation.cancel();
   });
 
   $effect(() => {
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
-      debounceTimer = null;
-    }
-
     if (!$formData) {
       isLoading = false;
       return;

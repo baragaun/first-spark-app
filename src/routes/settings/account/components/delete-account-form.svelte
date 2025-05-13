@@ -12,8 +12,10 @@
   import { m } from '@/paraglide/messages';
   import { AppUiMessage } from '@/types/enums';
   import { AlertTriangle } from 'lucide-svelte';
+  import { onDestroy } from 'svelte';
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zodClient } from 'sveltekit-superforms/adapters';
+  import { debounce } from 'throttle-debounce';
   import { deleteAccountFormSchema, type DeleteAccountFormSchema } from '../../(data)/schema';
 
   let {
@@ -28,8 +30,21 @@
   let isLoading = $state(false);
   let isSuccess = $state(false);
   let hasStepError = $state(true);
-  let debounceTimer: number | null = null;
   const DEBOUNCE_DELAY = 500;
+
+  // Replace setTimeout/clearTimeout with debounce
+  const debounceFormValidation = debounce(DEBOUNCE_DELAY, async () => {
+    try {
+      const result = await validateForm({ update: true, focusOnError: true });
+      hasStepError = !result.valid;
+      if (result.valid && $formData.confirmEmail !== currentEmail) {
+        hasStepError = true;
+        updateFormErrors('confirmEmail', m['setting.delete_account.error.not_found']());
+      }
+    } catch (error) {
+      console.error('Error validating form input:', error);
+    }
+  });
 
   const form = superForm(preValidatedForm, {
     validators: zodClient(deleteAccountFormSchema),
@@ -37,6 +52,7 @@
     dataType: 'json',
     resetForm: true,
     async onChange() {
+      if (!$formData.confirmEmail) return;
       await debounceFormValidation();
     },
     async onSubmit({ cancel }) {
@@ -57,26 +73,10 @@
     });
   };
 
-  const debounceFormValidation = async () => {
-    if (debounceTimer) clearTimeout(debounceTimer);
-
-    if (!$formData.confirmEmail) return;
-
-    debounceTimer = window.setTimeout(async () => {
-      try {
-        const result = await validateForm({ update: true, focusOnError: true });
-        hasStepError = !result.valid;
-        if (result.valid && $formData.confirmEmail !== currentEmail) {
-          hasStepError = true;
-          updateFormErrors('confirmEmail', m['setting.delete_account.error.not_found']());
-        }
-      } catch (error) {
-        console.error('Error validating form input:', error);
-      } finally {
-        debounceTimer = null;
-      }
-    }, DEBOUNCE_DELAY);
-  };
+  // Add onDestroy to clean up the debounce
+  onDestroy(() => {
+    debounceFormValidation.cancel();
+  });
 
   const deleteMyAccount = async () => {
     try {

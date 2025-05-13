@@ -139,7 +139,8 @@
       "have_account": "Don't have an account?",
       "update_password": "Update my password",
       "processing": "Processing...",
-      "signup": "Sign up"
+      "signup": "Sign up",
+      "change_email_username": "Change Email or Username"
     }
   },
   "verify_token": {
@@ -239,7 +240,8 @@
       "goodbuy": "Goodbye!",
       "cancel": "Cancel",
       "verify": "Verify",
-      "verifying": "Verifing"
+      "verifying": "Verifying...",
+      "change_email": "Change Email"
     }
   },
   "form_button_default": {

@@ -15,6 +15,7 @@
   import { onDestroy } from 'svelte';
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
+  import { debounce } from 'throttle-debounce';
   import {
     determineIdentifierType,
     getOtpMessage,
@@ -41,9 +42,21 @@
   let identType = $state(UserIdentType.email);
 
   let timerInterval: ReturnType<typeof setInterval>;
-  let debounceTimer: number | null = null;
   const DEBOUNCE_DELAY = 350; // ms
   const { getPasswordError, validatePassword } = passwordHelpers;
+
+  // Replace setTimeout/clearTimeout with debounce
+  const debouncedValidation = debounce(DEBOUNCE_DELAY, async () => {
+    try {
+      isLoading = true;
+      const result = await validateForm({ update: true, focusOnError: false });
+      hasStepError = !result.valid;
+    } catch (error) {
+      console.error('Error validating form:', error);
+    } finally {
+      isLoading = false;
+    }
+  });
 
   const form = superForm(data.form, {
     dataType: 'json',
@@ -51,26 +64,11 @@
     resetForm: false,
     validationMethod: 'submit-only',
     async onChange() {
-      if (debounceTimer) {
-        clearTimeout(debounceTimer);
-      }
-
       if (msaId && !$formData.actionId) {
         $formData.actionId = msaId;
       }
 
-      debounceTimer = window.setTimeout(async () => {
-        try {
-          isLoading = true;
-          const result = await validateForm({ update: true, focusOnError: false });
-          hasStepError = !result.valid;
-        } catch (error) {
-          console.error('Error validating form:', error);
-        } finally {
-          isLoading = false;
-          debounceTimer = null;
-        }
-      }, DEBOUNCE_DELAY);
+      debouncedValidation();
     },
     async onSubmit({ cancel }) {
       cancel(); // Avoid any actual server-side validation form action
@@ -177,6 +175,7 @@
 
       const onNotificationSent = () => {
         step = 2;
+        hasStepError = true;
         isLoading = false;
       };
       const onFailure = () => {
@@ -296,11 +295,6 @@
   };
 
   $effect(() => {
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
-      debounceTimer = null;
-    }
-
     if (!$formData) {
       isLoading = false;
       return;
@@ -319,14 +313,12 @@
   onDestroy(() => {
     clearInterval(timerInterval);
 
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
-      debounceTimer = null;
-    }
-
     if (otpHandler) {
       otpHandler.removeListener();
     }
+
+    // Cancel the debounced function
+    debouncedValidation.cancel();
   });
 </script>
 
@@ -357,6 +349,12 @@
           {canResend}
           {resendTimer}
           onResendClick={handleResendToken}
+          showBackButton={true}
+          backButtonLabel={m['reset_password.buttons.change_email_username']()}
+          onBackButtonClick={() => {
+            step = 1;
+            hasStepError = false;
+          }}
         />
       {/if}
       <FormButton

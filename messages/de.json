@@ -138,7 +138,8 @@
       "have_account": "Noch kein Konto?",
       "update_password": "Mein Passwort aktualisieren",
       "processing": "Wird verarbeitet...",
-      "signup": "Registrieren"
+      "signup": "Registrieren",
+      "change_email_username": "E-Mail oder Benutzername ändern"
     }
   },
   "verify_token": {
@@ -238,7 +239,8 @@
       "goodbuy": "Auf Wiedersehen!",
       "cancel": "Abbrechen",
       "verify": "Bestätigen",
-      "verifying": "Wird bestätigt..."
+      "verifying": "Wird überprüft...",
+      "change_email": "E-Mail ändern"
     }
   },
   "form_button_default": {

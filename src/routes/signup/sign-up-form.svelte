@@ -13,6 +13,7 @@
   import { onDestroy } from 'svelte';
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
+  import { debounce } from 'throttle-debounce';
   import {
     emailSchema,
     schemaFirstStep,
@@ -66,9 +67,30 @@
   let identType = $state(UserIdentType.email);
 
   let timerInterval: ReturnType<typeof setInterval>;
-  let debounceTimer: number | null = null;
   const DEBOUNCE_DELAY = 500; // ms
   const RESEND_TIMER_DURATION = 30; // s
+
+  // Create debounced validation function
+  const debouncedFormValidation = debounce(DEBOUNCE_DELAY, async () => {
+    try {
+      // Validate the identifier
+      const result = await validateForm({ update: true, focusOnError: false });
+      isLoading = true;
+
+      // Check availability if needed
+      if (step === 1 || step === 3) {
+        const availability = await checkIdentAvailability();
+        hasStepError = !availability || !result.valid;
+      } else if (step === 2) {
+        // For OTP verification step, only check if the form is valid
+        hasStepError = !result.valid || !$formData.token || $formData.token.length < 6;
+      }
+    } catch (error) {
+      console.error('Error debouncing the form input:', error);
+    } finally {
+      isLoading = false;
+    }
+  });
 
   const getCurrentValidator = () => steps[step - 1].schema;
 
@@ -78,7 +100,7 @@
     resetForm: false,
     validationMethod: 'submit-only',
     async onChange() {
-      debounceFormValidation();
+      debouncedFormValidation();
     },
     async onSubmit({ cancel }) {
       cancel(); // Avoid the server-side form action
@@ -96,36 +118,6 @@
       };
       return newErrors;
     });
-  };
-
-  const debounceFormValidation = async () => {
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
-    }
-
-    if (!$formData) return;
-
-    debounceTimer = window.setTimeout(async () => {
-      try {
-        // Validate the identifier
-        const result = await validateForm({ update: true, focusOnError: false });
-        isLoading = true;
-
-        // Check availability if needed
-        if (step === 1 || step === 3) {
-          const availability = await checkIdentAvailability();
-          hasStepError = !availability || !result.valid;
-        } else if (step === 2) {
-          // For OTP verification step, only check if the form is valid
-          hasStepError = !result.valid || !$formData.token || $formData.token.length < 6;
-        }
-      } catch (error) {
-        console.error('Error debouncing the form input:', error);
-      } finally {
-        isLoading = false;
-        debounceTimer = null;
-      }
-    }, DEBOUNCE_DELAY);
   };
 
   const handleFormSubmit = async () => {
@@ -384,11 +376,6 @@
   };
 
   $effect(() => {
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
-      debounceTimer = null;
-    }
-
     if (!$formData) {
       isLoading = false;
       return;
@@ -407,14 +394,12 @@
   onDestroy(() => {
     clearInterval(timerInterval);
 
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
-      debounceTimer = null;
-    }
-
     if (otpHandler) {
       otpHandler.removeListener();
     }
+
+    // Cancel the debounced function
+    debouncedFormValidation.cancel();
   });
 </script>
 
