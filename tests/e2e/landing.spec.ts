@@ -23,7 +23,7 @@ test('Landing page includes NavBar component, signup, login buttons', async ({ p
 
   // Check for the navigation bar
   // Since the NavBar is in the layout, we can verify it by checking for elements that are part of the NavBar
-  const navElement = page.getByRole('navigation').filter({ hasText: 'Sign Up' });
+  const navElement = page.getByRole('navigation').filter({ hasText: 'Sign up' });
   await expect(navElement).toBeVisible();
 
   // We can also check for specific elements within the NavBar
@@ -35,11 +35,11 @@ test('Landing page includes NavBar component, signup, login buttons', async ({ p
   const changeLanguageButton = navElement.getByLabel('Select language');
   await expect(changeLanguageButton).toBeVisible();
 
-  // Check if it contains a "Sign In" button
-  const signInButton = navElement.getByRole('button', { name: 'Sign In' });
+  // Check if it contains a "Sign in" button
+  const signInButton = navElement.getByRole('button', { name: 'Sign in' });
   await expect(signInButton).toBeVisible();
 
-  // Check if it contains a "Sign Up" button
-  const signUpButton = navElement.getByRole('button', { name: 'Sign Up' });
+  // Check if it contains a "Sign up" button
+  const signUpButton = navElement.getByRole('button', { name: 'Sign up' });
   await expect(signUpButton).toBeVisible();
 });

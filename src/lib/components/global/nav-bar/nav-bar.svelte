@@ -42,7 +42,7 @@
           >
             <LogIn class="mr-2 h-4 w-4" />
           </Button>
-          <span class="sr-only">Sign In</span>
+          <span class="sr-only">{m['nav.auth.sign_in']()}</span>
           <Button
             variant="default"
             onclick={() => goto('/signup')}
