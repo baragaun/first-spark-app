@@ -148,7 +148,7 @@
     const existingUser = await isIdentRegistered();
 
     try {
-      if (existingUser) {
+      if (!existingUser) {
         // Feign success and proceed
         // Todo: add the `change email` button like the `sign in with token` button
         step = 2;
@@ -168,10 +168,7 @@
         !response?.object.actionProgress?.actionId ||
         !response?.object.run
       ) {
-        updateFormErrors(
-          'ident',
-          "We couldn't find an account with this email or username. Please check and try again.",
-        );
+        updateFormErrors('ident', 'Failed to send verification code. Please try again.');
         hasStepError = true;
         isLoading = false;
         // Set to true since we failed to send the verification code
@@ -198,10 +195,14 @@
         onFailure,
         onSuccess,
       );
+
+      startResendTimer();
       return;
     } catch (err) {
       console.error('Error resetting password:', err);
       updateFormErrors('ident', translate(AppUiMessage.systemError));
+    } finally {
+      isLoading = true; // Leave the button in a processing state until sent event
     }
   };
 

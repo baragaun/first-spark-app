@@ -119,8 +119,7 @@
       "errors": {
         "account_not_found": "Kein Konto mit dieser E-Mail-Adresse gefunden",
         "default_error": "Deine Anfrage konnte nicht verarbeitet werden. Bitte versuche es erneut.",
-        "valid_ident_required": "Ein gültiger Benutzername oder eine gültige E-Mail-Adresse ist erforderlich",
-        "not_found": "Wir konnten kein Konto mit dieser E-Mail-Adresse oder diesem Benutzernamen finden. Bitte überprüfen Sie die Angaben und versuchen Sie es erneut."
+        "valid_ident_required": "Ein gültiger Benutzername oder eine gültige E-Mail-Adresse ist erforderlich"
       }
     },
     "new_password_form": {

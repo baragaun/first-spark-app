@@ -119,8 +119,7 @@
       "errors": {
         "account_not_found": "No account found with this email address",
         "default_error": "Unable to process your request. Please try again.",
-        "valid_ident_required": "A valid username or email is required",
-        "not_found": "We couldn't find an account with this email or username. Please check and try again."
+        "valid_ident_required": "A valid username or email is required"
       }
     },
     "new_password_form": {
