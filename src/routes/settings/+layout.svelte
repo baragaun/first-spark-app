@@ -10,7 +10,7 @@
 
   const tabs = [
     { id: 'account', label: m['setting.account'](), path: '/settings/account' },
-    { id: 'notifications', label: m['setting.notification'](), path: '/settings/notifications' },
+    // { id: 'notifications', label: m['setting.notification'](), path: '/settings/notifications' },
   ];
 
   let { children } = $props();
@@ -36,13 +36,13 @@
   <h1 class="font-lexend text-3xl font-bold tracking-tight">{m['setting.setting_label']()}</h1>
 
   <Tabs.Root value={activeTab} class="my-8">
-    <Tabs.List class="mx-auto grid w-3/5 grid-cols-2 border-b">
+    <!-- <Tabs.List class="mx-auto grid grid-cols-2 border-b">
       {#each tabs as tab}
         <Tabs.Trigger value={tab.id} onclick={() => goto(tab.path)}>
           {tab.label}
         </Tabs.Trigger>
       {/each}
-    </Tabs.List>
+    </Tabs.List> -->
     {#each tabs as tab}
       <Tabs.Content value={tab.id}>
         {@render children()}

@@ -74,6 +74,7 @@ export class MyUserContext {
           isSignedIn = false;
         },
         onMyUserUpdated: (updatedMyUser) => {
+          console.log('MyUserContext.onMyUserUpdated: ', updatedMyUser);
           myUser = updatedMyUser;
         },
       };

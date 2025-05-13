@@ -1,10 +1,11 @@
 import { myUserContext } from '@/contexts/my-user-context.svelte';
 import type { LayoutLoad } from './$types';
+import { redirect } from '@sveltejs/kit';
 
 // Only initialize in browser environment
 export const ssr = false;
 
-export const load: LayoutLoad = async () => {
+export const load: LayoutLoad = async ({url}) => {
   // Initialize user context in the browser
   if (typeof window !== 'undefined') {
     try {
@@ -21,6 +22,10 @@ export const load: LayoutLoad = async () => {
         userInitialized: false,
         userError: error instanceof Error ? error.message : 'Unknown error',
       };
+    } finally {
+      if (url.pathname === '/settings/notifications') {
+      throw redirect(302, '/settings'); // Redirect to the Account tab or main Settings page
+      }
     }
   }
 
