@@ -83,12 +83,12 @@ export class MockMyUserContext {
     this.isInitialized = true;
   }
 
-  public async initialize({ isSignedIn =  false } = {}): Promise<void> {
+  public async initialize({ isSignedIn = false } = {}): Promise<void> {
     console.log('MockMyUserContext.initialize called.');
 
     console.log('MockMyUserContext.initialize: this._isSignedIn:', isSignedIn);
 
-    if(isSignedIn){
+    if (isSignedIn) {
       this._myUser = mockUser;
       this._isSignedIn = isSignedIn;
     }
@@ -701,7 +701,6 @@ export class MockMyUserContext {
     return this._isSignedIn;
   }
 
-
   public get myUserHandle(): string | null | undefined {
     return this._myUser?.userHandle;
   }
@@ -709,7 +708,6 @@ export class MockMyUserContext {
   public get myEmail(): string | null | undefined {
     return this._myUser?.email;
   }
-
 }
 
 // Create and export a singleton instance

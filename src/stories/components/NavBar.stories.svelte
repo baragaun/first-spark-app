@@ -42,7 +42,7 @@
 >
   <MockUserProvider>
     <Sidebar.Provider>
-      <NavBar />
+      <NavBar isAuthenticated={false} myUser={undefined} onSignOut={() => {}} />
     </Sidebar.Provider>
   </MockUserProvider>
 </Story>
@@ -80,9 +80,24 @@
     // expect(signOutMenuItem).toBeInTheDocument();
   }}
 >
-  <MockUserProvider isSignedIn = {true} >
+  <MockUserProvider isSignedIn={true}>
     <Sidebar.Provider>
-      <NavBar />
+      <NavBar
+        isAuthenticated="{true},"
+        myUser={{
+          id: '1234567890',
+          email: 'test@example.com',
+          userHandle: 'testuser',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          isEmailVerified: false,
+          isPhoneNumberVerified: false,
+          spokenLanguagesTextIds: [],
+          roles: [],
+          trustLevel: 0,
+        }}
+        onSignOut={() => {}}
+      />
     </Sidebar.Provider>
   </MockUserProvider>
 </Story>
