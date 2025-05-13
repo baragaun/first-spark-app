@@ -2,7 +2,7 @@
   import { onMount, setContext } from 'svelte';
   import { MockMyUserContext } from './mock-user-context';
 
-  let { children } = $props();
+  let { children, isSignedIn = false } = $props();
 
   // Create a mock user context instance
   const myUserContext = new MockMyUserContext();
@@ -16,7 +16,7 @@
   // Initialize the context immediately
   const initContext = async () => {
     try {
-      await myUserContext.initialize({ enableMockMode: true });
+      await myUserContext.initialize({ isSignedIn });
       isInitialized = true;
     } catch (err) {
       console.error('MockUserProvider: Error initializing MockMyUserContext:', err);

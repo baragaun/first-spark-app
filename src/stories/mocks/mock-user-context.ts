@@ -83,8 +83,17 @@ export class MockMyUserContext {
     this.isInitialized = true;
   }
 
-  public async initialize({ enableMockMode = false } = {}): Promise<void> {
+  public async initialize({ isSignedIn =  false } = {}): Promise<void> {
     console.log('MockMyUserContext.initialize called.');
+
+    console.log('MockMyUserContext.initialize: this._isSignedIn:', isSignedIn);
+
+    if(isSignedIn){
+      this._myUser = mockUser;
+      this._isSignedIn = isSignedIn;
+    }
+
+    console.log('MockMyUserContext.initialize: this._myUser:', this._myUser);
 
     if (this.client.isInitialized || this._isInitializing) {
       console.warn('MockMyUserContext.initialize: already initialized.');
@@ -687,6 +696,20 @@ export class MockMyUserContext {
     this._isLoading = false;
     return true;
   }
+
+  public get isSignedIn(): boolean {
+    return this._isSignedIn;
+  }
+
+
+  public get myUserHandle(): string | null | undefined {
+    return this._myUser?.userHandle;
+  }
+
+  public get myEmail(): string | null | undefined {
+    return this._myUser?.email;
+  }
+
 }
 
 // Create and export a singleton instance

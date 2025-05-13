@@ -3,11 +3,11 @@
   import NavBar from '@/components/global/nav-bar/nav-bar.svelte';
   import { defineMeta } from '@storybook/addon-svelte-csf';
   import MockUserProvider from '../mocks/mock-user-provider.svelte';
-  import { within, expect } from '@storybook/test';
+  import { within, expect, userEvent } from '@storybook/test';
 
   const { Story } = defineMeta({
     title: 'Components/NavBar',
-    component: NavBar,
+    component: MockUserProvider,
     parameters: {
       layout: 'fullscreen',
     },
@@ -41,6 +41,46 @@
   }}
 >
   <MockUserProvider>
+    <Sidebar.Provider>
+      <NavBar />
+    </Sidebar.Provider>
+  </MockUserProvider>
+</Story>
+
+<Story
+  name="Signed In"
+  play={async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // Check for avatar menu when authenticated
+    const avatarMenu = canvas.getByText('FS', { selector: 'span[data-avatar-fallback]' });
+    expect(avatarMenu).toBeInTheDocument();
+
+    // Simulate a click on the avatar menu to open the dropdown
+    await userEvent.click(avatarMenu);
+    const dropdownMenu = canvas.getByTestId('avatar-menu-trigger');
+    expect(dropdownMenu).toBeVisible();
+
+    // // Debugging: Log the dropdown contents
+    // console.log(dropdownMenu);
+
+    // // Check for user information inside the dropdown
+    // const userName = within(dropdownMenu).getByText('testuser');
+    // expect(userName).toBeInTheDocument();
+
+    // const userEmail = within(dropdownMenu).getByText('test@example.com');
+    // expect(userEmail).toBeInTheDocument();
+
+    // // Check for the "Settings" menu item
+    // const settingsMenuItem = within(dropdownMenu).getByRole('menuitem', { name: /settings/i });
+    // expect(settingsMenuItem).toBeInTheDocument();
+
+    // // Check for the "Sign Out" menu item
+    // const signOutMenuItem = within(dropdownMenu).getByRole('menuitem', { name: /sign out/i });
+    // expect(signOutMenuItem).toBeInTheDocument();
+  }}
+>
+  <MockUserProvider isSignedIn = {true} >
     <Sidebar.Provider>
       <NavBar />
     </Sidebar.Provider>

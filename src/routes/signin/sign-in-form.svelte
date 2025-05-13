@@ -7,11 +7,11 @@
   import PasswordFormInput from '@/components/forms/form-password-input.svelte';
   import { Button } from '@/components/ui/button';
   import { MsaListenerHandler } from '@/contexts/msa-listener-handler.svelte';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import type { MyUserContext } from '@/contexts/my-user-context.svelte';
   import translate from '@/helpers/language/translate';
   import { AppUiMessage } from '@/types/enums';
   import { UserIdentType } from '@baragaun/bg-node-client';
-  import { onDestroy } from 'svelte';
+  import { getContext, onDestroy } from 'svelte';
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
   import {
@@ -22,6 +22,9 @@
     type SignInFormSchema,
   } from './schema';
 
+  // Context API (Recommended)
+  const myUserContext = getContext<MyUserContext>('myUserContext');
+  console.log('SignInForm: Retrieved context', myUserContext);
   let { data }: { data: { form: SuperValidated<SignInFormSchema> } } = $props();
 
   const steps = [zod(schemaFirstStep), zod(schemaLastStep)];
@@ -83,6 +86,7 @@
       }, DEBOUNCE_DELAY);
     },
     async onSubmit({ cancel }) {
+      console.log('Am I pressed?');
       // Bail on any server side action
       cancel();
       const result = await validateForm({ update: true, focusOnError: true });
