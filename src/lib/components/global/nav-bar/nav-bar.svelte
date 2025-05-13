@@ -38,6 +38,7 @@
             size="icon"
             onclick={() => goto('/signin')}
             aria-label={m['nav.auth.sign_in']()}
+            title={m['nav.auth.sign_in']()}
             class="font-lexend text-muted-foreground hover:text-foreground"
           >
             <LogIn class="mr-2 h-4 w-4" />
@@ -47,6 +48,7 @@
             variant="default"
             onclick={() => goto('/signup')}
             aria-label={m['nav.auth.sign_up']()}
+            title={m['nav.auth.sign_up']()}
             class="font-lexend shadow-sm hover:shadow-md"
           >
             {m['nav.auth.sign_up']()}
