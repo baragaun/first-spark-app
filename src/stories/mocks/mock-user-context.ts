@@ -6,13 +6,12 @@ import {
   MultiStepActionType,
   MutationType,
   UserIdentType,
-  type MultiStepActionListener,
   type MultiStepActionProgressResult,
   type MyUser,
+  type MyUserChanges,
   type QueryResult,
   type SignInSignUpResponse,
 } from '@baragaun/bg-node-client';
-import { writable } from 'svelte/store';
 
 // Mock user data
 const mockUser: MyUser = {
@@ -28,31 +27,102 @@ const mockUser: MyUser = {
   trustLevel: 0,
 };
 
-// Create a mock context class
+// Create a mock context class that matches the real MyUserContext
 export class MockMyUserContext {
-  myUser = writable<MyUser | null>(null);
-  isLoading = writable(false);
-  error = writable<string | null>(null);
-  isInitialized = true;
-  myUserId = '';
-  // Add the missing _listeners property
-  private _listeners: Record<string, Array<MultiStepActionListener>> = {};
+  // State variables using $state in the real context
+  private _isSignedIn = false;
+  private _isOffline = false;
+  private _isLoading = false;
+  private _myUser: MyUser | undefined = undefined;
+  private _isInitializing = false;
+
+  // Client property
+  client = {
+    isInitialized: true,
+    isSignedIn: false,
+    myUserId: '',
+    operations: {
+      myUser: {
+        signInUser: this.signInUser.bind(this),
+        signUpUser: this.signUpUser.bind(this),
+        signInWithToken: this.signMeInWithToken.bind(this),
+        updateMyUser: this.updateMyUser.bind(this),
+        updateMyPassword: this.updateMyPassword.bind(this),
+        verifyMyEmail: this.verifyMyEmail.bind(this),
+        verifyMyPassword: this.verifyMyPassword.bind(this),
+        findAvailableUserHandle: this.findAvailableUserHandle.bind(this),
+      },
+      multiStepAction: {
+        verifyMultiStepActionToken: this.verifyMultiStepActionToken.bind(this),
+      },
+    },
+    init: async (options: any) => {
+      this.client.isInitialized = true;
+      if (options.listener) {
+        // Store the listener for later use
+        this._listeners[options.listener.id] = options.listener;
+      }
+      return Promise.resolve();
+    },
+  };
+
+  isInitialized = false;
+
+  // Add the listeners property
+  private _listeners: Record<string, any> = {};
+  myUser: any;
+  // myUserId: string;
 
   constructor() {
     // Initialize with no user by default
-    this.myUser.set(null);
+    this._myUser = undefined;
+    this._isSignedIn = false;
+
+    // Pre-initialize the client for Storybook
+    this.client.isInitialized = true;
+    this.isInitialized = true;
   }
 
-  async initialize() {
-    return Promise.resolve();
-  }
+  public async initialize({ isSignedIn = false } = {}): Promise<void> {
+    console.log('MockMyUserContext.initialize called.');
 
-  get isSignedIn() {
-    let signedIn = false;
-    this.myUser.subscribe((user) => {
-      signedIn = !!user;
-    })();
-    return signedIn;
+    console.log('MockMyUserContext.initialize: this._isSignedIn:', isSignedIn);
+
+    if (isSignedIn) {
+      this._myUser = mockUser;
+      this._isSignedIn = isSignedIn;
+    }
+
+    console.log('MockMyUserContext.initialize: this._myUser:', this._myUser);
+
+    if (this.client.isInitialized || this._isInitializing) {
+      console.warn('MockMyUserContext.initialize: already initialized.');
+      return;
+    }
+
+    this._isInitializing = true;
+
+    try {
+      // Simulate a short delay for initialization
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      this.client.isInitialized = true;
+      this.isInitialized = true;
+
+      // Call any listeners that might be waiting
+      if (this._listeners) {
+        Object.values(this._listeners).forEach((listener) => {
+          if (listener.onMyUserUpdated) {
+            listener.onMyUserUpdated(this._myUser);
+          }
+        });
+      }
+    } catch (error) {
+      console.error('MockMyUserContext: Error initializing:', { error });
+      throw error;
+    } finally {
+      this._isInitializing = false;
+    }
   }
 
   async signInUser(
@@ -60,7 +130,7 @@ export class MockMyUserContext {
     identType: UserIdentType,
     password: string,
   ): Promise<QueryResult<SignInSignUpResponse>> {
-    this.isLoading.set(true);
+    this._isLoading = true;
 
     console.log('mocked signInUser called with:', { userIdent, identType, password });
 
@@ -72,9 +142,11 @@ export class MockMyUserContext {
       console.log('Username matched');
       if (password === '123456789') {
         console.log('Password matched - sign in successful');
-        this.myUser.set(mockUser);
-        this.myUserId = mockUser.id;
-        this.isLoading.set(false);
+        this._myUser = mockUser;
+        this._isSignedIn = true;
+        this.client.isSignedIn = true;
+        this.client.myUserId = mockUser.id;
+        this._isLoading = false;
         return {
           operation: MutationType.update,
           object: {
@@ -99,22 +171,50 @@ export class MockMyUserContext {
 
     // If we reach here, authentication failed
     console.log('mocked signInUser failed');
-    this.isLoading.set(false);
+    this._isLoading = false;
     return {
       operation: MutationType.update,
       error: 'Invalid credentials',
     };
   }
 
-  async signInWithToken(userIdent: string): Promise<QueryResult<MultiStepActionProgressResult>> {
-    this.isLoading.set(true);
+  async signMeInWithToken(
+    userIdent: string,
+    options?: { polling?: { enabled: boolean; interval: number; timeout: number } },
+  ): Promise<QueryResult<MultiStepActionProgressResult>> {
+    if (!this.client.isInitialized) {
+      console.error('MockMyUserContext.signMeInWithToken: not initialized.');
+      return { error: 'Client not initialized' };
+    }
+
+    this._isLoading = true;
+
     if (userIdent === 'test@example.com' || userIdent === 'testuser') {
-      console.log('Username matched');
+      console.log('Username matched for token sign-in');
       // Simulate API delay
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Return a mock action ID for the verification flow
-      this.isLoading.set(false);
+      this._isLoading = false;
+
+      // Simulate notification sent event after a short delay
+      setTimeout(() => {
+        if (this._listeners['tokenSignIn']) {
+          this._listeners['tokenSignIn'].forEach((l: any) => {
+            l.onEvent(MultiStepActionEventType.notificationSent, {
+              actionId: 'mock-token-signin-action-123456',
+              notificationResult: MultiStepActionSendNotificationResult.ok,
+              userId: 'mock-user-id',
+              actionType: MultiStepActionType.tokenSignIn,
+              result: MultiStepActionResult.ok,
+              attemptCount: 0,
+              id: 'mock-token-signin-id',
+              createdAt: new Date().toISOString(),
+            });
+          });
+        }
+      }, 500);
+
       return {
         object: {
           actionProgress: {
@@ -128,22 +228,20 @@ export class MockMyUserContext {
             createdAt: '',
           },
           run: {
-            addListener: (listener) => {
+            addListener: (listener: any) => {
+              if (!this._listeners['tokenSignIn']) {
+                this._listeners['tokenSignIn'] = [];
+              }
+              this._listeners['tokenSignIn'].push(listener);
               return 'mock-listener-id';
             },
             removeListener: () => {},
             actionId: 'mock-token-signin-action-123456',
             listeners: new Map(),
-            pollingOptions: { enabled: true, interval: 1000, timeout: 10000 },
-            onEventReceived: function (eventType: MultiStepActionEventType): void {
-              // Implementation not needed for mock
-            },
-            notifyListeners: function (event: MultiStepActionEventType): void {
-              // Implementation not needed for mock
-            },
-            abort: function (): void {
-              // Implementation not needed for mock
-            },
+            pollingOptions: options?.polling || { enabled: true, interval: 1000, timeout: 10000 },
+            onEventReceived: function (eventType: MultiStepActionEventType): void {},
+            notifyListeners: function (event: MultiStepActionEventType): void {},
+            abort: function (): void {},
             isStopped: function (): boolean {
               return false;
             },
@@ -153,7 +251,9 @@ export class MockMyUserContext {
         },
       };
     }
-    console.log('Username did not match:', userIdent);
+
+    console.log('Username did not match for token sign-in:', userIdent);
+    this._isLoading = false;
     return {
       error: 'Invalid credentials',
     };
@@ -163,8 +263,8 @@ export class MockMyUserContext {
     actionId: string,
     token: string,
     newPassword?: string,
-  ): Promise<boolean> {
-    this.isLoading.set(true);
+  ): Promise<true | string> {
+    this._isLoading = true;
 
     // Simulate API delay
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -173,7 +273,7 @@ export class MockMyUserContext {
     if (actionId.includes('reset-password')) {
       // Trigger success event for reset password listeners
       if (this._listeners['resetPassword']) {
-        this._listeners['resetPassword'].forEach((l) => {
+        this._listeners['resetPassword'].forEach((l: any) => {
           l.onEvent(MultiStepActionEventType.success, {
             actionId: actionId,
             notificationResult: MultiStepActionSendNotificationResult.ok,
@@ -192,7 +292,7 @@ export class MockMyUserContext {
         console.log('Password reset successful with new password:', newPassword);
       }
 
-      this.isLoading.set(false);
+      this._isLoading = false;
       return true;
     }
 
@@ -205,7 +305,7 @@ export class MockMyUserContext {
       if (actionId.includes('token-signin')) {
         // Trigger success event for token sign-in listeners
         if (this._listeners['tokenSignIn']) {
-          this._listeners['tokenSignIn'].forEach((l) => {
+          this._listeners['tokenSignIn'].forEach((l: any) => {
             l.onEvent(MultiStepActionEventType.success, {
               actionId: actionId,
               notificationResult: MultiStepActionSendNotificationResult.ok,
@@ -221,7 +321,7 @@ export class MockMyUserContext {
       } else {
         // Trigger success event for email verification listeners
         if (this._listeners['verifyEmail']) {
-          this._listeners['verifyEmail'].forEach((l) => {
+          this._listeners['verifyEmail'].forEach((l: any) => {
             l.onEvent(MultiStepActionEventType.success, {
               actionId: actionId,
               notificationResult: MultiStepActionSendNotificationResult.ok,
@@ -237,51 +337,86 @@ export class MockMyUserContext {
       }
 
       // Set the user as signed in
-      this.myUser.set(mockUser);
-      this.myUserId = mockUser.id;
-      this.isLoading.set(false);
+      this._myUser = mockUser;
+      this._isSignedIn = true;
+      this.client.isSignedIn = true;
+      this.client.myUserId = mockUser.id;
+      this._isLoading = false;
 
       return true;
     }
 
     // Mock failed verification
     console.log('Token verification failed:', token);
-    this.isLoading.set(false);
-    return false;
+    this._isLoading = false;
+    return 'Invalid verification code';
   }
 
-  async signUpUser(email: string): Promise<{ myUser?: MyUser; error?: string }> {
-    this.isLoading.set(true);
+  async signUpUser(email: string): Promise<QueryResult<SignInSignUpResponse>> {
+    this._isLoading = true;
 
     // Simulate API delay
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // Mock successful sign up
-    this.myUser.set({
+    this._myUser = {
       ...mockUser,
       email,
       userHandle: '',
-    });
-    this.myUserId = mockUser.id;
-    this.isLoading.set(false);
+    };
+    this._isSignedIn = true;
+    this.client.isSignedIn = true;
+    this.client.myUserId = mockUser.id;
+    this._isLoading = false;
 
     return {
-      myUser: {
-        ...mockUser,
-        email,
-        userHandle: '',
+      operation: MutationType.create,
+      object: {
+        userAuthResponse: {
+          userId: mockUser.id,
+          firstName: '',
+          lastName: '',
+          authType: AuthType.token,
+          authToken: 'auth-token',
+          foundUser: true,
+          onboardingStage: '',
+        },
+        myUser: {
+          ...mockUser,
+          email,
+          userHandle: '',
+        },
       },
     };
   }
 
   async verifyMyEmail(email: string): Promise<QueryResult<MultiStepActionProgressResult>> {
-    this.isLoading.set(true);
+    this._isLoading = true;
 
     // Simulate API delay
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // Always return a valid response with required properties
-    this.isLoading.set(false);
+    this._isLoading = false;
+
+    // Simulate notification sent event after a short delay
+    setTimeout(() => {
+      if (this._listeners['verifyEmail']) {
+        this._listeners['verifyEmail'].forEach((l: any) => {
+          l.onEvent(MultiStepActionEventType.notificationSent, {
+            actionId: 'mock-verify-email-action-123456',
+            notificationResult: MultiStepActionSendNotificationResult.ok,
+            userId: 'mock-user-id',
+            actionType: MultiStepActionType.verifyEmail,
+            result: MultiStepActionResult.ok,
+            attemptCount: 0,
+            id: 'mock-progress-id',
+            createdAt: new Date().toISOString(),
+          });
+        });
+      }
+    }, 500);
+
     return {
       object: {
         actionProgress: {
@@ -295,35 +430,16 @@ export class MockMyUserContext {
           createdAt: new Date().toISOString(),
         },
         run: {
-          addListener: (listener) => {
-            // Store the listener to trigger events later
+          addListener: (listener: any) => {
             if (!this._listeners['verifyEmail']) {
               this._listeners['verifyEmail'] = [];
             }
             this._listeners['verifyEmail'].push(listener);
 
-            // Simulate notification sent event after a short delay
-            setTimeout(() => {
-              if (this._listeners['verifyEmail']) {
-                this._listeners['verifyEmail'].forEach((l) => {
-                  l.onEvent(MultiStepActionEventType.notificationSent, {
-                    actionId: 'mock-verify-email-action-123456',
-                    notificationResult: MultiStepActionSendNotificationResult.ok,
-                    userId: 'mock-user-id',
-                    actionType: MultiStepActionType.verifyEmail,
-                    result: MultiStepActionResult.ok,
-                    attemptCount: 0,
-                    id: 'mock-progress-id',
-                    createdAt: new Date().toISOString(),
-                  });
-                });
-              }
-            }, 500);
-
             // Simulate success event after a longer delay (after user enters code)
             setTimeout(() => {
               if (this._listeners['verifyEmail']) {
-                this._listeners['verifyEmail'].forEach((l) => {
+                this._listeners['verifyEmail'].forEach((l: any) => {
                   l.onEvent(MultiStepActionEventType.success, {
                     actionId: 'mock-verify-email-action-123456',
                     notificationResult: MultiStepActionSendNotificationResult.ok,
@@ -344,27 +460,36 @@ export class MockMyUserContext {
           actionId: 'mock-verify-email-action-123456',
           listeners: new Map(),
           pollingOptions: { enabled: true, interval: 1000, timeout: 10000 },
-          onEventReceived: function (eventType: MultiStepActionEventType): void {
-            // Implementation not needed for mock
-          },
-          notifyListeners: function (event: MultiStepActionEventType): void {
-            // Implementation not needed for mock
-          },
-          abort: function (): void {
-            // Implementation not needed for mock
-          },
+          onEventReceived: function (eventType: MultiStepActionEventType): void {},
+          notifyListeners: function (event: MultiStepActionEventType): void {},
+          abort: function (): void {},
           isStopped: function (): boolean {
             return false;
           },
         },
-        id: 'verifyMyEmail-mock-id',
+        id: 'verifyEmail-mock-id',
         createdAt: Date.now().toString(),
       },
     };
   }
 
-  async updateMyUser(userData: { id: string; userHandle: string }): Promise<QueryResult<MyUser>> {
-    this.isLoading.set(true);
+  async verifyMyPassword(password: string): Promise<QueryResult<boolean>> {
+    this._isLoading = true;
+
+    // Simulate API delay
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // Mock successful verification if password is '123456789'
+    const isValid = password === '123456789';
+    this._isLoading = false;
+
+    return {
+      object: isValid,
+    };
+  }
+
+  async updateMyUser(changes: Partial<MyUserChanges>): Promise<QueryResult<MyUser>> {
+    this._isLoading = true;
 
     // Simulate API delay
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -372,37 +497,43 @@ export class MockMyUserContext {
     // Update the mock user
     const updatedUser = {
       ...mockUser,
-      userHandle: userData.userHandle,
+      ...changes,
     };
 
-    this.myUser.set(updatedUser);
-    this.isLoading.set(false);
+    this._myUser = updatedUser;
+    this._isLoading = false;
 
     return { object: updatedUser };
   }
 
-  async updateMyPassword(currentPassword: string, newPassword: string): Promise<QueryResult<void>> {
-    this.isLoading.set(true);
+  async updateMyPassword(currentPassword: string, newPassword: string): Promise<true | string> {
+    this._isLoading = true;
 
     // Simulate API delay
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    this.isLoading.set(false);
+    // Verify current password
+    if (currentPassword !== '123456789') {
+      this._isLoading = false;
+      return 'Current password is incorrect';
+    }
 
-    return {
-      operation: MutationType.update,
-    };
+    // Update password successful
+    this._isLoading = false;
+    return true;
   }
 
   async signMeOut(): Promise<boolean> {
-    this.isLoading.set(true);
+    this._isLoading = true;
 
     // Simulate API delay
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    this.myUser.set(null);
-    this.myUserId = '';
-    this.isLoading.set(false);
+    this._myUser = undefined;
+    this._isSignedIn = false;
+    this.client.isSignedIn = false;
+    this.client.myUserId = '';
+    this._isLoading = false;
 
     return true;
   }
@@ -410,54 +541,47 @@ export class MockMyUserContext {
   async isUserIdentAvailable(
     ident: string,
     identType: UserIdentType,
-  ): Promise<{ isAvailable?: boolean; error?: string }> {
-    this.isLoading.set(true);
+  ): Promise<QueryResult<boolean>> {
+    this._isLoading = true;
 
     // Simulate API delay
     await new Promise((resolve) => setTimeout(resolve, 500));
 
     // Mock implementation logic
     if (!this.isInitialized) {
-      this.isLoading.set(false);
+      this._isLoading = false;
       return { error: 'Client not initialized' };
     }
 
     try {
-      // For email type, check if it matches the mock user's email
-      if (identType === UserIdentType.email) {
-        const isAvailable = ident.toLowerCase() !== mockUser.email?.toLowerCase();
-        this.isLoading.set(false);
-        return { isAvailable };
-      }
-
-      // For userHandle type, check if it matches the mock user's handle
-      if (identType === UserIdentType.userHandle) {
-        const isAvailable = ident.toLowerCase() !== mockUser.userHandle?.toLowerCase();
-        this.isLoading.set(false);
-        return { isAvailable };
+      // Special case for testing - make 'taken@example.com' and 'takenuserhandle' unavailable
+      if (
+        (identType === UserIdentType.email && ident === 'taken@example.com') ||
+        (identType === UserIdentType.userHandle && ident === 'takenuserhandle')
+      ) {
+        this._isLoading = false;
+        return { object: false };
       }
 
       // Default case - most identifiers should be available in mock
-      this.isLoading.set(false);
-      return { isAvailable: true };
+      this._isLoading = false;
+      return { object: true };
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to check identity availability';
-      this.error.set(errorMsg);
-      console.error('Error checking identity availability:', err);
-      this.isLoading.set(false);
-      return { isAvailable: false, error: errorMsg };
+      this._isLoading = false;
+      return { error: errorMsg };
     }
   }
 
-  async findAvailableUserHandle(email: string): Promise<string | { error: string } | null> {
-    this.isLoading.set(true);
+  async findAvailableUserHandle(email: string): Promise<QueryResult<string>> {
+    this._isLoading = true;
 
     // Simulate API delay
     await new Promise((resolve) => setTimeout(resolve, 500));
 
     // Mock implementation logic
     if (!this.isInitialized) {
-      this.isLoading.set(false);
+      this._isLoading = false;
       return { error: 'Client not initialized' };
     }
 
@@ -469,25 +593,23 @@ export class MockMyUserContext {
       const randomNum = Math.floor(Math.random() * 1000);
       const suggestedHandle = `${username}${randomNum}`;
 
-      this.isLoading.set(false);
-      return suggestedHandle;
+      this._isLoading = false;
+      return { object: suggestedHandle };
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to find available handle';
-      this.error.set(errorMsg);
-      console.error('Error finding available handle:', err);
-      this.isLoading.set(false);
-      return null;
+      this._isLoading = false;
+      return { error: errorMsg };
     }
   }
 
   async resetMyPassword(email: string): Promise<QueryResult<MultiStepActionProgressResult>> {
-    this.isLoading.set(true);
+    this._isLoading = true;
 
     // Simulate API delay
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // Always return a valid response with required properties
-    this.isLoading.set(false);
+    this._isLoading = false;
     return {
       object: {
         actionProgress: {
@@ -501,7 +623,7 @@ export class MockMyUserContext {
           createdAt: new Date().toISOString(),
         },
         run: {
-          addListener: (listener) => {
+          addListener: (listener: any) => {
             // Store the listener to trigger events later
             if (!this._listeners['resetPassword']) {
               this._listeners['resetPassword'] = [];
@@ -511,7 +633,7 @@ export class MockMyUserContext {
             // Simulate notification sent event after a short delay
             setTimeout(() => {
               if (this._listeners['resetPassword']) {
-                this._listeners['resetPassword'].forEach((l) => {
+                this._listeners['resetPassword'].forEach((l: any) => {
                   l.onEvent(MultiStepActionEventType.notificationSent, {
                     actionId: 'mock-reset-password-action-123456',
                     notificationResult: MultiStepActionSendNotificationResult.ok,
@@ -532,15 +654,9 @@ export class MockMyUserContext {
           actionId: 'mock-reset-password-action-123456',
           listeners: new Map(),
           pollingOptions: { enabled: true, interval: 1000, timeout: 10000 },
-          onEventReceived: function (eventType: MultiStepActionEventType): void {
-            // Implementation not needed for mock
-          },
-          notifyListeners: function (event: MultiStepActionEventType): void {
-            // Implementation not needed for mock
-          },
-          abort: function (): void {
-            // Implementation not needed for mock
-          },
+          onEventReceived: function (eventType: MultiStepActionEventType): void {},
+          notifyListeners: function (event: MultiStepActionEventType): void {},
+          abort: function (): void {},
           isStopped: function (): boolean {
             return false;
           },
@@ -552,7 +668,7 @@ export class MockMyUserContext {
   }
 
   async sendMultiStepActionNotification(actionId: string, email?: string): Promise<boolean> {
-    this.isLoading.set(true);
+    this._isLoading = true;
 
     // Simulate API delay
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -562,7 +678,7 @@ export class MockMyUserContext {
 
     actionTypes.forEach((type) => {
       if (this._listeners[type]) {
-        this._listeners[type].forEach((l) => {
+        this._listeners[type].forEach((l: any) => {
           l.onEvent(MultiStepActionEventType.notificationSent, {
             actionId: `mock-${type}-action-123456`,
             notificationResult: MultiStepActionSendNotificationResult.ok,
@@ -577,8 +693,20 @@ export class MockMyUserContext {
       }
     });
 
-    this.isLoading.set(false);
+    this._isLoading = false;
     return true;
+  }
+
+  public get isSignedIn(): boolean {
+    return this._isSignedIn;
+  }
+
+  public get myUserHandle(): string | null | undefined {
+    return this._myUser?.userHandle;
+  }
+
+  public get myEmail(): string | null | undefined {
+    return this._myUser?.email;
   }
 }
 
