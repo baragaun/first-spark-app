@@ -139,7 +139,7 @@
       "update_password": "Mein Passwort aktualisieren",
       "processing": "Wird verarbeitet...",
       "signup": "Registrieren",
-      "change_email_username": "E-Mail oder Benutzername ändern"
+      "start_over": "Neu beginnen"
     }
   },
   "verify_token": {
@@ -246,6 +246,6 @@
   "form_button_default": {
     "buttonText": "Absenden",
     "successText": "Erfolgreich!",
-    "loadingText": "Wird verarbeitet"
+    "loadingText": "Wird verarbeitet..."
   }
 }

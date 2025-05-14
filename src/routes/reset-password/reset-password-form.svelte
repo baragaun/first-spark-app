@@ -350,7 +350,7 @@
           {resendTimer}
           onResendClick={handleResendToken}
           showBackButton={true}
-          backButtonLabel={m['reset_password.buttons.change_email_username']()}
+          backButtonLabel={m['reset_password.buttons.start_over']()}
           onBackButtonClick={() => {
             step = 1;
             hasStepError = false;

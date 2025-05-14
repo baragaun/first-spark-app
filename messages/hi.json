@@ -1,6 +1,6 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-  "welcome": "फर्स्ट स्पार्क में आपका स्वागत है",
+  "welcome": "फर्स्ट स्पार्क में आपका स्वागत है।",
   "welcome_subtitle": "जुड़ें, प्रेरित करें, विकसित हों!",
   "join_first_spark": "फर्स्ट स्पार्क से जुड़ें",
   "get_started": "शुरू करें",
@@ -12,7 +12,7 @@
     "menu": {
       "home": "होम",
       "inbox": "इनबॉक्स",
-      "conversations": "वार्तालाप",
+      "conversations": "बातचीत",
       "contacts": "संपर्क",
       "settings": "सेटिंग्स"
     }
@@ -25,15 +25,15 @@
       "dark_mode": "डार्क मोड"
     },
     "auth": {
-      "sign_in": "लॉग इन",
+      "sign_in": "साइन इन",
       "sign_up": "साइन अप",
       "sign_out": "साइन आउट"
     }
   },
   "footer": {
-    "copyright": "© {year} First Spark. सर्वाधिकार सुरक्षित।",
+    "copyright": "© {year} फर्स्ट स्पार्क. सर्वाधिकार सुरक्षित।",
     "navigation": {
-      "faq": "सामान्य प्रश्न",
+      "faq": "अक्सर पूछे जाने वाले प्रश्न",
       "privacy_policy": "गोपनीयता नीति",
       "terms_of_service": "सेवा की शर्तें"
     }
@@ -42,7 +42,7 @@
     "profile": "प्रोफ़ाइल",
     "inbox": "इनबॉक्स",
     "settings": "सेटिंग्स",
-    "logout": "लॉग आउट"
+    "logout": "लॉगआउट"
   },
   "language": {
     "change": "भाषा बदलें",
@@ -50,152 +50,152 @@
   },
   "signin": {
     "title": "साइन इन",
-    "description": "अपने खाते में साइन इन करने के लिए नीचे अपना ईमेल पता दर्ज करें",
-    "sign_with_token_description": "{identifier} पर भेजा गया सत्यापन कोड दर्ज करें",
+    "description": "अपने खाते में साइन इन करने के लिए अपना ईमेल पता दर्ज करें",
+    "sign_with_token_description": "{identifier} पर भेजे गए सत्यापन कोड को दर्ज करें",
     "sign_with_password_description": "{identifier} के रूप में साइन इन करने के लिए अपना पासवर्ड दर्ज करें",
     "have_account": "फर्स्ट स्पार्क पर नए हैं?",
     "forgot_password": "पासवर्ड भूल गए?",
-    "username_or_email_placeholder": "उपयोगकर्ता नाम या ईमेल",
-    "identifier_label": "ईमेल या उपयोगकर्ता नाम",
+    "username_or_email_placeholder": "यूजरनेम या ईमेल",
+    "identifier_label": "ईमेल या यूजरनेम",
     "password_label": "पासवर्ड",
     "email_placeholder": "ईमेल",
-    "identifier_placeholder": "अपना ईमेल या उपयोगकर्ता नाम दर्ज करें",
+    "identifier_placeholder": "अपना ईमेल या यूजरनेम दर्ज करें",
     "password_placeholder": "अपना पासवर्ड दर्ज करें",
     "buttons": {
       "signin": "साइन इन करें",
-      "signin_with_token": "टोकन से साइन इन करें",
+      "signin_with_token": "कोड से साइन इन करें",
       "signin_with_password": "पासवर्ड से साइन इन करें",
       "forgot_password": "पासवर्ड भूल गए?",
-      "back": "← लॉग इन पर वापस जाएं",
+      "back": "← लॉगिन पर वापस जाएं",
       "verify": "सत्यापित करें",
-      "verifying": "सत्यापन किया जा रहा है...",
-      "Signing_in": "साइन इन किया जा रहा है...",
+      "verifying": "सत्यापन हो रहा है...",
+      "Signing_in": "साइन इन हो रहा है...",
       "signup": "साइन अप करें"
     },
     "error": {
-      "required": "उपयोगकर्ता नाम या ईमेल आवश्यक है",
-      "invalid_credentials": "अमान्य उपयोगकर्ता नाम, ईमेल या पासवर्ड। कृपया पुन: प्रयास करें।"
+      "required": "यूजरनेम या ईमेल आवश्यक है।",
+      "invalid_credentials": "गलत यूजरनेम, ईमेल या पासवर्ड। कृपया फिर से प्रयास करें।"
     }
   },
   "signup": {
     "title": "साइन अप",
-    "email_description": "अपना फर्स्ट स्पार्क खाता बनाने के लिए एक ईमेल पता प्रदान करें।",
-    "verification_description": "हमने {email} पर जो सत्यापन कोड भेजा है उसे दर्ज करें।",
-    "create_credentials_description": "अपने खाते के लिए एक उपयोगकर्ता नाम और पासवर्ड चुनें।",
+    "email_description": "अपना फर्स्ट स्पार्क खाता बनाने के लिए ईमेल पता दर्ज करें।",
+    "verification_description": "हमने {email} पर एक सत्यापन कोड भेजा है, कृपया उसे दर्ज करें।",
+    "create_credentials_description": "अपने खाते के लिए एक यूजरनेम और पासवर्ड चुनें।",
     "email_title": "ईमेल पता",
-    "username": "उपयोगकर्ता नाम",
+    "username": "यूजरनेम",
     "password": "पासवर्ड",
-    "email_placeholder": "उदाहरण: 'student@example.com'",
-    "username_description": "उपयोगकर्ता नाम अद्वितीय होते हैं। हम जांचेंगे कि आपका पहले से उपयोग में नहीं है।",
-    "username_placeholder": "उदाहरण: 'giraffe08'",
+    "email_placeholder": "जैसे: 'student@example.com'",
+    "username_description": "यूजरनेम अद्वितीय होते हैं। हम जांचेंगे कि आपका यूजरनेम पहले से उपयोग में तो नहीं है।",
+    "username_placeholder": "जैसे: 'giraffe08'",
     "password_placeholder": "अपना पासवर्ड दर्ज करें",
     "errors": {
-      "email_unavailable": "यह ईमेल वर्तमान में उपयोग के लिए उपलब्ध नहीं है।",
-      "username_unavailable": "यह उपयोगकर्ता नाम वर्तमान में उपयोग के लिए उपलब्ध नहीं है।"
+      "email_unavailable": "यह ईमेल पहले से उपयोग में है।",
+      "username_unavailable": "यह यूजरनेम पहले से उपयोग में है।"
     },
     "buttons": {
       "sign_up": "साइन अप करें",
       "sign_in": "साइन इन करें",
-      "have_account": "क्या आपके पास पहले से खाता है?",
+      "have_account": "क्या आपका पहले से खाता है?",
       "verify": "सत्यापित करें",
-      "sending": "भेजा जा रहा है...",
-      "verifying": "सत्यापन हो रहा है...",
+      "sending": "भेज रहे हैं...",
+      "verifying": "सत्यापित कर रहे हैं...",
       "create_account": "खाता बनाएं",
-      "creating_account": "खाता बनाया जा रहा है..."
+      "creating_account": "खाता बन रहा है..."
     }
   },
   "reset_password": {
-    "title": "अपना पासवर्ड रीसेट करें",
-    "description": "सत्यापन कोड प्राप्त करने के लिए अपना उपयोगकर्ता नाम या ईमेल दर्ज करें",
+    "title": "पासवर्ड रीसेट करें",
+    "description": "सत्यापन कोड प्राप्त करने के लिए अपना यूजरनेम या ईमेल दर्ज करें",
     "check_inbox": {
-      "title": "अपने इनबॉक्स की जांच करें",
-      "description": "हमने {email} पर एक सत्यापन कोड भेजा है",
+      "title": "अपना इनबॉक्स चेक करें",
+      "description": "हमने {email} पर एक सत्यापन कोड भेजा है।",
       "code_expiration": "नोट: सत्यापन कोड 10 मिनट में समाप्त हो जाएगा।",
       "didnt_get_email": "ईमेल नहीं मिला?"
     },
     "form": {
-      "identifier_label": "ईमेल या उपयोगकर्ता नाम",
-      "identifier_placeholder": "अपना ईमेल या उपयोगकर्ता नाम दर्ज करें",
+      "identifier_label": "ईमेल या यूजरनेम",
+      "identifier_placeholder": "अपना ईमेल या यूजरनेम दर्ज करें",
       "errors": {
         "account_not_found": "इस ईमेल पते से कोई खाता नहीं मिला",
-        "default_error": "आपका अनुरोध संसाधित नहीं किया जा सका। कृपया पुनः प्रयास करें।",
-        "valid_ident_required": "एक मान्य उपयोगकर्ता नाम या ईमेल आवश्यक है"
+        "default_error": "आपका अनुरोध पूरा नहीं हो सका। कृपया फिर से प्रयास करें।",
+        "valid_ident_required": "एक वैध यूजरनेम या ईमेल आवश्यक है।"
       }
     },
     "new_password_form": {
       "description": "अपना पासवर्ड अपडेट करने के लिए नया पासवर्ड और सत्यापन कोड दर्ज करें",
       "label": "नया पासवर्ड",
       "placeholder": "नया पासवर्ड दर्ज करें",
-      "otp_description": "{identifier} पर भेजे गए सत्यापन कोड और नया पासवर्ड दर्ज करें ताकि आप अपना पासवर्ड अपडेट कर सकें"
+      "otp_description": "अपना पासवर्ड अपडेट करने के लिए {identifier} पर भेजे गए सत्यापन कोड और नया पासवर्ड दर्ज करें"
     },
     "buttons": {
       "send_email": "मुझे ईमेल भेजें",
-      "sending_email": "ईमेल भेजा जा रहा है...",
-      "resend_email": "ईमेल पुनः भेजें",
-      "resend_timer": "{time} में पुनः भेजें",
-      "back_to_login": "लॉग इन पर वापस जाएं",
+      "sending_email": "ईमेल भेज रहे हैं...",
+      "resend_email": "ईमेल फिर से भेजें",
+      "resend_timer": "{time} में फिर से भेजें",
+      "back_to_login": "लॉगिन पर वापस जाएं",
       "need_help": "मदद चाहिए?",
       "have_account": "खाता नहीं है?",
-      "update_password": "मेरा पासवर्ड अपडेट करें",
-      "processing": "प्रसंस्करण हो रहा है...",
+      "update_password": "पासवर्ड अपडेट करें",
+      "processing": "प्रक्रिया जारी है...",
       "signup": "साइन अप करें",
-      "change_email_username": "ईमेल या उपयोगकर्ता नाम बदलें"
+      "start_over": "फिर से शुरू करें"
     }
   },
   "verify_token": {
     "verification_code": "सत्यापन कोड",
-    "resend": "कोड पुनः भेजें",
-    "resend_in": "पुनः भेजें",
+    "resend": "कोड फिर से भेजें",
+    "resend_in": "फिर से भेजें",
     "error": {
-      "dev_mode_error": "सूचना भेजने में विफल रहा, लेकिन आप डेवलपमेंट मोड में हैं।",
-      "min_length": "आपका एक बार का पासवर्ड कम से कम 6 अक्षर का होना चाहिए",
-      "invalid": "हम आपके द्वारा दर्ज किया गया टोकन सत्यापित नहीं कर सके। कृपया पुनः प्रयास करें।"
+      "dev_mode_error": "सूचना भेजने में विफल, लेकिन आप डेवलपमेंट मोड में हैं।",
+      "min_length": "आपका वन-टाइम पासवर्ड कम से कम 6 अक्षर का होना चाहिए",
+      "invalid": "आपके द्वारा दर्ज किया गया कोड सत्यापित नहीं हो सका। कृपया फिर से प्रयास करें।"
     }
   },
   "theme": {
     "light_switch": "थीम बदलें",
-    "light": "प्रकाश",
-    "dark": "अंधकार",
+    "light": "लाइट",
+    "dark": "डार्क",
     "system": "सिस्टम"
   },
   "connection": {
     "offline": "आप ऑफ़लाइन हैं",
     "online": "फर्स्ट स्पार्क द्वारा संचालित",
     "offline.description": "आप वर्तमान में कनेक्ट नहीं हैं।",
-    "reconnected": "पुनः कनेक्ट हुआ",
-    "reconnected.description": "फर्स्ट स्पार्क से पुनः कनेक्ट हो गया!"
+    "reconnected": "फिर से कनेक्ट हो गया",
+    "reconnected.description": "फर्स्ट स्पार्क से फिर से कनेक्ट हो गया!"
   },
   "setting": {
     "setting_label": "सेटिंग्स",
     "account": "खाता",
-    "notification": "सूचना",
+    "notification": "सूचनाएँ",
     "username": {
-      "label": "मेरा उपयोगकर्ता नाम",
-      "change_username": "अपना उपयोगकर्ता नाम बदलें",
-      "change_username_description": "आप किसी भी समय अपना उपयोगकर्ता नाम बदल सकते हैं। आपका पिछला उपयोगकर्ता नाम तुरंत उपयोग के लिए उपलब्ध हो जाएगा।",
-      "current_username": "वर्तमान उपयोगकर्ता नाम",
-      "new_username": "नया उपयोगकर्ता नाम",
-      "suggest_new": "नया सुझाएं",
-      "generating": "जनरेट कर रहे हैं...",
+      "label": "मेरा यूजरनेम",
+      "change_username": "अपना यूजरनेम बदलें",
+      "change_username_description": "आप किसी भी समय अपना यूजरनेम बदल सकते हैं। आपका पुराना यूजरनेम तुरंत दूसरों के लिए उपलब्ध हो जाएगा।",
+      "current_username": "वर्तमान यूजरनेम",
+      "new_username": "नया यूजरनेम",
+      "suggest_new": "सुझाव दें",
+      "generating": "सुझाव तैयार हो रहा है...",
       "username_placeholder": "जैसे: 'giraffe08'",
       "error": {
-        "min_length": "उपयोगकर्ता नाम कम से कम 3 अक्षरों का होना चाहिए",
-        "max_length": "उपयोगकर्ता नाम में अधिकतम 30 अक्षर हो सकते हैं।",
-        "unavailable": "यह उपयोगकर्ता नाम वर्तमान में उपयोग के लिए उपलब्ध नहीं है।",
-        "in_use": "आप पहले से ही इस उपयोगकर्ता नाम का उपयोग कर रहे हैं। कृपया कोई अन्य चुनें।",
-        "alphanumeric": "उपयोगकर्ता नाम में केवल अक्षर और संख्याएँ होनी चाहिए"
+        "min_length": "यूजरनेम कम से कम 3 अक्षर का होना चाहिए",
+        "max_length": "यूजरनेम अधिकतम 30 अक्षर का हो सकता है।",
+        "unavailable": "यह यूजरनेम पहले से उपयोग में है। कृपया कोई अन्य चुनें।",
+        "in_use": "आप पहले से ही इस यूजरनेम का उपयोग कर रहे हैं। कृपया कोई अन्य चुनें।",
+        "alphanumeric": "यूजरनेम में केवल अक्षर और संख्याएँ होनी चाहिए"
       }
     },
     "email": {
       "label": "मेरा ईमेल",
-      "change_email": "अपना पंजीकृत ईमेल बदलें",
-      "change_email_description": "खाता अपडेट करने के लिए एक अलग ईमेल और एक सत्यापन कोड दर्ज करें।",
+      "change_email": "अपना रजिस्टर्ड ईमेल बदलें",
+      "change_email_description": "अपना खाता अपडेट करने के लिए एक अलग ईमेल और सत्यापन कोड दर्ज करें।",
       "current_email": "वर्तमान ईमेल",
       "new_email": "नया ईमेल",
       "email_placeholder": "जैसे: anne@example.com",
       "error": {
-        "invalid": "कृपया एक मान्य ईमेल पता दर्ज करें।",
-        "unavailable": "यह ईमेल वर्तमान में उपयोग के लिए उपलब्ध नहीं है।",
+        "invalid": "कृपया एक वैध ईमेल पता दर्ज करें।",
+        "unavailable": "यह ईमेल पहले से उपयोग के लिए उपलब्ध नहीं है।",
         "existing": "कृपया एक अलग ईमेल पता प्रदान करें।"
       }
     },
@@ -208,7 +208,7 @@
       "current_password_placeholder": "अपना वर्तमान पासवर्ड दर्ज करें",
       "new_password_placeholder": "अपना नया पासवर्ड दर्ज करें",
       "error": {
-        "required": "वर्तमान पासवर्ड आवश्यक है",
+        "required": "वर्तमान पासवर्ड आवश्यक है।",
         "min_length": "आपका पासवर्ड कम से कम 8 अक्षरों का होना चाहिए",
         "incorrect": "गलत पासवर्ड। कृपया जाँचें और पुनः प्रयास करें।"
       }
@@ -233,7 +233,7 @@
     },
     "buttons": {
       "update": "अपडेट करें",
-      "updating": "अपडेट किया जा रहा है",
+      "updating": "अपडेट किया जा रहा है...",
       "delete_account": "मेरा खाता हटाएं",
       "cleaning": "हटाए जा रहे हैं...",
       "goodbuy": "नमस्ते!",
@@ -246,6 +246,6 @@
   "form_button_default": {
     "buttonText": "सबमिट करें",
     "successText": "सफल!",
-    "loadingText": "प्रसंस्करण हो रहा है"
+    "loadingText": "प्रसंस्करण हो रहा है..."
   }
 }
