@@ -565,3 +565,7 @@ export class MyUserContext {
 
 // Create a singleton instance
 export const myUserContext = new MyUserContext();
+
+if (typeof window !== 'undefined') {
+  (window as Window & typeof globalThis & { __myUserContext: typeof myUserContext }).__myUserContext = myUserContext;
+}
