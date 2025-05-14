@@ -1,5 +1,5 @@
 <script module>
-  import FormIdentInput from '@/components/forms/form-ident-input.svelte';
+  import FormPassword from '$lib/components/forms/form-password-input.svelte';
   import { defineMeta } from '@storybook/addon-svelte-csf';
   import { writable } from 'svelte/store';
 
@@ -26,8 +26,8 @@
   };
 
   const { Story } = defineMeta({
-    title: 'Components/Forms/FormIdentInput',
-    component: FormIdentInput,
+    title: 'Components/Forms/FormPassword',
+    component: FormPassword,
     parameters: {
       layout: 'centered',
     },
@@ -51,7 +51,7 @@
       form: {
         subscribe: function (run, invalidate) {
           // Mock implementation that returns an unsubscriber function
-          run({ ident: 'Johan' }); // token field value
+          run({ password: 'Johan' }); // token field value
           return function unsubscribe() {};
         },
         set: function (value, options) {},
@@ -91,6 +91,6 @@
         throw new Error('Function not implemented.');
       },
     },
-    fieldName: 'ident',
+    fieldName: 'Password',
   }}
 />

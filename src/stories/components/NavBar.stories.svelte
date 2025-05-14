@@ -56,7 +56,7 @@
   }}
 >
   <NavBar
-    isAuthenticated= {true}
+    isAuthenticated={true}
     myUser={{
       id: '1234567890',
       email: 'test@example.com',

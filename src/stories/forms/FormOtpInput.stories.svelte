@@ -26,7 +26,7 @@
   };
 
   const { Story } = defineMeta({
-    title: 'Components/forms/FormOtpInput',
+    title: 'Components/Forms/FormOtpInput',
     component: FormOtpInput,
     parameters: {
       layout: 'centered',

@@ -47,7 +47,7 @@
     expect(connectionButton).toBeInTheDocument();
   }}
 >
-    <Sidebar.Provider>
-      <AppSidebar />
-    </Sidebar.Provider>
+  <Sidebar.Provider>
+    <AppSidebar />
+  </Sidebar.Provider>
 </Story>
