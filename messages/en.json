@@ -45,7 +45,6 @@
     "logout": "Log out"
   },
   "language": {
-    "title": "Language",
     "change": "Change Language",
     "select": "Select Language"
   },
@@ -141,7 +140,6 @@
     }
   },
   "theme": {
-    "title": "Theme",
     "light_switch": "Change theme",
     "light": "Light",
     "dark": "Dark",

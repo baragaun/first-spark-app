@@ -24,7 +24,7 @@ export const load: LayoutLoad = async ({ url }) => {
       };
     } finally {
       if (url.pathname === '/settings/notifications') {
-        redirect(302, '/settings');
+        redirect(307, '/settings');
         // Redirect to the Account tab or main Settings page
       }
     }

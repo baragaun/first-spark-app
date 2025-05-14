@@ -15,7 +15,7 @@
       size="icon"
       class={`${className} text-muted-foreground hover:text-foreground`}
       aria-label={m['language.select']()}
-      title={m['language.title']()}
+      title={m['language.select']()}
     >
       <Languages class="h-5 w-5" />
     </Button>

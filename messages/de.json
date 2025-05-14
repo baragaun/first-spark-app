@@ -45,7 +45,6 @@
     "logout": "Abmelden"
   },
   "language": {
-    "title": "Sprache",
     "change": "Sprache ändern",
     "select": "Sprache auswählen"
   },
@@ -116,7 +115,6 @@
     }
   },
   "theme": {
-    "title": "Thema",
     "light_switch": "Thema ändern",
     "light": "Hell",
     "dark": "Dunkel",
