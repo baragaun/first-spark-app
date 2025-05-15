@@ -102,29 +102,6 @@
     expect(submitButton).toBeInTheDocument();
     await userEvent.click(submitButton);
 
-    // Add a success indicator
-    const successPopup = document.createElement('div');
-    successPopup.id = 'test-success-popup';
-    successPopup.style.position = 'fixed';
-    successPopup.style.top = '20px';
-    successPopup.style.right = '20px';
-    successPopup.style.padding = '15px 20px';
-    successPopup.style.background = '#4CAF50';
-    successPopup.style.color = 'white';
-    successPopup.style.borderRadius = '5px';
-    successPopup.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
-    successPopup.style.zIndex = '9999';
-    successPopup.style.fontFamily = 'sans-serif';
-    successPopup.textContent = '✅ Form Interaction Test Completed Successfully!';
-
-    document.body.appendChild(successPopup);
-
-    // Remove the popup after 5 seconds
-    setTimeout(() => {
-      if (document.body.contains(successPopup)) {
-        document.body.removeChild(successPopup);
-      }
-    }, 5000);
   }}
 >
   <form>
