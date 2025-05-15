@@ -561,6 +561,23 @@ export class MyUserContext {
   public get myEmail(): string | null | undefined {
     return myUser?.email;
   }
+
+  public get myUserInitials(): string {
+    if (!this.myUserHandle) return '';
+
+    const parts = this.myUserHandle.split(/[^a-zA-Z]/).filter(Boolean);
+    if (parts.length === 0) return '';
+
+    if (parts.length > 1) {
+      return (parts[0][0] + parts[parts.length - 1][0]).substring(0, 2);
+    }
+
+    const word = parts[0];
+    const firstChar = word[0];
+    const firstUpperAfterStart = word.slice(1).match(/[A-Z]/)?.[0] || '';
+
+    return (firstChar + firstUpperAfterStart).substring(0, 2);
+  }
 }
 
 // Create a singleton instance

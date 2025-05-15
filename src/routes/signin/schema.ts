@@ -1,3 +1,4 @@
+import { m } from '@/paraglide/messages';
 import { UserIdentType } from '@baragaun/bg-node-client';
 import { z } from 'zod';
 import { emailSchema, otpSchema, passwordSchema, usernameSchema } from '../../lib/schemas/common';
@@ -5,7 +6,7 @@ import { emailSchema, otpSchema, passwordSchema, usernameSchema } from '../../li
 export const schemaFirstStep = z.object({
   ident: z
     .string()
-    .min(3, 'Username or email is required')
+    .min(3, m['signin.error.required']())
     .transform((val) => val.trim()),
   token: otpSchema.transform((val) => val.trim()).optional(),
   password: passwordSchema.transform((val) => val.trim()).optional(),
@@ -21,7 +22,7 @@ export const signInFormSchema = z.discriminatedUnion('authType', [schemaFirstSte
 
 export const getOtpMessage = (formData: { ident?: string }) => {
   const identifier = formData.ident || '';
-  return `Enter the verification code sent to ${identifier}`;
+  return m['signin.sign_with_token_description']({ identifier });
 };
 
 export const determineIdentifierType = (value: string): UserIdentType => {

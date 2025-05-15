@@ -13,6 +13,7 @@
   import { onDestroy } from 'svelte';
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
+  import { debounce } from 'throttle-debounce';
   import {
     emailFormSchemaFirstStep,
     emailFormSchemaLastStep,
@@ -39,7 +40,6 @@
   let otpHandler: MsaListenerHandler | undefined = $state(undefined);
   let msaId = $state<string | undefined>(undefined);
 
-  let debounceTimer: number | null = null;
   const RESEND_TIMER_DURATION = 30; // s
   const DEBOUNCE_DELAY = 500;
   const tokenFieldName = 'token';
@@ -48,13 +48,28 @@
   const steps = [zod(emailFormSchemaFirstStep), zod(emailFormSchemaLastStep)];
   const getCurrentValidator = () => steps[step - 1];
 
+  // Replace setTimeout/clearTimeout with debounce
+  const debounceFormValidation = debounce(DEBOUNCE_DELAY, async () => {
+    try {
+      const validationResult = await validateForm({ update: true, focusOnError: false });
+      if (validationResult.valid && step === 1) {
+        const available = await checkIdentAvailability();
+        hasStepError = !available;
+      } else {
+        hasStepError = !validationResult.valid;
+      }
+    } catch (error) {
+      console.error('Error validating form input:', error);
+    }
+  });
+
   const form = superForm(preValidatedForm, {
     dataType: 'json',
     validators: getCurrentValidator(),
     resetForm: true,
     validationMethod: 'submit-only',
     async onChange() {
-      await debounceFormValidation();
+      debounceFormValidation();
     },
     async onSubmit({ cancel }) {
       cancel();
@@ -84,28 +99,6 @@
       };
       return newErrors;
     });
-  };
-
-  const debounceFormValidation = async () => {
-    if (debounceTimer) clearTimeout(debounceTimer);
-
-    if (!$formData) return;
-
-    debounceTimer = window.setTimeout(async () => {
-      try {
-        const validationResult = await validateForm({ update: true, focusOnError: false });
-        if (validationResult.valid && step === 1) {
-          const available = await checkIdentAvailability();
-          hasStepError = !available;
-        } else {
-          hasStepError = !validationResult.valid;
-        }
-      } catch (error) {
-        console.error('Error validating form input:', error);
-      } finally {
-        debounceTimer = null;
-      }
-    }, DEBOUNCE_DELAY);
   };
 
   const checkIdentAvailability = async (): Promise<boolean> => {
@@ -194,6 +187,7 @@
       msaId = verificationResponse.object.actionProgress.actionId;
       const onNotificationSent = () => {
         step = 2;
+        hasStepError = true;
         isLoading = false;
       };
       const onFailure = () => {
@@ -286,18 +280,12 @@
   onDestroy(() => {
     clearInterval(timerInterval);
     if (otpHandler) otpHandler.removeListener();
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
-      debounceTimer = null;
-    }
+
+    // Cancel the debounced function
+    debounceFormValidation.cancel();
   });
 
   $effect(() => {
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
-      debounceTimer = null;
-    }
-
     if (!$formData) {
       isLoading = false;
       return;
@@ -341,6 +329,12 @@
       {canResend}
       {resendTimer}
       onResendClick={resendToken}
+      showBackButton={true}
+      backButtonLabel={m['setting.buttons.change_email']()}
+      onBackButtonClick={() => {
+        step = 1;
+        hasStepError = false;
+      }}
     />
   {/if}
 

@@ -1,3 +1,4 @@
+import { m } from '@/paraglide/messages';
 import { UserIdentType } from '@baragaun/bg-node-client';
 import { z } from 'zod';
 import { emailSchema, otpSchema, passwordSchema, usernameSchema } from '../../lib/schemas/common';
@@ -7,7 +8,7 @@ export { emailSchema, usernameSchema };
 export const schemaFirstStep = z.object({
   ident: z
     .string()
-    .min(3, 'A valid username or email is required')
+    .min(3, m['reset_password.form.errors.valid_ident_required']())
     .transform((val) => val.trim()),
 });
 
@@ -19,7 +20,7 @@ export const schemaLastStep = schemaFirstStep.extend({
 
 export const getOtpMessage = (formData: { ident?: string }) => {
   const identifier = formData.ident || '';
-  return `Enter a new password and the verification code we sent to ${identifier} to update your password`;
+  return m['reset_password.new_password_form.otp_description']({ identifier });
 };
 
 export const determineIdentifierType = (value: string): UserIdentType => {
