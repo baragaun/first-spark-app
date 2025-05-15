@@ -1,6 +1,7 @@
-import NavBar from '@/components/global/nav-bar/nav-bar.svelte';
+import NavBar from '@/components/layout/nav-bar/nav-bar.svelte';
 import { render, screen } from '@testing-library/svelte';
 import { afterEach, describe, expect, it } from 'vitest';
+import { m } from '$lib/paraglide/messages.js';
 
 describe('NavBar', () => {
   // beforeEach(() => {});
@@ -29,13 +30,13 @@ describe('NavBar', () => {
 
   it('renders theme toggle button', async () => {
     render(NavBar);
-    const themeToggleButton = screen.getByRole('button', { name: /change theme/i });
+    const themeToggleButton = screen.getByLabelText(m['light_switch.tooltip']());
     expect(themeToggleButton).toBeVisible();
   });
 
   it('renders language selection button', async () => {
     render(NavBar);
-    const languageButton = screen.getByRole('button', { name: /select language/i });
+    const languageButton = screen.getByLabelText(m['language_button.tooltip']());
     expect(languageButton).toBeVisible();
   });
 

@@ -44,9 +44,14 @@
     "settings": "Einstellungen",
     "logout": "Abmelden"
   },
-  "language": {
-    "change": "Sprache ändern",
-    "select": "Sprache auswählen"
+  "language_button": {
+    "tooltip": "Sprache"
+  },
+  "light_switch": {
+    "tooltip": "Thema",
+    "light": "Hell",
+    "dark": "Dunkel",
+    "system": "System"
   },
   "signin": {
     "title": "Anmelden",
@@ -151,12 +156,6 @@
       "min_length": "Ihr Einmalpasswort muss mindestens 6 Zeichen lang sein",
       "invalid": "Wir konnten den eingegebenen Token nicht verifizieren. Bitte versuchen Sie es erneut."
     }
-  },
-  "theme": {
-    "light_switch": "Thema ändern",
-    "light": "Hell",
-    "dark": "Dunkel",
-    "system": "System"
   },
   "connection": {
     "offline": "Du bist offline",

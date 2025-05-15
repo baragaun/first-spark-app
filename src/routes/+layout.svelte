@@ -3,10 +3,10 @@
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
   import { ModeWatcher } from 'mode-watcher';
-  import AppSidebar from '@/components/global/app-sidebar.svelte';
+  import AppSidebar from '@/components/layout/app-sidebar.svelte';
   import ConnectionSonner from '@/components/connection-sonner.svelte';
-  import NavBar from '@/components/global/nav-bar/nav-bar.svelte';
-  import Footer from '@/components/global/footer.svelte';
+  import NavBar from '@/components/layout/nav-bar/nav-bar.svelte';
+  import Footer from '@/components/layout/footer.svelte';
   import { SidebarProvider } from '@/components/ui/sidebar';
   import MyUserProvider from '@/contexts/my-user-provider.svelte';
   import { myUserContext } from '@/contexts/my-user-context.svelte';

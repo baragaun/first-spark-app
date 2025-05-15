@@ -1,5 +1,5 @@
 <script module>
-  import Footer from '@/components/global/footer.svelte';
+  import Footer from '@/components/layout/footer.svelte';
   import { defineMeta } from '@storybook/addon-svelte-csf';
 
   const { Story } = defineMeta({
