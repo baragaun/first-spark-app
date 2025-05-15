@@ -9,8 +9,8 @@
   const isSignedIn = $derived(myUserContext.isSignedIn);
 
   const tabs = [
-    { id: 'account', label: m['setting.account'](), path: '/settings/account' },
-    { id: 'notifications', label: m['setting.notification'](), path: '/settings/notifications' },
+    { id: 'account', label: m['setting.account'](), path: '/settings/account', disabled: false },
+    { id: 'notifications', label: m['setting.notification'](), path: '/settings/notifications', disabled: true },
   ];
 
   let { children } = $props();
@@ -29,6 +29,11 @@
     if (!isSignedIn) {
       goto('/signin', { replaceState: true });
     }
+
+    // Temporarily redirect from the `notifications` tab while it's disabled
+    if (page.url.pathname.startsWith('/settings/notifications')) {
+      goto('/settings/account', { replaceState: true });
+    }
   });
 </script>
 
@@ -38,7 +43,7 @@
   <Tabs.Root value={activeTab} class="my-8">
     <Tabs.List class="mx-auto grid w-3/5 grid-cols-2 border-b">
       {#each tabs as tab}
-        <Tabs.Trigger value={tab.id} onclick={() => goto(tab.path)}>
+        <Tabs.Trigger value={tab.id} disabled={tab.disabled} onclick={() => goto(tab.path)}>
           {tab.label}
         </Tabs.Trigger>
       {/each}
