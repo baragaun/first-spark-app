@@ -3,10 +3,10 @@
   "welcome": "Welcome to First Spark",
   "welcome_subtitle": "Connect, inspire, thrive!",
   "join_first_spark": "Join First Spark",
-  "get_started": "Get Started",
+  "get_started": "Get started",
   "sidebar": {
     "logo": {
-      "alt": "App Logo",
+      "alt": "App logo",
       "title": "First Spark"
     },
     "menu": {
@@ -19,23 +19,23 @@
   },
   "nav": {
     "menu": "Menu",
-    "open_menu": "Open Menu",
+    "open_menu": "Open menu",
     "theme": {
-      "light_mode": "Light Mode",
-      "dark_mode": "Dark Mode"
+      "light_mode": "Light mode",
+      "dark_mode": "Dark mode"
     },
     "auth": {
-      "sign_in": "Sign In",
-      "sign_up": "Sign Up",
-      "sign_out": "Sign Out"
+      "sign_in": "Sign in",
+      "sign_up": "Sign up",
+      "sign_out": "Sign out"
     }
   },
   "footer": {
     "copyright": "© {year} First Spark. All rights reserved.",
     "navigation": {
       "faq": "FAQ",
-      "privacy_policy": "Privacy Policy",
-      "terms_of_service": "Terms of Service"
+      "privacy_policy": "Privacy policy",
+      "terms_of_service": "Terms of service"
     }
   },
   "user_nav": {
@@ -45,68 +45,68 @@
     "logout": "Log out"
   },
   "language": {
-    "change": "Change Language",
-    "select": "Select Language"
+    "change": "Change language",
+    "select": "Select language"
   },
   "signin": {
-    "title": "Log In",
-    "terms_agreement": "By continuing, you agree to our User Agreement and acknowledge that you understand and agree to our Privacy Policy.",
+    "title": "Sign in",
+    "description": "Enter your email address below to sign in to your account",
+    "sign_with_token_description": "Enter the verification code sent to {identifier}",
+    "sign_with_password_description": "Enter your password to sign in as {identifier}",
     "have_account": "New to First Spark?",
-    "auth_method": "How would you like to login?",
-    "auth_method1": "Password",
-    "auth_method2": "One time password",
     "forgot_password": "Forgot your password?",
     "username_or_email_placeholder": "Username or Email",
+    "identifier_label": "Email or Username",
+    "password_label": "Password",
     "email_placeholder": "Email",
-    "password_placeholder": "Password",
-    "otp_title": "Check your inbox",
-    "otp_subtitle": "We've sent a magic link to ",
-    "otp_expiration": "The verification code will expire in 10 minutes. Enter the code below to log in.",
-    "otp_timer": "Resend in ",
-    "otp_renewal": "Didn't get an email?",
+    "identifier_placeholder": "Enter your email or username",
+    "password_placeholder": "Enter your password",
     "buttons": {
-      "back": "← Back to Log In",
-      "continue": "Log In",
-      "continue_otp": "Send me my code",
-      "resend_otp": "Resend email",
+      "signin": "Sign in",
+      "signin_with_token": "Sign in with token",
+      "signin_with_password": "Sign in with password",
+      "forgot_password": "Forgot your password?",
+      "back": "← Back to log in",
       "verify": "Verify",
-      "sending": "Sending OTP...",
-      "verifying": "Logging in...",
-      "signup": "Sign Up"
+      "verifying": "Verifying...",
+      "Signing_in": "Signing in...",
+      "signup": "Sign up"
+    },
+    "error": {
+      "required": "Username or email is required",
+      "invalid_credentials": "Invalid username, email or password. Please try again."
     }
   },
   "signup": {
-    "title": "Sign Up",
-    "verify_email_title": "Verify your email",
-    "terms_agreement": "By continuing, you agree to our User Agreement and acknowledge that you understand and agree to our Privacy Policy.",
-    "verify_code_message": "Enter the six digit code we sent to {email}",
-    "have_account": "Already have an account?",
-    "login_link": "Log In",
-    "create_credentials_title": "Create your username and password",
+    "title": "Sign up",
+    "email_description": "Provide an email address to create your First Spark account.",
+    "verification_description": "Enter the verification code we sent to {email}.",
+    "create_credentials_description": "Choose a username and a password for your account.",
+    "email_title": "Email address",
+    "username": "Username",
+    "password": "Password",
+    "email_placeholder": "e.g. 'student@example.com'",
     "username_description": "Usernames are unique handles. We'll verify that yours is not already taken.",
-    "username_placeholder": "Username (e.g., CosmoExplorer, PixelPioneer)",
-    "password_placeholder": "Password",
-    "password_requirements": {
-      "title": "Password requirements:",
-      "min_length": "At least 8 characters"
-    },
-    "password_errors": {
-      "min_length": "Password must be at least 8 characters long",
-      "too_simple": "Password is too simple or guessable"
+    "username_placeholder": "e.g. 'giraffe08'",
+    "password_placeholder": "Enter your password",
+    "errors": {
+      "email_unavailable": "This email is currently unavailable for use.",
+      "username_unavailable": "This username is currently unavailable for use."
     },
     "buttons": {
-      "back": "← Back",
-      "continue": "Continue",
+      "sign_up": "Sign up",
+      "sign_in": "Sign in",
+      "have_account": "Do you already have an account?",
       "verify": "Verify",
       "sending": "Sending...",
       "verifying": "Verifying...",
-      "create_account": "Create Account",
+      "create_account": "Create account",
       "creating_account": "Creating account..."
     }
   },
   "reset_password": {
     "title": "Reset your password",
-    "description": "We will email you a verification code if we can find this email address.",
+    "description": "Provide your username or email to get a verification code",
     "check_inbox": {
       "title": "Check your inbox",
       "description": "We've sent a verification code to {email}",
@@ -114,19 +114,33 @@
       "didnt_get_email": "Didn't get an email?"
     },
     "form": {
-      "identifier_placeholder": "Email or username",
+      "identifier_label": "Email or username",
+      "identifier_placeholder": "Enter your email or username",
       "errors": {
         "account_not_found": "No account found with this email address",
-        "default_error": "Unable to process your request. Please try again."
+        "default_error": "Unable to process your request. Please try again.",
+        "valid_ident_required": "A valid username or email is required"
       }
     },
+    "new_password_form": {
+      "description": "Enter a new password and the verification code we sent to test to update your password",
+      "label": "New password",
+      "placeholder": "Enter a new password",
+      "code_label": "Verification code",
+      "otp_description": "Enter a new password and the verification code we sent to {identifier} to update your password"
+    },
     "buttons": {
-      "send_email": "Send email",
+      "send_email": "Send me an email",
       "sending_email": "Sending email...",
       "resend_email": "Resend email",
       "resend_timer": "Resend in {time}",
-      "back_to_login": "Back to Log In",
-      "need_help": "Need help?"
+      "back_to_login": "Back to log in",
+      "need_help": "Need help?",
+      "have_account": "Don't have an account?",
+      "update_password": "Update my password",
+      "processing": "Processing...",
+      "signup": "Sign up",
+      "start_over": "Start over"
     }
   },
   "verify_token": {
@@ -178,7 +192,7 @@
       "change_email": "Change your registered email",
       "change_email_description": "Enter and different email and a verification code to update your account.",
       "current_email": "Current email",
-      "new_email": "New Email",
+      "new_email": "New email",
       "email_placeholder": "e.g. anne@example.com",
       "error": {
         "invalid": "Please enter a valid email address.",
@@ -200,7 +214,7 @@
         "incorrect": "Incorrect password. Please verify and try again."
       }
     },
-    "danger_zone": "Danger Zone",
+    "danger_zone": "Danger zone",
     "delete_account": {
       "label": "Delete my account",
       "sublabel": "Permanently delete your account and any associated data",
@@ -215,23 +229,24 @@
       "confirm_email": "Confirm your email",
       "error": {
         "invalid": "Please enter a valid email address.",
-        "incorrect": "The email entered doesn’t match your account. Please check and try again."
+        "not_found": "The email entered doesn't match your account. Please check and try again."
       }
     },
     "buttons": {
       "update": "Update",
-      "updating": "Updating",
+      "updating": "Updating...",
       "delete_account": "Delete my account",
       "cleaning": "Cleaning up...",
       "goodbuy": "Goodbye!",
       "cancel": "Cancel",
       "verify": "Verify",
-      "verifying": "Verifing"
+      "verifying": "Verifying...",
+      "change_email": "Change email"
     }
   },
   "form_button_default": {
     "buttonText": "Submit",
     "successText": "Success!",
-    "loadingText": "Processing"
+    "loadingText": "Processing..."
   }
 }

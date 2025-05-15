@@ -9,6 +9,8 @@
   import { m } from '@/paraglide/messages';
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
+  import { debounce } from 'throttle-debounce';
+  import { onDestroy } from 'svelte';
   import {
     currentPasswordSchema,
     passwordFormSchema,
@@ -26,8 +28,29 @@
   let isLoading = $state(false);
   let isSuccess = $state(false);
   let hasStepError = $state(true);
-  let debounceTimer: number | null = null;
   const DEBOUNCE_DELAY = 500;
+
+  // Replace setTimeout/clearTimeout with debounce
+  const debounceFormValidation = debounce(DEBOUNCE_DELAY, async () => {
+    try {
+      isLoading = true;
+
+      const currentPasswordValidation = currentPasswordSchema.safeParse($formData.currentPassword);
+
+      if (currentPasswordValidation.error) {
+        hasStepError = true;
+        updateFormErrors('currentPassword', currentPasswordValidation.error?.errors[0].message);
+        return;
+      }
+
+      const formValidation = await validateForm({ update: true, focusOnError: false });
+      hasStepError = !formValidation.valid;
+    } catch (error) {
+      console.error('Error validating form input:', error);
+    } finally {
+      isLoading = false;
+    }
+  });
 
   const form = superForm(preValidatedForm, {
     validators: zod(passwordFormSchema),
@@ -54,35 +77,10 @@
     });
   };
 
-  const debounceFormValidation = async () => {
-    if (debounceTimer) clearTimeout(debounceTimer);
-
-    if (!$formData) return;
-
-    debounceTimer = window.setTimeout(async () => {
-      try {
-        isLoading = true;
-
-        const currentPasswordValidation = currentPasswordSchema.safeParse(
-          $formData.currentPassword,
-        );
-
-        if (currentPasswordValidation.error) {
-          hasStepError = true;
-          updateFormErrors('currentPassword', currentPasswordValidation.error?.errors[0].message);
-          return;
-        }
-
-        const formValidation = await validateForm({ update: true, focusOnError: false });
-        hasStepError = !formValidation.valid;
-      } catch (error) {
-        console.error('Error validating form input:', error);
-      } finally {
-        isLoading = false;
-        debounceTimer = null;
-      }
-    }, DEBOUNCE_DELAY);
-  };
+  // Add onDestroy to clean up the debounce
+  onDestroy(() => {
+    debounceFormValidation.cancel();
+  });
 
   const verifyCurrentPassword = async (): Promise<boolean> => {
     isLoading = true;

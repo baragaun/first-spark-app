@@ -22,6 +22,9 @@
     resendTimerLabel = m['verify_token.resend_in'](),
     resendTimer = 0,
     onResendClick = undefined,
+    showBackButton = false,
+    backButtonLabel = 'back',
+    onBackButtonClick = undefined,
   } = $props<{
     form: SuperForm<T>;
     fieldName?: FormPathLeaves<T>;
@@ -35,6 +38,9 @@
     resendTimerLabel?: string;
     resendTimer?: number;
     onResendClick?: (() => void) | undefined;
+    showBackButton?: boolean;
+    backButtonLabel?: string;
+    onBackButtonClick?: (() => void) | undefined;
   }>();
 
   const errors = form.errors;
@@ -68,7 +74,7 @@
   <Form.FieldErrors />
 </Form.Field>
 
-{#if showResend}
+{#if showResend || showBackButton}
   <div class="flex justify-between text-sm">
     <Form.Button
       variant="link"
@@ -81,5 +87,18 @@
     >
       {canResend ? resendLabel : `${resendTimerLabel} ${formatTime()}`}
     </Form.Button>
+
+    {#if showBackButton}
+      <Form.Button
+        variant="link"
+        class="ml-auto px-0"
+        onclick={(e) => {
+          e.preventDefault();
+          if (onBackButtonClick) onBackButtonClick();
+        }}
+      >
+        {backButtonLabel}
+      </Form.Button>
+    {/if}
   </div>
 {/if}

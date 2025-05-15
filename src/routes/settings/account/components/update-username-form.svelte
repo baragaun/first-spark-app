@@ -11,6 +11,8 @@
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
   import { usernameFormSchema, type UsernameFormSchema } from '../../(data)/schema';
+  import { debounce } from 'throttle-debounce';
+  import { onDestroy } from 'svelte';
 
   let {
     preValidatedForm,
@@ -24,11 +26,23 @@
   let currentUsername = $derived(myUserContext.myUserHandle);
 
   let hasStepError = $state(true);
-  let debounceTimer: number | null = null;
   let isLoading = $state(false);
   let isSuccess = $state(false);
   let identType = $state(UserIdentType.userHandle);
   const DEBOUNCE_DELAY = 350; // ms
+
+  const debounceFormValidation = debounce(DEBOUNCE_DELAY, async () => {
+    try {
+      if (!$formData.username) return;
+
+      const result = await validateForm({ update: true, focusOnError: false });
+
+      const availability = await checkUsernameAvailability();
+      hasStepError = !availability || !result.valid;
+    } catch (error) {
+      console.error('Error debouncing the form input:', error);
+    }
+  });
 
   const form = superForm(preValidatedForm, {
     validators: zod(usernameFormSchema),
@@ -54,25 +68,6 @@
       };
       return newErrors;
     });
-  };
-
-  const debounceFormValidation = async () => {
-    if (debounceTimer) clearTimeout(debounceTimer);
-
-    if (!$formData.username) return;
-
-    debounceTimer = window.setTimeout(async () => {
-      try {
-        const result = await validateForm({ update: true, focusOnError: false });
-
-        const availability = await checkUsernameAvailability();
-        hasStepError = !availability || !result.valid;
-      } catch (error) {
-        console.error('Error debouncing the form input:', error);
-      } finally {
-        debounceTimer = null;
-      }
-    }, DEBOUNCE_DELAY);
   };
 
   const checkUsernameAvailability = async (): Promise<boolean> => {
@@ -184,12 +179,11 @@
     }
   };
 
-  $effect(() => {
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
-      debounceTimer = null;
-    }
+  onDestroy(() => {
+    debounceFormValidation.cancel();
+  });
 
+  $effect(() => {
     if (!$formData) {
       isLoading = false;
       return;

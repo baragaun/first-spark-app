@@ -9,11 +9,13 @@
   import { MsaListenerHandler } from '@/contexts/msa-listener-handler.svelte';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import translate from '@/helpers/language/translate';
+  import { m } from '@/paraglide/messages';
   import { AppUiMessage } from '@/types/enums';
   import { UserIdentType } from '@baragaun/bg-node-client';
   import { onDestroy } from 'svelte';
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
+  import { debounce } from 'throttle-debounce';
   import {
     determineIdentifierType,
     getOtpMessage,
@@ -34,51 +36,47 @@
   let canResend = $state(false);
 
   let isLoading = $state(false);
-  let hasStepError = $state(false);
+  let hasStepError = $state(true);
 
   let identifier = $state('');
   let identType = $state(UserIdentType.email);
 
   let timerInterval: ReturnType<typeof setInterval>;
-  let debounceTimer: number | null = null;
   const DEBOUNCE_DELAY = 350; // ms
   const emailCooldowns = $state(new Map<string, number>()); // Track emails that have active cooldowns
+
+  // Create debounced validation function
+  const debouncedValidation = debounce(DEBOUNCE_DELAY, async () => {
+    try {
+      // ============================================================
+      // Skip the empty validating to allow for error free authType swapping
+      if (step === 1 && (!$formData.ident || !$formData.password)) {
+        return;
+      } else if (step === 2 && !$formData.token) {
+        return;
+      }
+      // ============================================================
+
+      // This form is friendlier without the automatic error focusing
+      const result = await validateForm({ update: true, focusOnError: false });
+
+      hasStepError = !result.valid;
+    } catch (error) {
+      console.error('Error validating form:', error);
+    } finally {
+      isLoading = false;
+    }
+  });
 
   const form = superForm(data.form, {
     dataType: 'json',
     validators: getCurrentValidator(),
     resetForm: false,
     async onChange() {
-      if (debounceTimer) {
-        clearTimeout(debounceTimer);
-      }
-
       if (!$formData) return;
 
       isLoading = true;
-
-      debounceTimer = window.setTimeout(async () => {
-        try {
-          // ============================================================
-          // Skip the empty validating to allow for error free authType swapping
-          if (step === 1 && (!$formData.ident || !$formData.password)) {
-            return;
-          } else if (step === 2 && !$formData.token) {
-            return;
-          }
-          // ============================================================
-
-          // This form is friendlier without the automatic error focusing
-          const result = await validateForm({ update: true, focusOnError: false });
-
-          hasStepError = !result.valid;
-        } catch (error) {
-          console.error('Error validating form:', error);
-        } finally {
-          isLoading = false;
-          debounceTimer = null;
-        }
-      }, DEBOUNCE_DELAY);
+      debouncedValidation();
     },
     async onSubmit({ cancel }) {
       // Bail on any server side action
@@ -171,7 +169,8 @@
 
       if (response !== true) {
         updateFormErrors('ident', undefined);
-        updateFormErrors('password', 'Invalid username, email or password. Please try again.');
+        updateFormErrors('password', m['signin.error.invalid_credentials']());
+        hasStepError = true;
         return;
       }
 
@@ -317,22 +316,15 @@
   onDestroy(() => {
     clearInterval(timerInterval);
 
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
-      debounceTimer = null;
-    }
-
     if (otpHandler) {
       otpHandler.removeListener();
     }
+
+    // Cancel the debounced function
+    debouncedValidation.cancel();
   });
 
   $effect(() => {
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
-      debounceTimer = null;
-    }
-
     if (!$formData) {
       isLoading = false;
       return;
@@ -351,50 +343,50 @@
   const getCurrentStepDescription = () => {
     switch (step) {
       case 1:
-        return 'Enter your email address below to sign in to your account';
+        return m['signin.description']();
       case 2:
         return step === 2
           ? getOtpMessage($formData)
-          : `Enter your password to sign in as ${identifier}`;
+          : m['signin.sign_with_password_description']({ identifier });
     }
   };
 </script>
 
 <form method="POST" id="sign-in-form" use:enhance>
-  <AuthCard title="Sign in" description={getCurrentStepDescription()}>
+  <AuthCard title={m['signin.title']()} description={getCurrentStepDescription()}>
     <div class="space-y-4">
       {#if step === 1}
         <EmailFormInput
           {form}
           fieldName="ident"
-          placeholder="Enter your email or username"
-          label="Email or Username"
+          placeholder={m['signin.identifier_placeholder']()}
+          label={m['signin.identifier_label']()}
         />
         <PasswordFormInput
           {form}
           fieldName="password"
-          label="Password"
-          placeholder="Enter your password"
+          label={m['signin.password_label']()}
+          placeholder={m['signin.password_placeholder']()}
         />
         <FormButton
           disabled={$delayed || isLoading || hasStepError}
-          isLoading={$delayed || isLoading}
-          buttonText="Sign in"
-          loadingText="Signing in..."
+          isLoading={($delayed || isLoading) && !hasStepError}
+          buttonText={m['signin.buttons.signin']()}
+          loadingText={m['signin.buttons.Signing_in']()}
         />
         <div class="flex justify-between text-sm">
           <Button variant="link" disabled={!$formData.ident} onclick={() => toggleAuthType()}>
-            Sign in with token
+            {m['signin.buttons.signin_with_token']()}
           </Button>
           <Button variant="link" onclick={async () => await goto('reset-password')}>
-            Forgot your password?
+            {m['signin.buttons.forgot_password']()}
           </Button>
         </div>
       {:else if step === 2}
         <OTPFormInput
           {form}
           fieldName="token"
-          label="Verification code"
+          label={m['verify_token.verification_code']()}
           length={6}
           showResend={true}
           {canResend}
@@ -403,22 +395,22 @@
         />
         <FormButton
           disabled={$delayed || isLoading || hasStepError}
-          isLoading={$delayed || isLoading}
-          buttonText="Verify"
-          loadingText="Verifying..."
+          isLoading={($delayed || isLoading) && !hasStepError}
+          buttonText={m['signin.buttons.verify']()}
+          loadingText={m['signin.buttons.verifying']()}
         />
         <div class="flex justify-between text-sm">
           <Button variant="link" onclick={async () => await toggleAuthType()}>
-            Sign in with password
+            {m['signin.buttons.signin_with_password']()}
           </Button>
           <Button variant="link" onclick={async () => await goto('reset-password')}>
-            Forgot your password?
+            {m['signin.buttons.forgot_password']()}
           </Button>
         </div>
       {/if}
       <div class="mt-4 text-center text-sm">
-        Don't have an account?
-        <a href="/signup" class="underline"> Sign up </a>
+        {m['signin.have_account']()}
+        <a href="/signup" class="underline"> {m['signin.buttons.signup']()} </a>
       </div>
     </div>
   </AuthCard>

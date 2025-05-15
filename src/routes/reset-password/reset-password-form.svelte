@@ -9,11 +9,13 @@
   import { myUserContext } from '@/contexts/my-user-context.svelte.js';
   import translate from '@/helpers/language/translate.js';
   import passwordHelpers from '@/helpers/password-helpers.js';
+  import { m } from '@/paraglide/messages';
   import { AppUiMessage } from '@/types/enums.js';
   import { UserIdentType } from '@baragaun/bg-node-client';
   import { onDestroy } from 'svelte';
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
+  import { debounce } from 'throttle-debounce';
   import {
     determineIdentifierType,
     getOtpMessage,
@@ -34,15 +36,27 @@
   let canResend = $state(false);
 
   let isLoading = $state(false);
-  let hasStepError = $state(false);
+  let hasStepError = $state(true);
 
   let identifier = $state('');
   let identType = $state(UserIdentType.email);
 
   let timerInterval: ReturnType<typeof setInterval>;
-  let debounceTimer: number | null = null;
   const DEBOUNCE_DELAY = 350; // ms
   const { getPasswordError, validatePassword } = passwordHelpers;
+
+  // Replace setTimeout/clearTimeout with debounce
+  const debouncedValidation = debounce(DEBOUNCE_DELAY, async () => {
+    try {
+      isLoading = true;
+      const result = await validateForm({ update: true, focusOnError: false });
+      hasStepError = !result.valid;
+    } catch (error) {
+      console.error('Error validating form:', error);
+    } finally {
+      isLoading = false;
+    }
+  });
 
   const form = superForm(data.form, {
     dataType: 'json',
@@ -50,26 +64,11 @@
     resetForm: false,
     validationMethod: 'submit-only',
     async onChange() {
-      if (debounceTimer) {
-        clearTimeout(debounceTimer);
-      }
-
       if (msaId && !$formData.actionId) {
         $formData.actionId = msaId;
       }
 
-      debounceTimer = window.setTimeout(async () => {
-        try {
-          isLoading = true;
-          const result = await validateForm({ update: true, focusOnError: false });
-          hasStepError = !result.valid;
-        } catch (error) {
-          console.error('Error validating form:', error);
-        } finally {
-          isLoading = false;
-          debounceTimer = null;
-        }
-      }, DEBOUNCE_DELAY);
+      debouncedValidation();
     },
     async onSubmit({ cancel }) {
       cancel(); // Avoid any actual server-side validation form action
@@ -147,13 +146,13 @@
     const existingUser = await isIdentRegistered();
 
     try {
-      isLoading = true;
-
       if (!existingUser) {
         // Feign success and proceed
         // Todo: add the `change email` button like the `sign in with token` button
         step = 2;
+        hasStepError = true; // for steps = 2 initially fields are empty keep button disabled
         startResendTimer();
+
         return;
       }
 
@@ -168,11 +167,15 @@
         !response?.object.run
       ) {
         updateFormErrors('ident', 'Failed to send verification code. Please try again.');
+        hasStepError = true;
+        isLoading = false;
+        // Set to true since we failed to send the verification code
         return;
       }
 
       const onNotificationSent = () => {
         step = 2;
+        hasStepError = true;
         isLoading = false;
       };
       const onFailure = () => {
@@ -276,7 +279,7 @@
   const getCurrentStepDescription = () => {
     switch (step) {
       case 1:
-        return 'Provide your username or email to get a verification code';
+        return m['reset_password.description']();
       case 2:
         return getOtpMessage($formData);
     }
@@ -285,18 +288,13 @@
   const getCurrentStepButtonLabel = () => {
     switch (step) {
       case 1:
-        return 'Send me an email';
+        return m['reset_password.buttons.send_email']();
       case 2:
-        return 'Update my password';
+        return m['reset_password.buttons.update_password']();
     }
   };
 
   $effect(() => {
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
-      debounceTimer = null;
-    }
-
     if (!$formData) {
       isLoading = false;
       return;
@@ -315,56 +313,60 @@
   onDestroy(() => {
     clearInterval(timerInterval);
 
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
-      debounceTimer = null;
-    }
-
     if (otpHandler) {
       otpHandler.removeListener();
     }
+
+    // Cancel the debounced function
+    debouncedValidation.cancel();
   });
 </script>
 
 <form method="POST" id="reset-password-form" use:enhance>
-  <AuthCard title="Reset your password" description={getCurrentStepDescription()}>
+  <AuthCard title={m['reset_password.title']()} description={getCurrentStepDescription()}>
     <div class="space-y-4">
       {#if step == 1}
         <EmailFormInput
           {form}
           fieldName="ident"
-          placeholder="Enter your username or email"
-          label="Username or email"
+          placeholder={m['reset_password.form.identifier_placeholder']()}
+          label={m['reset_password.form.identifier_label']()}
           {isLoading}
         />
       {:else if step == 2}
         <PasswordFormInput
           {form}
           fieldName="newPassword"
-          label="New password"
-          placeholder="Enter a new password"
+          label={m['reset_password.new_password_form.label']()}
+          placeholder={m['reset_password.new_password_form.placeholder']()}
         />
         <OtpFormInput
           {form}
           fieldName="token"
-          label="Verification code"
+          label={m['verify_token.verification_code']()}
           length={6}
           showResend={true}
           {canResend}
           {resendTimer}
           onResendClick={handleResendToken}
+          showBackButton={true}
+          backButtonLabel={m['reset_password.buttons.start_over']()}
+          onBackButtonClick={() => {
+            step = 1;
+            hasStepError = false;
+          }}
         />
       {/if}
       <FormButton
         disabled={$delayed || isLoading || hasStepError}
         isLoading={$delayed || isLoading}
         buttonText={getCurrentStepButtonLabel()}
-        loadingText="Processing..."
+        loadingText={m['reset_password.buttons.processing']()}
       />
     </div>
     <div class="mt-4 text-center text-sm">
-      Don't have an account?
-      <a href="/signup" class="underline"> Sign up </a>
+      {m['reset_password.buttons.have_account']()}
+      <a href="/signup" class="underline"> {m['reset_password.buttons.signup']()} </a>
     </div>
   </AuthCard>
 
