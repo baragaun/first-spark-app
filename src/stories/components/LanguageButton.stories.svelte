@@ -1,5 +1,5 @@
 <script module>
-  import LanguageButton from '$lib/components/language-button.svelte';
+  import LanguageButton from '@/components/layout/nav-bar/language-button.svelte';
   import { defineMeta } from '@storybook/addon-svelte-csf';
 
   const { Story } = defineMeta({

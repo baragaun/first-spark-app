@@ -1,12 +1,13 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import * as Sidebar from '@/components/ui/sidebar';
+  import * as Tooltip from "@/components/ui/tooltip";
   import { Button } from '@/components/ui/button';
   import { m } from '@/paraglide/messages.js';
   import { LogIn } from 'lucide-svelte';
   import AvatarMenu from './avatar-menu.svelte';
-  import LanguageButton from '../../language-button.svelte';
-  import ThemeButton from '../../light-switch.svelte';
+  import LanguageButton from './language-button.svelte';
+  import ThemeButton from './light-switch.svelte';
 
   let { myUser, isAuthenticated, onSignOut } = $props();
 </script>
@@ -33,15 +34,24 @@
       <LanguageButton class="flex" />
       {#if !isAuthenticated}
         <div class="flex flex-none items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onclick={() => goto('/signin')}
-            aria-label={m['nav.auth.sign_in']()}
-            class="font-lexend text-muted-foreground hover:text-foreground"
-          >
-            <LogIn class="mr-2 h-4 w-4" />
-          </Button>
+          <Tooltip.Provider>
+            <Tooltip.Root>
+              <Tooltip.Trigger>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onclick={() => goto('/signin')}
+                  aria-label={m['nav.auth.sign_in']()}
+                  class="font-lexend text-muted-foreground hover:text-foreground"
+                >
+                  <LogIn class="mr-2 h-4 w-4" />
+                </Button>
+              </Tooltip.Trigger>
+              <Tooltip.Content>
+                <p>{m['nav.auth.sign_in']()}</p>
+              </Tooltip.Content>
+            </Tooltip.Root>
+          </Tooltip.Provider>
           <span class="sr-only">{m['nav.auth.sign_in']()}</span>
           <Button
             variant="default"

@@ -1,5 +1,5 @@
 <script module>
-  import AppSidebar from '@/components/global/app-sidebar.svelte';
+  import AppSidebar from '@/components/layout/app-sidebar.svelte';
   import * as Sidebar from '$lib/components/ui/sidebar/index';
   import { defineMeta } from '@storybook/addon-svelte-csf';
 
