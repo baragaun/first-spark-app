@@ -97,8 +97,6 @@ export class MockMyUserContext {
       this._isSignedIn = isSignedIn;
     }
 
-    console.log('MockMyUserContext.initialize: this._myUser:', this._myUser);
-
     if (this.client.isInitialized || this._isInitializing) {
       console.warn('MockMyUserContext.initialize: already initialized.');
       return;

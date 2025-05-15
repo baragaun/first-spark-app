@@ -5,7 +5,6 @@
   import { within, expect } from '@storybook/test';
   import { m } from '@/paraglide/messages';
 
-  // todo black page -->
   const { Story } = defineMeta({
     title: 'Components/AppSidebar',
     parameters: {

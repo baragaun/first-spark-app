@@ -149,7 +149,6 @@
         form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
       }
     }
-
   }}
 >
   <MockUserProvider>

@@ -41,24 +41,14 @@
       await userEvent.click(darkOption);
     });
 
-    // Check if dark mode is applied - if not, we'll try a different approach
-    try {
-      await waitFor(
-        () => {
-          expect(document.documentElement.classList.contains('dark')).toBe(true);
-        },
-        { timeout: 1000 },
-      );
-    } catch (error) {
-      console.log('Dark mode not applied via classList, trying alternative verification');
+    // Check if dark mode is applied
 
-      // Alternative verification - check if the theme was changed in some other way
-      // For example, check if a data attribute was set or if a specific element changed appearance
-
-      // For now, we'll skip this check to allow the test to continue
-      console.log('Skipping dark mode verification');
-    }
-
+    await waitFor(
+      () => {
+        expect(document.documentElement.classList.contains('dark')).toBe(true);
+      },
+      { timeout: 1000 },
+    );
     // Open dropdown again
     await userEvent.click(switchButton);
 
@@ -72,17 +62,13 @@
     });
 
     // Check if light mode is applied - with similar error handling
-    try {
-      await waitFor(
-        () => {
-          expect(document.documentElement.classList.contains('dark')).toBe(false);
-        },
-        { timeout: 1000 },
-      );
-    } catch (error) {
-      console.log('Light mode not applied via classList, skipping verification');
-    }
 
+    await waitFor(
+      () => {
+        expect(document.documentElement.classList.contains('dark')).toBe(false);
+      },
+      { timeout: 1000 },
+    );
   }}
 >
   <LightSwitch />

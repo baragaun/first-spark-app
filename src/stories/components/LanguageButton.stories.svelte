@@ -19,90 +19,39 @@
 
     try {
       // Find the language button using the message function
-      const languageButton = canvas.getByRole('button', {
-        name: m['language.select'](),
-      });
+      const languageButton = await waitFor(() =>
+        canvas.getByRole('button', { name: m['language.select']() }),
+      );
       expect(languageButton).toBeInTheDocument();
 
       // Click the button to open the dropdown
       await userEvent.click(languageButton);
 
-      // Wait for dropdown content to appear
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      const hindiOption = await within(document.body).findByText('हिन्दी', {}, { timeout: 2000 });
+      // Wait for Hindi option to appear and click it
+      const hindiOption = await waitFor(() => within(document.body).getByText('हिन्दी'));
       await userEvent.click(hindiOption);
 
-      // Try to find and click Hindi option with timeout
-      const findAndClickHindi = async () => {
-        try {
-          const hindiOption = await within(document.body).findByText(
-            'हिन्दी',
-            {},
-            { timeout: 2000 },
-          );
-          await userEvent.click(hindiOption);
-          return true;
-        } catch (error) {
-          console.log('Hindi option not found or not clickable');
-          return false;
-        }
-      };
-
-      // Try to find and click Hindi with timeout
-      const hindiClicked = await Promise.race([
-        findAndClickHindi(),
-        new Promise((resolve) => setTimeout(() => resolve(false), 3000)), // 3 second timeout
-      ]);
-
-      if (hindiClicked) {
-        // Wait for language change with timeout
-        await Promise.race([
-          waitFor(() => document.documentElement.lang === 'hi', { timeout: 2000 }),
-          new Promise((resolve) => setTimeout(resolve, 3000)), // 3 second timeout
-        ]);
-      } else {
-        console.log('Could not click Hindi option, skipping language change test');
-      }
-
-      // Wait a bit before clicking the button again
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Wait for language to change to Hindi
+      await waitFor(
+        () => {
+          // Add a debug log
+          console.log('Current lang:', document.documentElement.lang);
+          expect(document.documentElement.lang).toBe('hi');
+        },
+        { timeout: 2000 },
+      );
 
       // Click the button again to switch back to English
       await userEvent.click(languageButton);
 
-      // Wait for dropdown to appear again
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Wait for English option to appear and click it
+      const englishOption = await waitFor(() => within(document.body).getByText('English'));
+      await userEvent.click(englishOption);
 
-      // Try to find and click English option with timeout
-      const findAndClickEnglish = async () => {
-        try {
-          const englishOption = await within(document.body).findByText(
-            'English',
-            {},
-            { timeout: 2000 },
-          );
-          await userEvent.click(englishOption);
-          return true;
-        } catch (error) {
-          console.log('English option not found or not clickable');
-          return false;
-        }
-      };
-
-      // Try to find and click English with timeout
-      const englishClicked = await Promise.race([
-        findAndClickEnglish(),
-        new Promise((resolve) => setTimeout(() => resolve(false), 3000)), // 3 second timeout
-      ]);
-
-      if (englishClicked) {
-        // Wait for language change with timeout
-        await Promise.race([
-          waitFor(() => document.documentElement.lang === 'en', { timeout: 2000 }),
-          new Promise((resolve) => setTimeout(resolve, 3000)), // 3 second timeout
-        ]);
-      }
+      // Wait for language to change to English
+      await waitFor(() => {
+        expect(document.documentElement.lang).toBe('en');
+      });
     } catch (error) {
       console.error('Test failed:', error);
     }

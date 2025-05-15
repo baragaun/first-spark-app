@@ -101,7 +101,6 @@
     const submitButton = canvas.getByRole('button', { name: 'Submit' });
     expect(submitButton).toBeInTheDocument();
     await userEvent.click(submitButton);
-
   }}
 >
   <form>
