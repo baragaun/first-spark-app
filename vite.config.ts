@@ -17,7 +17,10 @@ export default defineConfig({
     name: 'unit',
     globals: true,
     environment: 'jsdom',
-    include: ['tests/unit/*.{test,spec}.{js,ts,svelte}'],
+    exclude: [
+      'tests/e2e/**/*',
+      'node_modules/**/*',
+    ],
     setupFiles: 'tests/setup.ts',
   },
 });
