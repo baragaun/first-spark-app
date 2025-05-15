@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { m } from '$lib/paraglide/messages.js';
 
 test('Landing page has welcome text, Get Started Button', async ({ page }) => {
   await page.goto('/'); // Navigate to home page
@@ -28,15 +29,16 @@ test('Landing page includes NavBar component, signup, login buttons', async ({ p
 
   // We can also check for specific elements within the NavBar
   // Check if it contains a toggle theme button
-  const themeToggleButton = navElement.getByLabel('Change theme');
+  const themeToggleButton = navElement.getByLabel(m['light_switch.tooltip']());
+  
   await expect(themeToggleButton).toBeVisible();
 
   // Check if it contains a change language button
-  const changeLanguageButton = navElement.getByLabel('Select language');
+  const changeLanguageButton = navElement.getByLabel(m['language_button.tooltip']());
   await expect(changeLanguageButton).toBeVisible();
 
   // Check if it contains a "Sign in" button
-  const signInButton = navElement.getByRole('button', { name: 'Sign in' });
+  const signInButton = navElement.getByLabel(m['nav.auth.sign_in']());
   await expect(signInButton).toBeVisible();
 
   // Check if it contains a "Sign up" button
