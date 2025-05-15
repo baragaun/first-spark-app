@@ -44,9 +44,14 @@
     "settings": "Settings",
     "logout": "Log out"
   },
-  "language": {
-    "change": "Change language",
-    "select": "Select language"
+  "language_button": {
+    "tooltip": "Language"
+  },
+    "light_switch": {
+    "tooltip": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
   },
   "signin": {
     "title": "Sign in",
@@ -152,12 +157,6 @@
       "min_length": "Your one-time password must be at least 6 characters",
       "invalid": "We could not verify the token you entered. Please try again."
     }
-  },
-  "theme": {
-    "light_switch": "Change theme",
-    "light": "Light",
-    "dark": "Dark",
-    "system": "System"
   },
   "connection": {
     "offline": "You're offline",
