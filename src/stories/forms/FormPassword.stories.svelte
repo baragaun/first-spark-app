@@ -1,5 +1,5 @@
 <script module>
-  import FormOtpInput from '@/components/forms/form-otp-input.svelte';
+  import FormPassword from '$lib/components/forms/form-password-input.svelte';
   import { defineMeta } from '@storybook/addon-svelte-csf';
   import { writable } from 'svelte/store';
 
@@ -26,8 +26,8 @@
   };
 
   const { Story } = defineMeta({
-    title: 'Components/Forms/FormOtpInput',
-    component: FormOtpInput,
+    title: 'Components/Forms/FormPassword',
+    component: FormPassword,
     parameters: {
       layout: 'centered',
     },
@@ -51,7 +51,7 @@
       form: {
         subscribe: function (run, invalidate) {
           // Mock implementation that returns an unsubscriber function
-          run({ token: '123456' }); // token field value
+          run({ password: 'Johan' }); // token field value
           return function unsubscribe() {};
         },
         set: function (value, options) {},
@@ -91,6 +91,6 @@
         throw new Error('Function not implemented.');
       },
     },
-    fieldName: 'token',
+    fieldName: 'Password',
   }}
 />

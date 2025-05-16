@@ -10,7 +10,12 @@
 
   const tabs = [
     { id: 'account', label: m['setting.account'](), path: '/settings/account', disabled: false },
-    { id: 'notifications', label: m['setting.notification'](), path: '/settings/notifications', disabled: true },
+    {
+      id: 'notifications',
+      label: m['setting.notification'](),
+      path: '/settings/notifications',
+      disabled: true,
+    },
   ];
 
   let { children } = $props();

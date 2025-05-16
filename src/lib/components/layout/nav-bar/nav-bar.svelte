@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import * as Sidebar from '@/components/ui/sidebar';
-  import * as Tooltip from "@/components/ui/tooltip";
+  import * as Tooltip from '@/components/ui/tooltip';
   import { Button } from '@/components/ui/button';
   import { m } from '@/paraglide/messages.js';
   import { LogIn } from 'lucide-svelte';
