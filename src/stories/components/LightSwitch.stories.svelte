@@ -1,7 +1,10 @@
 <script module>
-  import LightSwitch from '@/components/light-switch.svelte';
+  import LightSwitch from '$lib/components/layout/nav-bar/light-switch.svelte';
   import { defineMeta } from '@storybook/addon-svelte-csf';
   import { within, userEvent, expect, waitFor } from '@storybook/test';
+  import { resetMode, userPrefersMode } from 'mode-watcher';
+  import { get } from 'svelte/store';
+  import { m } from '$lib/paraglide/messages.js';
 
   const { Story } = defineMeta({
     title: 'Components/Light Switch',
@@ -21,10 +24,13 @@
 <Story
   name="Default"
   play={async ({ canvasElement }) => {
+    // Always start with a clean mode state
+    resetMode();
+
     const canvas = within(canvasElement);
 
     // Find the light switch button
-    const switchButton = canvas.getByRole('button', { name: /change theme/i });
+    const switchButton = canvas.getByRole('button', { name: m['light_switch.tooltip']() });
     expect(switchButton).toBeInTheDocument();
 
     // Click the button to open the dropdown
@@ -32,23 +38,20 @@
 
     // Wait for dropdown content to appear and find the Dark option
     await waitFor(async () => {
-      // The dropdown content might be in a portal outside the canvas
-      // Use document.body to search the entire document
       const darkOption = await within(document.body).findByText('Dark');
       expect(darkOption).toBeVisible();
-
-      // Click the Dark option
       await userEvent.click(darkOption);
     });
-
-    // Check if dark mode is applied
-
+    // Check if dark mode is applied using mode-watcher
     await waitFor(
       () => {
-        expect(document.documentElement.classList.contains('dark')).toBe(true);
+        expect(get(userPrefersMode)).toBe('dark');
       },
       { timeout: 1000 },
     );
+
+    // Wait for 1 second
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     // Open dropdown again
     await userEvent.click(switchButton);
 
@@ -56,19 +59,18 @@
     await waitFor(async () => {
       const lightOption = await within(document.body).findByText('Light');
       expect(lightOption).toBeVisible();
-
-      // Click the Light option
       await userEvent.click(lightOption);
     });
-
-    // Check if light mode is applied - with similar error handling
-
+    // Check if light mode is applied using mode-watcher
     await waitFor(
       () => {
-        expect(document.documentElement.classList.contains('dark')).toBe(false);
+        expect(get(userPrefersMode)).toBe('light');
       },
       { timeout: 1000 },
     );
+
+    // Optionally reset mode at the end
+    resetMode();
   }}
 >
   <LightSwitch />

@@ -1,9 +1,9 @@
 <script module>
-  import AppSidebar from '@/components/layout/app-sidebar.svelte';
-  import * as Sidebar from '@/components/ui/sidebar/index';
+  import AppSidebar from '$lib/components/layout/app-sidebar.svelte';
+  import * as Sidebar from '$lib/components/ui/sidebar/index.js';
   import { defineMeta } from '@storybook/addon-svelte-csf';
   import { within, expect } from '@storybook/test';
-  import { m } from '@/paraglide/messages';
+  import { m } from '$lib/paraglide/messages';
 
   const { Story } = defineMeta({
     title: 'Components/AppSidebar',

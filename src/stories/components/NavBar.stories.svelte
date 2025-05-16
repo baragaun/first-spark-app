@@ -1,7 +1,8 @@
 <script module>
-  import NavBar from '@/components/layout/nav-bar/nav-bar.svelte';
+  import NavBar from '$lib/components/layout/nav-bar/nav-bar.svelte';
   import { defineMeta } from '@storybook/addon-svelte-csf';
   import { within, expect, userEvent } from '@storybook/test';
+  import { m } from '$lib/paraglide/messages';
 
   const { Story } = defineMeta({
     title: 'Components/NavBar',
@@ -21,19 +22,19 @@
     expect(sidebarTrigger).toBeInTheDocument();
 
     // Check for theme toggle button
-    const themeToggleButton = canvas.getByRole('button', { name: /change theme/i });
+    const themeToggleButton = canvas.getByRole('button', { name: m['light_switch.tooltip']() });
     expect(themeToggleButton).toBeInTheDocument();
 
     // Check for language selection button
-    const languageButton = canvas.getByRole('button', { name: /select language/i });
+    const languageButton = canvas.getByRole('button', { name: m['language_button.tooltip']() });
     expect(languageButton).toBeInTheDocument();
 
     // Check for sign in button when not authenticated
-    const signInButton = canvas.getByRole('button', { name: /sign in/i });
+    const signInButton = canvas.getByRole('button', { name: m['nav.auth.sign_in']() });
     expect(signInButton).toBeInTheDocument();
 
     // Check for sign up button when not authenticated
-    const signUpButton = canvas.getByRole('button', { name: /sign up/i });
+    const signUpButton = canvas.getByRole('button', { name: m['signup.title']() });
     expect(signUpButton).toBeInTheDocument();
   }}
 >

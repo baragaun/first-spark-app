@@ -6,18 +6,6 @@
   import { within, userEvent, expect, waitFor } from '@storybook/test';
   import Button from '@/components/ui/button/button.svelte';
 
-  // Add this for the form example
-  let framework = 'sveltekit';
-  let frameworkLabel = 'SvelteKit';
-
-  const frameworks = [
-    { value: 'sveltekit', label: 'SvelteKit' },
-    { value: 'react', label: 'React' },
-    { value: 'vue', label: 'Vue' },
-    { value: 'angular', label: 'Angular' },
-    { value: 'solid', label: 'Solid' },
-  ];
-
   const { Story } = defineMeta({
     title: 'Components/AuthCard',
     component: AuthCard,
