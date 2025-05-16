@@ -2,7 +2,7 @@
   import { Button } from '$lib/components/ui/button/index.js';
   import { Languages } from 'lucide-svelte';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-  import * as Tooltip from "@/components/ui/tooltip";
+  import * as Tooltip from '@/components/ui/tooltip';
   import { getLocale, setLocale, locales } from '$lib/paraglide/runtime.js';
   import { m } from '$lib/paraglide/messages.js';
 

@@ -1,7 +1,7 @@
+import { m } from '@/paraglide/messages.js';
 import NavBar from '@/components/layout/nav-bar/nav-bar.svelte';
 import { render, screen } from '@testing-library/svelte';
 import { afterEach, describe, expect, it } from 'vitest';
-import { m } from '$lib/paraglide/messages.js';
 
 describe('NavBar', () => {
   // beforeEach(() => {});

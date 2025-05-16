@@ -47,7 +47,7 @@
   "language_button": {
     "tooltip": "Language"
   },
-    "light_switch": {
+  "light_switch": {
     "tooltip": "Theme",
     "light": "Light",
     "dark": "Dark",
