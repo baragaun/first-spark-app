@@ -57,7 +57,9 @@
       />
     </div>
   </Dialog.Trigger>
-  <Dialog.Content class={`flex flex-col ${dialogContentClass}`}>
+  <Dialog.Content
+    class={`flex max-h-[calc(100vh-2rem)] w-[calc(100%-2rem)] flex-col rounded-lg md:w-full ${dialogContentClass}`}
+  >
     <Dialog.Header class="space-y-2 px-2">
       <Dialog.Title class="text-xl font-semibold">{title}</Dialog.Title>
       <Dialog.Description class="text-base text-muted-foreground">
@@ -65,7 +67,7 @@
       </Dialog.Description>
     </Dialog.Header>
 
-    <div class="flex-1 overflow-y-auto px-2 py-4">
+    <div class="flex-1 overflow-auto px-2 py-4">
       {@render children?.()}
     </div>
   </Dialog.Content>
