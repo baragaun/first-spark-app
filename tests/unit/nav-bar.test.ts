@@ -1,5 +1,5 @@
-import { m } from '@/paraglide/messages.js';
 import NavBar from '@/components/layout/nav-bar/nav-bar.svelte';
+import { m } from '@/paraglide/messages.js';
 import { render, screen } from '@testing-library/svelte';
 import { afterEach, describe, expect, it } from 'vitest';
 

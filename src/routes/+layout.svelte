@@ -25,6 +25,13 @@
     await myUserContext.signMeOut();
     await goto('/signin');
   };
+
+  // Check if current route is a chat detail page
+  let isChatsDetailPage = $derived(() => {
+    return (
+      page.url.pathname.startsWith('/conversations/') && page.url.pathname !== '/conversations/'
+    );
+  });
 </script>
 
 <MyUserProvider>
@@ -34,11 +41,15 @@
     <SidebarProvider>
       <AppSidebar bind:isOffline {isAuthenticated} />
       <div class="flex flex-1 flex-col">
-        <NavBar {myUser} {isAuthenticated} {onSignOut} />
+        {#if !isChatsDetailPage()}
+          <NavBar {myUser} {isAuthenticated} {onSignOut} />
+        {/if}
         <main class="flex flex-1 flex-col">
           {@render children?.()}
         </main>
-        <Footer />
+        {#if !isChatsDetailPage()}
+          <Footer />
+        {/if}
       </div>
     </SidebarProvider>
   </div>

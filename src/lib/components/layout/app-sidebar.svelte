@@ -3,7 +3,7 @@
   import type { ComponentProps } from 'svelte';
   import * as Sidebar from '@/components/ui/sidebar';
   import { m } from '@/paraglide/messages';
-  import { House, PlugZap, Settings, Zap } from 'lucide-svelte';
+  import { House, MessageSquare, PlugZap, Settings, Zap } from 'lucide-svelte';
   import { Button } from '../ui/button';
 
   const items = [
@@ -12,17 +12,17 @@
       url: '/',
       icon: House,
     },
+    {
+      title: m['sidebar.menu.conversations'](),
+      url: '/conversations',
+      icon: MessageSquare,
+      requiresAuth: true,
+    },
     /* TODO: Hidding the following sidebar buttons as per the issue: https://github.com/baragaun/first-spark-app/issues/112 */
     /* {
       title: m['sidebar.menu.inbox'](),
       url: '#',
       icon: Inbox,
-      requiresAuth: true,
-    },
-    {
-      title: m['sidebar.menu.conversations'](),
-      url: '#',
-      icon: MessageSquare,
       requiresAuth: true,
     },
     {
