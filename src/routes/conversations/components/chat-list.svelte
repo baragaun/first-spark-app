@@ -10,8 +10,6 @@
     deleteChannel: { channelId: string };
   }>();
 
-  //todo update the dispatcher
-
   let { channels }: { channels: Channel[] } = $props();
 
   // Get users and currentUserId directly from page data
