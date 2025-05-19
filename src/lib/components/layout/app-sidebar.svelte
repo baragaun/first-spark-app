@@ -6,7 +6,7 @@
   import * as Sidebar from '@/components/ui/sidebar';
   import type { MyUserContext } from '@/contexts/my-user-context.svelte';
   import { m } from '@/paraglide/messages';
-  import { House, PlugZap, MessageSquare, Settings, Zap } from 'lucide-svelte';
+  import { House, MessageSquare, PlugZap, Settings, Zap } from 'lucide-svelte';
 
   const items = [
     {
