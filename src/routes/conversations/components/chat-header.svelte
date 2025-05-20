@@ -18,17 +18,6 @@
     goto('/conversations');
   };
 
-  function handleMessageSearch(e: CustomEvent<string>): void {
-    const searchQuery = e.detail.toLowerCase().trim();
-    if (searchQuery) {
-      // Dispatch a custom event to parent component to filter messages
-      const searchEvent = new CustomEvent('messageSearch', {
-        detail: { query: searchQuery },
-        bubbles: true,
-      });
-      document.dispatchEvent(searchEvent);
-    }
-  }
 </script>
 
 <div class="flex items-center justify-between border-b p-4">
@@ -48,11 +37,6 @@
   </div>
 
   <div class="flex items-end gap-2">
-    <SearchBar
-      placeholder="Search messages..."
-      iconSize="h-4 w-4"
-      on:search={handleMessageSearch}
-    />
     <DropdownMenu.Root>
       <DropdownMenu.Trigger>
         <Button variant="ghost" size="icon">
@@ -60,10 +44,6 @@
         </Button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Content align="end">
-        <DropdownMenu.Item>
-          <Search class="mr-2 h-4 w-4" />
-          Search
-        </DropdownMenu.Item>
         <DropdownMenu.Item>
           <Archive class="mr-2 h-4 w-4" />
           Archive

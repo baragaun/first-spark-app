@@ -52,7 +52,7 @@
 
   const handleNewChat = () => {
     // This would open a dialog to select a contact
-    goto('/contacts');
+    // goto('/contacts');
   };
 
   const handleDeleteChannel = async (event: CustomEvent<{ channelId: string }>) => {
