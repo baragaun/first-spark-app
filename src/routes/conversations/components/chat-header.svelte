@@ -1,10 +1,9 @@
 <script lang="ts">
   import * as Avatar from '$lib/components/ui/avatar/index.js';
   import { Button } from '$lib/components/ui/button';
-  import { ArrowLeft, MoreVertical, Search, Archive, BellOff, Ban } from 'lucide-svelte';
+  import { ArrowLeft, MoreVertical, Archive, BellOff, Ban } from 'lucide-svelte';
   import { goto } from '$app/navigation';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-  import SearchBar from '@/components/ui/search-bar.svelte';
 
   interface Contact {
     id: string;
@@ -17,7 +16,6 @@
   const handleBack = () => {
     goto('/conversations');
   };
-
 </script>
 
 <div class="flex items-center justify-between border-b p-4">
@@ -38,7 +36,7 @@
 
   <div class="flex items-end gap-2">
     <DropdownMenu.Root>
-      <DropdownMenu.Trigger>
+      <DropdownMenu.Trigger aria-label="More chat options">
         <Button variant="ghost" size="icon">
           <MoreVertical class="h-5 w-5" />
         </Button>
