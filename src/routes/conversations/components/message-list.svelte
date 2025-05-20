@@ -258,6 +258,7 @@
                 <DropdownMenu.Root>
                   <DropdownMenu.Trigger
                     class="flex h-6 w-6 items-center justify-center rounded-full bg-black/20 hover:bg-black/30 dark:bg-primary-foreground/20 dark:hover:bg-primary-foreground/30"
+                    aria-label="Message options"
                   >
                     <ChevronDown class="h-4 w-4" />
                   </DropdownMenu.Trigger>

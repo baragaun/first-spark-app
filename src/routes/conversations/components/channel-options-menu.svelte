@@ -1,6 +1,6 @@
 <script lang="ts">
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
-  import { Archive, Trash2, BellOff, Pin, ChevronDown } from 'lucide-svelte';
+  import { Archive, Trash2, ChevronDown } from 'lucide-svelte';
 
   let {
     channelId,
@@ -19,6 +19,7 @@
   <DropdownMenu.Root>
     <DropdownMenu.Trigger
       class="flex h-6 w-6 items-center justify-center rounded-full bg-black/10 dark:bg-primary-foreground/10"
+      aria-label="Channel options"
     >
       <ChevronDown class="h-4 w-4" />
     </DropdownMenu.Trigger>

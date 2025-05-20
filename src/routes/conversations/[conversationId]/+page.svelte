@@ -14,7 +14,7 @@
     id: string;
     name: string;
     avatar: string;
-    discription?: string;
+    description?: string;
   }
 
   let channelDetails = $state<ContactDetails | null>(null);
