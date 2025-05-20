@@ -229,7 +229,16 @@
         console.error('onFailure');
         isLoading = false;
       };
-      const onSuccess = async () => await goto('/');
+      const onSuccess = async () => {
+        const onboardingCompletion = myUserContext.myUserOnboardingCompletion;
+        if (onboardingCompletion === 0) {
+          console.error('sendTokeForSignIn.success.onboardingStep: User data not found.');
+        } else if (onboardingCompletion === 1) {
+          await goto('/');
+        } else {
+          await goto(`/signup?step=${onboardingCompletion}`);
+        }
+      };
 
       otpHandler = new MsaListenerHandler(
         'SignInForm',

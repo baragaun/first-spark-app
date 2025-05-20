@@ -8,13 +8,20 @@ export const schemaFirstStep = z.object({
   email: emailSchema.transform((val) => val.trim()),
 });
 
-export const schemaSecondStep = schemaFirstStep.extend({
+export const schemaSecondStep = z.object({
   token: otpSchema.transform((val) => val.trim()),
 });
 
-export const schemaLastStep = schemaSecondStep.extend({
+export const schemaLastStep = z.object({
   username: usernameSchema.transform((val) => val.trim()),
   password: passwordSchema.transform((val) => val.trim()),
+});
+
+export const completeSchema = z.object({
+  email: emailSchema.optional().default('').transform((val) => val ? val.trim() : val),
+  token: otpSchema.optional().default('').transform((val) => val ? val.trim() : val),
+  username: usernameSchema.optional().default('').transform((val) => val ? val.trim() : val),
+  password: passwordSchema.optional().default('').transform((val) => val ? val.trim() : val),
 });
 
 export const determineIdentifierType = (value: string): UserIdentType => {
@@ -31,5 +38,4 @@ export const determineIdentifierType = (value: string): UserIdentType => {
   return UserIdentType.email;
 };
 
-// Since steps swap required values, we need to join the two possible schemas to account for all possible requirements
-export type SignUpFormSchema = z.infer<typeof schemaLastStep>;
+export type SignUpFormSchema = z.infer<typeof completeSchema>;
