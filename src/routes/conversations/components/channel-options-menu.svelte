@@ -27,14 +27,6 @@
         <Archive class="mr-2 h-4 w-4" />
         Archive
       </DropdownMenu.Item>
-      <DropdownMenu.Item>
-        <Pin class="mr-2 h-4 w-4" />
-        Pin
-      </DropdownMenu.Item>
-      <DropdownMenu.Item>
-        <BellOff class="mr-2 h-4 w-4" />
-        Mute
-      </DropdownMenu.Item>
       <DropdownMenu.Item
         class="text-destructive focus:bg-destructive focus:text-destructive-foreground"
         onclick={handleDelete}
