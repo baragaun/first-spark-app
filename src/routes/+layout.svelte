@@ -24,9 +24,7 @@
         <main class="flex flex-1 flex-col">
           {@render children?.()}
         </main>
-        {#if !isChatsDetailPage()}
-          <Footer />
-        {/if}
+        <Footer />
       </div>
     </SidebarProvider>
   </div>
