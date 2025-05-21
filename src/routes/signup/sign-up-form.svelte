@@ -243,7 +243,12 @@
       } catch (error) {
         console.error('SignUpForm.setupOtpMsaHandler error updating verification:', { error });
       };
-      setStep(3);
+      if (!myUserContext.myUser?.passwordUpdatedAt) {
+        setStep(3);
+      } else {
+        // If this user already has a password, consider their onboarding complete
+        await goto('/');
+      }
       isLoading = false;
     };
 
@@ -518,6 +523,6 @@
   >
 
   <!-- commenting as per the issue : https://github.com/baragaun/first-spark-app/issues/113 -->
-  <div class="mt-4"><SuperDebug data={$formData} /></div>
-  <div class="mt-4"><SuperDebug data={errors} /></div>
+  <!-- <div class="mt-4"><SuperDebug data={$formData} /></div> -->
+  <!-- <div class="mt-4"><SuperDebug data={errors} /></div> -->
 </form>
