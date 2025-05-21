@@ -7,6 +7,7 @@
   import { Channel } from '@baragaun/bg-node-client';
   import type { PageData } from '../conversations/$types';
   import { MessageSquarePlus } from 'lucide-svelte';
+  import { conversationContext } from '@/contexts/conversation-context.svelte';
 
   let { data }: { data: PageData } = $props();
 
@@ -23,6 +24,9 @@
       filteredChannels = channels;
       isLoading = false;
     }, 500);
+
+    conversationContext.initialize();
+    conversationContext.findMyChannels();
   });
 
   const handleSearch = (event: CustomEvent<string>) => {
