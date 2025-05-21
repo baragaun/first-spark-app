@@ -16,11 +16,9 @@ export const usernameSchema = z
   });
 
 // Email schema
-export const emailSchema = z
-  .string()
-  .email({
-    message: m['setting.email.error.invalid'](),
-  });
+export const emailSchema = z.string().email({
+  message: m['setting.email.error.invalid'](),
+});
 
 // Password schemas
 export const passwordSchema = z.string().min(8, {
