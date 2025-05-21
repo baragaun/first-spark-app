@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@baragaun/bg-node-client':
-        specifier: ^0.0.28
-        version: 0.0.28(prettier@3.5.3)
+        specifier: ^0.0.29
+        version: 0.0.29(prettier@3.5.3)
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
@@ -246,9 +246,9 @@ packages:
     resolution: {integrity: sha512-+EzkxvLNfiUeKMgy/3luqfsCWFRXLb7U6wNQTk60tovuckwB15B191tJWvpp4HjiQWdJkCxO3Wbvc6jlk3Xb2Q==}
     engines: {node: '>=6.9.0'}
 
-  '@baragaun/bg-node-client@0.0.28':
-    resolution: {integrity: sha512-LcNx+P7v5EjeRRDVg2QAbdbgsv3YyAbyFGVT8qsVgnJmiJ4fjBoctbxiVHmApZpwwwfKhH2vrVEP0Dsuc+XoPQ==}
-    engines: {node: '>= 20'}
+  '@baragaun/bg-node-client@0.0.29':
+    resolution: {integrity: sha512-yRp6vLC3KV7h8gQ90c+bTqneHPww0qJsI6uTDAz+sN50fPcKmIk45MZu7792d5Dvmf6+YpFJASTXm7GjaiZ3Vg==}
+    engines: {node: '>=20'}
 
   '@bcoe/v8-coverage@1.0.2':
     resolution: {integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==}
@@ -4218,7 +4218,7 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.27.1
 
-  '@baragaun/bg-node-client@0.0.28(prettier@3.5.3)':
+  '@baragaun/bg-node-client@0.0.29(prettier@3.5.3)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
       '@nats-io/jetstream': 3.0.2
@@ -4231,6 +4231,7 @@ snapshots:
       dexie: 4.0.11
       graffle: 8.0.0-next.157(@opentelemetry/api@1.9.0)(graphql@16.11.0)(prettier@3.5.3)
       graphql: 16.11.0
+      leader-election: link:rxdb/plugins/leader-election
       rxdb: 16.12.0(rxjs@7.8.2)
       rxjs: 7.8.2
       tslib: 2.8.1
