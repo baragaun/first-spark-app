@@ -58,7 +58,7 @@
     </div>
   </Dialog.Trigger>
   <Dialog.Content
-    class={`flex w-[calc(100vw-2rem)] flex-col rounded-lg md:w-full ${dialogContentClass}`}
+    class={`flex w-[calc(100vw-2rem)] max-h-[80vh] flex-col rounded-lg md:w-full ${dialogContentClass}`}
   >
     <Dialog.Header class="space-y-2 px-2">
       <Dialog.Title class="text-xl font-semibold">{title}</Dialog.Title>
