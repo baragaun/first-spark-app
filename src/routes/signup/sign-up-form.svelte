@@ -10,7 +10,7 @@
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import translate from '@/helpers/language/translate';
   import { AppUiMessage } from '@/types/enums';
-  import { UserIdentType } from '@baragaun/bg-node-client';
+  import { UserIdentType, type MultiStepActionProgressResult, type QueryResult } from '@baragaun/bg-node-client';
   import { onDestroy, onMount } from 'svelte';
   import SuperDebug, { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
@@ -224,6 +224,41 @@
     }
   };
 
+  const setupOtpMsaHandler = (msaVerificationResponse: QueryResult<MultiStepActionProgressResult>) => {
+    const msaId = msaVerificationResponse.object?.actionProgress?.actionId || '';
+    
+    const onNotificationSent = () => {
+      setStep(2);
+      isLoading = false;
+    };
+    
+    const onFailure = () => {
+      console.error('onFailure');
+      isLoading = false;
+    };
+    
+    const onSuccess = async () => {
+      try {
+        await myUserContext.updateMyUser({isEmailVerified: true});
+      } catch (error) {
+        console.error('SignUpForm.setupOtpMsaHandler error updating verification:', { error });
+      };
+      setStep(3);
+      isLoading = false;
+    };
+
+    return {
+      msaId,
+      handler: new MsaListenerHandler(
+        'SignUpForm',
+        msaVerificationResponse,
+        onNotificationSent,
+        onFailure,
+        onSuccess,
+      )
+    };
+  };
+
   const registerNewEmail = async () => {
     isLoading = true;
 
@@ -258,32 +293,9 @@
 
       startResendTimer();
 
-      msaId = verificationResponse.object.actionProgress.actionId;
-      const onNotificationSent = () => {
-        setStep(2);
-        isLoading = false;
-      };
-      const onFailure = () => {
-        console.error('onFailure');
-        isLoading = false;
-      };
-      const onSuccess = async () => {
-        try {
-          await myUserContext.updateMyUser({isEmailVerified: true});
-        } catch (error) {
-          console.error('SignUpForm.registerNewEmail error updating verification:', { error });
-        };
-        setStep(3);
-        isLoading = false;
-      };
-
-      otpHandler = new MsaListenerHandler(
-        'SignUpForm',
-        verificationResponse,
-        onNotificationSent,
-        onFailure,
-        onSuccess,
-      );
+      const { msaId: newMsaId, handler } = setupOtpMsaHandler(verificationResponse);
+      msaId = newMsaId;
+      otpHandler = handler;
     } catch (error) {
       console.error('SignUpForm.registerNewEmail:', { error });
       updateFormErrors('email', translate(AppUiMessage.systemError));
@@ -428,16 +440,15 @@
         };
       
         if (targetStep === 2) {
-          // startResendTimer(); // TODO: we don't have an id mid flow
-          console.log('create a listener and expect token')
-          // const verificationResponse = await myUserContext.verifyMyEmail($formData.email);
-          // otpHandler = new MsaListenerHandler(
-          //   'SignUpForm',
-          //   verificationResponse,
-          //   undefined,
-          //   onFailure,
-          //   onSuccess,
-          // );
+          try {
+            const verificationResponse = await myUserContext.verifyMyEmail($formData.email);
+            const { msaId: newMsaId, handler } = setupOtpMsaHandler(verificationResponse);
+            msaId = newMsaId;
+            otpHandler = handler;
+          } catch (error) {
+            console.error('SignUpForm.registerNewEmail:', { error });
+            updateFormErrors('email', translate(AppUiMessage.systemError));
+          }
         }
       }
     }
