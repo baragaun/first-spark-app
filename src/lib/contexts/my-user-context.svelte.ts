@@ -582,9 +582,9 @@ export class MyUserContext {
   public get myUserOnboardingCompletion(): number  {
     if (!this.myUser) return 0;
 
-    if (!this.myUser.isEmailVerified) { // TODO: We should have started the listener again and gone to step 2
+    if (!this.myUser.isEmailVerified) {
       return 2;
-    } else if (!this.myUser.passwordHash) {
+    } else if (!this.myUser.passwordUpdatedAt) {
       return 3;
     }
 
