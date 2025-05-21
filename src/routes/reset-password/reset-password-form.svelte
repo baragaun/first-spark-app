@@ -354,6 +354,14 @@
           onBackButtonClick={() => {
             step = 1;
             hasStepError = false;
+            formData.update((data) => {
+              return {
+                ident: data.ident,
+                newPassword: '',
+                token: '',
+                actionId: '',
+              };
+            });
           }}
         />
       {/if}

@@ -334,6 +334,12 @@
       onBackButtonClick={() => {
         step = 1;
         hasStepError = false;
+        formData.update((data) => {
+          return {
+            email: data.email,
+            token: '',
+          };
+        });
       }}
     />
   {/if}

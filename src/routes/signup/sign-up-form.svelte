@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { page } from '$app/state';
   import AuthCard from '@/components/auth-card.svelte';
   import FormButton from '@/components/forms/form-button.svelte';
   import IdentFormInput from '@/components/forms/form-ident-input.svelte';
@@ -9,9 +10,9 @@
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import translate from '@/helpers/language/translate';
   import { AppUiMessage } from '@/types/enums';
-  import { UserIdentType } from '@baragaun/bg-node-client';
-  import { onDestroy } from 'svelte';
-  import { superForm, type SuperValidated } from 'sveltekit-superforms';
+  import { UserIdentType, type MultiStepActionProgressResult, type QueryResult } from '@baragaun/bg-node-client';
+  import { onDestroy, onMount } from 'svelte';
+  import SuperDebug, { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
   import { debounce } from 'throttle-debounce';
   import {
@@ -32,27 +33,23 @@
       description: m['signup.email_description'](),
       buttonLabel: m['signup.buttons.sign_up'](),
       loadingLabel: m['signup.buttons.sign_up'](),
+      requiredFields: ['email'] as const,
     },
     {
       schema: zod(schemaSecondStep),
       description: '',
       buttonLabel: m['signup.buttons.verify'](),
       loadingLabel: m['signup.buttons.verifying'](),
+      requiredFields: ['token'] as const,
     },
     {
       schema: zod(schemaLastStep),
       description: m['signup.create_credentials_description'](),
       buttonLabel: m['signup.buttons.create_account'](),
       loadingLabel: m['signup.buttons.creating_account'](),
+      requiredFields: ['username', 'password'] as const,
     },
   ];
-
-  const getCurrentStepDescription = (): string => {
-    const description = steps[step - 1].description;
-    return step === 2
-      ? m['signup.verification_description']({ email: $formData.email })
-      : description;
-  };
 
   let step = $state(1);
   let isLoading = $state(false);
@@ -70,9 +67,20 @@
   const DEBOUNCE_DELAY = 500; // ms
   const RESEND_TIMER_DURATION = 30; // s
 
-  // Create debounced validation function
   const debouncedFormValidation = debounce(DEBOUNCE_DELAY, async () => {
     try {
+
+      const requiredFields = steps[step - 1].requiredFields;
+
+      const missingRequiredFields = requiredFields.some(
+        field => !$formData[field] || $formData[field].trim() === ''
+      );
+      
+      if (missingRequiredFields) {
+        hasStepError = true;
+        return;
+      }      
+
       // Validate the identifier
       const result = await validateForm({ update: true, focusOnError: false });
       isLoading = true;
@@ -159,18 +167,25 @@
     hasStepError = true; // Disable button initially when step changes
   };
 
+  const getCurrentStepDescription = (): string => {
+    const description = steps[step - 1].description;
+    return step === 2
+      ? m['signup.verification_description']({ email: $formData.email || '' })
+      : description;
+  };
+
   const checkIdentAvailability = async (): Promise<boolean> => {
     isLoading = true;
 
     if (step === 1) {
-      identifier = $formData.email;
+      identifier = $formData.email || '';
       if (!identifier) return false;
       identType = UserIdentType.email;
 
       const validationResult = emailSchema.safeParse($formData.email);
       if (!validationResult.success) return false;
     } else if (step === 3) {
-      identifier = $formData.username;
+      identifier = $formData.username || '';
       if (!identifier) return false;
       identType = UserIdentType.userHandle;
 
@@ -184,7 +199,7 @@
     const message =
       identType === UserIdentType.email
         ? m['signup.errors.email_unavailable']()
-        : m['signup.errors.username_unavailable'](); //`This ${fieldName} is currently unavailable for use.`;
+        : m['signup.errors.username_unavailable']();
 
     try {
       const response = await myUserContext.isUserIdentAvailable(identifier, identType);
@@ -207,6 +222,46 @@
     } finally {
       isLoading = false;
     }
+  };
+
+  const setupOtpMsaHandler = (msaVerificationResponse: QueryResult<MultiStepActionProgressResult>) => {
+    const msaId = msaVerificationResponse.object?.actionProgress?.actionId || '';
+    
+    const onNotificationSent = () => {
+      setStep(2);
+      isLoading = false;
+    };
+    
+    const onFailure = () => {
+      console.error('onFailure');
+      isLoading = false;
+    };
+    
+    const onSuccess = async () => {
+      try {
+        await myUserContext.updateMyUser({isEmailVerified: true});
+      } catch (error) {
+        console.error('SignUpForm.setupOtpMsaHandler error updating verification:', { error });
+      };
+      if (!myUserContext.myUser?.passwordUpdatedAt) {
+        setStep(3);
+      } else {
+        // If this user already has a password, consider their onboarding complete
+        await goto('/');
+      }
+      isLoading = false;
+    };
+
+    return {
+      msaId,
+      handler: new MsaListenerHandler(
+        'SignUpForm',
+        msaVerificationResponse,
+        onNotificationSent,
+        onFailure,
+        onSuccess,
+      )
+    };
   };
 
   const registerNewEmail = async () => {
@@ -243,27 +298,9 @@
 
       startResendTimer();
 
-      msaId = verificationResponse.object.actionProgress.actionId;
-      const onNotificationSent = () => {
-        setStep(2);
-        isLoading = false;
-      };
-      const onFailure = () => {
-        console.error('onFailure');
-        isLoading = false;
-      };
-      const onSuccess = async () => {
-        setStep(3);
-        isLoading = false;
-      };
-
-      otpHandler = new MsaListenerHandler(
-        'SignUpForm',
-        verificationResponse,
-        onNotificationSent,
-        onFailure,
-        onSuccess,
-      );
+      const { msaId: newMsaId, handler } = setupOtpMsaHandler(verificationResponse);
+      msaId = newMsaId;
+      otpHandler = handler;
     } catch (error) {
       console.error('SignUpForm.registerNewEmail:', { error });
       updateFormErrors('email', translate(AppUiMessage.systemError));
@@ -282,7 +319,7 @@
 
       isLoading = true;
 
-      const response = await myUserContext.verifyMultiStepActionToken(msaId, $formData.token);
+      const response = await myUserContext.verifyMultiStepActionToken(msaId, $formData.token || '');
 
       if (response !== true) {
         console.error('SignUpForm.handleVerifyOtp: invalid response:', { result: response });
@@ -391,6 +428,37 @@
     options.validators = getCurrentValidator();
   });
 
+  onMount(async () => {
+    const stepParam = page.url.searchParams.get('step');
+    if (stepParam) {
+      const targetStep = parseInt(stepParam, 10);
+
+      if (!isNaN(targetStep) && targetStep > 1 && targetStep <= steps.length) {
+        setStep(targetStep);
+
+        identifier = step === 2 ? myUserContext.myEmail || '' : myUserContext.myUserHandle || '';
+        $formData = {
+          email: myUserContext.myEmail || '',
+          token: '',
+          username: myUserContext.myUserHandle || '',
+          password: ''
+        };
+      
+        if (targetStep === 2) {
+          try {
+            const verificationResponse = await myUserContext.verifyMyEmail($formData.email);
+            const { msaId: newMsaId, handler } = setupOtpMsaHandler(verificationResponse);
+            msaId = newMsaId;
+            otpHandler = handler;
+          } catch (error) {
+            console.error('SignUpForm.registerNewEmail:', { error });
+            updateFormErrors('email', translate(AppUiMessage.systemError));
+          }
+        }
+      }
+    }
+  });
+
   onDestroy(() => {
     clearInterval(timerInterval);
 
@@ -407,7 +475,6 @@
   <AuthCard title={m['signup.title']()} description={getCurrentStepDescription()}>
     <div class="space-y-4">
       {#if step === 1}
-        <!-- TODO: this should be called identinput -->
         <IdentFormInput
           {form}
           fieldName="email"
@@ -456,6 +523,6 @@
   >
 
   <!-- commenting as per the issue : https://github.com/baragaun/first-spark-app/issues/113 -->
-  <!--   <div class="mt-4"><SuperDebug data={$formData} /></div>
-  <div class="mt-4"><SuperDebug data={errors} /></div> -->
+  <!-- <div class="mt-4"><SuperDebug data={$formData} /></div> -->
+  <!-- <div class="mt-4"><SuperDebug data={errors} /></div> -->
 </form>
