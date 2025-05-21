@@ -578,6 +578,18 @@ export class MyUserContext {
 
     return (firstChar + firstUpperAfterStart).substring(0, 2);
   }
+
+  public get myUserOnboardingCompletion(): number  {
+    if (!this.myUser) return 0;
+
+    if (!this.myUser.isEmailVerified) {
+      return 2;
+    } else if (!this.myUser.passwordUpdatedAt) {
+      return 3;
+    }
+
+    return 1;
+  }
 }
 
 // Create a singleton instance

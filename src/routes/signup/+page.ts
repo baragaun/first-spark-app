@@ -1,9 +1,8 @@
 import { zod } from 'sveltekit-superforms/adapters';
 import { superValidate } from 'sveltekit-superforms/server';
 import type { PageLoad } from './$types';
-
-import { schemaLastStep } from './schema';
+import { completeSchema } from './schema';
 
 export const load: PageLoad = async () => {
-  return { form: await superValidate(zod(schemaLastStep)) };
+  return { form: await superValidate(zod(completeSchema)) };
 };
