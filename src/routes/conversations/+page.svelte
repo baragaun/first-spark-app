@@ -1,13 +1,12 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
-  import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
   import ChatList from './components/chat-list.svelte';
   import ChatSearch from './components/chat-search.svelte';
   import { Channel } from '@baragaun/bg-node-client';
   import type { PageData } from '../conversations/$types';
   import { MessageSquarePlus } from 'lucide-svelte';
-  import { conversationContext } from '@/contexts/conversation-context.svelte';
+  import { channelContext } from '@/contexts/channel-context.svelte';
 
   let { data }: { data: PageData } = $props();
 
@@ -25,8 +24,8 @@
       isLoading = false;
     }, 500);
 
-    conversationContext.initialize();
-    conversationContext.findMyChannels();
+    // conversationContext.initialize();
+    channelContext.findMyChannels();
   });
 
   const handleSearch = (event: CustomEvent<string>) => {

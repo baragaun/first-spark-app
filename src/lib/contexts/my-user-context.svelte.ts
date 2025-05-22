@@ -1,6 +1,6 @@
 import { env } from '$env/dynamic/public';
 import translate from '@/helpers/language/translate';
-import { client, initializeBgNodeClient } from '@/services/bg-node-client';
+import { client } from '@/services/bg-node-client';
 import { AppUiMessage } from '@/types/enums';
 import {
   BgListenerTopic,
@@ -22,7 +22,6 @@ let myUser = $state<MyUser | undefined>(undefined);
 
 export class MyUserContext {
   private client = client;
-  private _isInitializing = false;
 
   public async initialize(): Promise<void> {
     if (this.client.isInitialized || this._isInitializing) {
@@ -49,12 +48,11 @@ export class MyUserContext {
     }
 
     try {
-      await initializeBgNodeClient(listener);
+      this.client.addListener(listener);
       isSignedIn = this.client.isSignedIn;
     } catch (error) {
       console.error('MyUserContext: Error initializing BgNodeClient:', { error });
     } finally {
-      this._isInitializing = false;
     }
 
     // if (env.PUBLIC_MOCK_DATA === 'true') {
