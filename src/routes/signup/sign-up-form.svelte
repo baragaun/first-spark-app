@@ -24,6 +24,9 @@
     type SignUpFormSchema,
   } from './schema';
   import { m } from '@/paraglide/messages';
+  import { getLocale } from '@/paraglide/runtime';
+  import { turnstile } from '@svelte-put/cloudflare-turnstile';
+  import { env } from '$env/dynamic/public';
 
   let { data }: { data: { form: SuperValidated<SignUpFormSchema> } } = $props();
 
@@ -51,6 +54,7 @@
     },
   ];
 
+  let cloudflareToken = $state('');
   let step = $state(1);
   let isLoading = $state(false);
   let hasStepError = $state(true);
@@ -481,6 +485,16 @@
           placeholder={m['signup.email_placeholder']()}
           label={m['signup.email_title']()}
         />
+        <div
+          use:turnstile
+          turnstile-sitekey={env.PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY}
+          turnstile-theme="auto"
+          turnstile-size="flexible"
+          turnstile-language={getLocale()}
+          turnstile-response-field-name="turnstile"
+          turnstile-response-field
+          onturnstile={(e) => (cloudflareToken = e.detail.token)}
+        ></div>
       {:else if step === 2}
         <OTPFormInput
           {form}
@@ -510,7 +524,7 @@
         />
       {/if}
       <FormButton
-        disabled={$delayed || isLoading || hasStepError}
+        disabled={$delayed || isLoading || hasStepError || cloudflareToken === ''}
         isLoading={$delayed || isLoading}
         buttonText={steps[step - 1].buttonLabel}
         loadingText={steps[step - 1].loadingLabel}

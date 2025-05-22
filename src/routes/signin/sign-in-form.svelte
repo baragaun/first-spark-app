@@ -16,6 +16,9 @@
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
   import { debounce } from 'throttle-debounce';
+  import { getLocale } from '@/paraglide/runtime';
+  import { turnstile } from '@svelte-put/cloudflare-turnstile';
+  import { env } from '$env/dynamic/public';
   import {
     determineIdentifierType,
     getOtpMessage,
@@ -25,6 +28,8 @@
   } from './schema';
 
   let { data }: { data: { form: SuperValidated<SignInFormSchema> } } = $props();
+
+  let cloudflareToken = $state('');
 
   const steps = [zod(schemaFirstStep), zod(schemaLastStep)];
   let step = $state(1);
@@ -381,8 +386,18 @@
           label={m['signin.password_label']()}
           placeholder={m['signin.password_placeholder']()}
         />
+        <div
+          use:turnstile
+          turnstile-sitekey={env.PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY}
+          turnstile-theme="auto"
+          turnstile-size="flexible"
+          turnstile-language={getLocale()}
+          turnstile-response-field-name="turnstile"
+          turnstile-response-field
+          onturnstile={(e) => (cloudflareToken = e.detail.token)}
+        ></div>
         <FormButton
-          disabled={$delayed || isLoading || hasStepError}
+          disabled={$delayed || isLoading || hasStepError  || cloudflareToken === ''}
           isLoading={($delayed || isLoading) && !hasStepError}
           buttonText={m['signin.buttons.signin']()}
           loadingText={m['signin.buttons.Signing_in']()}
