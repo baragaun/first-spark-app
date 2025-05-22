@@ -157,6 +157,17 @@
     return;
   };
 
+  const onSignIn = async () => {
+    const onboardingCompletion = myUserContext.myUserOnboardingCompletion;
+    if (onboardingCompletion === 0) {
+      console.error('signMeInWithPassword.success.onboardingCompletion: User data not found.');
+    } else if (onboardingCompletion === 1) {
+      await goto('/');
+    } else {
+      await goto(`/signup?step=${onboardingCompletion}`);
+    }
+  };
+
   const signMeInWithPassword = async () => {
     if (!$formData.password) return;
 
@@ -179,7 +190,7 @@
         return;
       }
 
-      await goto('/');
+      await onSignIn();
     } catch (error) {
       console.error('SignInForm.signMeInWithPassword: error:', { error });
       updateFormErrors('password', translate(AppUiMessage.systemError));
@@ -234,7 +245,9 @@
         console.error('onFailure');
         isLoading = false;
       };
-      const onSuccess = async () => await goto('/');
+      const onSuccess = async () => {
+        await onSignIn();
+      };
 
       otpHandler = new MsaListenerHandler(
         'SignInForm',
