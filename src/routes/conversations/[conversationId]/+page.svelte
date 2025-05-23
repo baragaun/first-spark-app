@@ -7,6 +7,9 @@
   import { Channel, ChannelMessage } from '@baragaun/bg-node-client';
   import { X } from 'lucide-svelte';
   import Button from '@/components/ui/button/button.svelte';
+  import { selectedChannel } from '@/stores/channel-store';
+  import { channelContext } from '@/contexts/channel-context.svelte';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
 
   const conversationId = page.params.conversationId;
 
@@ -22,6 +25,8 @@
   let isLoading = $state(true);
   let messageListRef = $state<HTMLDivElement>();
   let replyingTo = $state<ChannelMessage | null>(null);
+
+  const currentUserId = myUserContext.myUserId;
 
   // Function to scroll to bottom of messages
   const scrollToBottom = () => {
@@ -54,9 +59,7 @@
       };
     } else {
       // Direct message - use recipient info
-      const recipientParticipant = channel.participants.find(
-        (p) => p.userId !== page.data.currentMockUserId,
-      );
+      const recipientParticipant = channel.participants.find((p) => p.userId !== currentUserId);
 
       if (!recipientParticipant) return null;
 
@@ -77,36 +80,46 @@
   onMount(async () => {
     // Mock data - would be replaced with actual API call
     isLoading = true;
-    setTimeout(() => {
-      // Find the channel from the data
-      const channel = page.data.channels.find((c: Channel) => c.id === conversationId);
-      if (channel) {
-        setContactInfo(channel);
-        messages = page.data.messages[conversationId] || [];
+    if ($selectedChannel) {
+      setContactInfo($selectedChannel);
+      const response = await channelContext.findChannelMessages(conversationId);
+
+      if (!response || !Array.isArray(response)) {
+        console.error('FindChannelMessages: received error.', { response });
+        messages = [];
+        isLoading = false;
+        return;
       }
+
+      messages = response;
       isLoading = false;
       // Scroll to bottom after messages load
       scrollToBottom();
-    }, 500);
+    }
   });
 
-  const handleSendMessage = (messageText: string) => {
+  const handleSendMessage = async (messageText: string) => {
     const newMessage: ChannelMessage = {
       id: Date.now().toString(),
       channelId: conversationId,
-      createdBy: page.data.currentMockUserId,
+      createdBy: currentUserId,
       messageText,
       createdAt: new Date().toISOString(),
     };
 
+    const response = await channelContext.createChannelMessage(newMessage);
+
+    if (!response || typeof response === 'string') {
+      console.error('CreateChannelMessage: received error.', { response });
+      return;
+    }
+
     messages = [...messages, newMessage];
     // Scroll to bottom after sending a message
     scrollToBottom();
-
-    // Here you would also send the message to your backend
   };
 
-  const handleEditMessage = (id: string, newText: string) => {
+  const handleEditMessage = async (id: string, newText: string) => {
     // Find and update the message
     messages = messages.map((message) =>
       message.id === id
@@ -118,33 +131,53 @@
         : message,
     );
 
-    // Here you would also update the message in your backend
+    const response = await channelContext.updateChannelMessage({
+      id,
+      messageText: newText,
+      editedAt: new Date().toISOString(),
+    });
+
+    if (!response || typeof response === 'string') {
+      console.error('UpdateChannelMessage: received error.', { response });
+      return;
+    }
   };
 
-  const handleDeleteMessage = (id: string) => {
-    // Implement delete functionality
+  const handleDeleteMessage = async (id: string) => {
+    const response = await channelContext.deleteChannelMessage(id);
+
+    if (response !== true) {
+      console.error('DeleteChannelMessage: received error.', { response });
+      return;
+    }
+
     messages = messages.filter((message) => message.id !== id);
 
     // Here you would also delete the message from your backend
   };
 
-  const handleReplyMessage = (replyToMessageId: string, messageText: string) => {
+  const handleReplyMessage = async (replyToMessageId: string, messageText: string) => {
     const newMessage: ChannelMessage = {
       id: Date.now().toString(),
       channelId: conversationId,
-      createdBy: page.data.currentMockUserId,
+      createdBy: currentUserId,
       messageText,
       createdAt: new Date().toISOString(),
       replyToMessageId: replyToMessageId,
     };
+
+    const response = await channelContext.createChannelMessage(newMessage);
+
+    if (!response || typeof response === 'string') {
+      console.error('CreateChannelMessage: received error.', { response });
+      return;
+    }
 
     messages = [...messages, newMessage];
     // Reset reply state
     replyingTo = null;
     // Scroll to bottom after sending a message
     scrollToBottom();
-
-    // Here you would also send the message to your backend
   };
 </script>
 
@@ -153,13 +186,13 @@
     <div class="flex flex-1 items-center justify-center">
       <div class="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
     </div>
-  {:else if !channelDetails}
+    <!-- {:else if !channelDetails}
     <div class="flex flex-1 items-center justify-center">
       <p>Conversation not found</p>
-    </div>
+    </div> -->
   {:else}
     <div class="sticky top-0 z-30 bg-background shadow-sm">
-      <ChatHeader contact={channelDetails} />
+      <!-- <ChatHeader contact={channelDetails} /> -->
     </div>
 
     <div class="relative flex-1 overflow-hidden">

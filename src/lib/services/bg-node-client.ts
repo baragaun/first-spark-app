@@ -3,13 +3,14 @@ import {
   BgNodeClient,
   ClientInfoStoreType,
   HttpHeaderName,
+  type BgBaseListener,
   type BgNodeClientConfig,
 } from '@baragaun/bg-node-client';
 
 const client = new BgNodeClient();
 let isInitializing = false;
 
-export async function initializeBgNodeClient(listener?: any) {
+export async function initializeBgNodeClient(listener?: BgBaseListener) {
   if (client.isInitialized || isInitializing) return client;
   isInitializing = true;
 

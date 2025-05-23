@@ -1,4 +1,3 @@
-import { myUserContext } from '@/contexts/my-user-context.svelte';
 import { initializeBgNodeClient } from '@/services/bg-node-client';
 import type { LayoutLoad } from './$types';
 
@@ -10,8 +9,6 @@ export const load: LayoutLoad = async () => {
   if (typeof window !== 'undefined') {
     try {
       await initializeBgNodeClient();
-      await myUserContext.initialize();
-
       return {
         userInitialized: true,
       };

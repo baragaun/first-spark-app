@@ -1,9 +1,13 @@
 <script lang="ts">
-  import { setContext, type Snippet } from 'svelte';
+  import { onMount, setContext, type Snippet } from 'svelte';
   import { channelContext } from './channel-context.svelte';
 
   // Set the user context for child components to consume
   setContext('channelContext', channelContext);
+
+  onMount(() => {
+    channelContext.findMyChannels();
+  });
 
   interface Props {
     children: Snippet;

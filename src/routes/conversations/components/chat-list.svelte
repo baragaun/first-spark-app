@@ -5,6 +5,8 @@
   import { createEventDispatcher } from 'svelte';
   import { page } from '$app/state';
   import ChannelOptionsMenu from './channel-options-menu.svelte';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { selectedChannel } from '@/stores/channel-store';
 
   const dispatch = createEventDispatcher<{
     deleteChannel: { channelId: string };
@@ -14,7 +16,8 @@
 
   // Get users and currentUserId directly from page data
   const users = page.data.users;
-  const currentUserId = page.data.currentMockUserId; // This should match the variable name in +layout.ts
+  // todo change to fetch real user by id
+  const currentUserId = myUserContext.myUserId; // This should match the variable name in +layout.ts
 
   const formatTime = (date: Date | string) => {
     return formatDistanceToNow(new Date(date), { addSuffix: true });
@@ -52,6 +55,10 @@
     // Remove from local state to update UI immediately
     channels = channels.filter((channel) => channel.id !== channelId);
   };
+
+  function handleChannelClick(channel: Channel) {
+    selectedChannel.set(channel);
+  }
 </script>
 
 <div class="space-y-2">
@@ -65,7 +72,11 @@
         class="group relative rounded-lg border p-4 transition-colors hover:bg-muted/50"
         data-channel-id={channel.id}
       >
-        <a href={`/conversations/${channel.id}`} class="flex items-center gap-4">
+        <a
+          href={`/conversations/${channel.id}`}
+          class="flex items-center gap-4"
+          onclick={() => handleChannelClick(channel)}
+        >
           <Avatar.Root class="h-12 w-12">
             <Avatar.Fallback>
               {#if channel.participants && channel.participants.length > 2}
@@ -93,7 +104,7 @@
               </div>
             </div>
             <p class="truncate text-sm text-muted-foreground">
-              {channel.description || 'No description'}
+              {channel.description || 'No latest message'}
             </p>
           </div>
 

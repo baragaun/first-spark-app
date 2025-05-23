@@ -3,54 +3,30 @@
   import { onMount } from 'svelte';
   import ChatList from './components/chat-list.svelte';
   import ChatSearch from './components/chat-search.svelte';
-  import { Channel } from '@baragaun/bg-node-client';
-  import type { PageData } from '../conversations/$types';
   import { MessageSquarePlus } from 'lucide-svelte';
   import { channelContext } from '@/contexts/channel-context.svelte';
+  import { myChannels } from '@/stores/channel-store';
 
-  let { data }: { data: PageData } = $props();
-
-  let channels = $state<Channel[]>([]);
-  let filteredChannels = $state<Channel[]>([]);
-  let isLoading = $state(true);
   let searchQuery = $state('');
 
-  onMount(async () => {
-    isLoading = true;
-    // Use the mock data from the layout
-    setTimeout(() => {
-      channels = data.channels;
-      filteredChannels = channels;
-      isLoading = false;
-    }, 500);
+  let filteredChannels = $derived(
+    $myChannels.filter((channel) => {
+      if (!searchQuery) return true;
 
-    // conversationContext.initialize();
-    channelContext.findMyChannels();
+      const query = searchQuery.toLowerCase();
+      return (
+        channel.name?.toLowerCase().includes(query) ||
+        channel.description?.toLowerCase().includes(query)
+      );
+    }),
+  );
+
+  onMount(async () => {
+    await channelContext.findMyChannels();
   });
 
   const handleSearch = (event: CustomEvent<string>) => {
     searchQuery = event.detail;
-    if (!searchQuery) {
-      filteredChannels = channels;
-      return;
-    }
-
-    const query = searchQuery.toLowerCase();
-    filteredChannels = channels.filter((channel) => {
-      // Search in channel name
-      if (channel.name?.toLowerCase().includes(query)) {
-        return true;
-      }
-
-      // Search in description
-      if (channel.description?.toLowerCase().includes(query)) {
-        return true;
-      }
-
-      // Could add more search criteria here
-
-      return false;
-    });
   };
 
   const handleNewChat = () => {
@@ -62,8 +38,7 @@
     const { channelId } = event.detail;
     try {
       // Remove from local state
-      channels = channels.filter((channel) => channel.id !== channelId);
-      filteredChannels = filteredChannels.filter((channel) => channel.id !== channelId);
+      $myChannels = $myChannels.filter((channel) => channel.id !== channelId);
 
       // Here you would call your API to delete the channel
       // For example:
@@ -88,7 +63,7 @@
     </div>
   </div>
 
-  {#if isLoading}
+  {#if channelContext.isLoading}
     <div class="flex h-40 items-center justify-center">
       <div class="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
     </div>

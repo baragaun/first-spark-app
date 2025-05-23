@@ -1,11 +1,11 @@
 import translate from '@/helpers/language/translate';
 import { client } from '@/services/bg-node-client';
+import { myChannels } from '@/stores/channel-store';
 import { AppUiMessage } from '@/types/enums';
-import { CachePolicy, Channel, ChannelMessage } from '@baragaun/bg-node-client';
+import { CachePolicy, Channel, ChannelMessage, type QueryOptions } from '@baragaun/bg-node-client';
 
 let isLoading = $state(false);
-let channels = $state<Channel[]>([]);
-let channelMessages = $state<ChannelMessage[]>([]);
+// let channels = $state<Channel[]>([]);
 
 export class ChannelContext {
   private client = client;
@@ -22,17 +22,21 @@ export class ChannelContext {
         match: {},
         options: {},
       };
+      console.log('FindMyChannels: input:', input);
       const response = await this.client.operations.channel.findMyChannels(
         input.filter,
         input.match,
         input.options,
         { cachePolicy: CachePolicy.network },
       );
-      if (!response || response.error) {
+      console.log('FindMyChannels: response.objects:', response.objects);
+      if (!response || response.error || !response.objects) {
         console.error('FindMyChannels: received error.', { response });
         return response.error || translate(AppUiMessage.systemError);
       }
-      console.log('FindMyChannels: received response.', { response });
+
+      myChannels.set(response.objects);
+
       return response.objects;
     } catch (error) {
       console.error('FindMyChannels: error', {
@@ -75,14 +79,14 @@ export class ChannelContext {
     }
   }
 
-  async createChannel(input: any): Promise<Channel | string | null | undefined> {
+  async createChannel(attributes: Partial<Channel>): Promise<Channel | string | null | undefined> {
     if (!this.client.isInitialized) {
       console.error('ConversationContext.createChannel: not initialized.');
       return translate(AppUiMessage.systemError);
     }
     try {
       isLoading = true;
-      const response = await this.client.operations.channel.createChannel(input);
+      const response = await this.client.operations.channel.createChannel(attributes);
       if (!response || response.error) {
         console.error('CreateChannel: received error.', { response });
         return response.error || translate(AppUiMessage.systemError);
@@ -101,7 +105,7 @@ export class ChannelContext {
 
   async updateChannel(
     changes: Partial<Channel>,
-    input: any,
+    queryOptions: QueryOptions,
   ): Promise<Channel | string | null | undefined> {
     if (!this.client.isInitialized) {
       console.error('ConversationContext.updateChannel: not initialized.');
@@ -109,7 +113,7 @@ export class ChannelContext {
     }
     try {
       isLoading = true;
-      const response = await this.client.operations.channel.updateChannel(changes, input);
+      const response = await this.client.operations.channel.updateChannel(changes, queryOptions);
       if (!response || response.error) {
         console.error('UpdateChannel: received error.', { response });
         return response.error || translate(AppUiMessage.systemError);
@@ -150,11 +154,7 @@ export class ChannelContext {
     }
   }
 
-  async findChannelMessages(
-    filter = {},
-    match = {},
-    options = {},
-  ): Promise<ChannelMessage[] | string | undefined> {
+  async findChannelMessages(channelId: string): Promise<ChannelMessage[] | string | undefined> {
     if (!this.client.isInitialized) {
       console.error('ConversationContext.findChannelMessages: not initialized.');
       return translate(AppUiMessage.systemError);
@@ -162,9 +162,9 @@ export class ChannelContext {
     try {
       isLoading = true;
       const response = await this.client.operations.channelMessage.findChannelMessages(
-        filter,
-        match,
-        options,
+        {},
+        { id: channelId },
+        {},
         { cachePolicy: CachePolicy.network },
       );
       if (!response || response.error) {
@@ -183,14 +183,16 @@ export class ChannelContext {
     }
   }
 
-  async createChannelMessage(input: any): Promise<ChannelMessage | string | null | undefined> {
+  async createChannelMessage(
+    attributes: Partial<ChannelMessage>,
+  ): Promise<ChannelMessage | string | null | undefined> {
     if (!this.client.isInitialized) {
       console.error('ConversationContext.createChannelMessage: not initialized.');
       return translate(AppUiMessage.systemError);
     }
     try {
       isLoading = true;
-      const response = await this.client.operations.channelMessage.createChannelMessage(input);
+      const response = await this.client.operations.channelMessage.createChannelMessage(attributes);
       if (!response || response.error) {
         console.error('CreateChannelMessage: received error.', { response });
         return response.error || translate(AppUiMessage.systemError);
@@ -209,7 +211,6 @@ export class ChannelContext {
 
   async updateChannelMessage(
     changes: Partial<ChannelMessage>,
-    input: any,
   ): Promise<ChannelMessage | string | null | undefined> {
     if (!this.client.isInitialized) {
       console.error('ConversationContext.updateChannelMessage: not initialized.');
@@ -219,7 +220,7 @@ export class ChannelContext {
       isLoading = true;
       const response = await this.client.operations.channelMessage.updateChannelMessage(
         changes,
-        input,
+        {},
       );
       if (!response || response.error) {
         console.error('UpdateChannelMessage: received error.', { response });
@@ -263,14 +264,6 @@ export class ChannelContext {
 
   public get isLoading(): boolean {
     return isLoading;
-  }
-
-  public get channels(): Channel[] {
-    return channels;
-  }
-
-  public get channelMessages(): ChannelMessage[] {
-    return channelMessages;
   }
 }
 

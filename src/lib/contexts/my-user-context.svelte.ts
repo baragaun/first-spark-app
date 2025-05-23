@@ -53,6 +53,7 @@ export class MyUserContext {
     } catch (error) {
       console.error('MyUserContext: Error initializing BgNodeClient:', { error });
     } finally {
+      isLoading = false;
     }
 
     // if (env.PUBLIC_MOCK_DATA === 'true') {

@@ -1,17 +1,10 @@
-import {
-  ChannelType,
-  type Channel,
-  type ChannelMessage,
-  type MyUser,
-} from '@baragaun/bg-node-client';
+import { type ChannelMessage, type MyUser } from '@baragaun/bg-node-client';
 import type { LayoutLoad } from './$types';
 
 // Only initialize in browser environment
 export const ssr = false;
 
 export const load: LayoutLoad = async () => {
-  const currentMockUserId = 'u1';
-
   // Mock users data
   const mockUsers: MyUser[] = [
     {
@@ -292,115 +285,9 @@ export const load: LayoutLoad = async () => {
   };
 
   // Mock channels
-  const mockChannels: Channel[] = [
-    {
-      id: '1',
-      createdAt: new Date(Date.now() - 4000000).toISOString(),
-      updatedAt: new Date(Date.now() - 3400000).toISOString(),
-      channelType: ChannelType.unset,
-      participants: [
-        {
-          id: '1p',
-          userId: 'u1',
-          channelId: '1',
-          createdAt: new Date(Date.now() - 4000000).toISOString(),
-        },
-        {
-          id: '2p',
-          userId: 'u2',
-          channelId: '1',
-          createdAt: new Date(Date.now() - 4000000).toISOString(),
-        },
-      ],
-    },
-    {
-      id: '2',
-      createdAt: new Date(Date.now() - 8000000).toISOString(),
-      updatedAt: new Date(Date.now() - 7100000).toISOString(),
-      channelType: ChannelType.unset,
-      participants: [
-        {
-          id: '3p',
-          userId: 'u1',
-          channelId: '2',
-          createdAt: new Date(Date.now() - 8000000).toISOString(),
-        },
-        {
-          id: '4p',
-          userId: 'u3',
-          channelId: '2',
-          createdAt: new Date(Date.now() - 8000000).toISOString(),
-        },
-      ],
-    },
-    {
-      id: '3',
-      name: 'First Spark Support',
-      description: 'We would like to help you!',
-      createdAt: new Date(Date.now() - 180000000).toISOString(),
-      updatedAt: new Date(Date.now() - 172600000).toISOString(),
-      channelType: ChannelType.unset,
-      participants: [
-        {
-          id: '5p',
-          userId: 'u3',
-          channelId: '3',
-          createdAt: new Date(Date.now() - 180000000).toISOString(),
-        },
-        {
-          id: '6p',
-          userId: 'u4',
-          channelId: '3',
-          createdAt: new Date(Date.now() - 180000000).toISOString(),
-        },
-        {
-          id: '11p',
-          userId: 'u1',
-          channelId: '3',
-          createdAt: new Date(Date.now() - 180000000).toISOString(),
-        },
-      ],
-    },
-    {
-      id: '4',
-      name: 'Team Chat',
-      description: 'General team chat',
-      createdAt: new Date(Date.now() - 90000000).toISOString(),
-      updatedAt: new Date(Date.now() - 86400000).toISOString(),
-      channelType: ChannelType.support,
-      participants: [
-        {
-          id: '7p',
-          userId: 'u1',
-          channelId: '4',
-          createdAt: new Date(Date.now() - 90000000).toISOString(),
-        },
-        {
-          id: '8p',
-          userId: 'u2',
-          channelId: '4',
-          createdAt: new Date(Date.now() - 90000000).toISOString(),
-        },
-        {
-          id: '9p',
-          userId: 'u3',
-          channelId: '4',
-          createdAt: new Date(Date.now() - 90000000).toISOString(),
-        },
-        {
-          id: '10p',
-          userId: 'u4',
-          channelId: '4',
-          createdAt: new Date(Date.now() - 90000000).toISOString(),
-        },
-      ],
-    },
-  ];
 
   return {
-    currentMockUserId,
     users: mockUsers,
-    channels: mockChannels,
     messages: mockMessages,
   };
 };

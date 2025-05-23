@@ -1,8 +1,12 @@
 <script lang="ts">
-  import { setContext, type Snippet } from 'svelte';
+  import { onMount, setContext, type Snippet } from 'svelte';
   import { myUserContext } from './my-user-context.svelte';
 
   setContext('myUserContext', myUserContext);
+
+  onMount(() => {
+    myUserContext.initialize();
+  });
 
   interface Props {
     children: Snippet;
