@@ -122,9 +122,11 @@
       "identifier_label": "Email or username",
       "identifier_placeholder": "Enter your email or username",
       "errors": {
-        "account_not_found": "No account found with this email address",
         "default_error": "Unable to process your request. Please try again.",
-        "valid_ident_required": "A valid username or email is required"
+        "valid_ident_required": "A valid username or email is required",
+        "failed_to_send": "Failed to send verification code. Please try again.",
+        "failed_to_resend": "Failed to resend verification code. Please try again.",
+        "failed_to_verify": "Failed to verify code. Please try again."
       }
     },
     "new_password_form": {

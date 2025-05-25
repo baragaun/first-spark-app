@@ -579,7 +579,7 @@ export class MyUserContext {
     return (firstChar + firstUpperAfterStart).substring(0, 2);
   }
 
-  public get myUserOnboardingCompletion(): number  {
+  public get myUserOnboardingCompletion(): number {
     if (!this.myUser) return 0;
 
     if (!this.myUser.isEmailVerified) {

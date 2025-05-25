@@ -10,7 +10,11 @@
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import translate from '@/helpers/language/translate';
   import { AppUiMessage } from '@/types/enums';
-  import { UserIdentType, type MultiStepActionProgressResult, type QueryResult } from '@baragaun/bg-node-client';
+  import {
+    UserIdentType,
+    type MultiStepActionProgressResult,
+    type QueryResult,
+  } from '@baragaun/bg-node-client';
   import { onDestroy, onMount } from 'svelte';
   import SuperDebug, { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
@@ -73,17 +77,16 @@
 
   const debouncedFormValidation = debounce(DEBOUNCE_DELAY, async () => {
     try {
-
       const requiredFields = steps[step - 1].requiredFields;
 
       const missingRequiredFields = requiredFields.some(
-        field => !$formData[field] || $formData[field].trim() === ''
+        (field) => !$formData[field] || $formData[field].trim() === '',
       );
-      
+
       if (missingRequiredFields) {
         hasStepError = true;
         return;
-      }      
+      }
 
       // Validate the identifier
       const result = await validateForm({ update: true, focusOnError: false });
@@ -228,25 +231,27 @@
     }
   };
 
-  const setupOtpMsaHandler = (msaVerificationResponse: QueryResult<MultiStepActionProgressResult>) => {
+  const setupOtpMsaHandler = (
+    msaVerificationResponse: QueryResult<MultiStepActionProgressResult>,
+  ) => {
     const msaId = msaVerificationResponse.object?.actionProgress?.actionId || '';
-    
+
     const onNotificationSent = () => {
       setStep(2);
       isLoading = false;
     };
-    
+
     const onFailure = () => {
       console.error('onFailure');
       isLoading = false;
     };
-    
+
     const onSuccess = async () => {
       try {
-        await myUserContext.updateMyUser({isEmailVerified: true});
+        await myUserContext.updateMyUser({ isEmailVerified: true });
       } catch (error) {
         console.error('SignUpForm.setupOtpMsaHandler error updating verification:', { error });
-      };
+      }
       if (!myUserContext.myUser?.passwordUpdatedAt) {
         setStep(3);
       } else {
@@ -264,7 +269,7 @@
         onNotificationSent,
         onFailure,
         onSuccess,
-      )
+      ),
     };
   };
 
@@ -445,9 +450,9 @@
           email: myUserContext.myEmail || '',
           token: '',
           username: myUserContext.myUserHandle || '',
-          password: ''
+          password: '',
         };
-      
+
         if (targetStep === 2) {
           try {
             const verificationResponse = await myUserContext.verifyMyEmail($formData.email);
