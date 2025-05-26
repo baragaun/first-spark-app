@@ -36,6 +36,8 @@
   let canResend = $state(false);
 
   let isLoading = $state(false);
+  let awaitingTokenVerification = $state(false);
+
   let hasStepError = $state(true);
 
   let identifier = $state('');
@@ -179,7 +181,14 @@
         isLoading = false;
       };
       const onFailure = () => {
-        isLoading = false;
+        if (awaitingTokenVerification && otpHandler) {
+          console.error('onFailure');
+
+          updateFormErrors('token', otpHandler.getErrorMessage());
+          hasStepError = true;
+          awaitingTokenVerification = false;
+          isLoading = false;
+        }
       };
       const onSuccess = async () => {
         isLoading = false;
@@ -240,7 +249,7 @@
 
   const updateMyPassword = async () => {
     isLoading = true;
-
+    awaitingTokenVerification = true;
     if (!msaId) {
       console.error('ResetPasswordForm.updateMyPassword: actionId missing:');
       updateFormErrors('token', translate(AppUiMessage.systemError));
@@ -272,7 +281,7 @@
         err instanceof Error ? err.message : 'Failed to verify code. Please try again.',
       );
     } finally {
-      isLoading = false;
+      isLoading = true; // Leave the button in a processing state until sent event
     }
   };
 
@@ -298,13 +307,6 @@
     if (!$formData) {
       isLoading = false;
       return;
-    }
-
-    if (otpHandler) {
-      const currentErrorMessage = otpHandler.getErrorMessage();
-      if (currentErrorMessage) {
-        updateFormErrors('token', currentErrorMessage);
-      }
     }
 
     options.validators = getCurrentValidator();

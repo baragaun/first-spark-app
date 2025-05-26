@@ -41,6 +41,7 @@
   let canResend = $state(false);
 
   let isLoading = $state(false);
+  let awaitingTokenVerification = $state(false);
   let hasStepError = $state(true);
 
   let identifier = $state('');
@@ -242,8 +243,14 @@
         isLoading = false;
       };
       const onFailure = () => {
-        console.error('onFailure');
-        isLoading = false;
+        if (awaitingTokenVerification && otpHandler) {
+          console.error('onFailure');
+
+          updateFormErrors('token', otpHandler.getErrorMessage());
+          hasStepError = true;
+          awaitingTokenVerification = false;
+          isLoading = false;
+        }
       };
       const onSuccess = async () => {
         await onSignIn();
@@ -268,6 +275,8 @@
 
   const verifySignInToken = async (): Promise<void> => {
     isLoading = true;
+    awaitingTokenVerification = true;
+
     if (!$formData.token) return;
 
     try {
@@ -348,13 +357,6 @@
       return;
     }
 
-    if (otpHandler) {
-      const currentErrorMessage = otpHandler.getErrorMessage();
-      if (currentErrorMessage) {
-        updateFormErrors('token', currentErrorMessage);
-      }
-    }
-
     options.validators = getCurrentValidator();
   });
 
@@ -397,7 +399,7 @@
           onturnstile={(e) => (cloudflareToken = e.detail.token)}
         ></div>
         <FormButton
-          disabled={$delayed || isLoading || hasStepError  || cloudflareToken === ''}
+          disabled={$delayed || isLoading || hasStepError || cloudflareToken === ''}
           isLoading={($delayed || isLoading) && !hasStepError}
           buttonText={m['signin.buttons.signin']()}
           loadingText={m['signin.buttons.Signing_in']()}
