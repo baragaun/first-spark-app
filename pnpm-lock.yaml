@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@baragaun/bg-node-client':
-        specifier: ^0.0.30
-        version: 0.0.30(prettier@3.5.3)
+        specifier: ^0.0.31
+        version: 0.0.31(prettier@3.5.3)
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
@@ -246,8 +246,8 @@ packages:
     resolution: {integrity: sha512-+EzkxvLNfiUeKMgy/3luqfsCWFRXLb7U6wNQTk60tovuckwB15B191tJWvpp4HjiQWdJkCxO3Wbvc6jlk3Xb2Q==}
     engines: {node: '>=6.9.0'}
 
-  '@baragaun/bg-node-client@0.0.30':
-    resolution: {integrity: sha512-Njlio9aD6W2m4aq0I/bKu+/kAeCm3R6MuEe9tBEoY2ilmHG42gADG/CEDd1vs2blHyPLyLWd5f+H3lsj5fB0AQ==}
+  '@baragaun/bg-node-client@0.0.31':
+    resolution: {integrity: sha512-kERxxDWLWJ3FJv6vEvVfDTY5CKD464AEutrtItubvfkAOoFwRTp2FJwC8fG1rW43+IZvV9KGIUVlYgaZnkeSmw==}
     engines: {node: '>=20'}
 
   '@bcoe/v8-coverage@1.0.2':
@@ -1750,8 +1750,8 @@ packages:
     resolution: {integrity: sha512-zgVZuo2WcZgfUEmsn6eO3kINexW8RAE4maiQ8QNs8CtpPCSyMiYsULR3HQYkm3w8FIA3SberyMJMSldGsW+U3w==}
     engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
 
-  chance@1.1.12:
-    resolution: {integrity: sha512-vVBIGQVnwtUG+SYe0ge+3MvF78cvSpuCOEUJr7sVEk2vSBuMW6OXNJjSzdtzrlxNUEaoqH2GBd5Y/+18BEB01Q==}
+  chance@1.1.13:
+    resolution: {integrity: sha512-V6lQCljcLznE7tUYUM9EOAnnKXbctE6j/rdQkYOHIWbfGQbrzTsAXNW9CdU5XCo4ArXQCj/rb6HgxPlmGJcaUg==}
 
   check-error@2.1.1:
     resolution: {integrity: sha512-OAlb+T7V4Op9OwdkjmguYRqncdlx5JiofwOAUkmTF+jNdHwzTaTs4sRAGpzLF3oOz5xAyDGrPgeIDFQmDOTiJw==}
@@ -1951,9 +1951,6 @@ packages:
 
   dexie@4.0.10:
     resolution: {integrity: sha512-eM2RzuR3i+M046r2Q0Optl3pS31qTWf8aFuA7H9wnsHTwl8EPvroVLwvQene/6paAs39Tbk6fWZcn2aZaHkc/w==}
-
-  dexie@4.0.11:
-    resolution: {integrity: sha512-SOKO002EqlvBYYKQSew3iymBoN2EQ4BDw/3yprjh7kAfFzjBYkaMNa/pZvcA7HSWlcKSQb9XhPe3wKyQ0x4A8A==}
 
   didyoumean@1.2.2:
     resolution: {integrity: sha512-gxtyfqMg7GKyhQmb056K7M3xszy/myH8w+B4RT+QXBQsvAOdc3XymqDDPHx1BgPgsdAA5SIifona89YtRATDzw==}
@@ -4218,7 +4215,7 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.27.1
 
-  '@baragaun/bg-node-client@0.0.30(prettier@3.5.3)':
+  '@baragaun/bg-node-client@0.0.31(prettier@3.5.3)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
       '@nats-io/jetstream': 3.0.2
@@ -4227,8 +4224,8 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       ajv: 8.17.1
       ajv-formats: 3.0.1(ajv@8.17.1)
-      chance: 1.1.12
-      dexie: 4.0.11
+      chance: 1.1.13
+      dexie: 4.0.10
       graffle: 8.0.0-next.157(@opentelemetry/api@1.9.0)(graphql@16.11.0)(prettier@3.5.3)
       graphql: 16.11.0
       leader-election: link:rxdb/plugins/leader-election
@@ -5996,7 +5993,7 @@ snapshots:
 
   chalk@5.4.1: {}
 
-  chance@1.1.12: {}
+  chance@1.1.13: {}
 
   check-error@2.1.1: {}
 
@@ -6146,8 +6143,6 @@ snapshots:
   devalue@5.1.1: {}
 
   dexie@4.0.10: {}
-
-  dexie@4.0.11: {}
 
   didyoumean@1.2.2: {}
 
