@@ -62,12 +62,5 @@
       </Button>
     </div>
   </div>
-
-  {#if channelContext.isLoading}
-    <div class="flex h-40 items-center justify-center">
-      <div class="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
-    </div>
-  {:else}
-    <ChatList channels={filteredChannels} on:deleteChannel={handleDeleteChannel} />
-  {/if}
+  <ChatList channels={filteredChannels} on:deleteChannel={handleDeleteChannel} />
 </div>

@@ -4,14 +4,9 @@
   import { ArrowLeft, MoreVertical, Archive, BellOff, Ban } from 'lucide-svelte';
   import { goto } from '$app/navigation';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+  import type { ContactDetails } from '@/helpers/types';
 
-  interface Contact {
-    id: string;
-    name: string;
-    avatar: string;
-  }
-
-  let { contact: channelDetails }: { contact: Contact } = $props();
+  let { contact: channelDetails }: { contact: ContactDetails | undefined } = $props();
 
   const handleBack = () => {
     goto('/conversations');
@@ -25,11 +20,11 @@
     </Button>
 
     <Avatar.Root class="h-10 w-10">
-      <Avatar.Fallback>{channelDetails.name.charAt(0)}</Avatar.Fallback>
+      <Avatar.Fallback>{channelDetails?.name.charAt(0)}</Avatar.Fallback>
     </Avatar.Root>
 
     <div>
-      <h2 class="font-medium">{channelDetails.name}</h2>
+      <h2 class="font-medium">{channelDetails?.name}</h2>
       <p class="text-xs text-muted-foreground">Online</p>
     </div>
   </div>

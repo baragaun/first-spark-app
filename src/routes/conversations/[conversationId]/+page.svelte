@@ -7,24 +7,18 @@
   import { Channel, ChannelMessage } from '@baragaun/bg-node-client';
   import { X } from 'lucide-svelte';
   import Button from '@/components/ui/button/button.svelte';
-  import { selectedChannel } from '@/stores/channel-store';
+  import { isChannelLoading, selectedChannel } from '@/stores/channel-store';
   import { channelContext } from '@/contexts/channel-context.svelte';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import type { ContactDetails } from '@/helpers/types';
 
-  const conversationId = page.params.conversationId;
+  const channelId = page.params.conversationId;
 
-  interface ContactDetails {
-    id: string;
-    name: string;
-    avatar: string;
-    description?: string;
-  }
-
-  let channelDetails = $state<ContactDetails | null>(null);
+  let channelDetails = $state<ContactDetails | undefined>(undefined);
   let messages = $state<ChannelMessage[]>([]);
-  let isLoading = $state(true);
   let messageListRef = $state<HTMLDivElement>();
   let replyingTo = $state<ChannelMessage | null>(null);
+  let isLoading = $state(false);
 
   const currentUserId = myUserContext.myUserId;
 
@@ -47,10 +41,10 @@
   });
 
   // Function to determine contact info based on channel participants
-  const setContactInfo = (channel: Channel) => {
-    if (!channel || !channel.participants) return null;
+  const setContactInfo = async (channel: Channel) => {
+    if (!channel || !channel.userIds) return null;
 
-    if (channel.participants.length > 2) {
+    if (channel.userIds.length > 2) {
       // Group chat - use channel info
       channelDetails = {
         id: channel.id,
@@ -59,63 +53,60 @@
       };
     } else {
       // Direct message - use recipient info
-      const recipientParticipant = channel.participants.find((p) => p.userId !== currentUserId);
+      const recipientId = channel.userIds.find((userId) => userId !== currentUserId);
 
-      if (!recipientParticipant) return null;
+      if (!recipientId) return null;
 
-      const recipientUser = page.data.users.find(
-        (user: { id: string }) => user.id === recipientParticipant.userId,
-      );
+      const recipientUser = await channelContext.findRecipientInfo(recipientId);
 
-      if (!recipientUser) return null;
+      if (!recipientUser || typeof recipientUser === 'string') return null;
+
+      const receipientName = recipientUser.firstName
+        ? `${recipientUser.firstName} ${recipientUser.lastName}`
+        : recipientUser.userHandle;
 
       channelDetails = {
         id: recipientUser.id,
-        name: `${recipientUser.firstName} ${recipientUser.lastName}`,
-        avatar: recipientUser.firstName.charAt(0),
+        name: receipientName || 'Unknown',
+        avatar: receipientName || '?'.charAt(0),
       };
     }
   };
 
-  onMount(async () => {
-    // Mock data - would be replaced with actual API call
+  const initializeChannel = async () => {
     isLoading = true;
+    const response = await channelContext.findChannelMessages(channelId);
+    if (!response || !Array.isArray(response)) {
+      console.error('FindChannelMessages: received error.', { response });
+      messages = [];
+      return;
+    }
+    messages = response;
+    isLoading = false;
+    scrollToBottom();
+  };
+
+  onMount(async () => {
     if ($selectedChannel) {
       setContactInfo($selectedChannel);
-      const response = await channelContext.findChannelMessages(conversationId);
-
-      if (!response || !Array.isArray(response)) {
-        console.error('FindChannelMessages: received error.', { response });
-        messages = [];
-        isLoading = false;
-        return;
-      }
-
-      messages = response;
-      isLoading = false;
-      // Scroll to bottom after messages load
-      scrollToBottom();
+      initializeChannel();
+    } else {
+      // todo if page refreshed then I need to call findChannelById
+      // selectedChannel.set(await channelContext.findChannel(channelId));
     }
   });
 
   const handleSendMessage = async (messageText: string) => {
-    const newMessage: ChannelMessage = {
-      id: Date.now().toString(),
-      channelId: conversationId,
-      createdBy: currentUserId,
+    const newMessage: Partial<ChannelMessage> = {
+      channelId: channelId,
       messageText,
-      createdAt: new Date().toISOString(),
     };
-
     const response = await channelContext.createChannelMessage(newMessage);
-
     if (!response || typeof response === 'string') {
       console.error('CreateChannelMessage: received error.', { response });
       return;
     }
-
-    messages = [...messages, newMessage];
-    // Scroll to bottom after sending a message
+    messages = [...messages, response];
     scrollToBottom();
   };
 
@@ -134,7 +125,6 @@
     const response = await channelContext.updateChannelMessage({
       id,
       messageText: newText,
-      editedAt: new Date().toISOString(),
     });
 
     if (!response || typeof response === 'string') {
@@ -145,8 +135,8 @@
 
   const handleDeleteMessage = async (id: string) => {
     const response = await channelContext.deleteChannelMessage(id);
-
-    if (response !== true) {
+    console.log('DeleteChannelMessage: response:', response);
+    if (!response) {
       console.error('DeleteChannelMessage: received error.', { response });
       return;
     }
@@ -157,12 +147,9 @@
   };
 
   const handleReplyMessage = async (replyToMessageId: string, messageText: string) => {
-    const newMessage: ChannelMessage = {
-      id: Date.now().toString(),
-      channelId: conversationId,
-      createdBy: currentUserId,
+    const newMessage: Partial<ChannelMessage> = {
+      channelId: channelId,
       messageText,
-      createdAt: new Date().toISOString(),
       replyToMessageId: replyToMessageId,
     };
 
@@ -173,7 +160,7 @@
       return;
     }
 
-    messages = [...messages, newMessage];
+    // messages = [...messages, newMessage];
     // Reset reply state
     replyingTo = null;
     // Scroll to bottom after sending a message
@@ -186,20 +173,19 @@
     <div class="flex flex-1 items-center justify-center">
       <div class="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
     </div>
-    <!-- {:else if !channelDetails}
+  {:else if !channelDetails}
     <div class="flex flex-1 items-center justify-center">
       <p>Conversation not found</p>
-    </div> -->
+    </div>
   {:else}
     <div class="sticky top-0 z-30 bg-background shadow-sm">
-      <!-- <ChatHeader contact={channelDetails} /> -->
+      <ChatHeader contact={channelDetails} />
     </div>
 
     <div class="relative flex-1 overflow-hidden">
-      <div class="absolute inset-0 overflow-y-auto" bind:this={messageListRef}>
+      <div class="overflo w-y-auto absolute inset-0" bind:this={messageListRef}>
         <MessageList
           {messages}
-          channelId={conversationId}
           onEditMessage={handleEditMessage}
           onDeleteMessage={handleDeleteMessage}
           onReplyMessage={handleReplyMessage}

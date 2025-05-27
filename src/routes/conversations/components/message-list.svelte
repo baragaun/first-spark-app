@@ -10,7 +10,6 @@
     Copy,
     CheckCircle,
     Clock,
-    Send,
     Edit,
     CheckCheck,
     ArrowDown,
@@ -21,27 +20,23 @@
   import { Button } from '$lib/components/ui/button';
   import { Separator } from '$lib/components/ui/separator/index.js';
   import type { ChannelMessage, Channel } from '@baragaun/bg-node-client';
-  import { page } from '$app/state';
-
-  const MessageStatus = {
-    SENDING: 'sending',
-    SENT: 'sent',
-    SEEN: 'seen',
-  } as const;
-
-  type MessageStatus = (typeof MessageStatus)[keyof typeof MessageStatus];
+  import { channelContext } from '@/contexts/channel-context.svelte';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { MessageStatus } from '@/helpers/types';
 
   // For demo purposes, let's assume messages have a status property
   // In a real app, this would come from your message data
   const getMessageStatus = (message: ChannelMessage): MessageStatus => {
-    // This is a placeholder implementation
-    // In a real app, you would use actual message status from your data
-    // if (message.statuses[]?.status) {
-    //   return message.metadata.status as MessageStatus;
-    // }
-
+    const messageStatus = message.statuses?.find((s) => s.userId !== myUserContext.myUserId);
+    if (messageStatus) {
+      if (messageStatus.seenAt) {
+        return MessageStatus.seen;
+      } else if (messageStatus.receivedAt) {
+        return MessageStatus.delivered;
+      }
+    }
     // Default to SEEN for demo purposes
-    return MessageStatus.SEEN;
+    return MessageStatus.sent;
   };
 
   let {
@@ -49,14 +44,14 @@
     onEditMessage,
     onDeleteMessage,
     onStartReply,
-    channelId,
+    channel,
   }: {
     messages: ChannelMessage[];
     onEditMessage?: (id: string, newText: string) => void;
     onDeleteMessage?: (id: string) => void;
     onReplyMessage?: (replyToId: string, text: string) => void;
     onStartReply?: (message: ChannelMessage) => void;
-    channelId?: string;
+    channel?: Channel;
   } = $props();
 
   let messagesContainer: HTMLDivElement;
@@ -66,22 +61,26 @@
   let copiedMessageId = $state<string | null>(null);
   let showScrollButton = $state(false);
 
-  let channel = $derived(() => {
-    return page.data.channels.find((c: Channel) => c.id === channelId);
-  });
-
   // Get sender info for avatar display
-  const getSenderInfo = (userId: string) => {
-    const user = page.data.users.find((u: { id: string }) => u.id === userId);
+  // todo this function repeated multiples times
+  const getSenderInfo = async (userId: string) => {
+    const user = await channelContext.findRecipientInfo(userId);
+    if (!user || typeof user === 'string') return { name: 'Unknown', initial: '?' };
+    if (user.firstName) {
+      return {
+        name: `${user.firstName} ${user.lastName}`,
+        initial: user.firstName.charAt(0),
+      };
+    }
     return {
-      name: user ? `${user.firstName} ${user.lastName}` : 'Unknown',
-      initial: user ? user.firstName.charAt(0) : '?',
+      name: user.userHandle,
+      initial: user.userHandle?.charAt(0),
     };
   };
 
   // Check if channel has more than two participants
   const isGroupChat = $derived(() => {
-    return channel()?.participants && channel().participants.length > 2;
+    return channel?.userIds && channel.userIds.length > 2;
   });
 
   // Auto-scroll to bottom when new messages arrive or when component mounts
@@ -218,31 +217,38 @@
 
       {#each group.messages as message (message.id)}
         <div
-          class="flex {message.createdBy === page.data.currentMockUserId
+          class="flex {message.createdBy === myUserContext.myUserId
             ? 'justify-end'
             : 'justify-start'}"
         >
-          {#if message.createdBy !== page.data.currentMockUserId && isGroupChat()}
-            <Avatar.Root class="mb-1 mr-2 h-8 w-8 self-end">
-              <Avatar.Fallback>
-                {getSenderInfo(message.createdBy ?? '').initial}
-              </Avatar.Fallback>
-            </Avatar.Root>
+          {#if message.createdBy !== myUserContext.myUserId && isGroupChat()}
+            {@const senderInfoPromise = getSenderInfo(message.createdBy ?? '')}
+            {#await senderInfoPromise then senderInfo}
+              <Avatar.Root class="mb-1 mr-2 h-8 w-8 self-end">
+                <Avatar.Fallback>
+                  {senderInfo.initial}
+                </Avatar.Fallback>
+              </Avatar.Root>
+            {/await}
           {/if}
           <div
             class="group relative max-w-[80%] rounded-lg px-4 py-2 {message.createdBy ===
-            page.data.currentMockUserId
+            myUserContext.myUserId
               ? 'bg-primary text-primary-foreground'
               : 'bg-muted'}"
           >
             {#if message.replyToMessageId}
               <div class="mb-2 rounded bg-black/10 p-2 text-xs dark:bg-white/10">
                 {#if messages.find((m) => m.id === message.replyToMessageId)}
-                  <p class="font-semibold">
-                    {getSenderInfo(
-                      messages.find((m) => m.id === message.replyToMessageId)?.createdBy ?? '',
-                    ).name}
-                  </p>
+                  {@const senderInfoPromise = getSenderInfo(
+                    messages.find((m) => m.id === message.replyToMessageId)?.createdBy ?? '',
+                  )}
+                  {#await senderInfoPromise then senderInfo}
+                    <p class="font-semibold">
+                      {senderInfo.name}
+                    </p>
+                  {/await}
+
                   <p class="line-clamp-2">
                     {messages.find((m) => m.id === message.replyToMessageId)?.messageText}
                   </p>
@@ -278,7 +284,7 @@
                       <Reply class="mr-2 h-4 w-4" />
                       Reply
                     </DropdownMenu.Item>
-                    {#if message.createdBy === page.data.currentMockUserId}
+                    {#if message.createdBy === myUserContext.myUserId}
                       <DropdownMenu.Item onclick={() => startEditing(message)}>
                         <Pencil class="mr-2 h-4 w-4" />
                         Edit
@@ -340,7 +346,7 @@
             {/if}
             <p
               class="mt-1 flex items-center justify-end gap-1 text-xs {message.createdBy ===
-              page.data.currentMockUserId
+              myUserContext.myUserId
                 ? 'text-primary-foreground/70'
                 : 'text-muted-foreground'}"
             >
@@ -353,12 +359,12 @@
                 </span>
               {/if}
 
-              {#if message.createdBy === page.data.currentMockUserId}
-                {#if getMessageStatus(message) === MessageStatus.SENDING}
+              {#if message.createdBy === myUserContext.myUserId}
+                {#if getMessageStatus(message) === MessageStatus.sending}
                   <Clock class="h-3 w-3" />
-                {:else if getMessageStatus(message) === MessageStatus.SENT}
-                  <Send class="h-3 w-3" />
-                {:else if getMessageStatus(message) === MessageStatus.SEEN}
+                {:else if getMessageStatus(message) === MessageStatus.sent}
+                  <Check class="h-3 w-3" />
+                {:else if getMessageStatus(message) === MessageStatus.seen}
                   <CheckCheck class="h-3 w-3" />
                 {/if}
               {/if}

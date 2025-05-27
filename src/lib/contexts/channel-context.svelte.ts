@@ -1,11 +1,14 @@
 import translate from '@/helpers/language/translate';
 import { client } from '@/services/bg-node-client';
-import { myChannels } from '@/stores/channel-store';
+import { isChannelLoading, myChannels } from '@/stores/channel-store';
 import { AppUiMessage } from '@/types/enums';
-import { CachePolicy, Channel, ChannelMessage, type QueryOptions } from '@baragaun/bg-node-client';
-
-let isLoading = $state(false);
-// let channels = $state<Channel[]>([]);
+import {
+  CachePolicy,
+  Channel,
+  ChannelMessage,
+  User,
+  type QueryOptions,
+} from '@baragaun/bg-node-client';
 
 export class ChannelContext {
   private client = client;
@@ -16,20 +19,20 @@ export class ChannelContext {
       return translate(AppUiMessage.systemError);
     }
     try {
-      isLoading = true;
+      isChannelLoading.set(true);
       const input = {
         filter: {},
         match: {},
-        options: {},
+        options: { cachePolicy: CachePolicy.network },
+        queryOptions: {},
       };
-      console.log('FindMyChannels: input:', input);
       const response = await this.client.operations.channel.findMyChannels(
-        input.filter,
-        input.match,
+        null,
+        null,
+        null,
+        input.queryOptions,
         input.options,
-        { cachePolicy: CachePolicy.network },
       );
-      console.log('FindMyChannels: response.objects:', response.objects);
       if (!response || response.error || !response.objects) {
         console.error('FindMyChannels: received error.', { response });
         return response.error || translate(AppUiMessage.systemError);
@@ -45,24 +48,28 @@ export class ChannelContext {
       });
       return translate(AppUiMessage.systemError);
     } finally {
-      isLoading = false;
+      isChannelLoading.set(false);
     }
   }
 
   async findChannels(
     filter = {},
     match = {},
-    options = {},
+    options = { cachePolicy: CachePolicy.network },
+    queryOptions = {},
   ): Promise<Channel[] | string | undefined> {
     if (!this.client.isInitialized) {
       console.error('ConversationContext.findChannels: not initialized.');
       return translate(AppUiMessage.systemError);
     }
     try {
-      isLoading = true;
-      const response = await this.client.operations.channel.findChannels(filter, match, options, {
-        cachePolicy: CachePolicy.network,
-      });
+      isChannelLoading.set(true);
+      const response = await this.client.operations.channel.findChannels(
+        filter,
+        match,
+        options,
+        queryOptions,
+      );
       if (!response || response.error) {
         console.error('FindChannels: received error.', { response });
         return response.error || translate(AppUiMessage.systemError);
@@ -75,7 +82,7 @@ export class ChannelContext {
       });
       return translate(AppUiMessage.systemError);
     } finally {
-      isLoading = false;
+      isChannelLoading.set(false);
     }
   }
 
@@ -85,7 +92,7 @@ export class ChannelContext {
       return translate(AppUiMessage.systemError);
     }
     try {
-      isLoading = true;
+      isChannelLoading.set(true);
       const response = await this.client.operations.channel.createChannel(attributes);
       if (!response || response.error) {
         console.error('CreateChannel: received error.', { response });
@@ -99,7 +106,7 @@ export class ChannelContext {
       });
       return translate(AppUiMessage.systemError);
     } finally {
-      isLoading = false;
+      isChannelLoading.set(false);
     }
   }
 
@@ -112,7 +119,7 @@ export class ChannelContext {
       return translate(AppUiMessage.systemError);
     }
     try {
-      isLoading = true;
+      isChannelLoading.set(true);
       const response = await this.client.operations.channel.updateChannel(changes, queryOptions);
       if (!response || response.error) {
         console.error('UpdateChannel: received error.', { response });
@@ -126,7 +133,7 @@ export class ChannelContext {
       });
       return translate(AppUiMessage.systemError);
     } finally {
-      isLoading = false;
+      isChannelLoading.set(false);
     }
   }
 
@@ -136,7 +143,7 @@ export class ChannelContext {
       return translate(AppUiMessage.systemError);
     }
     try {
-      isLoading = true;
+      isChannelLoading.set(true);
       const response = await this.client.operations.channel.deleteChannel(id);
       if (!response || response.error) {
         console.error('DeleteChannel: received error.', { response });
@@ -150,7 +157,7 @@ export class ChannelContext {
       });
       return translate(AppUiMessage.systemError);
     } finally {
-      isLoading = false;
+      isChannelLoading.set(false);
     }
   }
 
@@ -160,10 +167,11 @@ export class ChannelContext {
       return translate(AppUiMessage.systemError);
     }
     try {
-      isLoading = true;
+      isChannelLoading.set(true);
       const response = await this.client.operations.channelMessage.findChannelMessages(
         {},
-        { id: channelId },
+        { channelId },
+        {},
         {},
         { cachePolicy: CachePolicy.network },
       );
@@ -179,7 +187,7 @@ export class ChannelContext {
       });
       return translate(AppUiMessage.systemError);
     } finally {
-      isLoading = false;
+      isChannelLoading.set(false);
     }
   }
 
@@ -191,7 +199,7 @@ export class ChannelContext {
       return translate(AppUiMessage.systemError);
     }
     try {
-      isLoading = true;
+      isChannelLoading.set(true);
       const response = await this.client.operations.channelMessage.createChannelMessage(attributes);
       if (!response || response.error) {
         console.error('CreateChannelMessage: received error.', { response });
@@ -205,7 +213,7 @@ export class ChannelContext {
       });
       return translate(AppUiMessage.systemError);
     } finally {
-      isLoading = false;
+      isChannelLoading.set(false);
     }
   }
 
@@ -217,7 +225,7 @@ export class ChannelContext {
       return translate(AppUiMessage.systemError);
     }
     try {
-      isLoading = true;
+      isChannelLoading.set(true);
       const response = await this.client.operations.channelMessage.updateChannelMessage(
         changes,
         {},
@@ -234,7 +242,7 @@ export class ChannelContext {
       });
       return translate(AppUiMessage.systemError);
     } finally {
-      isLoading = false;
+      isChannelLoading.set(false);
     }
   }
 
@@ -244,7 +252,7 @@ export class ChannelContext {
       return translate(AppUiMessage.systemError);
     }
     try {
-      isLoading = true;
+      isChannelLoading.set(true);
       const response = await this.client.operations.channelMessage.deleteChannelMessage(id);
       if (!response || response.error) {
         console.error('DeleteChannelMessage: received error.', { response });
@@ -258,12 +266,32 @@ export class ChannelContext {
       });
       return translate(AppUiMessage.systemError);
     } finally {
-      isLoading = false;
+      isChannelLoading.set(false);
     }
   }
 
-  public get isLoading(): boolean {
-    return isLoading;
+  async findRecipientInfo(recipientId: string): Promise<User | string | null | undefined> {
+    if (!this.client.isInitialized) {
+      console.error('ConversationContext.findRecipientInfo: not initialized.');
+      return translate(AppUiMessage.systemError);
+    }
+    try {
+      isChannelLoading.set(true);
+      const response = await this.client.operations.user.findUserById(recipientId);
+      if (!response || response.error) {
+        console.error('FindRecipientInfo: received error.', { response });
+        return response.error || translate(AppUiMessage.systemError);
+      }
+      return response.object;
+    } catch (error) {
+      console.error('FindRecipientInfo: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return translate(AppUiMessage.systemError);
+    } finally {
+      isChannelLoading.set(false);
+    }
   }
 }
 
