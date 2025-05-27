@@ -49,7 +49,6 @@
     messages: ChannelMessage[];
     onEditMessage?: (id: string, newText: string) => void;
     onDeleteMessage?: (id: string) => void;
-    onReplyMessage?: (replyToId: string, text: string) => void;
     onStartReply?: (message: ChannelMessage) => void;
     channel?: Channel;
   } = $props();

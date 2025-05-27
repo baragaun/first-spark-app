@@ -96,10 +96,11 @@
     }
   });
 
-  const handleSendMessage = async (messageText: string) => {
+  const handleSendMessage = async ( messageText: string, replyToMessageId?: string) => {
     const newMessage: Partial<ChannelMessage> = {
       channelId: channelId,
       messageText,
+      replyToMessageId,
     };
     const response = await channelContext.createChannelMessage(newMessage);
     if (!response || typeof response === 'string') {
@@ -108,6 +109,7 @@
     }
     messages = [...messages, response];
     scrollToBottom();
+    replyingTo = null;
   };
 
   const handleEditMessage = async (id: string, newText: string) => {
@@ -145,27 +147,6 @@
 
     // Here you would also delete the message from your backend
   };
-
-  const handleReplyMessage = async (replyToMessageId: string, messageText: string) => {
-    const newMessage: Partial<ChannelMessage> = {
-      channelId: channelId,
-      messageText,
-      replyToMessageId: replyToMessageId,
-    };
-
-    const response = await channelContext.createChannelMessage(newMessage);
-
-    if (!response || typeof response === 'string') {
-      console.error('CreateChannelMessage: received error.', { response });
-      return;
-    }
-
-    // messages = [...messages, newMessage];
-    // Reset reply state
-    replyingTo = null;
-    // Scroll to bottom after sending a message
-    scrollToBottom();
-  };
 </script>
 
 <div class="flex h-screen flex-col overflow-hidden">
@@ -188,7 +169,6 @@
           {messages}
           onEditMessage={handleEditMessage}
           onDeleteMessage={handleDeleteMessage}
-          onReplyMessage={handleReplyMessage}
           onStartReply={(message) => (replyingTo = message)}
         />
       </div>
@@ -207,8 +187,7 @@
         </div>
       {/if}
       <MessageInput
-        onSendMessage={(text) =>
-          replyingTo ? handleReplyMessage(replyingTo.id, text) : handleSendMessage(text)}
+        onSendMessage={(text) => handleSendMessage(text, replyingTo?.id)}
         placeholder={replyingTo ? 'Type your reply...' : 'Type a message...'}
       />
     </div>
