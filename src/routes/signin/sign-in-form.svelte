@@ -440,8 +440,8 @@
           onResendClick={handleResendToken}
         />
         <FormButton
-          disabled={$delayed || formState.isLoading || formState.hasStepError}
-          isLoading={($delayed || formState.isLoading) && !formState.hasStepError}
+          disabled={buttonState.isLoading}
+          isLoading={buttonState.isLoading}
           buttonText={m['signin.buttons.verify']()}
           loadingText={m['signin.buttons.verifying']()}
         />
