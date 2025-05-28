@@ -7,6 +7,4 @@
   let { data }: { data: PageData } = $props();
 </script>
 
-<div class="container">
-  <AccountSettings {data} {myUser} />
-</div>
+<AccountSettings {data} {myUser} />

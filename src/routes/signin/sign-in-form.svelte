@@ -134,6 +134,7 @@
       otpHandler.removeListener();
       otpHandler = undefined;
     }
+    if (!hasStepError) hasStepError = true; //button should be disabled for empty fields
 
     // Ensure that there is valid ident input before we request a token
     if ($formData.ident && schemaFirstStep.safeParse($formData.ident)) {

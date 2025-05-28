@@ -18,10 +18,22 @@ export const schemaLastStep = z.object({
 });
 
 export const completeSchema = z.object({
-  email: emailSchema.optional().default('').transform((val) => val ? val.trim() : val),
-  token: otpSchema.optional().default('').transform((val) => val ? val.trim() : val),
-  username: usernameSchema.optional().default('').transform((val) => val ? val.trim() : val),
-  password: passwordSchema.optional().default('').transform((val) => val ? val.trim() : val),
+  email: emailSchema
+    .optional()
+    .default('')
+    .transform((val) => (val ? val.trim() : val)),
+  token: otpSchema
+    .optional()
+    .default('')
+    .transform((val) => (val ? val.trim() : val)),
+  username: usernameSchema
+    .optional()
+    .default('')
+    .transform((val) => (val ? val.trim() : val)),
+  password: passwordSchema
+    .optional()
+    .default('')
+    .transform((val) => (val ? val.trim() : val)),
 });
 
 export const determineIdentifierType = (value: string): UserIdentType => {
