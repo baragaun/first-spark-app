@@ -33,14 +33,14 @@
   let formState = $state({
     isLoading: false,
     hasStepError: false,
-    step: 1
+    step: 1,
   });
 
   let otpState = $state({
     handler: undefined as MsaListenerHandler | undefined,
     msaId: undefined as string | undefined,
     resendTimer: 30,
-    canResend: false
+    canResend: false,
   });
 
   const buttonState = $derived.by(() => ({
@@ -296,7 +296,10 @@
         return;
       }
 
-      const response = await myUserContext.verifyMultiStepActionToken(otpState.msaId, $formData.token);
+      const response = await myUserContext.verifyMultiStepActionToken(
+        otpState.msaId,
+        $formData.token,
+      );
 
       if (response !== true) {
         console.error('SignInForm.handleVerifyOtp: invalid response:', { result: response });
@@ -334,7 +337,10 @@
     try {
       formState.isLoading = true;
 
-      const response = await myUserContext.sendMultiStepActionNotification(otpState.msaId, identifier);
+      const response = await myUserContext.sendMultiStepActionNotification(
+        otpState.msaId,
+        identifier,
+      );
 
       if (typeof response === 'string') {
         console.error('SignInForm.handleResendToken: error:', { error: response });

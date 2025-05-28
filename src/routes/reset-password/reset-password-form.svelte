@@ -364,7 +364,7 @@
             hasStepError = false;
             if (otpHandler) {
               otpHandler.removeListener();
-            };
+            }
             formData.update((data) => {
               return {
                 ident: data.ident,

@@ -127,11 +127,11 @@
 
   const isFormValid = $derived.by(() => {
     if (step === 1) {
-      return !!($formData.email && cloudflareToken);
+      return $formData.email && cloudflareToken;
     } else if (step === 2) {
-      return !!$formData.token;
+      return $formData.token;
     } else if (step === 3) {
-      return !!($formData.username && $formData.password)
+      return $formData.username && $formData.password;
     }
     return false;
   });
