@@ -122,9 +122,11 @@
       "identifier_label": "E-Mail oder Benutzername",
       "identifier_placeholder": "Gib deine E-Mail oder deinen Benutzernamen ein",
       "errors": {
-        "account_not_found": "Kein Konto mit dieser E-Mail-Adresse gefunden",
         "default_error": "Deine Anfrage konnte nicht verarbeitet werden. Bitte versuche es erneut.",
-        "valid_ident_required": "Ein gültiger Benutzername oder eine gültige E-Mail-Adresse ist erforderlich"
+        "valid_ident_required": "Ein gültiger Benutzername oder eine gültige E-Mail-Adresse ist erforderlich",
+        "failed_to_send": "Verifizierungscode konnte nicht gesendet werden. Bitte versuche es erneut.",
+        "failed_to_resend": "Verifizierungscode konnte nicht erneut gesendet werden. Bitte versuche es erneut.",
+        "failed_to_verify": "Verifizierung des Codes fehlgeschlagen. Bitte versuche es erneut."
       }
     },
     "new_password_form": {

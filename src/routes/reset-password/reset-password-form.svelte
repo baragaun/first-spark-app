@@ -148,11 +148,9 @@
     try {
       if (!existingUser) {
         // Feign success and proceed
-        // Todo: add the `change email` button like the `sign in with token` button
         step = 2;
         hasStepError = true; // for steps = 2 initially fields are empty keep button disabled
         startResendTimer();
-
         return;
       }
 
@@ -166,7 +164,7 @@
         !response?.object.actionProgress?.actionId ||
         !response?.object.run
       ) {
-        updateFormErrors('ident', 'Failed to send verification code. Please try again.');
+        updateFormErrors('ident', m['reset_password.form.errors.failed_to_send']());
         hasStepError = true;
         isLoading = false;
         // Set to true since we failed to send the verification code
@@ -196,12 +194,12 @@
       );
 
       startResendTimer();
+      ///This fixes the issue: https://github.com/baragaun/first-spark-app/issues/148
+      isLoading = true; // Leave the button in a processing state until sent event
       return;
     } catch (err) {
       console.error('Error resetting password:', err);
       updateFormErrors('ident', translate(AppUiMessage.systemError));
-    } finally {
-      isLoading = true; // Leave the button in a processing state until sent event
     }
   };
 
@@ -224,7 +222,9 @@
       if (response !== true) {
         updateFormErrors(
           'token',
-          typeof response === 'string' ? response : 'Failed to resend verification code',
+          typeof response === 'string'
+            ? response
+            : m['reset_password.form.errors.failed_to_resend'](),
         );
         return;
       }
@@ -232,7 +232,7 @@
       startResendTimer();
     } catch (error) {
       console.error('Error resending email:', error);
-      updateFormErrors('token', 'Failed to resend verification code. Please try again.');
+      updateFormErrors('token', m['reset_password.form.errors.failed_to_resend']());
     } finally {
       isLoading = false;
     }
@@ -262,14 +262,17 @@
       );
 
       if (result !== true) {
-        updateFormErrors('token', typeof result === 'string' ? result : 'Failed to verify code');
+        updateFormErrors(
+          'token',
+          typeof result === 'string' ? result : m['reset_password.form.errors.failed_to_verify'](),
+        );
         return;
       }
     } catch (err) {
       console.error('Error verifying reset code:', err);
       updateFormErrors(
         'newPassword',
-        err instanceof Error ? err.message : 'Failed to verify code. Please try again.',
+        err instanceof Error ? err.message : m['reset_password.form.errors.failed_to_verify'](),
       );
     } finally {
       isLoading = false;
