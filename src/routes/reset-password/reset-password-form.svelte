@@ -60,6 +60,14 @@
     }
   });
 
+  const isFormValid = $derived.by(() => {
+    if (step === 1) {
+      return $formData.ident;
+    } else {
+      return $formData.token && $formData.newPassword;
+    }
+  });
+
   const form = superForm(data.form, {
     dataType: 'json',
     validators: getCurrentValidator(),
@@ -73,7 +81,7 @@
       debouncedValidation();
     },
     async onSubmit({ cancel }) {
-      cancel(); // Avoid any actual server-side validation form action
+      cancel();
 
       const result = await validateForm({ update: true, focusOnError: true });
       if (!result.valid) return;
@@ -145,17 +153,16 @@
 
   const startPasswordReset = async () => {
     isLoading = true;
-    const existingUser = await isIdentRegistered();
-
     try {
+      const existingUser = await isIdentRegistered();
       if (!existingUser) {
-        // Feign success and proceed
+        // Feign success and proceed, leave the user to update the ident
         step = 2;
-        hasStepError = true; // for steps = 2 initially fields are empty keep button disabled
         startResendTimer();
         return;
       }
 
+      isLoading = true;
       const response = await myUserContext.resetMyPassword($formData.ident);
 
       if (
@@ -179,12 +186,11 @@
         isLoading = false;
       };
       const onFailure = () => {
-        if (awaitingTokenVerification && otpHandler) {
+        if (otpHandler) {
           console.error('onFailure');
 
           updateFormErrors('token', otpHandler.getErrorMessage());
           hasStepError = true;
-          awaitingTokenVerification = false;
           isLoading = false;
         }
       };
@@ -203,8 +209,6 @@
       );
 
       startResendTimer();
-      ///This fixes the issue: https://github.com/baragaun/first-spark-app/issues/148
-      isLoading = true; // Leave the button in a processing state until sent event
       return;
     } catch (err) {
       console.error('Error resetting password:', err);
@@ -249,7 +253,6 @@
 
   const updateMyPassword = async () => {
     isLoading = true;
-    awaitingTokenVerification = true;
     if (!msaId) {
       console.error('ResetPasswordForm.updateMyPassword: actionId missing:');
       updateFormErrors('token', translate(AppUiMessage.systemError));
@@ -284,7 +287,7 @@
         err instanceof Error ? err.message : m['reset_password.form.errors.failed_to_verify'](),
       );
     } finally {
-      isLoading = true; // Leave the button in a processing state until sent event
+      isLoading = false;
     }
   };
 
@@ -359,6 +362,9 @@
           onBackButtonClick={() => {
             step = 1;
             hasStepError = false;
+            if (otpHandler) {
+              otpHandler.removeListener();
+            };
             formData.update((data) => {
               return {
                 ident: data.ident,
@@ -371,7 +377,7 @@
         />
       {/if}
       <FormButton
-        disabled={$delayed || isLoading || hasStepError}
+        disabled={isLoading || hasStepError || !isFormValid}
         isLoading={$delayed || isLoading}
         buttonText={getCurrentStepButtonLabel()}
         loadingText={m['reset_password.buttons.processing']()}
@@ -383,9 +389,6 @@
     </div>
   </AuthCard>
 
-  <!-- commenting as per the issue : https://github.com/baragaun/first-spark-app/issues/113 -->
-  <!--   <div class="mt-4"><SuperDebug data={$formData} /></div>
-  <div class="mt-4">
-    <SuperDebug data={errors} />
-  </div> -->
+  <!-- <div class="mt-4"><SuperDebug data={$formData} /></div> -->
+  <!-- <div class="mt-4"><SuperDebug data={errors} /></div> -->
 </form>

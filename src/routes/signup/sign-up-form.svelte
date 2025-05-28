@@ -61,7 +61,7 @@
   let cloudflareToken = $state('');
   let step = $state(1);
   let isLoading = $state(false);
-  let hasStepError = $state(true);
+  let hasStepError = $state(false);
 
   let canResend = $state(false);
   let resendTimer = $state(30);
@@ -124,6 +124,17 @@
   });
 
   const { form: formData, errors, enhance, delayed, validateForm, options } = form;
+
+  const isFormValid = $derived.by(() => {
+    if (step === 1) {
+      return !!($formData.email && cloudflareToken);
+    } else if (step === 2) {
+      return !!$formData.token;
+    } else if (step === 3) {
+      return !!($formData.username && $formData.password)
+    }
+    return false;
+  });
 
   const updateFormErrors = (field: keyof SignUpFormSchema, message: string) => {
     errors.update((errors) => {
@@ -314,7 +325,7 @@
       console.error('SignUpForm.registerNewEmail:', { error });
       updateFormErrors('email', translate(AppUiMessage.systemError));
     } finally {
-      isLoading = true; // Leave the button in a processing state until sent event
+      isLoading = false;
     }
   };
 
@@ -346,7 +357,7 @@
       console.error('SignUpForm.handleVerifyOtp: error:', { error });
       updateFormErrors('token', translate(AppUiMessage.systemError));
     } finally {
-      isLoading = true; // Leave the button in a processing state until success event
+      isLoading = false;
     }
   };
 
@@ -529,7 +540,7 @@
         />
       {/if}
       <FormButton
-        disabled={$delayed || isLoading || hasStepError || cloudflareToken === ''}
+        disabled={!isFormValid || isLoading || hasStepError}
         isLoading={$delayed || isLoading}
         buttonText={steps[step - 1].buttonLabel}
         loadingText={steps[step - 1].loadingLabel}

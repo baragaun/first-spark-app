@@ -33,7 +33,6 @@
   let formState = $state({
     isLoading: false,
     hasStepError: false,
-    awaitingTokenVerification: false,
     step: 1
   });
 
@@ -133,6 +132,11 @@
     }, 1000);
   };
 
+  const setStep = (newStep: number) => {
+    formState.step = newStep;
+    formState.hasStepError = true; // Disable button initially when step changes
+  };
+
   const updateFormErrors = (field: keyof SignInFormSchema, message?: string) => {
     errors.update((errors) => {
       const newErrors = {
@@ -154,18 +158,14 @@
       if (formState.step === 1) {
         $formData.authType = 'token';
         $formData.token = '';
-
         $formData.password = undefined;
-
         await sendTokenForSignIn();
-        formState.step = 2;
+        setStep(2);
       } else {
         $formData.authType = 'password';
         $formData.password = '';
-
         $formData.token = undefined;
-
-        formState.step = 1;
+        setStep(1);
       }
     }
     return;
@@ -252,22 +252,19 @@
       otpState.msaId = response.object.actionProgress.actionId;
 
       const onNotificationSent = () => {
-        formState.step = 2;
+        setStep(2);
         formState.isLoading = false;
-        formState.awaitingTokenVerification = true;
       };
       const onFailure = () => {
-        if (formState.awaitingTokenVerification && otpState.handler) {
+        if (otpState.handler) {
           console.error('onFailure');
 
           updateFormErrors('token', otpState.handler.getErrorMessage());
           formState.hasStepError = true;
-          formState.awaitingTokenVerification = false;
           formState.isLoading = false;
         }
       };
       const onSuccess = async () => {
-        formState.awaitingTokenVerification = false;
         await onSignIn();
       };
 
