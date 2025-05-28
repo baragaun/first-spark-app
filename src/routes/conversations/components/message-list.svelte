@@ -23,6 +23,8 @@
   import { channelContext } from '@/contexts/channel-context.svelte';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { MessageStatus } from '@/helpers/types';
+  import { selectedChannel } from '@/stores/channel-store';
+  import { createEventDispatcher, onMount } from 'svelte';
 
   // For demo purposes, let's assume messages have a status property
   // In a real app, this would come from your message data
@@ -44,13 +46,11 @@
     onEditMessage,
     onDeleteMessage,
     onStartReply,
-    channel,
   }: {
     messages: ChannelMessage[];
     onEditMessage?: (id: string, newText: string) => void;
     onDeleteMessage?: (id: string) => void;
     onStartReply?: (message: ChannelMessage) => void;
-    channel?: Channel;
   } = $props();
 
   let messagesContainer: HTMLDivElement;
@@ -59,6 +59,8 @@
   let replyingToMessage = $state<ChannelMessage | null>(null);
   let copiedMessageId = $state<string | null>(null);
   let showScrollButton = $state(false);
+  let isFetchingMoreMessages = $state(false);; // Flag to prevent multiple API calls
+  let isAllMessagesFetched = $state(false);;
 
   // Get sender info for avatar display
   // todo this function repeated multiples times
@@ -79,14 +81,7 @@
 
   // Check if channel has more than two participants
   const isGroupChat = $derived(() => {
-    return channel?.userIds && channel.userIds.length > 2;
-  });
-
-  // Auto-scroll to bottom when new messages arrive or when component mounts
-  $effect(() => {
-    if (messagesContainer && messages.length > 0) {
-      scrollToBottom();
-    }
+    return $selectedChannel?.userIds && $selectedChannel.userIds.length > 2;
   });
 
   const formatMessageTime = (date: Date) => {
@@ -188,6 +183,27 @@
     return words.slice(0, 150).join(' ') + '...';
   };
 
+    const fetchMoreMessages = async () => {
+    if (isFetchingMoreMessages && !isAllMessagesFetched) return; // Prevent multiple API calls
+    isFetchingMoreMessages = true;
+
+    const response = await channelContext.findChannelMessages($selectedChannel!.id, messages.length, 20);
+    if (!response || !Array.isArray(response)) {
+      console.error('FindChannelMessages: received error.', { response });
+      isFetchingMoreMessages = false;
+      return;
+    }
+
+    if(response.length === 0) {
+      isAllMessagesFetched = true;
+    } else {
+       messages = [...response, ...messages];
+    }
+    // Append new messages to the existing list
+
+    isFetchingMoreMessages = false;
+  };
+
   // Function to scroll to bottom
   const scrollToBottom = () => {
     if (messagesContainer) {
@@ -195,12 +211,24 @@
     }
   };
 
+  const dispatch = createEventDispatcher();
+
   // Check scroll position to show/hide button
   const handleScroll = () => {
     if (!messagesContainer) return;
     const { scrollTop, scrollHeight, clientHeight } = messagesContainer;
     showScrollButton = scrollHeight - scrollTop - clientHeight > 100;
+    // Check if the user has scrolled to the top
+    if (messagesContainer.scrollTop === 0) {
+      fetchMoreMessages();
+    }
   };
+
+  onMount(() => {
+    scrollToBottom();
+    dispatch('scrollToBottom', scrollToBottom);
+  });
+
 </script>
 
 <div class="h-full overflow-y-auto p-4" bind:this={messagesContainer} onscroll={handleScroll}>

@@ -6,6 +6,7 @@ import {
   CachePolicy,
   Channel,
   ChannelMessage,
+  SortDirection,
   User,
   type QueryOptions,
 } from '@baragaun/bg-node-client';
@@ -77,6 +78,36 @@ export class ChannelContext {
       return response.objects;
     } catch (error) {
       console.error('FindChannels: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return translate(AppUiMessage.systemError);
+    } finally {
+      isChannelLoading.set(false);
+    }
+  }
+
+   async findChannelById(
+    channelId: string,
+  ): Promise<Channel | string | null | undefined> {
+    if (!this.client.isInitialized) {
+      console.error('ConversationContext.findChannelById: not initialized.');
+      return translate(AppUiMessage.systemError);
+    }
+    try {
+      isChannelLoading.set(true);
+      const response = await this.client.operations.channel.findChannelById(
+        channelId,
+        {includeMessages: true , includeParticipants: true },
+        { cachePolicy: CachePolicy.network },
+      );
+      if (!response || response.error) {
+        console.error('FindChannelsById: received error.', { response });
+        return response.error || translate(AppUiMessage.systemError);
+      }
+      return response.channel;
+    } catch (error) {
+      console.error('FindChannelsById: error', {
         error: (error as Error).message,
         stack: (error as Error).stack,
       });
@@ -161,7 +192,7 @@ export class ChannelContext {
     }
   }
 
-  async findChannelMessages(channelId: string): Promise<ChannelMessage[] | string | undefined> {
+  async findChannelMessages(channelId: string, skip = 0, limit = 10): Promise<ChannelMessage[] | string | undefined> {
     if (!this.client.isInitialized) {
       console.error('ConversationContext.findChannelMessages: not initialized.');
       return translate(AppUiMessage.systemError);
@@ -171,10 +202,11 @@ export class ChannelContext {
       const response = await this.client.operations.channelMessage.findChannelMessages(
         {},
         { channelId },
-        {},
-        {},
-        { cachePolicy: CachePolicy.network },
+        undefined,
+        {skip, limit, sort: [{field: 'createdAt', direction: SortDirection.desc}] },
+        { cachePolicy: CachePolicy. network },
       );
+
       if (!response || response.error) {
         console.error('FindChannelMessages: received error.', { response });
         return response.error || translate(AppUiMessage.systemError);

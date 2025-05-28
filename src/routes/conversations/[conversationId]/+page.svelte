@@ -16,29 +16,11 @@
 
   let channelDetails = $state<ContactDetails | undefined>(undefined);
   let messages = $state<ChannelMessage[]>([]);
-  let messageListRef = $state<HTMLDivElement>();
   let replyingTo = $state<ChannelMessage | null>(null);
   let isLoading = $state(false);
+  let scrollToBottomFn: () => void;
 
   const currentUserId = myUserContext.myUserId;
-
-  // Function to scroll to bottom of messages
-  const scrollToBottom = () => {
-    if (messageListRef) {
-      setTimeout(() => {
-        if (messageListRef) {
-          messageListRef.scrollTop = messageListRef.scrollHeight;
-        }
-      }, 0);
-    }
-  };
-
-  // Effect to scroll down when messages change
-  $effect(() => {
-    if (messages.length > 0) {
-      scrollToBottom();
-    }
-  });
 
   // Function to determine contact info based on channel participants
   const setContactInfo = async (channel: Channel) => {
@@ -75,7 +57,7 @@
 
   const initializeChannel = async () => {
     isLoading = true;
-    const response = await channelContext.findChannelMessages(channelId);
+    const response = await channelContext.findChannelMessages(channelId, messages.length, 20);
     if (!response || !Array.isArray(response)) {
       console.error('FindChannelMessages: received error.', { response });
       messages = [];
@@ -83,7 +65,6 @@
     }
     messages = response;
     isLoading = false;
-    scrollToBottom();
   };
 
   onMount(async () => {
@@ -91,12 +72,20 @@
       setContactInfo($selectedChannel);
       initializeChannel();
     } else {
-      // todo if page refreshed then I need to call findChannelById
-      // selectedChannel.set(await channelContext.findChannel(channelId));
+      const response = await channelContext.findChannelById(channelId);
+      if (response && typeof response !== 'string') {
+        selectedChannel.set(response);
+        setContactInfo(response);
+        initializeChannel();
+      }
     }
   });
 
-  const handleSendMessage = async ( messageText: string, replyToMessageId?: string) => {
+  const handleScrollToBottomEvent = (event: CustomEvent<() => void>) => {
+    scrollToBottomFn = event.detail;
+  };
+
+  const handleSendMessage = async (messageText: string, replyToMessageId?: string) => {
     const newMessage: Partial<ChannelMessage> = {
       channelId: channelId,
       messageText,
@@ -108,8 +97,8 @@
       return;
     }
     messages = [...messages, response];
-    scrollToBottom();
     replyingTo = null;
+    scrollToBottomFn?.();
   };
 
   const handleEditMessage = async (id: string, newText: string) => {
@@ -149,7 +138,7 @@
   };
 </script>
 
-<div class="flex h-screen flex-col overflow-hidden">
+<div class="flex h-full flex-col overflow-hidden">
   {#if isLoading}
     <div class="flex flex-1 items-center justify-center">
       <div class="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
@@ -164,12 +153,13 @@
     </div>
 
     <div class="relative flex-1 overflow-hidden">
-      <div class="overflo w-y-auto absolute inset-0" bind:this={messageListRef}>
+      <div class="overflow-y-auto absolute inset-0" >
         <MessageList
           {messages}
           onEditMessage={handleEditMessage}
           onDeleteMessage={handleDeleteMessage}
           onStartReply={(message) => (replyingTo = message)}
+          on:scrollToBottom={handleScrollToBottomEvent}
         />
       </div>
     </div>

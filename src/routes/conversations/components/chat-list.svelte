@@ -78,7 +78,7 @@
           >
             <Avatar.Root class="h-12 w-12">
               <Avatar.Fallback>
-                {#if channel.participants && channel.participants.length > 2}
+                {#if channel.userIds && channel.userIds.length > 2}
                   {channel.name?.charAt(0) || '?'}
                 {:else}
                   {recipientName?.charAt(0) || '?'}
@@ -89,7 +89,7 @@
             <div class="flex-1 overflow-hidden">
               <div class="flex items-center justify-between">
                 <h3 class="font-medium">
-                  {#if channel.participants && channel.participants.length > 2}
+                  {#if channel.userIds && channel.userIds.length > 2}
                     {channel.name || 'Group Chat'}
                   {:else}
                     {recipientName || 'Unknown User'}
