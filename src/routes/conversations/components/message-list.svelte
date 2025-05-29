@@ -65,7 +65,7 @@
   // Get sender info for avatar display
   // todo this function repeated multiples times
   const getSenderInfo = async (userId: string) => {
-    const user = await channelContext.findRecipientInfo(userId);
+    const user = await channelContext.findUserInfoById(userId);
     if (!user || typeof user === 'string') return { name: 'Unknown', initial: '?' };
     if (user.firstName) {
       return {
@@ -197,7 +197,7 @@
     if(response.length === 0) {
       isAllMessagesFetched = true;
     } else {
-       messages = [...response, ...messages];
+       messages = [...response.reverse(), ...messages];
     }
     // Append new messages to the existing list
 
@@ -207,6 +207,7 @@
   // Function to scroll to bottom
   const scrollToBottom = () => {
     if (messagesContainer) {
+      console.log('Scrolling to bottom');
       messagesContainer.scrollTo({ top: messagesContainer.scrollHeight, behavior: 'smooth' });
     }
   };

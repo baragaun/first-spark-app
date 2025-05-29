@@ -203,7 +203,7 @@ export class ChannelContext {
         {},
         { channelId },
         undefined,
-        {skip, limit, sort: [{field: 'createdAt', direction: SortDirection.desc}] },
+        {skip, limit, sort: [{field: 'createdAt', direction: SortDirection.desc}, ] },
         { cachePolicy: CachePolicy. network },
       );
 
@@ -302,21 +302,21 @@ export class ChannelContext {
     }
   }
 
-  async findRecipientInfo(recipientId: string): Promise<User | string | null | undefined> {
+  async findUserInfoById(recipientId: string): Promise<User | string | null | undefined> {
     if (!this.client.isInitialized) {
-      console.error('ConversationContext.findRecipientInfo: not initialized.');
+      console.error('ConversationContext.findUserInfoById: not initialized.');
       return translate(AppUiMessage.systemError);
     }
     try {
       isChannelLoading.set(true);
       const response = await this.client.operations.user.findUserById(recipientId);
       if (!response || response.error) {
-        console.error('FindRecipientInfo: received error.', { response });
+        console.error('findUserInfoById: received error.', { response });
         return response.error || translate(AppUiMessage.systemError);
       }
       return response.object;
     } catch (error) {
-      console.error('FindRecipientInfo: error', {
+      console.error('findUserInfoById: error', {
         error: (error as Error).message,
         stack: (error as Error).stack,
       });
@@ -325,6 +325,31 @@ export class ChannelContext {
       isChannelLoading.set(false);
     }
   }
+
+async findUsers(): Promise<User[] | string | null | undefined> {
+  if (!this.client.isInitialized) {
+    console.error('ConversationContext.findUsers: not initialized.');
+    return translate(AppUiMessage.systemError);
+  }
+  try {
+    isChannelLoading.set(true);
+    const response = await this.client.operations.user.findUsers(undefined, undefined, undefined, { }, { cachePolicy: CachePolicy.network });
+    if (!response || response.error) {
+      console.error('findUsers: received error.', { response });
+      return response.error || translate(AppUiMessage.systemError);
+    }
+    return response.objects;
+  } catch (error) {
+    console.error('findUsers: error', {
+      error: (error as Error).message,
+      stack: (error as Error).stack,
+    });
+    return translate(AppUiMessage.systemError);
+  } finally {
+    isChannelLoading.set(false);
+  }
+}
+
 }
 
 // Create a singleton instance

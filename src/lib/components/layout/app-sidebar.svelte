@@ -6,7 +6,7 @@
   import * as Sidebar from '@/components/ui/sidebar';
   import type { MyUserContext } from '@/contexts/my-user-context.svelte';
   import { m } from '@/paraglide/messages';
-  import { House, MessageSquare, PlugZap, Settings, Zap } from 'lucide-svelte';
+  import { House, MessageSquare, PlugZap, Settings, User, Zap } from 'lucide-svelte';
 
   const items = [
     {
@@ -26,13 +26,13 @@
       url: '#',
       icon: Inbox,
       requiresAuth: true,
-    },
+    },*/
     {
-      title: m['sidebar.menu.contacts'](),
-      url: '#',
-      icon: BookUser,
+      title: m['sidebar.menu.users'](),
+      url: '/find-users',
+      icon: User,
       requiresAuth: true,
-    }, */
+    },
     {
       title: m['sidebar.menu.settings'](),
       url: '/settings',

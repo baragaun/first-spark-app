@@ -34,7 +34,7 @@
     }
 
     // Find the user details
-    const recipientUser = await channelContext.findRecipientInfo(recipientParticipant);
+    const recipientUser = await channelContext.findUserInfoById(recipientParticipant);
 
     if (!recipientUser || typeof recipientUser === 'string') {
       return null;

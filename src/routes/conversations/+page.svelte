@@ -2,10 +2,10 @@
   import { Button } from '$lib/components/ui/button';
   import { onMount } from 'svelte';
   import ChatList from './components/chat-list.svelte';
-  import ChatSearch from './components/chat-search.svelte';
   import { MessageSquarePlus } from 'lucide-svelte';
   import { channelContext } from '@/contexts/channel-context.svelte';
   import { myChannels } from '@/stores/channel-store';
+  import SearchBar from '@/components/search-bar.svelte';
 
   let searchQuery = $state('');
 
@@ -56,7 +56,7 @@
   <div class="mb-6 flex items-center justify-between">
     <h1 class="text-2xl font-bold">Conversations</h1>
     <div class="flex items-center gap-2">
-      <ChatSearch on:search={handleSearch} />
+      <SearchBar on:search={handleSearch} />
       <Button onclick={handleNewChat}>
         <MessageSquarePlus class="h-5 w-5" />
       </Button>

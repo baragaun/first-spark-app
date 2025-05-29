@@ -39,7 +39,7 @@
 
       if (!recipientId) return null;
 
-      const recipientUser = await channelContext.findRecipientInfo(recipientId);
+      const recipientUser = await channelContext.findUserInfoById(recipientId);
 
       if (!recipientUser || typeof recipientUser === 'string') return null;
 
@@ -63,7 +63,7 @@
       messages = [];
       return;
     }
-    messages = response;
+    messages = response.reverse();
     isLoading = false;
   };
 

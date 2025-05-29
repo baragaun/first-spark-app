@@ -12,7 +12,7 @@
 </script>
 
 <SearchBar
-  placeholder="Search conversations..."
+  placeholder="Search ..."
   autoSearch={true}
   debounceTime={300}
   on:search={handleSearch}
