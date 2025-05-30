@@ -1,12 +1,13 @@
-import translate from '@/helpers/language/translate';
-import { m } from '@/paraglide/messages';
-import { AppUiMessage, MsaTokenStatus } from '@/types/enums';
+import { env } from '$env/dynamic/public';
 import {
   MultiStepActionEventType,
   type MultiStepActionProgressResult,
   type QueryResult,
   type SidMultiStepActionProgress,
 } from '@baragaun/bg-node-client';
+import translate from '@/helpers/language/translate';
+import { m } from '@/paraglide/messages';
+import { AppUiMessage, MsaTokenStatus } from '@/types/enums';
 
 let errorMessage = $state('');
 let tokenStatus = $state(MsaTokenStatus.unset);
@@ -51,7 +52,7 @@ export class MsaListenerHandler {
         ): Promise<void> => {
           if (eventType === MultiStepActionEventType.notificationFailed) {
             // The notification failed to go out.
-            if (import.meta.env.VITE_APP_ENVIRONMENT === 'development') {
+            if (env.PUBLIC_APP_ENVIRONMENT === 'development') {
               errorMessage = m['verify_token.error.dev_mode_error']();
 
               // Advance, ignoring the failure to send in development

@@ -1,10 +1,11 @@
 <script lang="ts">
-  import { page } from '$app/state';
   import type { ComponentProps } from 'svelte';
+  import { page } from '$app/state';
+  import { env } from '$env/dynamic/public';
   import * as Sidebar from '@/components/ui/sidebar';
   import { m } from '@/paraglide/messages';
-  import { House, PlugZap, Settings, Zap } from 'lucide-svelte';
   import { Button } from '../ui/button';
+  import { House, PlugZap, Settings, Zap } from 'lucide-svelte';
 
   const items = [
     {
@@ -54,7 +55,7 @@
     return itemUrl !== '#' && currentPath.startsWith(itemUrl);
   };
 
-  const isDevEnv = $derived(import.meta.env.DEV);
+  const isDevEnv = env.PUBLIC_APP_ENVIRONMENT === 'development';
   const toggleConnection = () => {
     isOffline = !isOffline;
   };
