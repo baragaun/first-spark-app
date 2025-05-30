@@ -1,4 +1,6 @@
 import { env } from '$env/dynamic/public';
+import translate from '@/helpers/language/translate';
+import { AppUiMessage } from '@/types/enums';
 import {
   AppEnvironment,
   BgListenerTopic,
@@ -16,8 +18,6 @@ import {
   type SignInUserInput,
   type SignUpUserInput,
 } from '@baragaun/bg-node-client';
-import translate from '@/helpers/language/translate';
-import { AppUiMessage } from '@/types/enums';
 
 let isSignedIn = $state(false);
 let isOffline = $state(false); // TODO: The client does not yet support toggling the connectivity state
