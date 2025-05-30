@@ -8,8 +8,22 @@
   import AvatarMenu from './avatar-menu.svelte';
   import LanguageButton from './language-button.svelte';
   import ThemeButton from './light-switch.svelte';
+  import type { MyUserContext } from '@/contexts/my-user-context.svelte';
+  import { getContext } from 'svelte';
+  import type { MyUser } from '@baragaun/bg-node-client';
 
-  let { myUser, isAuthenticated, onSignOut } = $props();
+  const userContext = getContext<MyUserContext>('myUserContext');
+  let isSignedIn: boolean = $derived(userContext.isSignedIn);
+  let myUser: MyUser | undefined = $derived(userContext.myUser);
+
+  const onSignOut = async () => {
+    // TODO: add a confirmation dialog
+    // Solution for putting a dialog in a dropdown menu:
+    // https://stackoverflow.com/questions/77185827/shadcn-dialog-inside-of-dropdown-closes-automatically
+    await userContext.signMeOut();
+    await goto('/signin');
+  };
+
 </script>
 
 <nav
@@ -32,7 +46,7 @@
     <div class="flex flex-none items-center gap-2">
       <ThemeButton class="flex" />
       <LanguageButton class="flex" />
-      {#if !isAuthenticated}
+      {#if !isSignedIn}
         <div class="flex flex-none items-center gap-2">
           <Tooltip.Provider>
             <Tooltip.Root>

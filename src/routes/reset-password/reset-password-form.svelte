@@ -6,13 +6,13 @@
   import OtpFormInput from '@/components/forms/form-otp-input.svelte';
   import PasswordFormInput from '@/components/forms/form-password-input.svelte';
   import { MsaListenerHandler } from '@/contexts/msa-listener-handler.svelte';
-  import { myUserContext } from '@/contexts/my-user-context.svelte.js';
+  import { type MyUserContext } from '@/contexts/my-user-context.svelte.js';
   import translate from '@/helpers/language/translate.js';
   import passwordHelpers from '@/helpers/password-helpers.js';
   import { m } from '@/paraglide/messages';
   import { AppUiMessage } from '@/types/enums.js';
   import { UserIdentType } from '@baragaun/bg-node-client';
-  import { onDestroy } from 'svelte';
+  import { getContext, onDestroy } from 'svelte';
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
   import { debounce } from 'throttle-debounce';
@@ -29,7 +29,8 @@
   const steps = [zod(schemaFirstStep), zod(schemaLastStep)];
   let step = $state(1);
   const getCurrentValidator = () => steps[step - 1];
-
+    
+  const userContext = getContext<MyUserContext>('myUserContext');
   let otpHandler: MsaListenerHandler | undefined = $state(undefined);
   let msaId = $state<string | undefined>(undefined);
   let resendTimer = $state(30);
@@ -130,7 +131,7 @@
     identType = determineIdentifierType(identifier);
 
     try {
-      const response = await myUserContext.isUserIdentAvailable(identifier, identType);
+      const response = await userContext.isUserIdentAvailable(identifier, identType);
 
       if (response.error) {
         updateFormErrors('ident', response.error);
@@ -163,7 +164,7 @@
       }
 
       isLoading = true;
-      const response = await myUserContext.resetMyPassword($formData.ident);
+      const response = await userContext.resetMyPassword($formData.ident);
 
       if (
         !response ||
@@ -227,7 +228,7 @@
     }
 
     try {
-      const response = await myUserContext.sendMultiStepActionNotification(
+      const response = await userContext.sendMultiStepActionNotification(
         $formData.actionId,
         $formData.ident,
       );
@@ -267,7 +268,7 @@
         return;
       }
 
-      const result = await myUserContext.verifyMultiStepActionToken(
+      const result = await userContext.verifyMultiStepActionToken(
         $formData.actionId,
         $formData.token,
         $formData.newPassword,

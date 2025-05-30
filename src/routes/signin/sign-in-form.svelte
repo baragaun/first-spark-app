@@ -7,12 +7,12 @@
   import PasswordFormInput from '@/components/forms/form-password-input.svelte';
   import { Button } from '@/components/ui/button';
   import { MsaListenerHandler } from '@/contexts/msa-listener-handler.svelte';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { type MyUserContext } from '@/contexts/my-user-context.svelte';
   import translate from '@/helpers/language/translate';
   import { m } from '@/paraglide/messages';
   import { AppUiMessage } from '@/types/enums';
   import { UserIdentType } from '@baragaun/bg-node-client';
-  import { onDestroy } from 'svelte';
+  import { getContext, onDestroy } from 'svelte';
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
   import { debounce } from 'throttle-debounce';
@@ -29,6 +29,8 @@
 
   let { data }: { data: { form: SuperValidated<SignInFormSchema> } } = $props();
 
+  
+  const userContext = getContext<MyUserContext>('myUserContext');
   let cloudflareToken = $state('');
   let formState = $state({
     isLoading: false,
@@ -172,7 +174,7 @@
   };
 
   const onSignIn = async () => {
-    const onboardingCompletion = myUserContext.myUserOnboardingCompletion;
+    const onboardingCompletion = userContext.myUserOnboardingCompletion;
     if (onboardingCompletion === 0) {
       console.error('signMeInWithPassword.success.onboardingCompletion: User data not found.');
     } else if (onboardingCompletion === 1) {
@@ -191,7 +193,7 @@
       identifier = $formData.ident || '';
       identType = determineIdentifierType(identifier);
 
-      const response = await myUserContext.signMeInWithPassword(
+      const response = await userContext.signMeInWithPassword(
         $formData.ident,
         identType,
         $formData.password,
@@ -235,7 +237,7 @@
     }
 
     try {
-      const response = await myUserContext.signMeInWithToken(identifier);
+      const response = await userContext.signMeInWithToken(identifier);
 
       if (
         !response ||
@@ -296,7 +298,7 @@
         return;
       }
 
-      const response = await myUserContext.verifyMultiStepActionToken(
+      const response = await userContext.verifyMultiStepActionToken(
         otpState.msaId,
         $formData.token,
       );
@@ -337,7 +339,7 @@
     try {
       formState.isLoading = true;
 
-      const response = await myUserContext.sendMultiStepActionNotification(
+      const response = await userContext.sendMultiStepActionNotification(
         otpState.msaId,
         identifier,
       );

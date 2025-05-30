@@ -1,10 +1,11 @@
 <script lang="ts">
   import { page } from '$app/state';
-  import type { ComponentProps } from 'svelte';
+  import { getContext, type ComponentProps } from 'svelte';
   import * as Sidebar from '@/components/ui/sidebar';
   import { m } from '@/paraglide/messages';
   import { House, PlugZap, Settings, Zap } from 'lucide-svelte';
   import { Button } from '../ui/button';
+  import type { MyUserContext } from '@/contexts/my-user-context.svelte';
 
   const items = [
     {
@@ -42,10 +43,12 @@
   let {
     ref = $bindable(null),
     collapsible = 'icon' as ComponentProps<typeof Sidebar.Root>['collapsible'],
-    isOffline = $bindable(false),
-    isAuthenticated = false,
     ...restProps
   } = $props();
+
+  const userContext = getContext<MyUserContext>('myUserContext');
+  let isOffline: boolean = $derived(userContext.isOffline);
+  let isSignedIn: boolean = $derived(userContext.isSignedIn);
 
   const isItemActive = (itemUrl: string, currentPath: string): boolean => {
     if (itemUrl === '/') {
@@ -59,7 +62,7 @@
     isOffline = !isOffline;
   };
 
-  let visibleItems = $derived(isAuthenticated ? items : items.filter((item) => !item.requiresAuth));
+  let visibleItems = $derived(isSignedIn ? items : items.filter((item) => !item.requiresAuth));
 
   const sidebar = Sidebar.useSidebar();
 
@@ -103,7 +106,7 @@
       </Sidebar.Menu>
     </Sidebar.Group>
 
-    {#if !isAuthenticated}
+    {#if !isSignedIn}
       <Sidebar.Group class="mb-2 mt-auto px-3 group-data-[collapsible=icon]:hidden">
         <div class="rounded-lg border border-border bg-card p-4 shadow-sm">
           <h2 class="mb-3 text-sm font-bold">{m['join_first_spark']()}</h2>
@@ -127,7 +130,7 @@
     {/if}
 
     <Sidebar.Group
-      class={`mb-2 ${!isAuthenticated ? '' : 'mt-auto'} px-3 group-data-[collapsible=icon]:mt-auto`}
+      class={`mb-2 ${!isSignedIn ? '' : 'mt-auto'} px-3 group-data-[collapsible=icon]:mt-auto`}
     >
       <Sidebar.Menu>
         <Sidebar.MenuItem>

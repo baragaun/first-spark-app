@@ -7,12 +7,12 @@
   import FormButton from '@/components/forms/form-button.svelte';
   import IdentFormInput from '@/components/forms/form-ident-input.svelte';
   import { Button } from '@/components/ui/button';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { MyUserContext, myUserContext } from '@/contexts/my-user-context.svelte';
   import translate from '@/helpers/language/translate';
   import { m } from '@/paraglide/messages';
   import { AppUiMessage } from '@/types/enums';
   import { AlertTriangle } from 'lucide-svelte';
-  import { onDestroy } from 'svelte';
+  import { getContext, onDestroy } from 'svelte';
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zodClient } from 'sveltekit-superforms/adapters';
   import { debounce } from 'throttle-debounce';
@@ -26,7 +26,8 @@
     onClose?: () => void;
   } = $props();
 
-  let currentEmail = $derived(myUserContext.myEmail);
+  const userContext = getContext<MyUserContext>('myUserContext');
+  const currentEmail = $derived(userContext.myEmail);
   let isLoading = $state(false);
   let isSuccess = $state(false);
   let hasStepError = $state(true);
@@ -82,7 +83,7 @@
     try {
       isLoading = true;
 
-      const response = await myUserContext.deleteMyUser($formData.reason, $formData.description);
+      const response = await userContext.deleteMyUser($formData.reason, $formData.description);
 
       if (response !== true) {
         console.error('DeleteAccountForm.deleteMyAccount: error deleting user account:', {
