@@ -29,7 +29,6 @@
 
   let { data }: { data: { form: SuperValidated<SignInFormSchema> } } = $props();
 
-  
   const userContext = getContext<MyUserContext>('myUserContext');
   let cloudflareToken = $state('');
   let formState = $state({

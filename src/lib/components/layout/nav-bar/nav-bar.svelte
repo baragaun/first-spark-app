@@ -23,7 +23,6 @@
     await userContext.signMeOut();
     await goto('/signin');
   };
-
 </script>
 
 <nav

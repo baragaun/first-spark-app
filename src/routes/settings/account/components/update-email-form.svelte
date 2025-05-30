@@ -114,10 +114,7 @@
     const message = m['setting.email.error.unavailable']();
 
     try {
-      const response = await userContext.isUserIdentAvailable(
-        $formData.email,
-        UserIdentType.email,
-      );
+      const response = await userContext.isUserIdentAvailable($formData.email, UserIdentType.email);
 
       if (response.error) {
         updateFormErrors(emailFieldName, response.error);

@@ -7,7 +7,7 @@
   import { m } from '@/paraglide/messages';
 
   // const userContext = getContext<MyUserContext>('myUserContext');
-  const userContext = hasContext('myUserContext') 
+  const userContext = hasContext('myUserContext')
     ? getContext<MyUserContext>('myUserContext')
     : null;
   const isSignedIn = $derived(userContext?.isSignedIn ?? false);

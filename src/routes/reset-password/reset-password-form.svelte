@@ -29,7 +29,7 @@
   const steps = [zod(schemaFirstStep), zod(schemaLastStep)];
   let step = $state(1);
   const getCurrentValidator = () => steps[step - 1];
-    
+
   const userContext = getContext<MyUserContext>('myUserContext');
   let otpHandler: MsaListenerHandler | undefined = $state(undefined);
   let msaId = $state<string | undefined>(undefined);

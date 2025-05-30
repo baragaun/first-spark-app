@@ -58,7 +58,6 @@
     },
   ];
 
-
   const userContext = getContext<MyUserContext>('myUserContext');
   let cloudflareToken = $state('');
   let step = $state(1);
