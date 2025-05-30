@@ -47,9 +47,13 @@
     return `${recipientUser.userHandle || ''}`;
   };
 
-  const handleDeleteChannel = (channelId: string) => {
+  const handleDeleteChannel = async (channelId: string) => {
     dispatch('deleteChannel', { channelId });
-    // Remove from local state to update UI immediately
+    const response = await channelContext.deleteChannel(channelId);
+    if (!response) {
+      console.error('DeleteChannel: received error.', { response });
+      return;
+    }
     channels = channels.filter((channel) => channel.id !== channelId);
   };
 
