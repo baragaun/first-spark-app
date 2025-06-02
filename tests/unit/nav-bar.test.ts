@@ -1,11 +1,10 @@
 import NavBar from '@/components/layout/nav-bar/nav-bar.svelte';
 import { m } from '@/paraglide/messages.js';
-import type { MyUser } from '@baragaun/bg-node-client';
 import { render, screen } from '@testing-library/svelte';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 describe('NavBar', () => {
-  const createMockUserContext = (isSignedIn = false) => ({isSignedIn});
+  const createMockUserContext = (isSignedIn = false) => ({ isSignedIn });
 
   const originalInnerWidth = window.innerWidth;
   const originalInnerHeight = window.innerHeight;
@@ -32,7 +31,7 @@ describe('NavBar', () => {
   it('renders theme toggle button', async () => {
     const mockContext = createMockUserContext(false);
     render(NavBar, {
-      context: new Map([['myUserContext', mockContext]])
+      context: new Map([['myUserContext', mockContext]]),
     });
     const themeToggleButton = screen.getByLabelText(m['light_switch.tooltip']());
     expect(themeToggleButton).toBeVisible();
@@ -41,7 +40,7 @@ describe('NavBar', () => {
   it('renders language selection button', async () => {
     const mockContext = createMockUserContext(false);
     render(NavBar, {
-      context: new Map([['myUserContext', mockContext]])
+      context: new Map([['myUserContext', mockContext]]),
     });
     const languageButton = screen.getByLabelText(m['language_button.tooltip']());
     expect(languageButton).toBeVisible();
@@ -50,7 +49,7 @@ describe('NavBar', () => {
   it('renders sign in button when not authenticated', async () => {
     const mockContext = createMockUserContext(false);
     render(NavBar, {
-      context: new Map([['myUserContext', mockContext]])
+      context: new Map([['myUserContext', mockContext]]),
     });
     const signInButton = screen.getByRole('button', { name: /sign in/i });
     expect(signInButton).toBeVisible();
@@ -59,7 +58,7 @@ describe('NavBar', () => {
   it('renders sign up button when not authenticated', async () => {
     const mockContext = createMockUserContext(false);
     render(NavBar, {
-      context: new Map([['myUserContext', mockContext]])
+      context: new Map([['myUserContext', mockContext]]),
     });
     const signUpButton = screen.getByRole('button', { name: /sign up/i });
     expect(signUpButton).toBeVisible();
@@ -68,12 +67,12 @@ describe('NavBar', () => {
   it('does not render sign in/up buttons when authenticated', async () => {
     const mockContext = createMockUserContext(true);
     render(NavBar, {
-      context: new Map([['myUserContext', mockContext]])
+      context: new Map([['myUserContext', mockContext]]),
     });
-    
+
     const signInButton = screen.queryByRole('button', { name: /sign in/i });
     const signUpButton = screen.queryByRole('button', { name: /sign up/i });
-    
+
     expect(signInButton).not.toBeInTheDocument();
     expect(signUpButton).not.toBeInTheDocument();
   });
