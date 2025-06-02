@@ -1,3 +1,4 @@
+import { env } from '$env/dynamic/public';
 import translate from '@/helpers/language/translate';
 import { AppUiMessage } from '@/types/enums';
 import {
