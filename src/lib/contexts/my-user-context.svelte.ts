@@ -47,7 +47,6 @@ export class MyUserContext {
       },
       clientInfoStoreType: ClientInfoStoreType.db,
       logLevel: env.PUBLIC_LOG_LEVEL as 'debug' | 'info' | 'warn' | 'error' | 'silent' | undefined,
-      enableGroupChannels: false,
     };
 
     if (env.PUBLIC_APP_ENVIRONMENT) {
