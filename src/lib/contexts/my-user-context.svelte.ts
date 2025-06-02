@@ -1,3 +1,4 @@
+import { env } from '$env/dynamic/public';
 import translate from '@/helpers/language/translate';
 import { AppUiMessage } from '@/types/enums';
 import {
@@ -39,17 +40,18 @@ export class MyUserContext {
       enableGroupChannels: false,
       inBrowser: true,
       fsdata: {
-        url: import.meta.env.VITE_FSDATA_URL || 'http://localhost:8092/fsdata/api/graphql',
+        url: env.PUBLIC_FSDATA_URL || 'http://localhost:8092/fsdata/api/graphql',
         headers: {
           [HttpHeaderName.consumer]: 'first-spark-app',
         },
       },
       clientInfoStoreType: ClientInfoStoreType.db,
-      logLevel: 'debug',
+      logLevel: env.PUBLIC_LOG_LEVEL as 'debug' | 'info' | 'warn' | 'error' | 'silent' | undefined,
+      enableGroupChannels: false,
     };
 
-    if (import.meta.env.VITE_APP_ENVIRONMENT) {
-      config.appEnvironment = import.meta.env.VITE_APP_ENVIRONMENT as AppEnvironment;
+    if (env.PUBLIC_APP_ENVIRONMENT) {
+      config.appEnvironment = env.PUBLIC_APP_ENVIRONMENT as AppEnvironment;
     }
 
     try {
@@ -92,8 +94,8 @@ export class MyUserContext {
       return;
     }
 
-    // if (import.meta.env.MOCK_DATA === 'true') {
-    //   config.useMockData = true;
+    // if (env.PUBLIC_MOCK_DATA === 'true') {
+    //    config.enableMockMode = true;
     // }
 
     this._isInitializing = false;
@@ -119,7 +121,7 @@ export class MyUserContext {
       isLoading = true;
       const input: SignUpUserInput = { email };
 
-      if (import.meta.env.VITE_APP_ENVIRONMENT === 'development') {
+      if (env.PUBLIC_APP_ENVIRONMENT === 'development') {
         input.isTestUser = true;
         input.source = '{"msaToken":"666666"}';
       }
