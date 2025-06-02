@@ -1,13 +1,18 @@
 <script lang="ts">
   import { Separator } from '$lib/components/ui/separator';
   import { m } from '$lib/paraglide/messages';
+  import type { MyUserContext } from '@/contexts/my-user-context.svelte';
   import DeleteAccountForm from './components/delete-account-form.svelte';
   import SettingsDialog from './components/settings-dialog.svelte';
   import UpdateEmailForm from './components/update-email-form.svelte';
   import UpdatePasswordForm from './components/update-password-form.svelte';
   import UpdateUsernameForm from './components/update-username-form.svelte';
+  import { getContext } from 'svelte';
 
-  let { data, myUser } = $props();
+  let { data } = $props();
+
+  const userContext = getContext<MyUserContext>('myUserContext');
+  const myUser = $derived(userContext.myUser);
 
   let showUpdateUsernameDialog = $state(false);
   let showUpdateEmailDialog = $state(false);

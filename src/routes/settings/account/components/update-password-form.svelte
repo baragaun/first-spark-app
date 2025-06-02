@@ -1,7 +1,7 @@
 <script lang="ts">
   import PasswordFormInput from '@/components/forms/form-password-input.svelte';
 
-  import { myUserContext } from '$lib/contexts/my-user-context.svelte';
+  import { type MyUserContext } from '$lib/contexts/my-user-context.svelte';
   import { AppUiMessage } from '@/types/enums';
 
   import FormButton from '@/components/forms/form-button.svelte';
@@ -10,7 +10,7 @@
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
   import { debounce } from 'throttle-debounce';
-  import { onDestroy } from 'svelte';
+  import { getContext, onDestroy } from 'svelte';
   import {
     currentPasswordSchema,
     passwordFormSchema,
@@ -24,6 +24,8 @@
     preValidatedForm: SuperValidated<PasswordFormSchema>;
     onClose?: () => void;
   } = $props();
+
+  const userContext = getContext<MyUserContext>('myUserContext');
 
   let isLoading = $state(false);
   let isSuccess = $state(false);
@@ -86,7 +88,7 @@
     isLoading = true;
 
     try {
-      const verifyMyPasswordResponse = await myUserContext.verifyMyPassword(
+      const verifyMyPasswordResponse = await userContext.verifyMyPassword(
         $formData.currentPassword,
       );
 
@@ -130,7 +132,7 @@
       const currentPasswordValidation = await verifyCurrentPassword();
       if (!currentPasswordValidation) return;
 
-      const result = await myUserContext.updateMyPassword(
+      const result = await userContext.updateMyPassword(
         $formData.currentPassword,
         $formData.newPassword,
       );

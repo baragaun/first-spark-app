@@ -7,12 +7,12 @@
   import PasswordFormInput from '@/components/forms/form-password-input.svelte';
   import { Button } from '@/components/ui/button';
   import { MsaListenerHandler } from '@/contexts/msa-listener-handler.svelte';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { type MyUserContext } from '@/contexts/my-user-context.svelte';
   import translate from '@/helpers/language/translate';
   import { m } from '@/paraglide/messages';
   import { AppUiMessage } from '@/types/enums';
   import { UserIdentType } from '@baragaun/bg-node-client';
-  import { onDestroy } from 'svelte';
+  import { getContext, onDestroy } from 'svelte';
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
   import { debounce } from 'throttle-debounce';
@@ -29,20 +29,28 @@
 
   let { data }: { data: { form: SuperValidated<SignInFormSchema> } } = $props();
 
+  const userContext = getContext<MyUserContext>('myUserContext');
   let cloudflareToken = $state('');
+  let formState = $state({
+    isLoading: false,
+    hasStepError: false,
+    step: 1,
+  });
+
+  let otpState = $state({
+    handler: undefined as MsaListenerHandler | undefined,
+    msaId: undefined as string | undefined,
+    resendTimer: 30,
+    canResend: false,
+  });
+
+  const buttonState = $derived.by(() => ({
+    isDisabled: !isFormValid || formState.isLoading || formState.hasStepError,
+    isLoading: ($delayed || formState.isLoading) && !formState.hasStepError,
+  }));
 
   const steps = [zod(schemaFirstStep), zod(schemaLastStep)];
-  let step = $state(1);
-  const getCurrentValidator = () => steps[step - 1];
-
-  let otpHandler: MsaListenerHandler | undefined = $state(undefined);
-  let msaId = $state<string | undefined>(undefined);
-  let resendTimer = $state(30);
-  let canResend = $state(false);
-
-  let isLoading = $state(false);
-  let awaitingTokenVerification = $state(false);
-  let hasStepError = $state(true);
+  const getCurrentValidator = () => steps[formState.step - 1];
 
   let identifier = $state('');
   let identType = $state(UserIdentType.email);
@@ -51,14 +59,22 @@
   const DEBOUNCE_DELAY = 350; // ms
   const emailCooldowns = $state(new Map<string, number>()); // Track emails that have active cooldowns
 
-  // Create debounced validation function
+  const isFormValid = $derived.by(() => {
+    if (formState.step === 1) {
+      return $formData.ident && $formData.password && cloudflareToken;
+    } else if (formState.step === 2) {
+      return $formData.ident && $formData.token;
+    }
+    return false;
+  });
+
   const debouncedValidation = debounce(DEBOUNCE_DELAY, async () => {
     try {
       // ============================================================
       // Skip the empty validating to allow for error free authType swapping
-      if (step === 1 && (!$formData.ident || !$formData.password)) {
+      if (formState.step === 1 && (!$formData.ident || !$formData.password)) {
         return;
-      } else if (step === 2 && !$formData.token) {
+      } else if (formState.step === 2 && !$formData.token) {
         return;
       }
       // ============================================================
@@ -66,11 +82,11 @@
       // This form is friendlier without the automatic error focusing
       const result = await validateForm({ update: true, focusOnError: false });
 
-      hasStepError = !result.valid;
+      formState.hasStepError = !result.valid;
     } catch (error) {
       console.error('Error validating form:', error);
     } finally {
-      isLoading = false;
+      formState.isLoading = false;
     }
   });
 
@@ -80,44 +96,46 @@
     resetForm: false,
     async onChange() {
       if (!$formData) return;
-
-      isLoading = true;
       debouncedValidation();
     },
     async onSubmit({ cancel }) {
-      // Bail on any server side action
       cancel();
       const result = await validateForm({ update: true, focusOnError: true });
       if (!result.valid) {
-        hasStepError = true;
+        formState.hasStepError = true;
         return;
       }
 
-      if (step === 1) {
+      if (formState.step === 1) {
         await signMeInWithPassword();
-      } else if (step === 2 && $formData.token) {
+      } else if (formState.step === 2 && $formData.token) {
         await verifySignInToken();
       }
       return;
     },
   });
 
-  const { form: formData, errors, enhance, delayed, validateForm, options } = form;
+  const { form: formData, errors, enhance, delayed, validateForm, options, isTainted } = form;
 
   const startResendTimer = () => {
-    resendTimer = 30;
-    canResend = false;
-    emailCooldowns.set(identifier, Date.now() + resendTimer * 1000);
+    otpState.resendTimer = 30;
+    otpState.canResend = false;
+    emailCooldowns.set(identifier, Date.now() + otpState.resendTimer * 1000);
 
     clearInterval(timerInterval);
     timerInterval = setInterval(() => {
-      resendTimer -= 1;
-      if (resendTimer <= 0) {
+      otpState.resendTimer -= 1;
+      if (otpState.resendTimer <= 0) {
         clearInterval(timerInterval);
-        canResend = true;
+        otpState.canResend = true;
         emailCooldowns.delete(identifier);
       }
     }, 1000);
+  };
+
+  const setStep = (newStep: number) => {
+    formState.step = newStep;
+    formState.hasStepError = true; // Disable button initially when step changes
   };
 
   const updateFormErrors = (field: keyof SignInFormSchema, message?: string) => {
@@ -131,36 +149,31 @@
   };
 
   const toggleAuthType = async () => {
-    if (otpHandler) {
-      otpHandler.removeListener();
-      otpHandler = undefined;
+    if (otpState.handler) {
+      otpState.handler.removeListener();
+      otpState.handler = undefined;
     }
-    if (!hasStepError) hasStepError = true; //button should be disabled for empty fields
 
     // Ensure that there is valid ident input before we request a token
     if ($formData.ident && schemaFirstStep.safeParse($formData.ident)) {
-      if (step === 1) {
+      if (formState.step === 1) {
         $formData.authType = 'token';
         $formData.token = '';
-
         $formData.password = undefined;
-
         await sendTokenForSignIn();
-        step = 2;
+        setStep(2);
       } else {
         $formData.authType = 'password';
         $formData.password = '';
-
         $formData.token = undefined;
-
-        step = 1;
+        setStep(1);
       }
     }
     return;
   };
 
   const onSignIn = async () => {
-    const onboardingCompletion = myUserContext.myUserOnboardingCompletion;
+    const onboardingCompletion = userContext.myUserOnboardingCompletion;
     if (onboardingCompletion === 0) {
       console.error('signMeInWithPassword.success.onboardingCompletion: User data not found.');
     } else if (onboardingCompletion === 1) {
@@ -174,12 +187,12 @@
     if (!$formData.password) return;
 
     try {
-      isLoading = true;
+      formState.isLoading = true;
 
       identifier = $formData.ident || '';
       identType = determineIdentifierType(identifier);
 
-      const response = await myUserContext.signMeInWithPassword(
+      const response = await userContext.signMeInWithPassword(
         $formData.ident,
         identType,
         $formData.password,
@@ -188,7 +201,7 @@
       if (response !== true) {
         updateFormErrors('ident', undefined);
         updateFormErrors('password', m['signin.error.invalid_credentials']());
-        hasStepError = true;
+        formState.hasStepError = true;
         return;
       }
 
@@ -197,12 +210,12 @@
       console.error('SignInForm.signMeInWithPassword: error:', { error });
       updateFormErrors('password', translate(AppUiMessage.systemError));
     } finally {
-      isLoading = false;
+      formState.isLoading = false;
     }
   };
 
   const sendTokenForSignIn = async () => {
-    isLoading = true;
+    formState.isLoading = true;
 
     if (!$formData.ident) {
       validateForm({ update: true });
@@ -217,13 +230,13 @@
       const remainingTime = Math.ceil((cooldownEnd - Date.now()) / 1000);
 
       if (remainingTime > 0) {
-        resendTimer = remainingTime;
+        otpState.resendTimer = remainingTime;
         return;
       }
     }
 
     try {
-      const response = await myUserContext.signMeInWithToken(identifier);
+      const response = await userContext.signMeInWithToken(identifier);
 
       if (
         !response ||
@@ -237,27 +250,26 @@
         return;
       }
       startResendTimer();
-      msaId = response.object.actionProgress.actionId;
+      otpState.msaId = response.object.actionProgress.actionId;
 
       const onNotificationSent = () => {
-        step = 2;
-        isLoading = false;
+        setStep(2);
+        formState.isLoading = false;
       };
       const onFailure = () => {
-        if (awaitingTokenVerification && otpHandler) {
+        if (otpState.handler) {
           console.error('onFailure');
 
-          updateFormErrors('token', otpHandler.getErrorMessage());
-          hasStepError = true;
-          awaitingTokenVerification = false;
-          isLoading = false;
+          updateFormErrors('token', otpState.handler.getErrorMessage());
+          formState.hasStepError = true;
+          formState.isLoading = false;
         }
       };
       const onSuccess = async () => {
         await onSignIn();
       };
 
-      otpHandler = new MsaListenerHandler(
+      otpState.handler = new MsaListenerHandler(
         'SignInForm',
         response,
         onNotificationSent,
@@ -270,43 +282,44 @@
       console.error('SignInForm.startTokenSignIn:', { error });
       updateFormErrors('ident', translate(AppUiMessage.systemError));
     } finally {
-      isLoading = true; // Leave the button in a processing state until sent event
+      formState.isLoading = false;
     }
   };
 
   const verifySignInToken = async (): Promise<void> => {
-    isLoading = true;
-    awaitingTokenVerification = true;
-
+    formState.isLoading = true;
     if (!$formData.token) return;
 
     try {
-      if (!msaId) {
+      if (!otpState.msaId) {
         console.error('SignInForm.handleVerifyOtp: actionId missing:');
         updateFormErrors('token', translate(AppUiMessage.systemError));
         return;
       }
 
-      const response = await myUserContext.verifyMultiStepActionToken(msaId, $formData.token);
+      const response = await userContext.verifyMultiStepActionToken(
+        otpState.msaId,
+        $formData.token,
+      );
 
       if (response !== true) {
         console.error('SignInForm.handleVerifyOtp: invalid response:', { result: response });
         updateFormErrors('token', translate(AppUiMessage.systemError));
-        isLoading = false;
+        formState.isLoading = false;
         return;
       }
     } catch (error) {
       console.error('SignInForm.handleVerifyOtp: error:', { error });
       updateFormErrors('token', translate(AppUiMessage.systemError));
     } finally {
-      isLoading = true; // Leave the button in a processing state until sent event
+      formState.isLoading = true; // Leave the button in a processing state until sent event
     }
   };
 
   const handleResendToken = async () => {
-    if (!canResend) return;
+    if (!otpState.canResend) return;
 
-    if (!msaId) {
+    if (!otpState.msaId) {
       console.error('SignInForm.handleResendToken: actionId missing.');
       updateFormErrors('token', translate(AppUiMessage.systemError));
       return;
@@ -317,15 +330,18 @@
       const remainingTime = Math.ceil((cooldownEnd - Date.now()) / 1000);
       if (remainingTime > 0) {
         // If same email and cooldown active, just show verification screen with current timer
-        resendTimer = remainingTime;
+        otpState.resendTimer = remainingTime;
         return;
       }
     }
 
     try {
-      isLoading = true;
+      formState.isLoading = true;
 
-      const response = await myUserContext.sendMultiStepActionNotification(msaId, identifier);
+      const response = await userContext.sendMultiStepActionNotification(
+        otpState.msaId,
+        identifier,
+      );
 
       if (typeof response === 'string') {
         console.error('SignInForm.handleResendToken: error:', { error: response });
@@ -338,14 +354,14 @@
       console.error('SignInForm.handleResendToken: error:', { error });
       updateFormErrors('ident', translate(AppUiMessage.systemError));
     } finally {
-      isLoading = false;
+      formState.isLoading = false;
     }
   };
   onDestroy(() => {
     clearInterval(timerInterval);
 
-    if (otpHandler) {
-      otpHandler.removeListener();
+    if (otpState.handler) {
+      otpState.handler.removeListener();
     }
 
     // Cancel the debounced function
@@ -354,7 +370,7 @@
 
   $effect(() => {
     if (!$formData) {
-      isLoading = false;
+      formState.isLoading = false;
       return;
     }
 
@@ -362,11 +378,11 @@
   });
 
   const getCurrentStepDescription = () => {
-    switch (step) {
+    switch (formState.step) {
       case 1:
         return m['signin.description']();
       case 2:
-        return step === 2
+        return formState.step === 2
           ? getOtpMessage($formData)
           : m['signin.sign_with_password_description']({ identifier });
     }
@@ -376,7 +392,7 @@
 <form method="POST" id="sign-in-form" use:enhance>
   <AuthCard title={m['signin.title']()} description={getCurrentStepDescription()}>
     <div class="space-y-4">
-      {#if step === 1}
+      {#if formState.step === 1}
         <EmailFormInput
           {form}
           fieldName="ident"
@@ -400,8 +416,8 @@
           onturnstile={(e) => (cloudflareToken = e.detail.token)}
         ></div>
         <FormButton
-          disabled={$delayed || isLoading || hasStepError || cloudflareToken === ''}
-          isLoading={($delayed || isLoading) && !hasStepError}
+          disabled={buttonState.isDisabled}
+          isLoading={buttonState.isLoading}
           buttonText={m['signin.buttons.signin']()}
           loadingText={m['signin.buttons.Signing_in']()}
         />
@@ -413,20 +429,20 @@
             {m['signin.buttons.forgot_password']()}
           </Button>
         </div>
-      {:else if step === 2}
+      {:else if formState.step === 2}
         <OTPFormInput
           {form}
           fieldName="token"
           label={m['verify_token.verification_code']()}
           length={6}
           showResend={true}
-          {canResend}
-          {resendTimer}
+          canResend={otpState.canResend}
+          resendTimer={otpState.resendTimer}
           onResendClick={handleResendToken}
         />
         <FormButton
-          disabled={$delayed || isLoading || hasStepError}
-          isLoading={($delayed || isLoading) && !hasStepError}
+          disabled={buttonState.isLoading}
+          isLoading={buttonState.isLoading}
           buttonText={m['signin.buttons.verify']()}
           loadingText={m['signin.buttons.verifying']()}
         />
@@ -447,6 +463,6 @@
   </AuthCard>
 
   <!-- commenting as per the issue : https://github.com/baragaun/first-spark-app/issues/113 -->
-  <!--   <div class="mt-4"><SuperDebug data={$formData} /></div>
-  <div class="mt-4"><SuperDebug data={errors} /></div> -->
+  <!-- <div class="mt-4"><SuperDebug data={$formData} /></div> -->
+  <!-- <div class="mt-4"><SuperDebug data={errors} /></div> -->
 </form>

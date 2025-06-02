@@ -4,7 +4,7 @@
   import FormButton from '@/components/forms/form-button.svelte';
   import IdentFormInput from '@/components/forms/form-ident-input.svelte';
   import { Button } from '@/components/ui/button';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { type MyUserContext } from '@/contexts/my-user-context.svelte';
   import translate from '@/helpers/language/translate';
   import { AppUiMessage } from '@/types/enums';
   import { UserIdentType } from '@baragaun/bg-node-client';
@@ -12,7 +12,7 @@
   import { zod } from 'sveltekit-superforms/adapters';
   import { usernameFormSchema, type UsernameFormSchema } from '../../(data)/schema';
   import { debounce } from 'throttle-debounce';
-  import { onDestroy } from 'svelte';
+  import { getContext, onDestroy } from 'svelte';
 
   let {
     preValidatedForm,
@@ -22,8 +22,9 @@
     onClose?: () => void;
   } = $props();
 
-  let currentEmail = $derived(myUserContext.myEmail);
-  let currentUsername = $derived(myUserContext.myUserHandle);
+  const userContext = getContext<MyUserContext>('myUserContext');
+  const currentEmail = $derived(userContext.myEmail);
+  const currentUsername = $derived(userContext.myUserHandle);
 
   let hasStepError = $state(true);
   let isLoading = $state(false);
@@ -74,7 +75,7 @@
     isLoading = true;
     const fieldName = 'username';
 
-    if ($formData.username === myUserContext.myUserHandle) {
+    if ($formData.username === userContext.myUserHandle) {
       // isLoading = false;
       // return true;
       isLoading = false;
@@ -91,7 +92,7 @@
     let message = m['setting.username.error.unavailable']();
 
     try {
-      const response = await myUserContext.isUserIdentAvailable($formData.username, identType);
+      const response = await userContext.isUserIdentAvailable($formData.username, identType);
 
       if (response.error) {
         updateFormErrors(fieldName, response.error);
@@ -117,7 +118,7 @@
     if (!currentEmail) return;
 
     try {
-      const result = await myUserContext.findAvailableUserHandle(currentEmail);
+      const result = await userContext.findAvailableUserHandle(currentEmail);
       if (result && typeof result === 'object' && 'object' in result) {
         $formData.username = result.object ?? '';
       } else if (typeof result === 'string') {
@@ -136,7 +137,7 @@
     try {
       isLoading = true;
 
-      const result = await myUserContext.updateMyUser({
+      const result = await userContext.updateMyUser({
         userHandle: $formData.username,
       });
 
