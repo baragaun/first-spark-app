@@ -5,12 +5,12 @@
   import { Button } from '@/components/ui/button';
   import { Input } from '@/components/ui/input';
   import { MsaListenerHandler } from '@/contexts/msa-listener-handler.svelte';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { MyUserContext } from '@/contexts/my-user-context.svelte';
   import translate from '@/helpers/language/translate';
   import { m } from '@/paraglide/messages';
   import { AppUiMessage } from '@/types/enums';
   import { UserIdentType } from '@baragaun/bg-node-client';
-  import { onDestroy } from 'svelte';
+  import { getContext, onDestroy } from 'svelte';
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
   import { debounce } from 'throttle-debounce';
@@ -28,7 +28,9 @@
     onClose?: () => void;
   } = $props();
 
-  let currentEmail = $derived(myUserContext.myEmail);
+  const userContext = getContext<MyUserContext>('myUserContext');
+  const currentEmail = $derived(userContext.myEmail);
+
   let step = $state(1);
   let isLoading = $state(false);
   let isSuccess = $state(false);
@@ -112,10 +114,7 @@
     const message = m['setting.email.error.unavailable']();
 
     try {
-      const response = await myUserContext.isUserIdentAvailable(
-        $formData.email,
-        UserIdentType.email,
-      );
+      const response = await userContext.isUserIdentAvailable($formData.email, UserIdentType.email);
 
       if (response.error) {
         updateFormErrors(emailFieldName, response.error);
@@ -137,7 +136,7 @@
   const updateEmail = async (email: string) => {
     isLoading = true;
     try {
-      const result = await myUserContext.updateMyUser({
+      const result = await userContext.updateMyUser({
         email: email,
       });
 
@@ -165,7 +164,7 @@
   const registerNewEmail = async () => {
     isLoading = true;
     try {
-      const verificationResponse = await myUserContext.verifyMyEmail($formData.email);
+      const verificationResponse = await userContext.verifyMyEmail($formData.email);
 
       if (
         !verificationResponse ||
@@ -223,7 +222,7 @@
 
       isLoading = true;
 
-      const response = await myUserContext.verifyMultiStepActionToken(msaId, $formData.token);
+      const response = await userContext.verifyMultiStepActionToken(msaId, $formData.token);
       if (response !== true) {
         console.error('UpdateEmailForm.handleVerifyOtp: invalid response:', { result: response });
         updateFormErrors(tokenFieldName, translate(AppUiMessage.systemError));
@@ -246,7 +245,7 @@
 
     try {
       isLoading = true;
-      const response = await myUserContext.sendMultiStepActionNotification(msaId, $formData.email);
+      const response = await userContext.sendMultiStepActionNotification(msaId, $formData.email);
 
       if (typeof response === 'string') {
         console.error('UpdateEmailDialog.handleResendOtp: error:', { error: response });

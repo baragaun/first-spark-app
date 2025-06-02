@@ -1,12 +1,16 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { getContext, hasContext, onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
   import * as Tabs from '@/components/ui/tabs';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { MyUserContext } from '@/contexts/my-user-context.svelte';
   import { m } from '@/paraglide/messages';
 
-  const isSignedIn = $derived(myUserContext.isSignedIn);
+  // const userContext = getContext<MyUserContext>('myUserContext');
+  const userContext = hasContext('myUserContext')
+    ? getContext<MyUserContext>('myUserContext')
+    : null;
+  const isSignedIn = $derived(userContext?.isSignedIn ?? false);
 
   const tabs = [
     { id: 'account', label: m['setting.account'](), path: '/settings/account', disabled: false },

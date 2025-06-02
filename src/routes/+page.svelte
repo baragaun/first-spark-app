@@ -1,9 +1,11 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
   import { m } from '$lib/paraglide/messages.js';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { MyUserContext } from '@/contexts/my-user-context.svelte';
+  import { getContext } from 'svelte';
 
-  const isSignedIn = $derived(myUserContext.isSignedIn);
+  const userContext = getContext<MyUserContext>('myUserContext');
+  const isSignedIn = $derived(userContext.isSignedIn);
 </script>
 
 <div class="grid flex-1 place-items-center">

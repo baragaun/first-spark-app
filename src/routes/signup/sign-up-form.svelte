@@ -7,7 +7,7 @@
   import OTPFormInput from '@/components/forms/form-otp-input.svelte';
   import PasswordFormInput from '@/components/forms/form-password-input.svelte';
   import { MsaListenerHandler } from '@/contexts/msa-listener-handler.svelte';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { type MyUserContext } from '@/contexts/my-user-context.svelte';
   import translate from '@/helpers/language/translate';
   import { AppUiMessage } from '@/types/enums';
   import {
@@ -15,7 +15,7 @@
     type MultiStepActionProgressResult,
     type QueryResult,
   } from '@baragaun/bg-node-client';
-  import { onDestroy, onMount } from 'svelte';
+  import { getContext, onDestroy, onMount } from 'svelte';
   import SuperDebug, { superForm, type SuperValidated } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
   import { debounce } from 'throttle-debounce';
@@ -58,10 +58,11 @@
     },
   ];
 
+  const userContext = getContext<MyUserContext>('myUserContext');
   let cloudflareToken = $state('');
   let step = $state(1);
   let isLoading = $state(false);
-  let hasStepError = $state(true);
+  let hasStepError = $state(false);
 
   let canResend = $state(false);
   let resendTimer = $state(30);
@@ -124,6 +125,17 @@
   });
 
   const { form: formData, errors, enhance, delayed, validateForm, options } = form;
+
+  const isFormValid = $derived.by(() => {
+    if (step === 1) {
+      return $formData.email && cloudflareToken;
+    } else if (step === 2) {
+      return $formData.token;
+    } else if (step === 3) {
+      return $formData.username && $formData.password;
+    }
+    return false;
+  });
 
   const updateFormErrors = (field: keyof SignUpFormSchema, message: string) => {
     errors.update((errors) => {
@@ -196,7 +208,7 @@
       if (!identifier) return false;
       identType = UserIdentType.userHandle;
 
-      if (identifier === myUserContext.myUserHandle) return true;
+      if (identifier === userContext.myUserHandle) return true;
 
       const validationResult = usernameSchema.safeParse($formData.username);
       if (!validationResult.success) return false;
@@ -209,7 +221,7 @@
         : m['signup.errors.username_unavailable']();
 
     try {
-      const response = await myUserContext.isUserIdentAvailable(identifier, identType);
+      const response = await userContext.isUserIdentAvailable(identifier, identType);
 
       if (response.error) {
         updateFormErrors(step === 1 ? 'email' : 'username', response.error);
@@ -248,11 +260,11 @@
 
     const onSuccess = async () => {
       try {
-        await myUserContext.updateMyUser({ isEmailVerified: true });
+        await userContext.updateMyUser({ isEmailVerified: true });
       } catch (error) {
         console.error('SignUpForm.setupOtpMsaHandler error updating verification:', { error });
       }
-      if (!myUserContext.myUser?.passwordUpdatedAt) {
+      if (!userContext.myUser?.passwordUpdatedAt) {
         setStep(3);
       } else {
         // If this user already has a password, consider their onboarding complete
@@ -282,7 +294,7 @@
     }
 
     try {
-      const signUpResponse = await myUserContext.signUpUser($formData.email);
+      const signUpResponse = await userContext.signUpUser($formData.email);
 
       if (signUpResponse !== true) {
         console.error('SignUpForm.registerNewEmail: signUpUser failed.', { signUpResponse });
@@ -290,7 +302,7 @@
         return;
       }
 
-      const verificationResponse = await myUserContext.verifyMyEmail($formData.email);
+      const verificationResponse = await userContext.verifyMyEmail($formData.email);
 
       if (
         !verificationResponse ||
@@ -314,7 +326,7 @@
       console.error('SignUpForm.registerNewEmail:', { error });
       updateFormErrors('email', translate(AppUiMessage.systemError));
     } finally {
-      isLoading = true; // Leave the button in a processing state until sent event
+      isLoading = false;
     }
   };
 
@@ -328,7 +340,7 @@
 
       isLoading = true;
 
-      const response = await myUserContext.verifyMultiStepActionToken(msaId, $formData.token || '');
+      const response = await userContext.verifyMultiStepActionToken(msaId, $formData.token || '');
 
       if (response !== true) {
         console.error('SignUpForm.handleVerifyOtp: invalid response:', { result: response });
@@ -346,7 +358,7 @@
       console.error('SignUpForm.handleVerifyOtp: error:', { error });
       updateFormErrors('token', translate(AppUiMessage.systemError));
     } finally {
-      isLoading = true; // Leave the button in a processing state until success event
+      isLoading = false;
     }
   };
 
@@ -360,7 +372,7 @@
     try {
       isLoading = true;
 
-      const response = await myUserContext.sendMultiStepActionNotification(msaId, $formData.email);
+      const response = await userContext.sendMultiStepActionNotification(msaId, $formData.email);
 
       if (typeof response === 'string') {
         console.error('SignInForm.handleResendOtp: error:', { error: response });
@@ -382,7 +394,7 @@
 
     try {
       isLoading = true;
-      const result = await myUserContext.findAvailableUserHandle($formData.email);
+      const result = await userContext.findAvailableUserHandle($formData.email);
 
       if (result && typeof result === 'object' && 'object' in result) {
         $formData.username = result.object ?? '';
@@ -402,7 +414,7 @@
     if (!$formData.password) return;
 
     try {
-      const { error } = await myUserContext.updateMyUser({
+      const { error } = await userContext.updateMyUser({
         userHandle: $formData.username,
         newPassword: $formData.password,
       });
@@ -445,17 +457,17 @@
       if (!isNaN(targetStep) && targetStep > 1 && targetStep <= steps.length) {
         setStep(targetStep);
 
-        identifier = step === 2 ? myUserContext.myEmail || '' : myUserContext.myUserHandle || '';
+        identifier = step === 2 ? userContext.myEmail || '' : userContext.myUserHandle || '';
         $formData = {
-          email: myUserContext.myEmail || '',
+          email: userContext.myEmail || '',
           token: '',
-          username: myUserContext.myUserHandle || '',
+          username: userContext.myUserHandle || '',
           password: '',
         };
 
         if (targetStep === 2) {
           try {
-            const verificationResponse = await myUserContext.verifyMyEmail($formData.email);
+            const verificationResponse = await userContext.verifyMyEmail($formData.email);
             const { msaId: newMsaId, handler } = setupOtpMsaHandler(verificationResponse);
             msaId = newMsaId;
             otpHandler = handler;
@@ -529,7 +541,7 @@
         />
       {/if}
       <FormButton
-        disabled={$delayed || isLoading || hasStepError || cloudflareToken === ''}
+        disabled={!isFormValid || isLoading || hasStepError}
         isLoading={$delayed || isLoading}
         buttonText={steps[step - 1].buttonLabel}
         loadingText={steps[step - 1].loadingLabel}
