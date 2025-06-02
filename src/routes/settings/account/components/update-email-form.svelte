@@ -33,6 +33,7 @@
 
   let step = $state(1);
   let isLoading = $state(false);
+  let awaitingTokenVerification = $state(false);
   let isSuccess = $state(false);
   let hasStepError = $state(true);
 
@@ -190,8 +191,14 @@
         isLoading = false;
       };
       const onFailure = () => {
-        console.error('onFailure');
-        isLoading = false;
+        if (awaitingTokenVerification && otpHandler) {
+          console.error('onFailure');
+
+          updateFormErrors('token', otpHandler.getErrorMessage());
+          hasStepError = true;
+          awaitingTokenVerification = false;
+          isLoading = false;
+        }
       };
       const onSuccess = async () => {
         await updateEmail($formData.email);
@@ -221,6 +228,7 @@
       }
 
       isLoading = true;
+      awaitingTokenVerification = true;
 
       const response = await userContext.verifyMultiStepActionToken(msaId, $formData.token);
       if (response !== true) {
@@ -280,7 +288,6 @@
     clearInterval(timerInterval);
     if (otpHandler) otpHandler.removeListener();
 
-    // Cancel the debounced function
     debounceFormValidation.cancel();
   });
 
@@ -289,14 +296,6 @@
       isLoading = false;
       return;
     }
-
-    if (otpHandler) {
-      const currentErrorMessage = otpHandler.getErrorMessage();
-      if (currentErrorMessage) {
-        updateFormErrors(tokenFieldName, currentErrorMessage);
-      }
-    }
-
     options.validators = getCurrentValidator();
   });
 </script>
