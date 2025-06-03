@@ -6,7 +6,7 @@
   import * as Sidebar from '@/components/ui/sidebar';
   import type { MyUserContext } from '@/contexts/my-user-context.svelte';
   import { m } from '@/paraglide/messages';
-  import { House, PlugZap, Settings, Zap } from 'lucide-svelte';
+  import { GiftIcon, House, PlugZap, Settings, Zap } from 'lucide-svelte';
 
   const items = [
     {
@@ -37,6 +37,12 @@
       title: m['sidebar.menu.settings'](),
       url: '/settings',
       icon: Settings,
+      requiresAuth: true,
+    },
+    {
+      title: m['sidebar.menu.marketplace'](),
+      url: '/marketplace',
+      icon: GiftIcon,
       requiresAuth: true,
     },
   ];
