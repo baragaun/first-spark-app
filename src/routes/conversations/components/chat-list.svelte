@@ -2,15 +2,10 @@
   import * as Avatar from '$lib/components/ui/avatar/index.js';
   import { formatDistanceToNow } from 'date-fns';
   import type { ChannelListItem } from '@baragaun/bg-node-client';
-  import { createEventDispatcher } from 'svelte';
   import ChannelOptionsMenu from './channel-options-menu.svelte';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { selectedChannel } from '@/stores/channel-store';
   import { channelContext } from '@/contexts/channel-context.svelte';
-
-  const dispatch = createEventDispatcher<{
-    deleteChannel: { channelId: string };
-  }>();
 
   let { channels }: { channels: ChannelListItem[] } = $props();
 
@@ -48,7 +43,6 @@
   };
 
   const handleDeleteChannel = async (channelId: string) => {
-    dispatch('deleteChannel', { channelId });
     const response = await channelContext.deleteChannel(channelId);
     if (!response) {
       console.error('DeleteChannel: received error.', { response });

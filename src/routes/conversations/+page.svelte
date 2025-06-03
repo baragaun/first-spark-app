@@ -34,22 +34,6 @@
     // goto('/contacts');
   };
 
-  const handleDeleteChannel = async (event: CustomEvent<{ channelId: string }>) => {
-    const { channelId } = event.detail;
-    try {
-      // Remove from local state
-      $myChannels = $myChannels.filter((channel) => channel.id !== channelId);
-
-      // Here you would call your API to delete the channel
-      // For example:
-      // await myChannelContext.deleteChannel(channelId);
-
-      // For now, we'll just update the UI
-    } catch (error) {
-      console.error('Failed to delete channel:', error);
-      // Optionally show an error message to the user
-    }
-  };
 </script>
 
 <div class="container mx-auto max-w-4xl py-6">
@@ -62,5 +46,5 @@
       </Button>
     </div>
   </div>
-  <ChatList channels={filteredChannels} on:deleteChannel={handleDeleteChannel} />
+  <ChatList channels={filteredChannels} />
 </div>
