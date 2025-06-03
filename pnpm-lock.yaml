@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@baragaun/bg-node-client':
-        specifier: ^0.0.31
-        version: 0.0.31(prettier@3.5.3)
+        specifier: ^0.0.39
+        version: 0.0.39(prettier@3.5.3)
       formsnap:
         specifier: ^2.0.0
         version: 2.0.1(svelte@5.30.1)(sveltekit-superforms@2.25.0(@sveltejs/kit@2.21.0(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.30.1)(vite@6.3.5(@types/node@22.15.18)(jiti@1.21.7)(yaml@2.8.0)))(svelte@5.30.1)(vite@6.3.5(@types/node@22.15.18)(jiti@1.21.7)(yaml@2.8.0)))(@types/json-schema@7.0.15)(svelte@5.30.1)(typescript@5.8.3))
@@ -246,8 +246,8 @@ packages:
     resolution: {integrity: sha512-+EzkxvLNfiUeKMgy/3luqfsCWFRXLb7U6wNQTk60tovuckwB15B191tJWvpp4HjiQWdJkCxO3Wbvc6jlk3Xb2Q==}
     engines: {node: '>=6.9.0'}
 
-  '@baragaun/bg-node-client@0.0.31':
-    resolution: {integrity: sha512-kERxxDWLWJ3FJv6vEvVfDTY5CKD464AEutrtItubvfkAOoFwRTp2FJwC8fG1rW43+IZvV9KGIUVlYgaZnkeSmw==}
+  '@baragaun/bg-node-client@0.0.39':
+    resolution: {integrity: sha512-JFTR28ASlKqBukIO2WmI84Z2piVipm5K8Esbefoezjw3u2UXM7LXOSNkfg3r8SNq+9AM71lGHM6+L83SLGJd8Q==}
     engines: {node: '>=20'}
 
   '@bcoe/v8-coverage@1.0.2':
@@ -4217,7 +4217,7 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.27.1
 
-  '@baragaun/bg-node-client@0.0.31(prettier@3.5.3)':
+  '@baragaun/bg-node-client@0.0.39(prettier@3.5.3)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
       '@nats-io/jetstream': 3.0.2
@@ -4230,7 +4230,6 @@ snapshots:
       dexie: 4.0.10
       graffle: 8.0.0-next.157(@opentelemetry/api@1.9.0)(graphql@16.11.0)(prettier@3.5.3)
       graphql: 16.11.0
-      leader-election: link:rxdb/plugins/leader-election
       rxdb: 16.12.0(rxjs@7.8.2)
       rxjs: 7.8.2
       tslib: 2.8.1
