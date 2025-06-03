@@ -1,7 +1,7 @@
 <script lang="ts">
   import * as Avatar from '$lib/components/ui/avatar/index.js';
   import { formatDistanceToNow } from 'date-fns';
-  import type { Channel } from '@baragaun/bg-node-client';
+  import type { ChannelListItem } from '@baragaun/bg-node-client';
   import { createEventDispatcher } from 'svelte';
   import ChannelOptionsMenu from './channel-options-menu.svelte';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
@@ -12,7 +12,7 @@
     deleteChannel: { channelId: string };
   }>();
 
-  let { channels }: { channels: Channel[] } = $props();
+  let { channels }: { channels: ChannelListItem[] } = $props();
 
   // todo change to fetch real user by id
   const currentUserId = myUserContext.myUserId; // This should match the variable name in +layout.ts
@@ -21,7 +21,7 @@
     return formatDistanceToNow(new Date(date), { addSuffix: true });
   };
 
-  const getRecipientName = async (channel: Channel) => {
+  const getRecipientName = async (channel: ChannelListItem) => {
     if (!channel.userIds || channel.userIds.length === 0) {
       return null;
     }
@@ -57,7 +57,7 @@
     channels = channels.filter((channel) => channel.id !== channelId);
   };
 
-  function handleChannelClick(channel: Channel) {
+  function handleChannelClick(channel: ChannelListItem) {
     selectedChannel.set(channel);
   }
 </script>
@@ -101,7 +101,11 @@
                 </h3>
                 <div class="flex items-center gap-2">
                   <span class="text-xs text-muted-foreground"
-                    >{formatTime(channel.updatedAt || channel.createdAt)}</span
+                    >{formatTime(
+                      channel.latestMessage?.updatedAt ??
+                        channel.latestMessage?.createdAt ??
+                        new Date(),
+                    )}</span
                   >
                   <ChannelOptionsMenu
                     channelId={channel.id}
@@ -110,7 +114,7 @@
                 </div>
               </div>
               <p class="truncate text-sm text-muted-foreground">
-                {channel.description || 'No latest messages'}
+                {channel.latestMessage?.messageText || 'No latest messages'}
               </p>
             </div>
 

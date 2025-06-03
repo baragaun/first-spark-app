@@ -59,8 +59,8 @@
   let replyingToMessage = $state<ChannelMessage | null>(null);
   let copiedMessageId = $state<string | null>(null);
   let showScrollButton = $state(false);
-  let isFetchingMoreMessages = $state(false);; // Flag to prevent multiple API calls
-  let isAllMessagesFetched = $state(false);;
+  let isFetchingMoreMessages = $state(false); // Flag to prevent multiple API calls
+  let isAllMessagesFetched = $state(false);
 
   // Get sender info for avatar display
   // todo this function repeated multiples times
@@ -183,24 +183,33 @@
     return words.slice(0, 150).join(' ') + '...';
   };
 
-    const fetchMoreMessages = async () => {
+  const fetchMoreMessages = async () => {
     if (isFetchingMoreMessages && !isAllMessagesFetched) return; // Prevent multiple API calls
     isFetchingMoreMessages = true;
 
-    const response = await channelContext.findChannelMessages($selectedChannel!.id, messages.length, 20);
+    // Capture the current scroll position
+    const previousScrollTop = messagesContainer?.scrollTop || 0;
+
+    const response = await channelContext.findChannelMessages(
+      $selectedChannel!.id,
+      messages.length,
+      20,
+    );
     if (!response || !Array.isArray(response)) {
       console.error('FindChannelMessages: received error.', { response });
       isFetchingMoreMessages = false;
       return;
     }
 
-    if(response.length === 0) {
+    if (response.length === 0) {
       isAllMessagesFetched = true;
     } else {
-       messages = [...response.reverse(), ...messages];
+      messages = [...response.reverse(), ...messages];
+      const newScrollHeight = messagesContainer?.scrollHeight || 0;
+      const addedHeight = newScrollHeight - previousScrollTop;
+      messagesContainer?.scrollTo({ top: addedHeight, behavior: 'auto' });
     }
     // Append new messages to the existing list
-
     isFetchingMoreMessages = false;
   };
 
@@ -229,7 +238,6 @@
     scrollToBottom();
     dispatch('scrollToBottom', scrollToBottom);
   });
-
 </script>
 
 <div class="h-full overflow-y-auto p-4" bind:this={messagesContainer} onscroll={handleScroll}>

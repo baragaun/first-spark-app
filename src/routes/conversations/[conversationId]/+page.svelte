@@ -4,10 +4,10 @@
   import ChatHeader from '../components/chat-header.svelte';
   import MessageList from '../components/message-list.svelte';
   import MessageInput from '../components/message-input.svelte';
-  import { Channel, ChannelMessage } from '@baragaun/bg-node-client';
+  import { ChannelListItem, ChannelMessage } from '@baragaun/bg-node-client';
   import { X } from 'lucide-svelte';
   import Button from '@/components/ui/button/button.svelte';
-  import { isChannelLoading, selectedChannel } from '@/stores/channel-store';
+  import { selectedChannel } from '@/stores/channel-store';
   import { channelContext } from '@/contexts/channel-context.svelte';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import type { ContactDetails } from '@/helpers/types';
@@ -23,7 +23,7 @@
   const currentUserId = myUserContext.myUserId;
 
   // Function to determine contact info based on channel participants
-  const setContactInfo = async (channel: Channel) => {
+  const setContactInfo = async (channel: ChannelListItem) => {
     if (!channel || !channel.userIds) return null;
 
     if (channel.userIds.length > 2) {
@@ -35,17 +35,15 @@
       };
     } else {
       // Direct message - use recipient info
-      const recipientId = channel.userIds.find((userId) => userId !== currentUserId);
-
-      if (!recipientId) return null;
-
-      const recipientUser = await channelContext.findUserInfoById(recipientId);
+      const recipientUser = channel.participants?.find(
+        (participant) => participant.userId !== currentUserId,
+      );
 
       if (!recipientUser || typeof recipientUser === 'string') return null;
 
-      const receipientName = recipientUser.firstName
-        ? `${recipientUser.firstName} ${recipientUser.lastName}`
-        : recipientUser.userHandle;
+      const receipientName = recipientUser.userInfo?.firstName
+        ? `${recipientUser.userInfo?.firstName} ${recipientUser.userInfo?.lastName}`
+        : recipientUser.userInfo?.userHandle;
 
       channelDetails = {
         id: recipientUser.id,
@@ -153,7 +151,7 @@
     </div>
 
     <div class="relative flex-1 overflow-hidden">
-      <div class="overflow-y-auto absolute inset-0" >
+      <div class="absolute inset-0 overflow-y-auto">
         <MessageList
           {messages}
           onEditMessage={handleEditMessage}

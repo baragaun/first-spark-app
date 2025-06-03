@@ -11,9 +11,4 @@
   };
 </script>
 
-<SearchBar
-  placeholder="Search ..."
-  autoSearch={true}
-  debounceTime={300}
-  on:search={handleSearch}
-/>
+<SearchBar placeholder="Search ..." autoSearch={true} debounceTime={300} on:search={handleSearch} />

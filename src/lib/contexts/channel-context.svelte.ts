@@ -5,16 +5,20 @@ import { AppUiMessage } from '@/types/enums';
 import {
   CachePolicy,
   Channel,
+  ChannelListItem,
   ChannelMessage,
   SortDirection,
   User,
+  UserListItem,
   type QueryOptions,
 } from '@baragaun/bg-node-client';
 
 export class ChannelContext {
+  // users: UserListItem[] = [];
+  public users = $state<UserListItem[]>([]);
   private client = client;
 
-  async findMyChannels(): Promise<Channel[] | string | undefined> {
+  async findMyChannels(): Promise<ChannelListItem[] | string | undefined> {
     if (!this.client.isInitialized) {
       console.error('ConversationContext.findMyChannels: not initialized.');
       return translate(AppUiMessage.systemError);
@@ -24,20 +28,21 @@ export class ChannelContext {
       const input = {
         filter: {},
         match: {},
-        options: { cachePolicy: CachePolicy.network },
-        queryOptions: {},
+        queryOptions: { cachePolicy: CachePolicy.network },
+        options: {},
       };
       const response = await this.client.operations.channel.findMyChannels(
-        null,
-        null,
-        null,
-        input.queryOptions,
+        2,
+        true,
         input.options,
+        input.queryOptions,
       );
       if (!response || response.error || !response.objects) {
         console.error('FindMyChannels: received error.', { response });
         return response.error || translate(AppUiMessage.systemError);
       }
+
+      console.log('FindMyChannels: response:', { response });
 
       myChannels.set(response.objects);
 
@@ -58,7 +63,7 @@ export class ChannelContext {
     match = {},
     options = { cachePolicy: CachePolicy.network },
     queryOptions = {},
-  ): Promise<Channel[] | string | undefined> {
+  ): Promise<ChannelListItem[] | string | undefined> {
     if (!this.client.isInitialized) {
       console.error('ConversationContext.findChannels: not initialized.');
       return translate(AppUiMessage.systemError);
@@ -87,9 +92,7 @@ export class ChannelContext {
     }
   }
 
-   async findChannelById(
-    channelId: string,
-  ): Promise<Channel | string | null | undefined> {
+  async findChannelById(channelId: string): Promise<ChannelListItem | string | null | undefined> {
     if (!this.client.isInitialized) {
       console.error('ConversationContext.findChannelById: not initialized.');
       return translate(AppUiMessage.systemError);
@@ -98,7 +101,7 @@ export class ChannelContext {
       isChannelLoading.set(true);
       const response = await this.client.operations.channel.findChannelById(
         channelId,
-        {includeMessages: true , includeParticipants: true },
+        { includeMessages: true, includeParticipants: true },
         { cachePolicy: CachePolicy.network },
       );
       if (!response || response.error) {
@@ -192,7 +195,11 @@ export class ChannelContext {
     }
   }
 
-  async findChannelMessages(channelId: string, skip = 0, limit = 10): Promise<ChannelMessage[] | string | undefined> {
+  async findChannelMessages(
+    channelId: string,
+    skip = 0,
+    limit = 10,
+  ): Promise<ChannelMessage[] | string | undefined> {
     if (!this.client.isInitialized) {
       console.error('ConversationContext.findChannelMessages: not initialized.');
       return translate(AppUiMessage.systemError);
@@ -203,8 +210,8 @@ export class ChannelContext {
         {},
         { channelId },
         undefined,
-        {skip, limit, sort: [{field: 'createdAt', direction: SortDirection.desc}, ] },
-        { cachePolicy: CachePolicy. network },
+        { skip, limit, sort: [{ field: 'createdAt', direction: SortDirection.desc }] },
+        { cachePolicy: CachePolicy.network },
       );
 
       if (!response || response.error) {
@@ -326,30 +333,36 @@ export class ChannelContext {
     }
   }
 
-async findUsers(): Promise<User[] | string | null | undefined> {
-  if (!this.client.isInitialized) {
-    console.error('ConversationContext.findUsers: not initialized.');
-    return translate(AppUiMessage.systemError);
-  }
-  try {
-    isChannelLoading.set(true);
-    const response = await this.client.operations.user.findUsers(undefined, undefined, undefined, { }, { cachePolicy: CachePolicy.network });
-    if (!response || response.error) {
-      console.error('findUsers: received error.', { response });
-      return response.error || translate(AppUiMessage.systemError);
+  async findUsers(searchText: string = ''): Promise<UserListItem[] | string | null | undefined> {
+    if (!this.client.isInitialized) {
+      console.error('ConversationContext.findUsers: not initialized.');
+      return translate(AppUiMessage.systemError);
     }
-    return response.objects;
-  } catch (error) {
-    console.error('findUsers: error', {
-      error: (error as Error).message,
-      stack: (error as Error).stack,
-    });
-    return translate(AppUiMessage.systemError);
-  } finally {
-    isChannelLoading.set(false);
+    try {
+      isChannelLoading.set(true);
+      const response = await this.client.operations.user.findUsers(
+        { searchText },
+        {},
+        {},
+        {},
+        { cachePolicy: CachePolicy.network },
+      );
+      if (!response || response.error || !response.objects) {
+        console.error('findUsers: received error.', { response });
+        return response.error || translate(AppUiMessage.systemError);
+      }
+      this.users = response.objects;
+      return response.objects;
+    } catch (error) {
+      console.error('findUsers: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return translate(AppUiMessage.systemError);
+    } finally {
+      isChannelLoading.set(false);
+    }
   }
-}
-
 }
 
 // Create a singleton instance

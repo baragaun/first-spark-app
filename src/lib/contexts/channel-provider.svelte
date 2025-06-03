@@ -7,8 +7,8 @@
   setContext('channelContext', channelContext);
 
   onMount(() => {
-    if(myUserContext.isSignedIn) {
-    channelContext.findMyChannels();
+    if (myUserContext.isSignedIn) {
+      channelContext.findMyChannels();
     }
   });
 
