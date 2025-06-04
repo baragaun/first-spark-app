@@ -5,7 +5,7 @@
   import MessageList from '../components/message-list.svelte';
   import MessageInput from '../components/message-input.svelte';
   import { ChannelListItem, ChannelMessage } from '@baragaun/bg-node-client';
-  import { ArrowDown, X } from 'lucide-svelte';
+  import { X } from 'lucide-svelte';
   import Button from '@/components/ui/button/button.svelte';
   import { selectedChannel } from '@/stores/channel-store';
   import { channelContext } from '@/contexts/channel-context.svelte';
