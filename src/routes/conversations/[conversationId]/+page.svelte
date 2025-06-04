@@ -5,7 +5,7 @@
   import MessageList from '../components/message-list.svelte';
   import MessageInput from '../components/message-input.svelte';
   import { ChannelListItem, ChannelMessage } from '@baragaun/bg-node-client';
-  import { X } from 'lucide-svelte';
+  import { ArrowDown, X } from 'lucide-svelte';
   import Button from '@/components/ui/button/button.svelte';
   import { selectedChannel } from '@/stores/channel-store';
   import { channelContext } from '@/contexts/channel-context.svelte';
@@ -38,8 +38,8 @@
       const recipientUser = channel.participants?.find(
         (participant) => participant.userId !== currentUserId,
       );
-
-      if (!recipientUser || typeof recipientUser === 'string') return null;
+      console.log('recipientUser:', recipientUser);
+      if (!recipientUser) return null;
 
       const receipientName = recipientUser.userInfo?.firstName
         ? `${recipientUser.userInfo?.firstName} ${recipientUser.userInfo?.lastName}`
@@ -71,6 +71,7 @@
       initializeChannel();
     } else {
       const response = await channelContext.findChannelById(channelId);
+      console.log('FindChannelById: response:', response);
       if (response && typeof response !== 'string') {
         selectedChannel.set(response);
         setContactInfo(response);

@@ -3,10 +3,15 @@ import translate from '@/helpers/language/translate';
 import { client } from '@/services/bg-node-client';
 import { AppUiMessage } from '@/types/enums';
 import {
+  AppEnvironment,
   BgListenerTopic,
+  BgNodeClient,
+  ClientInfoStoreType,
+  HttpHeaderName,
   MyUserChanges,
   NotificationMethod,
   UserIdentType,
+  type BgNodeClientConfig,
   type MultiStepActionProgressResult,
   type MyUser,
   type MyUserListener,
@@ -21,31 +26,23 @@ let isLoading = $state(false);
 let myUser = $state<MyUser | undefined>(undefined);
 
 export class MyUserContext {
-  private client = client;
+  private client: BgNodeClient = client;
 
-  public async initialize(): Promise<void> {
-    if (this.client.isInitialized || this._isInitializing) {
-      console.warn('MyUserContext.initialize: already initialized.');
-      return;
-    }
-    this._isInitializing = true;
-
-    const config: BgNodeClientConfig = {
-      enableGroupChannels: false,
-      inBrowser: true,
-      fsdata: {
-        url: env.PUBLIC_FSDATA_URL || 'http://localhost:8092/fsdata/api/graphql',
-        headers: {
-          [HttpHeaderName.consumer]: 'first-spark-app',
-        },
+   public async initialize(): Promise<void> {
+    isLoading = true;
+    const listener: MyUserListener = {
+      id: 'MyUserContext',
+      topic: BgListenerTopic.myUser,
+      onSignedIn: () => {
+        isSignedIn = true;
       },
-      clientInfoStoreType: ClientInfoStoreType.db,
-      logLevel: env.PUBLIC_LOG_LEVEL as 'debug' | 'info' | 'warn' | 'error' | 'silent' | undefined,
+      onSignedOut: () => {
+        isSignedIn = false;
+      },
+      onMyUserUpdated: (updatedMyUser) => {
+        myUser = updatedMyUser;
+      },
     };
-
-    if (env.PUBLIC_APP_ENVIRONMENT) {
-      config.appEnvironment = env.PUBLIC_APP_ENVIRONMENT as AppEnvironment;
-    }
 
     try {
       this.client.addListener(listener);
@@ -55,12 +52,6 @@ export class MyUserContext {
     } finally {
       isLoading = false;
     }
-
-    // if (env.PUBLIC_MOCK_DATA === 'true') {
-    //    config.enableMockMode = true;
-    // }
-
-    this._isInitializing = false;
   }
 
   /**

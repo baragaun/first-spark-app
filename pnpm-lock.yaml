@@ -11,6 +11,9 @@ importers:
       '@baragaun/bg-node-client':
         specifier: link:../bg-node-client
         version: link:../bg-node-client
+      '@svelte-put/cloudflare-turnstile':
+        specifier: ^1.2.0
+        version: 1.2.0(svelte@5.30.1)
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
@@ -1173,6 +1176,11 @@ packages:
     resolution: {integrity: sha512-6VjZg8HJ2Op7+KV7ihJpYrDnFtd9D1jrQnUS8LckcpuBXrIEbaut5+34ObY8ssQnSqkk2GwIZBBBQYQBCVvkOw==}
     peerDependencies:
       storybook: ^8.2.0 || ^8.3.0-0 || ^8.4.0-0 || ^8.5.0-0 || ^8.6.0-0
+
+  '@svelte-put/cloudflare-turnstile@1.2.0':
+    resolution: {integrity: sha512-bm5zgKCBMbTrQCxX3u3rLiWaNFa6/B6juelE8Y8MriyaztxPg+ph5yS8WADMugEn3KmjN43QgcgsyHzPd2eCYg==}
+    peerDependencies:
+      svelte: ^5.1.0
 
   '@sveltejs/acorn-typescript@1.0.5':
     resolution: {integrity: sha512-IwQk4yfwLdibDlrXVE04jTZYlLnwsTT2PIOQQGNLWfjavGifnk1JD1LcZjZaBTRcxZu2FfPfNLOE04DSu9lqtQ==}
@@ -5151,6 +5159,10 @@ snapshots:
   '@storybook/theming@8.6.12(storybook@8.6.12(prettier@3.5.3))':
     dependencies:
       storybook: 8.6.12(prettier@3.5.3)
+
+  '@svelte-put/cloudflare-turnstile@1.2.0(svelte@5.30.1)':
+    dependencies:
+      svelte: 5.30.1
 
   '@sveltejs/acorn-typescript@1.0.5(acorn@8.14.1)':
     dependencies:

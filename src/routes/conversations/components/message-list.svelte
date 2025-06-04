@@ -241,6 +241,14 @@
 </script>
 
 <div class="h-full overflow-y-auto p-4" bind:this={messagesContainer} onscroll={handleScroll}>
+  {#if showScrollButton}
+    <button
+      class="fixed right-6 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md transition-opacity hover:bg-primary/90"
+      onclick={scrollToBottom}
+    >
+      <ArrowDown class="h-5 w-5" />
+    </button>
+  {/if}
   <div class="space-y-4">
     {#each groupMessagesByDate(messages) as group}
       <div class="relative my-6 flex items-center">
@@ -410,15 +418,6 @@
       {/each}
     {/each}
   </div>
-
-  {#if showScrollButton}
-    <button
-      class="fixed bottom-20 right-6 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md transition-opacity hover:bg-primary/90"
-      onclick={scrollToBottom}
-    >
-      <ArrowDown class="h-5 w-5" />
-    </button>
-  {/if}
 </div>
 
 <style>
