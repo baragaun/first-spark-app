@@ -38,7 +38,7 @@
   </div>
 
   <div class="user-grid">
-    {#each channelContext.users as user}
+    {#each channelContext.users.filter(user => user.userHandle?.toLowerCase().includes(searchQuery.toLowerCase())) as user}
       <Card>
         <CardHeader class="flex items-center gap-4">
           <img

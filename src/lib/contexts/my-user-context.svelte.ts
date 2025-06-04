@@ -3,15 +3,11 @@ import translate from '@/helpers/language/translate';
 import { client } from '@/services/bg-node-client';
 import { AppUiMessage } from '@/types/enums';
 import {
-  AppEnvironment,
   BgListenerTopic,
   BgNodeClient,
-  ClientInfoStoreType,
-  HttpHeaderName,
   MyUserChanges,
   NotificationMethod,
   UserIdentType,
-  type BgNodeClientConfig,
   type MultiStepActionProgressResult,
   type MyUser,
   type MyUserListener,
@@ -28,7 +24,7 @@ let myUser = $state<MyUser | undefined>(undefined);
 export class MyUserContext {
   private client: BgNodeClient = client;
 
-   public async initialize(): Promise<void> {
+  public async initialize(): Promise<void> {
     isLoading = true;
     const listener: MyUserListener = {
       id: 'MyUserContext',

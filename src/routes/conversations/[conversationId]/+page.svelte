@@ -38,7 +38,7 @@
       const recipientUser = channel.participants?.find(
         (participant) => participant.userId !== currentUserId,
       );
-      console.log('recipientUser:', recipientUser);
+
       if (!recipientUser) return null;
 
       const receipientName = recipientUser.userInfo?.firstName
@@ -125,15 +125,11 @@
 
   const handleDeleteMessage = async (id: string) => {
     const response = await channelContext.deleteChannelMessage(id);
-    console.log('DeleteChannelMessage: response:', response);
-    if (!response) {
+    if (!response || typeof response === 'string') {
       console.error('DeleteChannelMessage: received error.', { response });
       return;
     }
-
     messages = messages.filter((message) => message.id !== id);
-
-    // Here you would also delete the message from your backend
   };
 </script>
 

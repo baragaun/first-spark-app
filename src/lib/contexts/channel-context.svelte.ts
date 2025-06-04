@@ -31,8 +31,9 @@ export class ChannelContext {
         queryOptions: { cachePolicy: CachePolicy.network },
         options: {},
       };
+      const participantLimit = 2;
       const response = await this.client.operations.channel.findMyChannels(
-        2,
+        participantLimit,
         true,
         input.options,
         input.queryOptions,

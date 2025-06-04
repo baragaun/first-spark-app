@@ -33,7 +33,6 @@
     // This would open a dialog to select a contact
     // goto('/contacts');
   };
-
 </script>
 
 <div class="container mx-auto max-w-4xl py-6">

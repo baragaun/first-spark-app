@@ -21,25 +21,19 @@
       return null;
     }
 
-    // Find the participant that is not the current user
-    const recipientParticipant = channel.userIds.find((userId) => userId !== currentUserId);
+    const recipientUser = channel.participants?.find(
+      (participant) => participant.userId !== currentUserId,
+    );
 
-    if (!recipientParticipant) {
+    if (!recipientUser) {
       return null;
     }
 
-    // Find the user details
-    const recipientUser = await channelContext.findUserInfoById(recipientParticipant);
+    const receipientName = recipientUser.userInfo?.firstName
+      ? `${recipientUser.userInfo?.firstName} ${recipientUser.userInfo?.lastName}`
+      : recipientUser.userInfo?.userHandle;
 
-    if (!recipientUser || typeof recipientUser === 'string') {
-      return null;
-    }
-
-    if (recipientUser.firstName) {
-      return `${recipientUser.firstName || ''} ${recipientUser.lastName || ''}`;
-    }
-
-    return `${recipientUser.userHandle || ''}`;
+    return receipientName;
   };
 
   const handleDeleteChannel = async (channelId: string) => {

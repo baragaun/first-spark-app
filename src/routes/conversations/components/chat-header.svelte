@@ -20,7 +20,7 @@
     </Button>
 
     <Avatar.Root class="h-10 w-10">
-      <Avatar.Fallback>{channelDetails?.name.charAt(0)}</Avatar.Fallback>
+      <Avatar.Fallback>{channelDetails?.name?.charAt(0) || '?'}</Avatar.Fallback>
     </Avatar.Root>
 
     <div>

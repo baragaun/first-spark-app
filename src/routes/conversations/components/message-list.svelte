@@ -187,7 +187,8 @@
     if (isFetchingMoreMessages && !isAllMessagesFetched) return; // Prevent multiple API calls
     isFetchingMoreMessages = true;
 
-    // Capture the current scroll position
+    // Capture the current scroll height and scroll position
+    const oldScrollHeight = messagesContainer?.scrollHeight || 0;
     const previousScrollTop = messagesContainer?.scrollTop || 0;
 
     const response = await channelContext.findChannelMessages(
@@ -204,12 +205,15 @@
     if (response.length === 0) {
       isAllMessagesFetched = true;
     } else {
+      // Prepend new messages to the existing list
       messages = [...response.reverse(), ...messages];
+
+      // Calculate the difference in scroll height and adjust scrollTop
       const newScrollHeight = messagesContainer?.scrollHeight || 0;
-      const addedHeight = newScrollHeight - previousScrollTop;
-      messagesContainer?.scrollTo({ top: addedHeight, behavior: 'auto' });
+      const scrollHeightDifference = newScrollHeight - oldScrollHeight;
+      messagesContainer.scrollTop = scrollHeightDifference + previousScrollTop;
     }
-    // Append new messages to the existing list
+
     isFetchingMoreMessages = false;
   };
 
