@@ -1,53 +1,74 @@
 <script lang="ts">
   import { m } from '$lib/paraglide/messages.js';
-  import { page } from '$app/state';
+  import { page } from '$app/stores';
   import { onMount } from 'svelte';
-  import { writable } from 'svelte/store';
   import { Button } from '$lib/components/ui/button';
   import * as Card from '$lib/components/ui/card';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
   import type { GiftCardProduct, Vendor } from '@baragaun/bg-node-client';
   import placeholderImage from '../../../assets/images/placeholder.png';
   import { ArrowLeft } from 'lucide-svelte';
+  import { giftCardProductsStore, vendorsStore, dataLoaded } from '$lib/stores/marketplace-store';
+  import { derived } from 'svelte/store';
 
-  const giftCardId = $derived(page.params.id);
+  const giftCardId = $page.params.id;
   const giftCardImageDomain = 'https://d27wpajtnol6ce.cloudfront.net';
   
-  const giftCardProduct = writable<GiftCardProduct | null>(null);
-  const vendor = writable<Vendor | null>(null);
+  // Create derived stores for the specific gift card and vendor
+  const giftCardProduct = derived(
+    [giftCardProductsStore, dataLoaded],
+    ([$products, $loaded]) => {
+      if (!$loaded) return null;
+      return $products.find(p => p.id === giftCardId) || null;
+    }
+  );
+  
+  const vendor = derived(
+    [vendorsStore, giftCardProduct, dataLoaded],
+    ([$vendors, $product, $loaded]) => {
+      if (!$loaded || !$product) return null;
+      return $vendors.find(v => v.id === $product.vendorId) || null;
+    }
+  );
+  
   let isLoading = $state(true);
   let error = $state<string | null>(null);
 
   onMount(async () => {
     try {
       isLoading = true;
-      // Fetch gift card products
+      
+      // If data is already loaded in the stores, use it
+      if ($dataLoaded) {
+        if (!$giftCardProduct) {
+          error = "Gift card not found";
+        }
+        isLoading = false;
+        return;
+      }
+      
+      // Otherwise, fetch the data
       const giftCardsResponse = await marketplaceContext.findGiftCardProducts();
       if (typeof giftCardsResponse === 'string') {
         error = giftCardsResponse;
         return;
       }
+      giftCardProductsStore.set(giftCardsResponse as GiftCardProduct[]);
       
-      // Find the specific gift card by ID
       const product = giftCardsResponse?.find(p => p.id === giftCardId);
       if (!product) {
         error = "Gift card not found";
         return;
       }
-      giftCardProduct.set(product);
       
-      // Fetch vendors
       const vendorsResponse = await marketplaceContext.findVendors();
       if (typeof vendorsResponse === 'string') {
         error = vendorsResponse;
         return;
       }
+      vendorsStore.set(vendorsResponse as Vendor[]);
       
-      // Find the vendor for this gift card
-      const productVendor = vendorsResponse?.find(v => v.id === product.vendorId);
-      if (productVendor) {
-        vendor.set(productVendor);
-      }
+      dataLoaded.set(true);
     } catch (err) {
       error = "Failed to load gift card details";
       console.error(err);
@@ -147,10 +168,10 @@
                 </div>
               {/if}
               
-              {#if $giftCardProduct.terms}
+              {#if $giftCardProduct.termsEn}
                 <div>
                   <h3 class="font-medium">Terms & Conditions</h3>
-                  <p class="text-muted-foreground">{$giftCardProduct.terms}</p>
+                  <p class="text-muted-foreground">{$giftCardProduct.termsEn}</p>
                 </div>
               {/if}
             </div>
