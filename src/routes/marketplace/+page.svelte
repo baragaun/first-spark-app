@@ -7,50 +7,48 @@
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
   import { onMount } from 'svelte';
-  import { writable } from 'svelte/store';
   import type { GiftCardProduct, Vendor, ProductCategory } from '@baragaun/bg-node-client';
   import placeholderImage from '../../assets/images/placeholder.png';
+  import { goto } from '$app/navigation';
+  import { giftCardProductsStore, vendorsStore, productCategoriesStore, dataLoaded } from '$lib/stores/marketplace-store';
   
   let searchQuery = '';
   let selectedCategory: ProductCategory | 'All' = 'All';
   
   const giftCardImageDomain = 'https://d27wpajtnol6ce.cloudfront.net';
-  const giftCardProducts = writable<GiftCardProduct[]>([]);
-  const vendorsList = writable<Vendor[]>([]);
-  const productCategoriesList = writable<ProductCategory[]>([]);
   
-  $: filteredGiftCardProducts = $giftCardProducts.filter(giftCardProduct => {
+  function navigateToGiftCardDetail(giftCardId: string) {
+    goto(`/marketplace/${giftCardId}`);
+  }
+
+  $: filteredGiftCardProducts = $giftCardProductsStore.filter(giftCardProduct => {
     // Filter by search query (vendor name)
-    const matchesVendor = $vendorsList.some(vendor => 
+    const matchesVendor = $vendorsStore.some(vendor => 
       vendor.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
       vendor.id === giftCardProduct.vendorId
     );
 
-    //console.log('jahanvi selectedCategory =', selectedCategory);
-    //console.log('jahanvi giftCardProduct.categories =', giftCardProduct.categories);
-    
     // Filter by category
     const matchesCategory = selectedCategory === 'All' || 
       giftCardProduct.categories?.includes(
-        //$productCategoriesList.find(cat => cat.name === selectedCategory)?.id || ''
-        selectedCategory.name,
+        selectedCategory.id,
       );
     
     return matchesVendor && matchesCategory;
   });
 
   function getVendorForGiftCard(giftCardProduct: GiftCardProduct): Vendor | undefined {
-    return $vendorsList.find(vendor => vendor.id === giftCardProduct.vendorId);
+    return $vendorsStore.find(vendor => vendor.id === giftCardProduct.vendorId);
   }
 
   onMount(async () => {
     const giftCardsresponse = await marketplaceContext.findGiftCardProducts();
-    giftCardProducts.set(giftCardsresponse as GiftCardProduct[]);
+    giftCardProductsStore.set(giftCardsresponse as GiftCardProduct[]);
     const vendorsResponse = await marketplaceContext.findVendors();
-    vendorsList.set(vendorsResponse as Vendor[]);
+    vendorsStore.set(vendorsResponse as Vendor[]);
     const productCategoriesResponse = await marketplaceContext.findProductCategories();
-    productCategoriesList.set(productCategoriesResponse as ProductCategory[]);
-    console.log('productCategoriesList', $vendorsList);
+    productCategoriesStore.set(productCategoriesResponse as ProductCategory[]);
+    dataLoaded.set(true);
   });
 </script>
 
@@ -89,7 +87,7 @@
           {/if}
         </DropdownMenu.Item>
         
-        {#each $productCategoriesList as category}
+        {#each $productCategoriesStore as category}
           <DropdownMenu.Item 
             onclick={() => selectedCategory = category}
             class="cursor-pointer"
@@ -108,7 +106,13 @@
     {#each filteredGiftCardProducts as giftCardProduct (giftCardProduct.id)}
       {@const vendor = getVendorForGiftCard(giftCardProduct)}
       {#if vendor}
-        <div class="flex flex-col items-center">
+        <button 
+          type="button"
+          class="flex flex-col items-center text-left bg-transparent border-0 p-0 hover:opacity-90 transition-opacity" 
+          onclick={() => navigateToGiftCardDetail(giftCardProduct.id)}
+          onkeydown={(e) => e.key === 'Enter' && navigateToGiftCardDetail(giftCardProduct.id)}
+          aria-label={`View ${vendor.name} gift card details`}
+        >
           <div class="rounded-lg border bg-card shadow-sm overflow-hidden mb-2 w-full aspect-[4/3]">
             <img 
               src={giftCardImageDomain + '/giftcards/' + giftCardProduct.imageSourceFront} 
@@ -128,7 +132,7 @@
             </div>
             <span class="text-sm font-medium">{vendor.name}</span>
           </div>
-        </div>
+        </button>
       {/if}
     {/each}
   </div>
