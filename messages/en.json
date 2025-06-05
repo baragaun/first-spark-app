@@ -1,0 +1,253 @@
+{
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "welcome": "Welcome to First Spark",
+  "welcome_subtitle": "Connect, inspire, thrive!",
+  "join_first_spark": "Join First Spark",
+  "get_started": "Get started",
+  "sidebar": {
+    "logo": {
+      "alt": "App logo",
+      "title": "First Spark"
+    },
+    "menu": {
+      "home": "Home",
+      "inbox": "Inbox",
+      "conversations": "Conversations",
+      "contacts": "Contacts",
+      "settings": "Settings"
+    }
+  },
+  "nav": {
+    "menu": "Menu",
+    "open_menu": "Open menu",
+    "theme": {
+      "light_mode": "Light mode",
+      "dark_mode": "Dark mode"
+    },
+    "auth": {
+      "sign_in": "Sign in",
+      "sign_up": "Sign up",
+      "sign_out": "Sign out"
+    }
+  },
+  "footer": {
+    "copyright": "© {year} First Spark. All rights reserved.",
+    "navigation": {
+      "faq": "FAQ",
+      "privacy_policy": "Privacy policy",
+      "terms_of_service": "Terms of service"
+    }
+  },
+  "user_nav": {
+    "profile": "Profile",
+    "inbox": "Inbox",
+    "settings": "Settings",
+    "logout": "Log out"
+  },
+  "language_button": {
+    "tooltip": "Language"
+  },
+  "light_switch": {
+    "tooltip": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "signin": {
+    "title": "Sign in",
+    "description": "Enter your email address below to sign in to your account",
+    "sign_with_token_description": "Enter the verification code sent to {identifier}",
+    "sign_with_password_description": "Enter your password to sign in as {identifier}",
+    "have_account": "New to First Spark?",
+    "forgot_password": "Forgot your password?",
+    "username_or_email_placeholder": "Username or Email",
+    "identifier_label": "Email or Username",
+    "password_label": "Password",
+    "email_placeholder": "Email",
+    "identifier_placeholder": "Enter your email or username",
+    "password_placeholder": "Enter your password",
+    "buttons": {
+      "signin": "Sign in",
+      "signin_with_token": "Sign in with token",
+      "signin_with_password": "Sign in with password",
+      "forgot_password": "Forgot your password?",
+      "back": "← Back to log in",
+      "verify": "Verify",
+      "verifying": "Verifying...",
+      "Signing_in": "Signing in...",
+      "signup": "Sign up"
+    },
+    "error": {
+      "required": "Username or email is required",
+      "invalid_credentials": "Invalid username, email or password. Please try again."
+    }
+  },
+  "signup": {
+    "title": "Sign up",
+    "email_description": "Provide an email address to create your First Spark account.",
+    "verification_description": "Enter the verification code we sent to {email}.",
+    "create_credentials_description": "Choose a username and a password for your account.",
+    "email_title": "Email address",
+    "username": "Username",
+    "password": "Password",
+    "email_placeholder": "e.g. 'student@example.com'",
+    "username_description": "Usernames are unique handles. We'll verify that yours is not already taken.",
+    "username_placeholder": "e.g. 'giraffe08'",
+    "password_placeholder": "Enter your password",
+    "errors": {
+      "email_unavailable": "This email is currently unavailable for use.",
+      "username_unavailable": "This username is currently unavailable for use."
+    },
+    "buttons": {
+      "sign_up": "Sign up",
+      "sign_in": "Sign in",
+      "have_account": "Do you already have an account?",
+      "verify": "Verify",
+      "sending": "Sending...",
+      "verifying": "Verifying...",
+      "create_account": "Create account",
+      "creating_account": "Creating account..."
+    }
+  },
+  "reset_password": {
+    "title": "Reset your password",
+    "description": "Provide your username or email to get a verification code",
+    "check_inbox": {
+      "title": "Check your inbox",
+      "description": "We've sent a verification code to {email}",
+      "code_expiration": "Note: The verification code will expire in 10 minutes.",
+      "didnt_get_email": "Didn't get an email?"
+    },
+    "form": {
+      "identifier_label": "Email or username",
+      "identifier_placeholder": "Enter your email or username",
+      "errors": {
+        "default_error": "Unable to process your request. Please try again.",
+        "valid_ident_required": "A valid username or email is required",
+        "failed_to_send": "Failed to send verification code. Please try again.",
+        "failed_to_resend": "Failed to resend verification code. Please try again.",
+        "failed_to_verify": "Failed to verify code. Please try again."
+      }
+    },
+    "new_password_form": {
+      "description": "Enter a new password and the verification code we sent to test to update your password",
+      "label": "New password",
+      "placeholder": "Enter a new password",
+      "code_label": "Verification code",
+      "otp_description": "Enter a new password and the verification code we sent to {identifier} to update your password"
+    },
+    "buttons": {
+      "send_email": "Send me an email",
+      "sending_email": "Sending email...",
+      "resend_email": "Resend email",
+      "resend_timer": "Resend in {time}",
+      "back_to_login": "Back to log in",
+      "need_help": "Need help?",
+      "have_account": "Don't have an account?",
+      "update_password": "Update my password",
+      "processing": "Processing...",
+      "signup": "Sign up",
+      "start_over": "Start over"
+    }
+  },
+  "verify_token": {
+    "verification_code": "Verification code",
+    "resend": "Resend code",
+    "resend_in": "Resend in",
+    "error": {
+      "dev_mode_error": "Notification failed, but you're in development.",
+      "min_length": "Your one-time password must be at least 6 characters",
+      "invalid": "We could not verify the token you entered. Please try again."
+    }
+  },
+  "connection": {
+    "offline": "You're offline",
+    "online": "Powered by First Spark",
+    "offline.description": "You are not currently connected.",
+    "reconnected": "Reconnected",
+    "reconnected.description": "Reconnected to First Spark!"
+  },
+  "setting": {
+    "setting_label": "Settings",
+    "account": "Account",
+    "notification": "Notification",
+    "username": {
+      "label": "My username",
+      "change_username": "Change your username",
+      "change_username_description": "You can change your username at anytime. Your previous username becomes immediately available for use.",
+      "current_username": "Current username",
+      "new_username": "New username",
+      "suggest_new": "Suggest new",
+      "generating": "Generating...",
+      "username_placeholder": "e.g. 'giraffe08'",
+      "error": {
+        "min_length": "Username must be at least 3 characters",
+        "max_length": "Username must contain at most 30 character(s)",
+        "unavailable": "This username is currently unavailable for use.",
+        "in_use": "You already use this username. Please choose a different one.",
+        "alphanumeric": "Username must contain only letters and numbers"
+      }
+    },
+    "email": {
+      "label": "My email",
+      "change_email": "Change your registered email",
+      "change_email_description": "Enter and different email and a verification code to update your account.",
+      "current_email": "Current email",
+      "new_email": "New email",
+      "email_placeholder": "e.g. anne@example.com",
+      "error": {
+        "invalid": "Please enter a valid email address.",
+        "unavailable": "This email is currently unavailable for use.",
+        "existing": "Please provide a different email address."
+      }
+    },
+    "password": {
+      "label": "My password",
+      "change_password": "Change your password",
+      "change_password_description": "Your password should be unique and updated regularly.",
+      "current_password": "Current password",
+      "new_password": "New password",
+      "current_password_placeholder": "Enter your current password",
+      "new_password_placeholder": "Enter your new password",
+      "error": {
+        "required": "Current password is required",
+        "min_length": "Your password must be at least 8 characters",
+        "incorrect": "Incorrect password. Please verify and try again."
+      }
+    },
+    "danger_zone": "Danger zone",
+    "delete_account": {
+      "label": "Delete my account",
+      "sublabel": "Permanently delete your account and any associated data",
+      "your_account": "Delete your account",
+      "delete_account_description": "We're sorry to see you go! Please provide any feedback you may have before departing so that we can better improve.",
+      "alert_title": "Are you sure you want to proceed?",
+      "alert_subtitle": "Your profile and all of your data will be permanently deleted. This action cannot be recovered from.",
+      "reason": "Reason",
+      "reason_placeholder": "Why are you deleting your account?",
+      "addition_details": "Additional details",
+      "addition_details_placeholder": "Do you have any additional feedback?",
+      "confirm_email": "Confirm your email",
+      "error": {
+        "invalid": "Please enter a valid email address.",
+        "not_found": "The email entered doesn't match your account. Please check and try again."
+      }
+    },
+    "buttons": {
+      "update": "Update",
+      "updating": "Updating...",
+      "delete_account": "Delete my account",
+      "cleaning": "Cleaning up...",
+      "goodbuy": "Goodbye!",
+      "cancel": "Cancel",
+      "verify": "Verify",
+      "verifying": "Verifying...",
+      "change_email": "Change email"
+    }
+  },
+  "form_button_default": {
+    "buttonText": "Submit",
+    "successText": "Success!",
+    "loadingText": "Processing..."
+  }
+}

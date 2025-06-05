@@ -1,0 +1,252 @@
+{
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "welcome": "Willkommen bei First Spark",
+  "welcome_subtitle": "Verbinden, inspirieren, wachsen!",
+  "join_first_spark": "Mach mit bei First Spark",
+  "get_started": "Jetzt starten",
+  "sidebar": {
+    "logo": {
+      "alt": "App-Logo",
+      "title": "First Spark"
+    },
+    "menu": {
+      "home": "Startseite",
+      "inbox": "Posteingang",
+      "conversations": "Gespräche",
+      "contacts": "Kontakte",
+      "settings": "Einstellungen"
+    }
+  },
+  "nav": {
+    "menu": "Menü",
+    "open_menu": "Menü öffnen",
+    "theme": {
+      "light_mode": "Heller Modus",
+      "dark_mode": "Dunkler Modus"
+    },
+    "auth": {
+      "sign_in": "Anmelden",
+      "sign_up": "Registrieren",
+      "sign_out": "Abmelden"
+    }
+  },
+  "footer": {
+    "copyright": "© {year} First Spark. Alle Rechte vorbehalten.",
+    "navigation": {
+      "faq": "FAQ",
+      "privacy_policy": "Datenschutzerklärung",
+      "terms_of_service": "Nutzungsbedingungen"
+    }
+  },
+  "user_nav": {
+    "profile": "Profil",
+    "inbox": "Posteingang",
+    "settings": "Einstellungen",
+    "logout": "Abmelden"
+  },
+  "language_button": {
+    "tooltip": "Sprache"
+  },
+  "light_switch": {
+    "tooltip": "Thema",
+    "light": "Hell",
+    "dark": "Dunkel",
+    "system": "System"
+  },
+  "signin": {
+    "title": "Anmelden",
+    "description": "Geben Sie unten Ihre E-Mail-Adresse ein, um sich bei Ihrem Konto anzumelden",
+    "sign_with_token_description": "Geben Sie den Bestätigungscode ein, der an {identifier} gesendet wurde",
+    "sign_with_password_description": "Geben Sie Ihr Passwort ein, um sich als {identifier} anzumelden",
+    "have_account": "Neu bei First Spark?",
+    "forgot_password": "Passwort vergessen?",
+    "username_or_email_placeholder": "Benutzername oder E-Mail",
+    "identifier_label": "E-Mail oder Benutzername",
+    "password_label": "Passwort",
+    "email_placeholder": "E-Mail",
+    "identifier_placeholder": "Geben Sie Ihre E-Mail oder Ihren Benutzernamen ein",
+    "password_placeholder": "Geben Sie Ihr Passwort ein",
+    "buttons": {
+      "signin": "Anmelden",
+      "signin_with_token": "Mit Token anmelden",
+      "signin_with_password": "Mit Passwort anmelden",
+      "forgot_password": "Passwort vergessen?",
+      "back": "← Zurück zur Anmeldung",
+      "verify": "Bestätigen",
+      "verifying": "Überprüfung läuft...",
+      "Signing_in": "Anmeldung läuft...",
+      "signup": "Registrieren"
+    },
+    "error": {
+      "required": "Benutzername oder E-Mail ist erforderlich",
+      "invalid_credentials": "Ungültiger Benutzername, E-Mail oder Passwort. Bitte versuchen Sie es erneut."
+    }
+  },
+  "signup": {
+    "title": "Registrieren",
+    "email_description": "Geben Sie eine E-Mail-Adresse ein, um Ihr First Spark-Konto zu erstellen.",
+    "verification_description": "Geben Sie den Bestätigungscode ein, den wir an {email} gesendet haben.",
+    "create_credentials_description": "Wählen Sie einen Benutzernamen und ein Passwort für Ihr Konto.",
+    "email_title": "E-Mail-Adresse",
+    "username": "Benutzername",
+    "password": "Passwort",
+    "email_placeholder": "z. B. 'student@example.com'",
+    "username_description": "Benutzernamen sind eindeutige Kennungen. Wir prüfen, ob Ihrer bereits vergeben ist.",
+    "username_placeholder": "z. B. 'giraffe08'",
+    "password_placeholder": "Geben Sie Ihr Passwort ein",
+    "errors": {
+      "email_unavailable": "Diese E-Mail-Adresse ist derzeit nicht verfügbar.",
+      "username_unavailable": "Dieser Benutzername ist derzeit nicht verfügbar."
+    },
+    "buttons": {
+      "sign_up": "Registrieren",
+      "sign_in": "Anmelden",
+      "have_account": "Haben Sie bereits ein Konto?",
+      "verify": "Verifizieren",
+      "sending": "Wird gesendet...",
+      "verifying": "Wird überprüft...",
+      "create_account": "Konto erstellen",
+      "creating_account": "Konto wird erstellt..."
+    }
+  },
+  "reset_password": {
+    "title": "Setze dein Passwort zurück",
+    "description": "Gib deinen Benutzernamen oder deine E-Mail-Adresse ein, um einen Bestätigungscode zu erhalten",
+    "check_inbox": {
+      "title": "Posteingang überprüfen",
+      "description": "Wir haben einen Bestätigungscode an {email} gesendet",
+      "code_expiration": "Hinweis: Der Bestätigungscode läuft in 10 Minuten ab.",
+      "didnt_get_email": "Keine E-Mail erhalten?"
+    },
+    "form": {
+      "identifier_label": "E-Mail oder Benutzername",
+      "identifier_placeholder": "Gib deine E-Mail oder deinen Benutzernamen ein",
+      "errors": {
+        "default_error": "Deine Anfrage konnte nicht verarbeitet werden. Bitte versuche es erneut.",
+        "valid_ident_required": "Ein gültiger Benutzername oder eine gültige E-Mail-Adresse ist erforderlich",
+        "failed_to_send": "Verifizierungscode konnte nicht gesendet werden. Bitte versuche es erneut.",
+        "failed_to_resend": "Verifizierungscode konnte nicht erneut gesendet werden. Bitte versuche es erneut.",
+        "failed_to_verify": "Verifizierung des Codes fehlgeschlagen. Bitte versuche es erneut."
+      }
+    },
+    "new_password_form": {
+      "description": "Gib ein neues Passwort und den Bestätigungscode ein, um dein Passwort zu aktualisieren",
+      "label": "Neues Passwort",
+      "placeholder": "Gib ein neues Passwort ein",
+      "otp_description": "Geben Sie ein neues Passwort und den Bestätigungscode ein, den wir an {identifier} gesendet haben, um Ihr Passwort zu aktualisieren"
+    },
+    "buttons": {
+      "send_email": "E-Mail senden",
+      "sending_email": "E-Mail wird gesendet...",
+      "resend_email": "E-Mail erneut senden",
+      "resend_timer": "Erneut senden in {time}",
+      "back_to_login": "Zurück zur Anmeldung",
+      "need_help": "Brauchst du Hilfe?",
+      "have_account": "Noch kein Konto?",
+      "update_password": "Mein Passwort aktualisieren",
+      "processing": "Wird verarbeitet...",
+      "signup": "Registrieren",
+      "start_over": "Neu beginnen"
+    }
+  },
+  "verify_token": {
+    "verification_code": "Verifizierungscode",
+    "resend": "Code erneut senden",
+    "resend_in": "Erneut senden in",
+    "error": {
+      "dev_mode_error": "Benachrichtigung fehlgeschlagen, aber Sie befinden sich im Entwicklungsmodus.",
+      "min_length": "Ihr Einmalpasswort muss mindestens 6 Zeichen lang sein",
+      "invalid": "Wir konnten den eingegebenen Token nicht verifizieren. Bitte versuchen Sie es erneut."
+    }
+  },
+  "connection": {
+    "offline": "Du bist offline",
+    "online": "Unterstützt von First Spark",
+    "offline.description": "Sie sind derzeit nicht verbunden.",
+    "reconnected": "Wieder verbunden",
+    "reconnected.description": "Wieder mit First Spark verbunden!"
+  },
+  "setting": {
+    "setting_label": "Einstellungen",
+    "account": "Konto",
+    "notification": "Benachrichtigung",
+    "username": {
+      "label": "Mein Benutzername",
+      "change_username": "Benutzernamen ändern",
+      "change_username_description": "Du kannst deinen Benutzernamen jederzeit ändern. Dein vorheriger Benutzername wird sofort wieder verfügbar.",
+      "current_username": "Aktueller Benutzername",
+      "new_username": "Neuer Benutzername",
+      "suggest_new": "Neuen Vorschlag machen",
+      "generating": "Generiere...",
+      "username_placeholder": "z. B. 'giraffe08'",
+      "error": {
+        "min_length": "Der Benutzername muss mindestens 3 Zeichen lang sein",
+        "max_length": "Der Benutzername darf höchstens 30 Zeichen enthalten.",
+        "unavailable": "Dieser Benutzername ist derzeit nicht verfügbar.",
+        "in_use": "Sie verwenden diesen Benutzernamen bereits. Bitte wählen Sie einen anderen.",
+        "alphanumeric": "Der Benutzername darf nur Buchstaben und Zahlen enthalten"
+      }
+    },
+    "email": {
+      "label": "Meine E-Mail",
+      "change_email": "Registrierte E-Mail ändern",
+      "change_email_description": "Gib eine andere E-Mail-Adresse und einen Bestätigungscode ein, um dein Konto zu aktualisieren.",
+      "current_email": "Aktuelle E-Mail",
+      "new_email": "Neue E-Mail",
+      "email_placeholder": "z.B. anne@beispiel.de",
+      "error": {
+        "invalid": "Bitte gib eine gültige E-Mail-Adresse ein.",
+        "unavailable": "Diese E-Mail ist derzeit nicht verfügbar.",
+        "existing": "Bitte geben Sie eine andere E-Mail-Adresse an."
+      }
+    },
+    "password": {
+      "label": "Mein Passwort",
+      "change_password": "Passwort ändern",
+      "change_password_description": "Dein Passwort sollte einzigartig sein und regelmäßig aktualisiert werden.",
+      "current_password": "Aktuelles Passwort",
+      "new_password": "Neues Passwort",
+      "current_password_placeholder": "Gib dein aktuelles Passwort ein",
+      "new_password_placeholder": "Gib dein neues Passwort ein",
+      "error": {
+        "required": "Aktuelles Passwort ist erforderlich",
+        "min_length": "Das Passwort muss mindestens 8 Zeichen lang sein",
+        "incorrect": "Falsches Passwort. Bitte überprüfe es und versuche es erneut."
+      }
+    },
+    "danger_zone": "Gefahrenbereich",
+    "delete_account": {
+      "label": "Konto löschen",
+      "sublabel": "Lösche dein Konto und alle zugehörigen Daten dauerhaft",
+      "your_account": "Dein Konto löschen",
+      "delete_account_description": "Es tut uns leid, dich gehen zu sehen! Bitte hinterlasse uns dein Feedback, damit wir uns verbessern können.",
+      "alert_title": "Bist du sicher, dass du fortfahren möchtest?",
+      "alert_subtitle": "Dein Profil und alle Daten werden dauerhaft gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.",
+      "reason": "Grund",
+      "reason_placeholder": "Warum möchtest du dein Konto löschen?",
+      "addition_details": "Weitere Details",
+      "addition_details_placeholder": "Hast du weiteres Feedback für uns?",
+      "confirm_email": "E-Mail bestätigen",
+      "error": {
+        "invalid": "Bitte gib eine gültige E-Mail-Adresse ein.",
+        "not_found": "Die eingegebene E-Mail-Adresse stimmt nicht mit Ihrem Konto überein. Bitte überprüfen Sie sie und versuchen Sie es erneut."
+      }
+    },
+    "buttons": {
+      "update": "Aktualisieren",
+      "updating": "Wird aktualisiert...",
+      "delete_account": "Konto löschen",
+      "cleaning": "Wird bereinigt...",
+      "goodbuy": "Auf Wiedersehen!",
+      "cancel": "Abbrechen",
+      "verify": "Bestätigen",
+      "verifying": "Wird überprüft...",
+      "change_email": "E-Mail ändern"
+    }
+  },
+  "form_button_default": {
+    "buttonText": "Absenden",
+    "successText": "Erfolgreich!",
+    "loadingText": "Wird verarbeitet..."
+  }
+}
