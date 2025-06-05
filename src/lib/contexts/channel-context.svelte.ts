@@ -43,8 +43,6 @@ export class ChannelContext {
         return response.error || translate(AppUiMessage.systemError);
       }
 
-      console.log('FindMyChannels: response:', { response });
-
       myChannels.set(response.objects);
 
       return response.objects;

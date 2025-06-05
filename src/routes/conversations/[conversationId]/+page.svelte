@@ -48,7 +48,7 @@
       channelDetails = {
         id: recipientUser.id,
         name: receipientName || 'Unknown',
-        avatar: receipientName || '?'.charAt(0),
+        avatar: (receipientName || '?').charAt(0).toUpperCase(),
       };
     }
   };
