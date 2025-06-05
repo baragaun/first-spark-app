@@ -65,17 +65,18 @@
   // Get sender info for avatar display
   // todo this function repeated multiples times
   const getSenderInfo = async (userId: string) => {
-    const user = await channelContext.findUserInfoById(userId);
-    if (!user || typeof user === 'string') return { name: 'Unknown', initial: '?' };
-    if (user.firstName) {
+    // const user = await channelContext.findUserInfoById(userId);
+    const user = $selectedChannel?.participants?.find((p) => p.userId === userId);
+    if (!user) return { name: 'Unknown', initial: '?' };
+    if (user.userInfo?.firstName) {
       return {
-        name: `${user.firstName} ${user.lastName}`,
-        initial: user.firstName.charAt(0),
+        name: `${user.userInfo?.firstName} ${user.userInfo?.firstName}`,
+        initial: user.userInfo?.firstName.charAt(0),
       };
     }
     return {
-      name: user.userHandle,
-      initial: user.userHandle?.charAt(0),
+      name: user.userInfo?.userHandle,
+      initial: user.userInfo?.userHandle?.charAt(0),
     };
   };
 

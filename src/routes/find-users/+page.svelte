@@ -46,7 +46,7 @@
             alt={user.userHandle}
             class="user-avatar"
           />
-          <CardTitle>{user.firstName} {user.lastName}</CardTitle>
+          <CardTitle>{user.userHandle}</CardTitle>
         </CardHeader>
         <CardContent>
           <p class="text-sm text-muted-foreground">
