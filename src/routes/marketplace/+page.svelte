@@ -11,6 +11,10 @@
   import placeholderImage from '../../assets/images/placeholder.png';
   import { goto } from '$app/navigation';
   import { giftCardProductsStore, vendorsStore, productCategoriesStore, dataLoaded } from '$lib/stores/marketplace-store';
+  import { IsMobile } from '$lib/hooks/is-mobile.svelte';
+  
+  // Initialize the mobile detector
+  const isMobile = new IsMobile();
   
   let searchQuery = '';
   let selectedCategory: ProductCategory | 'All' = 'All';
@@ -102,7 +106,7 @@
     </DropdownMenu.Root>
   </div>
 
-  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 overflow-y-auto max-h-[calc(100vh-220px)]">
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 overflow-y-auto max-h-[calc(100vh-220px)]">
     {#each filteredGiftCardProducts as giftCardProduct (giftCardProduct.id)}
       {@const vendor = getVendorForGiftCard(giftCardProduct)}
       {#if vendor}
@@ -122,14 +126,16 @@
             />
           </div>
           <div class="flex items-center gap-2">
-            <div class="w-6 h-6 rounded-full overflow-hidden">
-              <img 
-                src={giftCardImageDomain + '/vendors/' + vendor.logoImageSource} 
-                alt="" 
-                class="w-full h-full object-cover"
-                onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
-              />
-            </div>
+            {#if !isMobile.current}
+              <div class="w-6 h-6 rounded-full overflow-hidden">
+                <img 
+                  src={giftCardImageDomain + '/vendors/' + vendor.logoImageSource} 
+                  alt="" 
+                  class="w-full h-full object-cover"
+                  onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
+                />
+              </div>
+            {/if}
             <span class="text-sm font-medium">{vendor.name}</span>
           </div>
         </button>
