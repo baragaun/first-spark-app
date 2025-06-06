@@ -173,14 +173,15 @@ export class ChannelContext {
     }
   }
 
-  async deleteChannel(id: string): Promise<true | string> {
+  async deleteChannelParticipant(participantId: string): Promise<true | string> {
     if (!this.client.isInitialized) {
       console.error('ConversationContext.deleteChannel: not initialized.');
       return translate(AppUiMessage.systemError);
     }
     try {
       isChannelLoading = true;
-      const response = await this.client.operations.channel.deleteChannel(id);
+      const response =
+        await this.client.operations.channelParticipant.deleteChannelParticipant(participantId);
       if (!response || response.error) {
         console.error('DeleteChannel: received error.', { response });
         return response.error || translate(AppUiMessage.systemError);

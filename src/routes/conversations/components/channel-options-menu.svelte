@@ -1,17 +1,22 @@
 <script lang="ts">
   import * as DropdownMenu from '@/components/ui/dropdown-menu';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import type { ChannelListItem } from '@baragaun/bg-node-client';
   import { Archive, Trash2, ChevronDown } from 'lucide-svelte';
 
   let {
-    channelId,
+    channel,
     onDeleteChannel,
   }: {
-    channelId: string;
-    onDeleteChannel: (id: string) => void;
+    channel: ChannelListItem;
+    onDeleteChannel: (participantId: string, channelId: string) => void;
   } = $props();
 
   const handleDelete = () => {
-    onDeleteChannel(channelId);
+    if (!channel.participants) return;
+    const participant = channel.participants.find((p) => p.userId === myUserContext.myUserId);
+    if (!participant) return;
+    onDeleteChannel(participant.id, channel.id);
   };
 </script>
 

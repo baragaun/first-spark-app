@@ -35,8 +35,8 @@
     return receipientName;
   };
 
-  const handleDeleteChannel = async (channelId: string) => {
-    const response = await channelContext.deleteChannel(channelId);
+  const handleDeleteChannel = async (participantId: string, channelId: string) => {
+    const response = await channelContext.deleteChannelParticipant(participantId);
     if (!response) {
       console.error('DeleteChannel: received error.', { response });
       return;
@@ -94,10 +94,7 @@
                         new Date(),
                     )}</span
                   >
-                  <ChannelOptionsMenu
-                    channelId={channel.id}
-                    onDeleteChannel={handleDeleteChannel}
-                  />
+                  <ChannelOptionsMenu {channel} onDeleteChannel={handleDeleteChannel} />
                 </div>
               </div>
               <p class="truncate text-sm text-muted-foreground">
