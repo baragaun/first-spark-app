@@ -52,7 +52,8 @@
     "tooltip": "Thema",
     "light": "Hell",
     "dark": "Dunkel",
-    "system": "System"
+    "system": "System",
+    "kcu": "KCU"
   },
   "signin": {
     "title": "Anmelden",
