@@ -1,83 +1,69 @@
 <script lang="ts">
   import { page } from '$app/state';
   import { onMount } from 'svelte';
-  import ChatHeader from '../components/chat-header.svelte';
-  import MessageList from '../components/message-list.svelte';
-  import MessageInput from '../components/message-input.svelte';
-  import { ChannelListItem, ChannelMessage } from '@baragaun/bg-node-client';
+  import ChatHeader from '../../conversations/components/chat-header.svelte';
+  import MessageList from '../../conversations/components/message-list.svelte';
+  import MessageInput from '../../conversations/components/message-input.svelte';
+  import { ChannelListItem, ChannelMessage, UserListItem } from '@baragaun/bg-node-client';
   import { X } from 'lucide-svelte';
   import Button from '@/components/ui/button/button.svelte';
   import { channelContext } from '@/contexts/channel-context.svelte';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import type { ContactDetails } from '@/helpers/types';
+  import { selectedUser } from '@/stores/user-store';
 
-  const channelId = page.params.conversationId;
-
+  let user: UserListItem | null = null;
   let channelDetails = $state<ContactDetails | undefined>(undefined);
   let messages = $state<ChannelMessage[]>([]);
   let replyingTo = $state<ChannelMessage | null>(null);
   let isLoading = $state(false);
   let scrollToBottomFn: () => void;
 
-  const currentUserId = myUserContext.myUserId;
+  selectedUser.subscribe((value) => {
+    user = value;
+  });
 
   // Function to determine contact info based on channel participants
-  const setContactInfo = async (channel: ChannelListItem) => {
+  const setContactInfo = async (recipientUser: UserListItem) => {
     channelDetails = undefined;
-    if (!channel || !channel.userIds) return null;
 
-    if (channel.userIds.length > 2) {
-      // Group chat - use channel info
-      channelDetails = {
-        id: channel.id,
-        name: channel.name || 'Group Chat',
-        avatar: channel.name?.charAt(0) || 'G',
-      };
-    } else {
-      // Direct message - use recipient info
-      const recipientUser = channel.participants?.find(
-        (participant) => participant.userId !== currentUserId,
-      );
+    const receipientName = recipientUser.firstName
+      ? `${recipientUser.firstName} ${recipientUser.lastName}`
+      : recipientUser.userHandle;
 
-      if (!recipientUser) return null;
-
-      const receipientName = recipientUser.userInfo?.firstName
-        ? `${recipientUser.userInfo?.firstName} ${recipientUser.userInfo?.lastName}`
-        : recipientUser.userInfo?.userHandle;
-
-      channelDetails = {
-        id: recipientUser.id,
-        name: receipientName || 'Unknown',
-        avatar: (receipientName || '?').charAt(0).toUpperCase(),
-      };
-    }
+    channelDetails = {
+      id: recipientUser.id,
+      name: receipientName || 'Unknown',
+      avatar: (receipientName || '?').charAt(0).toUpperCase(),
+    };
   };
 
-  const initializeChannel = async () => {
-    isLoading = true;
-    const response = await channelContext.findChannelMessages(channelId, messages.length, 20);
-    if (!response || !Array.isArray(response)) {
-      console.error('FindChannelMessages: received error.', { response });
-      messages = [];
-      return;
-    }
-    messages = response.reverse();
-    isLoading = false;
-  };
+  // const initializeChannel = async () => {
+  //   isLoading = true;
+  //   const response = await channelContext.findChannelMessages(channelId, messages.length, 20);
+  //   if (!response || !Array.isArray(response)) {
+  //     console.error('FindChannelMessages: received error.', { response });
+  //     messages = [];
+  //     return;
+  //   }
+  //   messages = response.reverse();
+  //   isLoading = false;
+  // };
 
   onMount(async () => {
-    if (channelContext.selectedChannel) {
-      setContactInfo(channelContext.selectedChannel);
-      initializeChannel();
-    } else {
-      const response = await channelContext.findChannelById(channelId);
-      console.log('FindChannelById: response:', response);
-      if (response && typeof response !== 'string') {
-        channelContext.selectChannel(response);
-        setContactInfo(response);
-        initializeChannel();
-      }
-    }
+    setContactInfo(user!);
+    // if (channelContext.selectedChannel) {
+    //   setContactInfo(channelContext.selectedChannel);
+    //   initializeChannel();
+    // } else {
+    //   const response = await channelContext.findChannelById(channelId);
+    //   console.log('FindChannelById: response:', response);
+    //   if (response && typeof response !== 'string') {
+    //     channelContext.selectChannel(response);
+    //     setContactInfo(response);
+    //     initializeChannel();
+    //   }
+    // }
   });
 
   const handleScrollToBottomEvent = (event: CustomEvent<() => void>) => {
@@ -85,11 +71,22 @@
   };
 
   const handleSendMessage = async (messageText: string, replyToMessageId?: string) => {
+    if (!user) return;
+    const channel = await channelContext.createChannel({
+      userIds: [user.id],
+    });
+
+    if (!channel || typeof channel === 'string') {
+      console.error('CreateChannel: received error.', { channel });
+      return;
+    }
+
     const newMessage: Partial<ChannelMessage> = {
-      channelId: channelId,
+      channelId: channel.id,
       messageText,
       replyToMessageId,
     };
+    // todo create channel first
     const response = await channelContext.createChannelMessage(newMessage);
     if (!response || typeof response === 'string') {
       console.error('CreateChannelMessage: received error.', { response });

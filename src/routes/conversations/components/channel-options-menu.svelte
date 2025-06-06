@@ -1,5 +1,5 @@
 <script lang="ts">
-  import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
+  import * as DropdownMenu from '@/components/ui/dropdown-menu';
   import { Archive, Trash2, ChevronDown } from 'lucide-svelte';
 
   let {

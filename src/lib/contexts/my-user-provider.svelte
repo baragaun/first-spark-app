@@ -4,8 +4,8 @@
 
   setContext('myUserContext', myUserContext);
 
-  onMount(() => {
-    myUserContext.initialize();
+  onMount(async () => {
+    await myUserContext.initialize();
   });
 
   interface Props {

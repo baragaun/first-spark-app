@@ -2,26 +2,18 @@
   import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '$lib/components/ui/card';
   import { Button } from '$lib/components/ui/button';
   import { goto } from '$app/navigation';
-  import SearchBar from '@/components/ui/search-bar.svelte';
   import { onMount } from 'svelte';
   import { channelContext } from '@/contexts/channel-context.svelte';
+  import SearchBar from '@/components/ui/search-bar.svelte';
+  import type { UserListItem } from '@baragaun/bg-node-client';
+  import { selectedUser } from '@/stores/user-store';
 
   let searchQuery = $state(''); // State for search query
 
-  // Navigate to the user's profile
-  const viewProfile = (userId: string) => {
-    goto(`/profile/${userId}`);
-  };
-
   // Navigate to the send message page
-  const sendMessage = async (userId: string) => {
-    console.log('sendMessage', { userId });
-    const channel = await channelContext.createChannel({ userIds: [userId] });
-
-    if (typeof channel !== 'string' && channel?.id) {
-      console.log('Created channel', channel.id);
-      goto(`/conversations/${channel.id}`);
-    }
+  const sendMessage = async (user: UserListItem) => {
+    selectedUser.set(user); // Set the user in the store
+    goto('/find-users/sendMessage');
   };
 
   onMount(async () => {
@@ -38,7 +30,9 @@
   </div>
 
   <div class="user-grid">
-    {#each channelContext.users.filter(user => user.userHandle?.toLowerCase().includes(searchQuery.toLowerCase())) as user}
+    {#each channelContext.users.filter((user) => user.userHandle
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase())) as user}
       <Card>
         <CardHeader class="flex items-center gap-4">
           <img
@@ -54,10 +48,7 @@
           </p>
         </CardContent>
         <CardFooter class="flex gap-2">
-          <Button onclick={() => viewProfile(user.id ?? '')}>View Profile</Button>
-          <Button variant="secondary" onclick={() => sendMessage(user.id ?? '')}
-            >Send Message</Button
-          >
+          <Button variant="secondary" onclick={() => sendMessage(user)}>Send Message</Button>
         </CardFooter>
       </Card>
     {/each}

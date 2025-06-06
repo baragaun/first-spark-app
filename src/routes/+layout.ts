@@ -1,4 +1,4 @@
-import { initializeBgNodeClient } from '@/services/bg-node-client';
+import { myUserContext } from '@/contexts/my-user-context.svelte';
 import type { LayoutLoad } from './$types';
 
 // Only initialize in browser environment
@@ -8,7 +8,7 @@ export const load: LayoutLoad = async () => {
   // Initialize user context in the browser
   if (typeof window !== 'undefined') {
     try {
-      await initializeBgNodeClient();
+      await myUserContext.initialize();
       return {
         userInitialized: true,
       };

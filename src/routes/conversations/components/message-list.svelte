@@ -23,7 +23,6 @@
   import { channelContext } from '@/contexts/channel-context.svelte';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { MessageStatus } from '@/helpers/types';
-  import { selectedChannel } from '@/stores/channel-store';
   import { createEventDispatcher, onMount } from 'svelte';
 
   // For demo purposes, let's assume messages have a status property
@@ -62,11 +61,13 @@
   let isFetchingMoreMessages = $state(false); // Flag to prevent multiple API calls
   let isAllMessagesFetched = $state(false);
 
-  // Get sender info for avatar display
-  // todo this function repeated multiples times
+  const selectedChannel = $derived(() => {
+    return channelContext.selectedChannel;
+  });
+
   const getSenderInfo = async (userId: string) => {
     // const user = await channelContext.findUserInfoById(userId);
-    const user = $selectedChannel?.participants?.find((p) => p.userId === userId);
+    const user = selectedChannel()?.participants?.find((p) => p.userId === userId);
     if (!user) return { name: 'Unknown', initial: '?' };
     if (user.userInfo?.firstName) {
       return {
@@ -82,7 +83,8 @@
 
   // Check if channel has more than two participants
   const isGroupChat = $derived(() => {
-    return $selectedChannel?.userIds && $selectedChannel.userIds.length > 2;
+    const channel = selectedChannel();
+    return channel?.userIds?.length ?? 0 > 2;
   });
 
   const formatMessageTime = (date: Date) => {
@@ -193,7 +195,7 @@
     const previousScrollTop = messagesContainer?.scrollTop || 0;
 
     const response = await channelContext.findChannelMessages(
-      $selectedChannel!.id,
+      selectedChannel()!.id,
       messages.length,
       20,
     );
@@ -221,7 +223,6 @@
   // Function to scroll to bottom
   const scrollToBottom = () => {
     if (messagesContainer) {
-      console.log('Scrolling to bottom');
       messagesContainer.scrollTo({ top: messagesContainer.scrollHeight, behavior: 'smooth' });
     }
   };

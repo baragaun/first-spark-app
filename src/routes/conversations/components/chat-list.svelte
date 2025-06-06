@@ -4,7 +4,6 @@
   import type { ChannelListItem } from '@baragaun/bg-node-client';
   import ChannelOptionsMenu from './channel-options-menu.svelte';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
-  import { selectedChannel } from '@/stores/channel-store';
   import { channelContext } from '@/contexts/channel-context.svelte';
 
   let { channels }: { channels: ChannelListItem[] } = $props();
@@ -46,7 +45,7 @@
   };
 
   function handleChannelClick(channel: ChannelListItem) {
-    selectedChannel.set(channel);
+    channelContext.selectChannel(channel);
   }
 </script>
 

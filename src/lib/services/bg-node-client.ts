@@ -1,3 +1,4 @@
+import { env } from '$env/dynamic/public';
 import {
   AppEnvironment,
   BgNodeClient,
@@ -15,20 +16,20 @@ export async function initializeBgNodeClient(listener?: BgBaseListener) {
   isInitializing = true;
 
   const config: BgNodeClientConfig = {
+    enableGroupChannels: false,
     inBrowser: true,
     fsdata: {
-      url: import.meta.env.VITE_FSDATA_URL || 'http://localhost:8092/fsdata/api/graphql',
+      url: env.PUBLIC_FSDATA_URL || 'http://localhost:8092/fsdata/api/graphql',
       headers: {
         [HttpHeaderName.consumer]: 'first-spark-app',
       },
     },
     clientInfoStoreType: ClientInfoStoreType.db,
-    logLevel: 'debug',
-    enableGroupChannels: false,
+    logLevel: env.PUBLIC_LOG_LEVEL as 'debug' | 'info' | 'warn' | 'error' | 'silent' | undefined,
   };
 
-  if (import.meta.env.VITE_APP_ENVIRONMENT) {
-    config.appEnvironment = import.meta.env.VITE_APP_ENVIRONMENT as AppEnvironment;
+  if (env.PUBLIC_APP_ENVIRONMENT) {
+    config.appEnvironment = env.PUBLIC_APP_ENVIRONMENT as AppEnvironment;
   }
 
   if (typeof window === 'undefined' || !('indexedDB' in window)) {

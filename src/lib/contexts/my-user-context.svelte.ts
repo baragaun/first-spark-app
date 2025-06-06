@@ -1,6 +1,6 @@
 import { env } from '$env/dynamic/public';
 import translate from '@/helpers/language/translate';
-import { client } from '@/services/bg-node-client';
+import { client, initializeBgNodeClient } from '@/services/bg-node-client';
 import { AppUiMessage } from '@/types/enums';
 import {
   BgListenerTopic,
@@ -41,7 +41,7 @@ export class MyUserContext {
     };
 
     try {
-      this.client.addListener(listener);
+      await initializeBgNodeClient(listener);
       isSignedIn = this.client.isSignedIn;
     } catch (error) {
       console.error('MyUserContext: Error initializing BgNodeClient:', { error });
@@ -366,7 +366,7 @@ export class MyUserContext {
     }
   }
 
-  async verifyMyPassword(password: string): Promise<QueryResult<boolean>> {
+  async verifyMyPassword(password: string): Promise<QueryResult<string>> {
     if (!this.client.isInitialized) {
       console.error('MyUserContext.verifyMyPassword: not initialized.');
       return { error: translate(AppUiMessage.systemError) };

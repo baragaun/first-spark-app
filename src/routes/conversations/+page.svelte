@@ -4,13 +4,12 @@
   import ChatList from './components/chat-list.svelte';
   import { MessageSquarePlus } from 'lucide-svelte';
   import { channelContext } from '@/contexts/channel-context.svelte';
-  import { myChannels } from '@/stores/channel-store';
-  import SearchBar from '@/components/search-bar.svelte';
+  import SearchBar from '@/components/ui/search-bar.svelte';
 
   let searchQuery = $state('');
 
   let filteredChannels = $derived(
-    $myChannels.filter((channel) => {
+    channelContext.myChannels.filter((channel) => {
       if (!searchQuery) return true;
 
       const query = searchQuery.toLowerCase();
