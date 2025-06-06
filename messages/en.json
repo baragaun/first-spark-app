@@ -52,7 +52,8 @@
     "tooltip": "Theme",
     "light": "Light",
     "dark": "Dark",
-    "system": "System"
+    "system": "System",
+    "kcu": "KCU"
   },
   "signin": {
     "title": "Sign in",
