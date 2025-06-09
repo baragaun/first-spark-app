@@ -4,7 +4,8 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    /* First Spark theme */
+    /* --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
 
     --muted: 240 4.8% 95.9%;
@@ -42,7 +43,59 @@
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 217.2 91.2% 59.8%; */
+
+    /* KCU theme */
+    --kcu-white:    0 0% 100%;         /* #ffffff — White */ 
+    --kcu-black:    240 10% 3.9%;      /* #000000 — Black */ 
+    --kcu-orange:   35.2 100% 46%;    /* #ed8b00 — Orange */ 
+    --kcu-glacier:  181 100% 36.3%;  /* #00b6b9 — Glacier */ 
+    --kcu-plum:     322.2 67.3% 32.4%; /* #8a1b61 — Plum */ 
+    --kcu-lime:     65 100% 42%;       /* #c4d600 — Lime */ 
+    --kcu-tangerine:42 88% 53%;        /* #f1b11c — Tangerine */ 
+    --kcu-juniper:  181 100% 19%;      /* #005f61 — Juniper */ 
+    --kcu-avocado:  99.3 46.1% 35.7%;  /* #4e8531 — Avocado */ 
+    --kcu-blackberry:318.1 37.6% 27.6%;/* #612c51 — Blackberry */ 
+    --kcu-pine:     99.3 46.1% 35.7%;  /* #275d38 — Pine — *estimate* using similar green */ 
+    --kcu-wood:     318.1 37.6% 27.6%; /* #5b3427 — Wood — *estimate* using similar deep brown */ 
+
+    --background: var(--kcu-white);
+    --foreground: var(--kcu-blackberry);
+
+    --muted: var(--kcu-avocado);
+    --muted-foreground: var(--kcu-plum);
+
+    --popover: var(var(--kcu-juniper))%;
+    --popover-foreground: var(--kcu-plum);
+
+    --card: var(--kcu-blackberry);
+    --card-foreground: var(--kcu-avocado);
+
+    --border: var(--kcu-black);
+    --input: var(--kcu-white); /* Updated from a darker value to be more visible */
+
+    --primary: var(--kcu-blackberry);
+    --primary-foreground: var(--kcu-tangerine);
+
+    --secondary: var(--kcu-tangerine);
+    --secondary-foreground: var(--kcu-avocado);
+
+    --accent: var(--kcu-glacier);
+    --accent-foreground: var(--kcu-white);
+
+    --destructive: var(--kcu-avocado); /* Updated to be more prominent */
+    --destructive-foreground: var(--kcu-white);
+
+    --ring: var(--kcu-juniper);
+
+    --sidebar-background: var(--kcu-orange);
+    --sidebar-foreground: var(--kcu-white);
+    --sidebar-primary: var(--kcu-glacier);
+    --sidebar-primary-foreground: var(--kcu-plum);
+    --sidebar-accent: var(--kcu-tangerine);
+    --sidebar-accent-foreground: var(--kcu-blackberry);
+    --sidebar-border: var(--kcu-blackberry);
+    --sidebar-ring: var(--kcu-juniper);
   }
 
   .dark {
