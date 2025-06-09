@@ -80,7 +80,7 @@
           <ChevronDown class="h-4 w-4" />
         </Button>
       </DropdownMenu.Trigger>
-      <DropdownMenu.Content class="max-h-[300px] overflow-y-auto">
+      <DropdownMenu.Content class="bg-background max-h-[300px] overflow-y-auto">
         <DropdownMenu.Item 
           onclick={() => selectedCategory = 'All'}
           class="cursor-pointer"

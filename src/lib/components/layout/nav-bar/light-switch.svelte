@@ -42,7 +42,7 @@
       </Tooltip.Root>
     </Tooltip.Provider>
   </DropdownMenu.Trigger>
-  <DropdownMenu.Content>
+  <DropdownMenu.Content class="bg-background">
     {#each themeOptions as option}
       <DropdownMenu.Item onclick={option.action} class="flex justify-between">
         {option.label}
