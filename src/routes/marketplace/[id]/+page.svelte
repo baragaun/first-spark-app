@@ -163,7 +163,7 @@
     {#if selectedTab === 'info'}
       <div class="px-2 py-4">
         <div class="mb-6">
-          <h2 class="text-lg font-semibold text-gray-400 mb-2">How To Redeem</h2>
+          <h2 class="text-lg font-semibold text-secondary-foreground text-400 mb-2">How To Redeem</h2>
           <p class="mb-2">
             <span class="font-bold">Online:</span>
             {$giftCardProduct.instructionsEn}
@@ -174,8 +174,8 @@
           </p>
         </div>
         <div>
-          <h2 class="text-lg font-semibold text-gray-400 mb-2">Terms And Conditions</h2>
-          <p class="text-gray-700">
+          <h2 class="text-lg font-semibold text-secondary-foreground text-400 mb-2">Terms And Conditions</h2>
+          <p class="text-700">
             {$giftCardProduct.termsEn}
           </p>
         </div>
