@@ -29,7 +29,7 @@
       </Tooltip.Root>
     </Tooltip.Provider>
   </DropdownMenu.Trigger>
-  <DropdownMenu.Content>
+  <DropdownMenu.Content class="bg-background">
     {#each locales as locale}
       <DropdownMenu.Item class="cursor-pointer" onclick={() => setLocale(locale)}>
         <span class:font-bold={getLocale() === locale}>

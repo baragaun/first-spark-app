@@ -143,17 +143,17 @@
 
     {#if selectedTab === 'buy'}
       <!-- Brand and Amounts (Buy Tab) -->
-      <div class="mb-2 text-gray-500 text-sm">Brand</div>
+      <div class="mb-2 text-secondary-foreground text-500 text-sm">Brand</div>
       <div class="mb-4 text-xl font-bold">{$vendor.name}</div>
       <div class="space-y-4">
         {#each $giftCardProduct.denominations ?? [] as denomination}
           <div class="rounded-xl border px-6 py-4 flex flex-col items-center text-2xl font-bold shadow-sm">
             <span class="flex items-end gap-1">
-              <span class="text-base align-bottom" style="color: var(--kcu-plum)">USD</span>
+              <span class="text-base text-muted-foreground align-bottom">USD</span>
               {denomination.amount}
             </span>
             {#if denomination.amount}
-              <span class="text-xs text-indigo-400 mt-1">Reward: MIT {denomination.amount}</span>
+              <span class="text-xs text-secondary-foreground text-400 mt-1">Reward: MIT {denomination.amount}</span>
             {/if}
           </div>
         {/each}
@@ -195,7 +195,7 @@
         </div>
        <!-- Brand Description -->
         {#if $vendor.description}
-          <div class="text-gray-600 text-center max-w-xl mb-8">{$vendor.description}</div>
+          <div class="text-600 text-center max-w-xl mb-8">{$vendor.description}</div>
         {/if}
         <!-- Visit Online Button -->
         {#if $vendor.url}
