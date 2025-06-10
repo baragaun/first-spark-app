@@ -74,41 +74,38 @@
   });
 </script>
 
-<div class="border-t p-4">
-  <div class="flex items-start gap-2">
-    <div class="relative self-end">
-      <Button type="button" variant="ghost" size="icon" onclick={toggleEmojiPicker}>
-        <Smile class="h-5 w-5" />
-      </Button>
-
-      {#if showEmojiPicker}
-        <div class="absolute bottom-full left-0 mb-2">
-          <EmojiPicker onSelectEmoji={addEmoji} />
-        </div>
-      {/if}
-    </div>
-
-    <Textarea
-      {placeholder}
-      bind:value={messageText}
-      onkeydown={handleKeyDown}
-      oninput={adjustTextareaHeight}
-      class="max-h-[150px] min-h-[40px] flex-1 resize-none"
-      bind:ref={inputRef}
-      rows={1}
-    />
-
-    <Button
-      type="button"
-      variant="default"
-      size="icon"
-      disabled={!messageText.trim()}
-      onclick={handleSubmit}
-      class="self-end"
-    >
-      <Send class="h-5 w-5" />
+<div class="flex items-center gap-2 w-full">
+  <!-- <div class="relative">
+    <Button type="button" variant="ghost" size="icon" onclick={toggleEmojiPicker}>
+      <Smile class="h-5 w-5" />
     </Button>
-  </div>
+
+    {#if showEmojiPicker}
+      <div class="absolute bottom-full left-0 mb-2">
+        <EmojiPicker onSelectEmoji={addEmoji} />
+      </div>
+    {/if}
+  </div> -->
+
+  <Textarea
+    {placeholder}
+    bind:value={messageText}
+    onkeydown={handleKeyDown}
+    oninput={adjustTextareaHeight}
+    class="max-h-[150px] min-h-[40px] flex-1 resize-none"
+    bind:ref={inputRef}
+    rows={1}
+  />
+
+  <Button
+    type="button"
+    size="icon"
+    variant='ghost'
+    disabled={!messageText.trim()}
+    onclick={handleSubmit}
+  >
+    <Send class="h-5 w-5" />
+  </Button>
 </div>
 
 <style>

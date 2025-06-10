@@ -1,15 +1,15 @@
 <script lang="ts">
   import { getContext, onMount, setContext, type Snippet } from 'svelte';
-  import { channelContext } from './channel-context.svelte';
   import type { MyUserContext } from './my-user-context.svelte';
-
+  import { usersContext } from './users-context.svelte';
+  
   const myUserContext = getContext<MyUserContext>('myUserContext');
   
-  setContext('channelContext', channelContext);
+  setContext('usersContext', usersContext);
 
   onMount(() => {
     if (myUserContext.isSignedIn) {
-      channelContext.findMyChannels();
+      usersContext.findUsers();
     }
   });
 

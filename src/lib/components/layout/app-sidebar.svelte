@@ -15,8 +15,8 @@
       icon: House,
     },
     {
-      title: m['sidebar.menu.conversations'](),
-      url: '/conversations',
+      title: m['sidebar.menu.chat'](),
+      url: '/chat',
       icon: MessageSquare,
       requiresAuth: true,
     },
