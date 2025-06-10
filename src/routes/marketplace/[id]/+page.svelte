@@ -5,7 +5,7 @@
   import { Button } from '$lib/components/ui/button';
   import * as Card from '$lib/components/ui/card';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
-  import type { GiftCardProduct, Vendor } from '@baragaun/bg-node-client';
+  import { GiftCardDenomination, type GiftCardProduct, type Vendor } from '@baragaun/bg-node-client';
   import placeholderImage from '../../../assets/images/placeholder.png';
   import { ArrowLeft } from 'lucide-svelte';
   import { giftCardProductsStore, vendorsStore, dataLoaded } from '$lib/stores/marketplace-store';
@@ -80,6 +80,24 @@
       isLoading = false;
     }
   });
+
+  function getDenominations(giftCardProduct: GiftCardProduct | null | undefined
+  ): GiftCardDenomination[] {
+    let denominationsToReturn: GiftCardDenomination[] = [];
+    if (giftCardProduct?.denominations && giftCardProduct.denominations.length > 0) {
+      denominationsToReturn = giftCardProduct.denominations;
+    }
+    else if (giftCardProduct?.genericGiftCardId) {
+      const genericProduct = $giftCardProductsStore.find(product =>
+        product.id === giftCardProduct.genericGiftCardId
+      );
+
+      if (genericProduct?.denominations && genericProduct.denominations.length > 0) {
+        denominationsToReturn = genericProduct.denominations;
+      } 
+    }
+    return [...denominationsToReturn].sort((a, b) => a.amount - b.amount);
+  }
 </script>
 
 <!-- Header Bar -->
@@ -146,14 +164,14 @@
       <div class="mb-2 text-secondary-foreground text-500 text-sm">Brand</div>
       <div class="mb-4 text-xl font-bold">{$vendor.name}</div>
       <div class="space-y-4">
-        {#each $giftCardProduct.denominations ?? [] as denomination}
+        {#each getDenominations($giftCardProduct) as denomination}
           <div class="rounded-xl border px-6 py-4 flex flex-col items-center text-2xl font-bold shadow-sm">
             <span class="flex items-end gap-1">
               <span class="text-base text-muted-foreground align-bottom">USD</span>
-              {denomination.amount}
+              {denomination.amount/1000}
             </span>
             {#if denomination.amount}
-              <span class="text-xs text-secondary-foreground text-400 mt-1">Reward: MIT {denomination.amount}</span>
+              <span class="text-xs text-secondary-foreground text-400 mt-1">Reward: MIT {denomination.amount/1000}</span>
             {/if}
           </div>
         {/each}
@@ -162,23 +180,34 @@
 
     {#if selectedTab === 'info'}
       <div class="px-2 py-4">
-        <div class="mb-6">
-          <h2 class="text-lg font-semibold text-secondary-foreground text-400 mb-2">How To Redeem</h2>
-          <p class="mb-2">
-            <span class="font-bold">Online:</span>
-            {$giftCardProduct.instructionsEn}
-          </p>
-          <p>
-            <span class="font-bold">In-store:</span>
-            Bring your Gift Card number and PIN to any adidas Sport Performance, adidas Originals, or adidas Outlet store.
-          </p>
-        </div>
-        <div>
-          <h2 class="text-lg font-semibold text-secondary-foreground text-400 mb-2">Terms And Conditions</h2>
-          <p class="text-700">
-            {$giftCardProduct.termsEn}
-          </p>
-        </div>
+        {#if $giftCardProduct.instructionsEn}
+          <div class="mb-6">
+            <h2 class="text-lg font-semibold text-secondary-foreground text-400 mb-2">How To Redeem</h2>
+            {#if $giftCardProduct.instructionsEn?.trim().startsWith('<')}
+              <p class="mb-2">
+                {@html $giftCardProduct.instructionsEn}
+              </p>
+            {:else}
+              <p class="mb-2">
+                {$giftCardProduct.instructionsEn}
+              </p>
+            {/if}
+          </div>
+        {/if}
+        {#if $giftCardProduct.termsEn}
+          <div>
+            <h2 class="text-lg font-semibold text-secondary-foreground text-400 mb-2">Terms And Conditions</h2>
+            {#if $giftCardProduct.instructionsEn?.trim().startsWith('<')}
+              <p class="mb-2">
+                {@html $giftCardProduct.termsEn}
+              </p>
+            {:else}
+              <p class="mb-2">
+                {$giftCardProduct.termsEn}
+              </p>
+            {/if}
+          </div>
+        {/if}
       </div>
     {/if}
 
