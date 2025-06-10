@@ -1,5 +1,5 @@
+import type { GiftCardProduct, ProductCategory, Vendor } from '@baragaun/bg-node-client';
 import { writable } from 'svelte/store';
-import type { GiftCardProduct, Vendor, ProductCategory } from '@baragaun/bg-node-client';
 
 // Create stores to cache marketplace data
 export const giftCardProductsStore = writable<GiftCardProduct[]>([]);

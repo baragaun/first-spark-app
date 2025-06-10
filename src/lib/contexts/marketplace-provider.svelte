@@ -7,8 +7,8 @@
   setContext('channelContext', marketplaceContext);
 
   onMount(() => {
-    if(myUserContext.isSignedIn) {
-    channelContext.findMyChannels();
+    if (myUserContext.isSignedIn) {
+      channelContext.findMyChannels();
     }
   });
 
