@@ -1,16 +1,13 @@
 import { env } from '$env/dynamic/public';
 import translate from '@/helpers/language/translate';
+import { client, initializeBgNodeClient } from '@/services/bg-node-client';
 import { AppUiMessage } from '@/types/enums';
 import {
-  AppEnvironment,
   BgListenerTopic,
   BgNodeClient,
-  ClientInfoStoreType,
-  HttpHeaderName,
   MyUserChanges,
   NotificationMethod,
   UserIdentType,
-  type BgNodeClientConfig,
   type MultiStepActionProgressResult,
   type MyUser,
   type MyUserListener,
@@ -25,79 +22,32 @@ let isLoading = $state(false);
 let myUser = $state<MyUser | undefined>(undefined);
 
 export class MyUserContext {
-  private client: BgNodeClient = new BgNodeClient();
-  private _isInitializing = false;
+  private client: BgNodeClient = client;
 
   public async initialize(): Promise<void> {
-    if (this.client.isInitialized || this._isInitializing) {
-      console.warn('MyUserContext.initialize: already initialized.');
-      return;
-    }
-
-    this._isInitializing = true;
-
-    const config: BgNodeClientConfig = {
-      enableGroupChannels: false,
-      inBrowser: true,
-      fsdata: {
-        url: env.PUBLIC_FSDATA_URL || 'http://localhost:8092/fsdata/api/graphql',
-        headers: {
-          [HttpHeaderName.consumer]: 'first-spark-app',
-        },
+    isLoading = true;
+    const listener: MyUserListener = {
+      id: 'MyUserContext',
+      topic: BgListenerTopic.myUser,
+      onSignedIn: () => {
+        isSignedIn = true;
       },
-      clientInfoStoreType: ClientInfoStoreType.db,
-      logLevel: env.PUBLIC_LOG_LEVEL as 'debug' | 'info' | 'warn' | 'error' | 'silent' | undefined,
+      onSignedOut: () => {
+        isSignedIn = false;
+      },
+      onMyUserUpdated: (updatedMyUser) => {
+        myUser = updatedMyUser;
+      },
     };
 
-    if (env.PUBLIC_APP_ENVIRONMENT) {
-      config.appEnvironment = env.PUBLIC_APP_ENVIRONMENT as AppEnvironment;
-    }
-
     try {
-      if (typeof window === 'undefined') {
-        console.error('MyUserContext.initialize: not running in the browser.');
-        this._isInitializing = false;
-        return;
-      }
-
-      if (!('indexedDB' in window)) {
-        console.error('MyUserContext.initialize: indexedDB is not supported in this browser.');
-        this._isInitializing = false;
-        return;
-      }
-
-      const listener: MyUserListener = {
-        id: 'MyUserContext',
-        topic: BgListenerTopic.myUser,
-        onSignedIn: () => {
-          isSignedIn = true;
-        },
-        onSignedOut: () => {
-          isSignedIn = false;
-        },
-        onMyUserUpdated: (updatedMyUser) => {
-          myUser = updatedMyUser;
-        },
-      };
-      await this.client.init({
-        config,
-        isOnline: true,
-        startSession: true,
-        listener,
-      });
-
+      await initializeBgNodeClient(listener);
       isSignedIn = this.client.isSignedIn;
     } catch (error) {
       console.error('MyUserContext: Error initializing BgNodeClient:', { error });
-      this._isInitializing = false;
-      return;
+    } finally {
+      isLoading = false;
     }
-
-    // if (env.PUBLIC_MOCK_DATA === 'true') {
-    //    config.enableMockMode = true;
-    // }
-
-    this._isInitializing = false;
   }
 
   /**
@@ -416,7 +366,7 @@ export class MyUserContext {
     }
   }
 
-  async verifyMyPassword(password: string): Promise<QueryResult<boolean>> {
+  async verifyMyPassword(password: string): Promise<QueryResult<string>> {
     if (!this.client.isInitialized) {
       console.error('MyUserContext.verifyMyPassword: not initialized.');
       return { error: translate(AppUiMessage.systemError) };

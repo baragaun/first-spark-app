@@ -8,10 +8,7 @@ export const load: LayoutLoad = async () => {
   // Initialize user context in the browser
   if (typeof window !== 'undefined') {
     try {
-      if (!myUserContext.isInitialized) {
-        await myUserContext.initialize();
-      }
-
+      await myUserContext.initialize();
       return {
         userInitialized: true,
       };
