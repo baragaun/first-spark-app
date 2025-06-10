@@ -172,6 +172,7 @@
       <!-- Brand and Amounts (Buy Tab) -->
       <div class="text-500 mb-2 text-sm text-secondary-foreground">Brand</div>
       <div class="mb-4 text-xl font-bold">{$vendor.name}</div>
+      <div class="text-500 mb-2 text-sm text-secondary-foreground">Gift Card Amount</div>
       <div class="space-y-4">
         {#each getDenominations($giftCardProduct) as denomination}
           <div
