@@ -168,7 +168,7 @@
           <div class="rounded-xl border px-6 py-4 flex flex-col items-center text-2xl font-bold shadow-sm">
             <span class="flex items-end gap-1">
               <span class="text-base text-muted-foreground align-bottom">USD</span>
-              {denomination.amount/1000}
+              <span class="text-4xl">{denomination.amount/1000}</span>
             </span>
             {#if denomination.amount}
               <span class="text-xs text-secondary-foreground text-400 mt-1">Reward: MIT {denomination.amount/1000}</span>
