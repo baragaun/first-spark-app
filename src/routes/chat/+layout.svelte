@@ -1,5 +1,5 @@
 <script lang="ts">
-  import ChannelProvider from '@/contexts/channel-provider.svelte';
+  import ChannelProvider from '@/contexts/channels/channel-provider.svelte';
   let { children } = $props();
 </script>
 

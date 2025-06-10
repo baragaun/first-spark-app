@@ -1,7 +1,7 @@
 <script lang="ts">
   import PasswordFormInput from '@/components/forms/form-password-input.svelte';
 
-  import { type MyUserContext } from '$lib/contexts/my-user-context.svelte';
+  import { type MyUserContext } from '$lib/contexts/users/my-user-context.svelte';
   import { AppUiMessage } from '@/types/enums';
 
   import FormButton from '@/components/forms/form-button.svelte';
@@ -93,8 +93,9 @@
       );
 
       if (
-        verifyMyPasswordResponse.object === false ||
-        verifyMyPasswordResponse.object?.toString() === 'false'
+        verifyMyPasswordResponse.object === 'false' ||
+        verifyMyPasswordResponse.object === null ||
+        verifyMyPasswordResponse.object === undefined
       ) {
         console.error('Incorrect password', { verifyMyPasswordResponse });
         updateFormErrors('currentPassword', m['setting.password.error.incorrect']());

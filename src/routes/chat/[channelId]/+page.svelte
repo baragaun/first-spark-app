@@ -7,8 +7,8 @@
   import { ChannelListItem, ChannelMessage } from '@baragaun/bg-node-client';
   import { X } from 'lucide-svelte';
   import Button from '@/components/ui/button/button.svelte';
-  import { channelContext } from '@/contexts/channel-context.svelte';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { channelContext } from '@/contexts/channels/channel-context.svelte';
+  import { myUserContext } from '@/contexts/users/my-user-context.svelte';
   import type { ContactDetails } from '@/helpers/types';
 
   const channelId = page.params.channelId;

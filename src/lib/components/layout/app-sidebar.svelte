@@ -4,7 +4,7 @@
   import { env } from '$env/dynamic/public';
   import { Button } from '@/components/ui/button';
   import * as Sidebar from '@/components/ui/sidebar';
-  import type { MyUserContext } from '@/contexts/my-user-context.svelte';
+  import type { MyUserContext } from '@/contexts/users/my-user-context.svelte';
   import { m } from '@/paraglide/messages';
   import { House, MessageSquare, PlugZap, Settings, User, Zap } from 'lucide-svelte';
 

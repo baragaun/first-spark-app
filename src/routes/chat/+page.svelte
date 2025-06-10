@@ -2,7 +2,7 @@
   import { Button } from '$lib/components/ui/button';
   import ChatList from './components/chat-list.svelte';
   import { MessageSquarePlus } from 'lucide-svelte';
-  import { channelContext } from '@/contexts/channel-context.svelte';
+  import { channelContext } from '@/contexts/channels/channel-context.svelte';
   import SearchBar from '@/components/ui/search-bar.svelte';
 
   let searchQuery = $state('');

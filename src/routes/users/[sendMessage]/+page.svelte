@@ -8,8 +8,8 @@
   import { X } from 'lucide-svelte';
   import Button from '@/components/ui/button/button.svelte';
   import type { ContactDetails } from '@/helpers/types';
-  import type { ChannelContext } from '@/contexts/channel-context.svelte';
-  import type { UsersContext } from '@/contexts/users-context.svelte';
+  import type { ChannelContext } from '@/contexts/channels/channel-context.svelte';
+  import type { UsersContext } from '@/contexts/users/users-context.svelte';
 
   const channelContext = getContext<ChannelContext>('channelContext');
   const usersContext = getContext<UsersContext>('usersContext');

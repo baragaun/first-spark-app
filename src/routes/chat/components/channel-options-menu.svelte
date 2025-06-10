@@ -1,6 +1,6 @@
 <script lang="ts">
   import * as DropdownMenu from '@/components/ui/dropdown-menu';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { myUserContext } from '@/contexts/users/my-user-context.svelte';
   import type { ChannelListItem } from '@baragaun/bg-node-client';
   import { Archive, Trash2, ChevronDown } from 'lucide-svelte';
 

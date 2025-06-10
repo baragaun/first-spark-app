@@ -20,8 +20,8 @@
   import { Button } from '$lib/components/ui/button';
   import { Separator } from '$lib/components/ui/separator/index.js';
   import type { ChannelMessage, Channel } from '@baragaun/bg-node-client';
-  import { channelContext } from '@/contexts/channel-context.svelte';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { channelContext } from '@/contexts/channels/channel-context.svelte';
+  import { myUserContext } from '@/contexts/users/my-user-context.svelte';
   import { MessageStatus } from '@/helpers/types';
   import { createEventDispatcher, onMount } from 'svelte';
 

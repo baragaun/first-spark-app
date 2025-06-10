@@ -3,8 +3,8 @@
   import * as Dialog from '@/components/ui/dialog';
   import { Button, buttonVariants } from '$lib/components/ui/button';
   import { goto } from '$app/navigation';
-  import type { ChannelContext } from '@/contexts/channel-context.svelte';
-  import type { MyUserContext } from '@/contexts/my-user-context.svelte';
+  import type { ChannelContext } from '@/contexts/channels/channel-context.svelte';
+  import type { MyUserContext } from '@/contexts/users/my-user-context.svelte';
   import SearchBar from '@/components/ui/search-bar.svelte';
   import type { UserListItem, ChannelMessage } from '@baragaun/bg-node-client';
   import { getContext, onMount } from 'svelte';
@@ -12,7 +12,7 @@
   import MessageInput from '../chat/components/message-input.svelte';
   import MessageList from '../chat/components/message-list.svelte';
   import { format } from 'date-fns';
-  import { UsersContext } from '@/contexts/users-context.svelte';
+  import { UsersContext } from '@/contexts/users/users-context.svelte';
 
   const channelContext = getContext<ChannelContext>('channelContext');
   const myUserContext = getContext<MyUserContext>('myUserContext');

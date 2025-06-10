@@ -7,7 +7,7 @@
   import NavBar from '@/components/layout/nav-bar/nav-bar.svelte';
   import Footer from '@/components/layout/footer.svelte';
   import { SidebarProvider } from '@/components/ui/sidebar';
-  import MyUserProvider from '@/contexts/my-user-provider.svelte';
+  import MyUserProvider from '@/contexts/users/my-user-provider.svelte';
   import { locales, localizeHref } from '@/paraglide/runtime';
 
   let { children } = $props();

@@ -9,7 +9,7 @@ This document explains why we use Svelte's Context API (`getContext`) for access
 ### Direct Import (Not Recommended)
 
 ```typescript
-import { myUserContext } from '@/contexts/my-user-context.svelte';
+import { myUserContext } from '@/contexts/users/my-user-context.svelte';
 ```
 
 ### Context API (Recommended)
@@ -38,7 +38,7 @@ In components:
 
 ```typescript
 import { getContext } from 'svelte';
-import type { MyUserContext } from '@/contexts/my-user-context.svelte';
+import type { MyUserContext } from '@/contexts/users/my-user-context.svelte';
 
 const myUserContext = getContext<MyUserContext>('myUserContext');
 ```

@@ -3,7 +3,7 @@
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
   import * as Tabs from '@/components/ui/tabs';
-  import { MyUserContext } from '@/contexts/my-user-context.svelte';
+  import { MyUserContext } from '@/contexts/users/my-user-context.svelte';
   import { m } from '@/paraglide/messages';
 
   // const userContext = getContext<MyUserContext>('myUserContext');

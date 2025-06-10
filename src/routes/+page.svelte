@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
   import { m } from '$lib/paraglide/messages.js';
-  import { MyUserContext } from '@/contexts/my-user-context.svelte';
+  import { MyUserContext } from '@/contexts/users/my-user-context.svelte';
   import { getContext } from 'svelte';
 
   const userContext = getContext<MyUserContext>('myUserContext');
