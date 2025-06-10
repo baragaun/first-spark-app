@@ -16,6 +16,9 @@ const config: Config = {
     },
     extend: {
       colors: {
+        'kcu-orange': '#FF6B00',
+        'kcu-glacier': '#00A3E0',
+        'kcu-plum': '#6B1B9A',
         border: 'hsl(var(--border) / <alpha-value>)',
         input: 'hsl(var(--input) / <alpha-value>)',
         ring: 'hsl(var(--ring) / <alpha-value>)',
