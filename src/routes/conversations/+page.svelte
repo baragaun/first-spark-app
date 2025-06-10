@@ -1,6 +1,5 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
-  import { onMount } from 'svelte';
   import ChatList from './components/chat-list.svelte';
   import { MessageSquarePlus } from 'lucide-svelte';
   import { channelContext } from '@/contexts/channel-context.svelte';
@@ -9,20 +8,27 @@
   let searchQuery = $state('');
 
   let filteredChannels = $derived(
-    channelContext.myChannels.filter((channel) => {
-      if (!searchQuery) return true;
+    channelContext.myChannels
+      .filter((channel) => {
+        if (!channel.latestMessage) return false;
+        
+        if (!searchQuery) return true;
 
-      const query = searchQuery.toLowerCase();
-      return (
-        channel.name?.toLowerCase().includes(query) ||
-        channel.description?.toLowerCase().includes(query)
-      );
-    }),
+        const query = searchQuery.toLowerCase();
+        return (
+          channel.name?.toLowerCase().includes(query) ||
+          channel.description?.toLowerCase().includes(query)
+        );
+      })
+      .sort((a, b) => {
+        const aTimestamp = a.latestMessage?.updatedAt || a.latestMessage?.createdAt;
+        const bTimestamp = b.latestMessage?.updatedAt || b.latestMessage?.createdAt;
+      
+        if (!aTimestamp || !bTimestamp) return 0;        
+        // Descending
+        return new Date(bTimestamp).getTime() - new Date(aTimestamp).getTime();
+      })
   );
-
-  onMount(async () => {
-    await channelContext.findMyChannels();
-  });
 
   const handleSearch = (event: CustomEvent<string>) => {
     searchQuery = event.detail;

@@ -1,29 +1,26 @@
 <script lang="ts">
-  import { page } from '$app/state';
-  import { onMount } from 'svelte';
+  import { page } from '$app/stores';
+  import { getContext, onMount } from 'svelte';
   import ChatHeader from '../../conversations/components/chat-header.svelte';
   import MessageList from '../../conversations/components/message-list.svelte';
   import MessageInput from '../../conversations/components/message-input.svelte';
-  import { ChannelListItem, ChannelMessage, UserListItem } from '@baragaun/bg-node-client';
+  import { ChannelMessage, UserListItem } from '@baragaun/bg-node-client';
   import { X } from 'lucide-svelte';
   import Button from '@/components/ui/button/button.svelte';
-  import { channelContext } from '@/contexts/channel-context.svelte';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
   import type { ContactDetails } from '@/helpers/types';
-  import { selectedUser } from '@/stores/user-store';
+  import type { ChannelContext } from '@/contexts/channel-context.svelte';
+  import type { UsersContext } from '@/contexts/users-context.svelte';
 
-  let user: UserListItem | null = null;
+  const channelContext = getContext<ChannelContext>('channelContext');
+  const usersContext = getContext<UsersContext>('usersContext');
+
+  let selectedUser: UserListItem | null = null;
   let channelDetails = $state<ContactDetails | undefined>(undefined);
   let messages = $state<ChannelMessage[]>([]);
   let replyingTo = $state<ChannelMessage | null>(null);
   let isLoading = $state(false);
   let scrollToBottomFn: () => void;
 
-  selectedUser.subscribe((value) => {
-    user = value;
-  });
-
-  // Function to determine contact info based on channel participants
   const setContactInfo = async (recipientUser: UserListItem) => {
     channelDetails = undefined;
 
@@ -38,32 +35,24 @@
     };
   };
 
-  // const initializeChannel = async () => {
-  //   isLoading = true;
-  //   const response = await channelContext.findChannelMessages(channelId, messages.length, 20);
-  //   if (!response || !Array.isArray(response)) {
-  //     console.error('FindChannelMessages: received error.', { response });
-  //     messages = [];
-  //     return;
-  //   }
-  //   messages = response.reverse();
-  //   isLoading = false;
-  // };
-
   onMount(async () => {
-    setContactInfo(user!);
-    // if (channelContext.selectedChannel) {
-    //   setContactInfo(channelContext.selectedChannel);
-    //   initializeChannel();
-    // } else {
-    //   const response = await channelContext.findChannelById(channelId);
-    //   console.log('FindChannelById: response:', response);
-    //   if (response && typeof response !== 'string') {
-    //     channelContext.selectChannel(response);
-    //     setContactInfo(response);
-    //     initializeChannel();
-    //   }
-    // }
+    // Get user ID from URL params
+    const userId = $page.params.userId;
+    
+    if (!userId) {
+      console.error('No user ID provided in URL');
+      return;
+    }
+
+    // Find the user from the channelContext users list
+    selectedUser = usersContext.users.find(user => user.id === userId) || null;
+    
+    if (!selectedUser) {
+      console.error('User not found with ID:', userId);
+      return;
+    }
+
+    setContactInfo(selectedUser);
   });
 
   const handleScrollToBottomEvent = (event: CustomEvent<() => void>) => {
@@ -71,9 +60,9 @@
   };
 
   const handleSendMessage = async (messageText: string, replyToMessageId?: string) => {
-    if (!user) return;
+    if (!selectedUser) return;
     const channel = await channelContext.createChannel({
-      userIds: [user.id],
+      userIds: [selectedUser.id],
     });
 
     if (!channel || typeof channel === 'string') {
@@ -86,7 +75,7 @@
       messageText,
       replyToMessageId,
     };
-    // todo create channel first
+    
     const response = await channelContext.createChannelMessage(newMessage);
     if (!response || typeof response === 'string') {
       console.error('CreateChannelMessage: received error.', { response });
@@ -137,7 +126,7 @@
     </div>
   {:else if !channelDetails}
     <div class="flex flex-1 items-center justify-center">
-      <p>Conversation not found</p>
+      <p>User not found</p>
     </div>
   {:else}
     <div class="sticky top-0 z-30 bg-background shadow-sm">
