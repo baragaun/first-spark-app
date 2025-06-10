@@ -46,18 +46,18 @@
     --sidebar-ring: 217.2 91.2% 59.8%; */
 
     /* KCU theme */
-    --kcu-white:    0 0% 100%;         /* #ffffff — White */ 
-    --kcu-black:    240 10% 3.9%;      /* #000000 — Black */ 
-    --kcu-orange:   35.2 100% 46%;    /* #ed8b00 — Orange */ 
-    --kcu-glacier:  181 100% 36.3%;  /* #00b6b9 — Glacier */ 
-    --kcu-plum:     322.2 67.3% 32.4%; /* #8a1b61 — Plum */ 
-    --kcu-lime:     65 100% 42%;       /* #c4d600 — Lime */ 
-    --kcu-tangerine:42 88% 53%;        /* #f1b11c — Tangerine */ 
-    --kcu-juniper:  181 100% 19%;      /* #005f61 — Juniper */ 
-    --kcu-avocado:  99.3 46.1% 35.7%;  /* #4e8531 — Avocado */ 
-    --kcu-blackberry:318.1 37.6% 27.6%;/* #612c51 — Blackberry */ 
-    --kcu-pine:     99.3 46.1% 35.7%;  /* #275d38 — Pine — *estimate* using similar green */ 
-    --kcu-wood:     318.1 37.6% 27.6%; /* #5b3427 — Wood — *estimate* using similar deep brown */ 
+    --kcu-white: 0 0% 100%; /* #ffffff — White */
+    --kcu-black: 240 10% 3.9%; /* #000000 — Black */
+    --kcu-orange: 35.2 100% 46%; /* #ed8b00 — Orange */
+    --kcu-glacier: 181 100% 36.3%; /* #00b6b9 — Glacier */
+    --kcu-plum: 322.2 67.3% 32.4%; /* #8a1b61 — Plum */
+    --kcu-lime: 65 100% 42%; /* #c4d600 — Lime */
+    --kcu-tangerine: 42 88% 53%; /* #f1b11c — Tangerine */
+    --kcu-juniper: 181 100% 19%; /* #005f61 — Juniper */
+    --kcu-avocado: 99.3 46.1% 35.7%; /* #4e8531 — Avocado */
+    --kcu-blackberry: 318.1 37.6% 27.6%; /* #612c51 — Blackberry */
+    --kcu-pine: 99.3 46.1% 35.7%; /* #275d38 — Pine — *estimate* using similar green */
+    --kcu-wood: 318.1 37.6% 27.6%; /* #5b3427 — Wood — *estimate* using similar deep brown */
 
     --background: var(--kcu-white);
     --foreground: var(--kcu-blackberry);
@@ -65,7 +65,7 @@
     --muted: var(--kcu-orange);
     --muted-foreground: var(--kcu-plum);
 
-    --popover: var(var(--kcu-juniper))%;
+    --popover: var(var(--kcu-juniper)) %;
     --popover-foreground: var(--kcu-plum);
     --popover-background: var(--kcu-white);
 
