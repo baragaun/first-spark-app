@@ -11,7 +11,7 @@
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import type { ContactDetails } from '@/helpers/types';
 
-  const channelId = page.params.conversationId;
+  const channelId = page.params.channelId;
 
   let channelDetails = $state<ContactDetails | undefined>(undefined);
   let messages = $state<ChannelMessage[]>([]);

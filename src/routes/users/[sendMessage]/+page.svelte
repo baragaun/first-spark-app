@@ -1,9 +1,9 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { getContext, onMount } from 'svelte';
-  import ChatHeader from '../../conversations/components/chat-header.svelte';
-  import MessageList from '../../conversations/components/message-list.svelte';
-  import MessageInput from '../../conversations/components/message-input.svelte';
+  import ChatHeader from '../../chat/components/chat-header.svelte';
+  import MessageList from '../../chat/components/message-list.svelte';
+  import MessageInput from '../../chat/components/message-input.svelte';
   import { ChannelMessage, UserListItem } from '@baragaun/bg-node-client';
   import { X } from 'lucide-svelte';
   import Button from '@/components/ui/button/button.svelte';

@@ -6,11 +6,11 @@
   import type { ChannelContext } from '@/contexts/channel-context.svelte';
   import type { MyUserContext } from '@/contexts/my-user-context.svelte';
   import SearchBar from '@/components/ui/search-bar.svelte';
-  import type { UserListItem } from '@baragaun/bg-node-client';
+  import type { UserListItem, ChannelMessage } from '@baragaun/bg-node-client';
   import { getContext, onMount } from 'svelte';
   import { BadgeInfo, Edit, Ellipsis, Send } from 'lucide-svelte';
-  import MessageInput from '../conversations/components/message-input.svelte';
-  import MessageList from '../conversations/components/message-list.svelte';
+  import MessageInput from '../chat/components/message-input.svelte';
+  import MessageList from '../chat/components/message-list.svelte';
   import { format } from 'date-fns';
   import { UsersContext } from '@/contexts/users-context.svelte';
 
@@ -19,12 +19,39 @@
   const usersContext = getContext<UsersContext>('usersContext');
 
   let searchQuery = $state('');
+  let openDialogUserId = $state<string | null>(null);
   let userList = $derived(usersContext.users.filter((user) => user.userHandle
     ?.toLowerCase()
     .includes(searchQuery.toLowerCase())));
 
-  const createChannel = async (user: UserListItem) => {
-    goto(`/users/sendMessage/${user.id}`);
+  const handleSendMessage = async (user: UserListItem, messageText: string) => {
+    try {
+      const channel = await channelContext.createChannel({
+        userIds: [user.id],
+      });
+
+      if (!channel || typeof channel === 'string') {
+        console.error('CreateChannel: received error.', { channel });
+        return;
+      }
+
+      const newMessage: Partial<ChannelMessage> = {
+        channelId: channel.id,
+        messageText,
+      };
+      
+      const response = await channelContext.createChannelMessage(newMessage);
+      if (!response || typeof response === 'string') {
+        console.error('CreateChannelMessage: received error.', { response });
+        return;
+      }
+
+      openDialogUserId = null;
+      goto(`/chat/${channel.id}`);
+      
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
   };
 </script>
 
@@ -56,7 +83,10 @@
           </Card.Description>
         </Card.Content>
         <Card.Footer class="flex justify-end">
-          <Dialog.Root>
+          <Dialog.Root
+            open={openDialogUserId === user.id} 
+            onOpenChange={(open) => openDialogUserId = open ? user.id : null}
+          >
             <Dialog.Trigger class={buttonVariants({variant: 'default', size: 'sm'})}>
               <Send class='h-5 w-5' />
               Chat
@@ -79,26 +109,18 @@
                     <span class='text-muted-foreground'>@</span>{user.userHandle}
                   </Dialog.Title>
                   <div class='flex flex-col gap-6 p-6'>
-                    <!-- <MessageList
-                      messages={[{
-                        id: 'example_msg_id',
-                        createdAt: new Date().toString(),
-                        channelId: 'example_channel_id',
-                        messageText: "Hi! 👋 The most productive conversations start with a brief introduction, the necessary context, and a simple, actionable request. Do you think you can take it from here?"
-                      }]}
-                    /> -->
                     <div class="flex flex-col rounded-lg rounded-bl-none px-4 py-2 bg-muted">
                       <span class='text-muted-foreground text-xs self-start'>FirstSpark</span>
                       <p class="mt-1 flex items-center justify-end gap-1 text-xs text-foreground">
                         Hey, {myUserContext.myUserHandle}! 👋 The most productive conversations start with a brief introduction, the necessary context, and a simple, actionable request. Do you think you can take it from here?
                       </p>
-                      <span class='text-muted-foreground text-xs self-end'>{format(new Date(), 'h:mm a')}</span>
+                      <span class='text-muted-foreground text-xs self-end'>a moment ago</span>
                     </div>
                   </div>
                 </div>
               </div>
               <Dialog.Footer>
-                <MessageInput onSendMessage={(t) => console.log('clicked', t)} />
+                <MessageInput onSendMessage={(messageText) => handleSendMessage(user, messageText)} />
               </Dialog.Footer>
             </Dialog.Content>
           </Dialog.Root>

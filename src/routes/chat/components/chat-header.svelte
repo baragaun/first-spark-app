@@ -9,7 +9,7 @@
   let { contact: channelDetails }: { contact: ContactDetails | undefined } = $props();
 
   const handleBack = () => {
-    goto('/conversations');
+    goto('/chat');
   };
 </script>
 

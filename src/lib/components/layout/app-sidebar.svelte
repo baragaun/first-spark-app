@@ -29,7 +29,7 @@
     },*/
     {
       title: m['sidebar.menu.users'](),
-      url: '/find-users',
+      url: '/users',
       icon: User,
       requiresAuth: true,
     },

@@ -63,7 +63,7 @@
           data-channel-id={channel.id}
         >
           <a
-            href={`/conversations/${channel.id}`}
+            href={`/chat/${channel.id}`}
             class="flex items-center gap-4"
             onclick={() => handleChannelClick(channel)}
           >
