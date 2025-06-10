@@ -1,14 +1,16 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
   import ChatList from './components/chat-list.svelte';
-  import { MessageSquarePlus } from 'lucide-svelte';
-  import { channelContext } from '@/contexts/channels/channel-context.svelte';
+  import { MessageSquarePlus, Plus } from 'lucide-svelte';
+  import { ChannelContext } from '@/contexts/channels/channel-context.svelte';
   import SearchBar from '@/components/ui/search-bar.svelte';
+  import { getContext, onMount } from 'svelte';
+
+  const channelsContext = getContext<ChannelContext>('channelContext');
 
   let searchQuery = $state('');
-
   let filteredChannels = $derived(
-    channelContext.myChannels
+    channelsContext.myChannels
       .filter((channel) => {
         if (!channel.latestMessage) return false;
         
@@ -38,15 +40,19 @@
     // This would open a dialog to select a contact
     // goto('/contacts');
   };
+
+  onMount(async () => {
+    await channelsContext.findMyChannels();
+  })
 </script>
 
-<div class="container mx-auto max-w-4xl py-6">
+<div class="p-8">
   <div class="mb-6 flex items-center justify-between">
     <h1 class="text-2xl font-bold">Conversations</h1>
     <div class="flex items-center gap-2">
       <SearchBar on:search={handleSearch} />
-      <Button onclick={handleNewChat}>
-        <MessageSquarePlus class="h-5 w-5" />
+      <Button variant='ghost' onclick={handleNewChat}>
+        <Plus class="h-5 w-5" />
       </Button>
     </div>
   </div>

@@ -257,12 +257,13 @@
   {/if}
   <div class="space-y-4">
     {#each groupMessagesByDate(messages) as group}
-      <div class="relative my-6 flex items-center">
-        <Separator class="flex-1" />
-        <span class="mx-2 text-xs font-medium text-muted-foreground"
-          >{getDateDisplay(group.date)}</span
-        >
-        <Separator class="flex-1" />
+      <div class="relative my-6 flex items-center justify-center">
+        <!-- TODO: Add the "Conversation started <firstMessage.createdAt>" if i === 1 -->
+        <!-- <Separator class="flex w-1/3" /> -->
+        <span class="px-6 text-xs font-medium text-muted-foreground">
+          {getDateDisplay(group.date)}
+        </span>
+        <!-- <Separator class="flex w-1/3" /> -->
       </div>
 
       {#each group.messages as message (message.id)}

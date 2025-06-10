@@ -4,6 +4,7 @@ import { AppUiMessage } from '@/types/enums';
 import {
   CachePolicy,
   User,
+  UserListFilter,
   UserListItem,
 } from '@baragaun/bg-node-client';
 
@@ -11,7 +12,9 @@ let isUserLoading = $state(false);
 
 export class UsersContext {
   public users = $state<UserListItem[]>([]);
+  public searchText = $state('');
   private client = client;
+  private hasLoadedUsers = false;
 
   async findUserInfoById(recipientId: string): Promise<User | string | null | undefined> {
     if (!this.client.isInitialized) {
@@ -37,28 +40,35 @@ export class UsersContext {
     }
   }
 
-  async findUsers(searchText: string = ''): Promise<UserListItem[] | string | null | undefined> {
+  async getAllUsers(excludeIds?: string[]): Promise<UserListItem[] | string | null | undefined> {
     if (!this.client.isInitialized) {
-      console.error('UsersContext.findUsers: not initialized.');
+      console.error('UsersContext.getAllUsers: not initialized.');
       return translate(AppUiMessage.systemError);
     }
     try {
       isUserLoading = true;
+      
+      const filter: UserListFilter = { 
+        excludeIds,
+      };
+      
       const response = await this.client.operations.user.findUsers(
-        { searchText },
+        filter,
         {},
         {},
         {},
         { cachePolicy: CachePolicy.network },
       );
       if (!response || response.error || !response.objects) {
-        console.error('findUsers: received error.', { response });
+        console.error('getAllUsers: received error.', { response });
         return response.error || translate(AppUiMessage.systemError);
       }
+      
       this.users = response.objects;
+      this.hasLoadedUsers = true;
       return response.objects;
     } catch (error) {
-      console.error('findUsers: error', {
+      console.error('getAllUsers: error', {
         error: (error as Error).message,
         stack: (error as Error).stack,
       });
@@ -68,8 +78,63 @@ export class UsersContext {
     }
   }
 
+  async searchUsers(searchText: string, excludeIds?: string[]): Promise<UserListItem[] | string | null | undefined> {
+    if (!this.client.isInitialized) {
+      console.error('UsersContext.searchUsers: not initialized.');
+      return translate(AppUiMessage.systemError);
+    }
+    try {
+      isUserLoading = true;
+      
+      this.searchText = searchText;
+      
+      const filter: UserListFilter = { 
+        searchText, 
+        excludeIds,
+      };
+      
+      const response = await this.client.operations.user.findUsers(
+        filter,
+        {},
+        {},
+        {},
+        { cachePolicy: CachePolicy.network },
+      );
+      if (!response || response.error || !response.objects) {
+        console.error('searchUsers: received error.', { response });
+        return response.error || translate(AppUiMessage.systemError);
+      }
+      
+      this.users = response.objects;
+      return response.objects;
+    } catch (error) {
+      console.error('searchUsers: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return translate(AppUiMessage.systemError);
+    } finally {
+      isUserLoading = false;
+    }
+  }
+
+  async ensureUsersLoaded(excludeIds?: string[]): Promise<void> {
+    if (!this.hasLoadedUsers) {
+      await this.getAllUsers(excludeIds);
+    }
+  }
+
+  async clearSearch(excludeIds?: string[]): Promise<void> {
+    this.searchText = '';
+    await this.getAllUsers(excludeIds);
+  }
+
   public get isUserLoading(): boolean {
     return isUserLoading;
+  }
+
+  public get hasUsers(): boolean {
+    return this.hasLoadedUsers;
   }
 }
 

@@ -1,18 +1,14 @@
 <script lang="ts">
-  import { getContext, onMount, setContext, type Snippet } from 'svelte';
+  import { getContext, setContext, type Snippet } from 'svelte';
   import type { MyUserContext } from './my-user-context.svelte';
   import { usersContext } from './users-context.svelte';
   
   const myUserContext = getContext<MyUserContext>('myUserContext');
+
+  if (myUserContext.isSignedIn) {
+    setContext('usersContext', usersContext);
+  }
   
-  setContext('usersContext', usersContext);
-
-  onMount(() => {
-    if (myUserContext.isSignedIn) {
-      usersContext.findUsers();
-    }
-  });
-
   interface Props {
     children: Snippet;
   }

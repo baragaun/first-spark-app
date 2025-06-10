@@ -1,17 +1,13 @@
 <script lang="ts">
-  import { getContext, onMount, setContext, type Snippet } from 'svelte';
-  import { channelContext } from './channel-context.svelte';
+  import { getContext, setContext, type Snippet } from 'svelte';
   import type { MyUserContext } from '../users/my-user-context.svelte';
+  import { channelContext } from './channel-context.svelte';
 
   const myUserContext = getContext<MyUserContext>('myUserContext');
-  
-  setContext('channelContext', channelContext);
 
-  onMount(() => {
-    if (myUserContext.isSignedIn) {
-      channelContext.findMyChannels();
-    }
-  });
+  if (myUserContext.isSignedIn) {
+    setContext('channelContext', channelContext);
+  }
 
   interface Props {
     children: Snippet;

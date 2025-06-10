@@ -106,6 +106,15 @@ export class ChannelContext {
         console.error('FindChannelsById: received error.', { response });
         return response.error || translate(AppUiMessage.systemError);
       }
+      
+      // TODO: Later we expect to get a ChannelListItem so that we can use Participants
+      if (response.channel && response.participants) {
+        return {
+          ...response.channel,
+          participants: response.participants
+        } as ChannelListItem;
+      }
+      
       return response.channel;
     } catch (error) {
       console.error('FindChannelsById: error', {

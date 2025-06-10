@@ -1,8 +1,9 @@
 <script lang="ts">
+  import { goto } from '$app/navigation';
+  import { page } from '$app/state';
   import * as Card from '@/components/ui/card';
   import * as Dialog from '@/components/ui/dialog';
-  import { Button, buttonVariants } from '$lib/components/ui/button';
-  import { goto } from '$app/navigation';
+  import { Button, buttonVariants } from '@/components/ui/button';
   import type { ChannelContext } from '@/contexts/channels/channel-context.svelte';
   import type { MyUserContext } from '@/contexts/users/my-user-context.svelte';
   import SearchBar from '@/components/ui/search-bar.svelte';
@@ -12,17 +13,38 @@
   import MessageInput from '../chat/components/message-input.svelte';
   import MessageList from '../chat/components/message-list.svelte';
   import { format } from 'date-fns';
-  import { UsersContext } from '@/contexts/users/users-context.svelte';
+  import type { UsersContext } from '@/contexts/users/users-context.svelte';
 
   const channelContext = getContext<ChannelContext>('channelContext');
   const myUserContext = getContext<MyUserContext>('myUserContext');
   const usersContext = getContext<UsersContext>('usersContext');
 
-  let searchQuery = $state('');
+    
+  const channelId = $derived(page.params.channelId);
   let openDialogUserId = $state<string | null>(null);
-  let userList = $derived(usersContext.users.filter((user) => user.userHandle
-    ?.toLowerCase()
-    .includes(searchQuery.toLowerCase())));
+
+  let userList = $derived.by(() => {
+    if (!usersContext?.users) return [];
+    
+    if (usersContext.searchText) {
+      const filtered = usersContext.users.filter((user) => 
+        user.userHandle?.toLowerCase().includes(usersContext.searchText.toLowerCase())
+      );
+      return filtered;
+    }
+    
+    return usersContext.users;
+  });
+
+  const handleSearch = async (searchText: string) => {
+    if (!usersContext) return;
+    
+    if (searchText.trim()) {
+      await usersContext.searchUsers(searchText, [myUserContext.myUserId || '']);
+    } else {
+      await usersContext.clearSearch([myUserContext.myUserId || '']);
+    }
+  };
 
   const handleSendMessage = async (user: UserListItem, messageText: string) => {
     try {
@@ -53,17 +75,34 @@
       console.error('Error sending message:', error);
     }
   };
+
+  onMount(async () => {
+    if (usersContext && myUserContext.myUserId) {
+      try {
+        await usersContext.ensureUsersLoaded([myUserContext.myUserId]);
+      } catch (error) {
+        console.error('Error loading users:', error);
+      }
+    }
+  });
 </script>
 
-<div class="container mx-auto max-w-4xl py-6">
+<div class="p-8">
   <div class="mb-6 flex items-center justify-between">
     <h1 class="text-2xl font-bold">Find Users</h1>
     <div class="flex items-center gap-2">
-      <SearchBar on:search={(event) => (searchQuery = event.detail)} />
+      <SearchBar on:search={(event) => handleSearch(event.detail)} />
     </div>
   </div>
 
-  <div class="grid sm: grid-cols-2 gap-4">
+  {#if usersContext?.isUserLoading}
+    <div class="text-center py-8">Loading users...</div>
+  {:else if userList.length === 0}
+    <div class="text-center py-8 text-muted-foreground">
+      {usersContext?.searchText ? 'No users found matching your search.' : ' No users available.'}
+    </div>
+  {:else}
+    <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
     {#each userList as user}
       <Card.Root class='relative'>
         <Card.Header class="flex gap-2 items-center">
@@ -127,5 +166,6 @@
         </Card.Footer>
       </Card.Root>
     {/each}
-  </div>
+    </div>
+  {/if}
 </div>
