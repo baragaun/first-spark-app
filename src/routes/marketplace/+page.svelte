@@ -9,39 +9,45 @@
   import type { GiftCardProduct, Vendor, ProductCategory } from '@baragaun/bg-node-client';
   import placeholderImage from '../../assets/images/placeholder.png';
   import { goto } from '$app/navigation';
-  import { giftCardProductsStore, vendorsStore, productCategoriesStore, dataLoaded } from '$lib/stores/marketplace-store';
+  import {
+    giftCardProductsStore,
+    vendorsStore,
+    productCategoriesStore,
+    dataLoaded,
+  } from '$lib/stores/marketplace-store';
   import { IsMobile } from '$lib/hooks/is-mobile.svelte';
-  
+
   // Initialize the mobile detector
   const isMobile = new IsMobile();
-  
+
   let searchQuery = '';
   let selectedCategory: ProductCategory | 'All' = 'All';
-  
+
   const giftCardImageDomain = 'https://d27wpajtnol6ce.cloudfront.net';
-  
+
   function navigateToGiftCardDetail(giftCardId: string) {
     goto(`/marketplace/${giftCardId}`);
   }
 
-  $: filteredGiftCardProducts = $giftCardProductsStore.filter(giftCardProduct => {
+  $: filteredGiftCardProducts = $giftCardProductsStore.filter((giftCardProduct) => {
     // Filter by search query (vendor name)
-    const matchesVendor = $vendorsStore.some(vendor => 
-      vendor.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
-      vendor.id === giftCardProduct.vendorId
+    const matchesVendor = $vendorsStore.some(
+      (vendor) =>
+        vendor.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+        vendor.id === giftCardProduct.vendorId,
     );
     // Filter by category
-    const matchesCategory = selectedCategory === 'All' || 
-      giftCardProduct.categories?.includes(
-        selectedCategory.id,
-      ); 
+    const matchesCategory =
+      selectedCategory === 'All' || giftCardProduct.categories?.includes(selectedCategory.id);
 
-    const hasDenominations = ((giftCardProduct.denominations?.length ?? 0) > 0  || giftCardProduct.genericGiftCardId != undefined);
+    const hasDenominations =
+      (giftCardProduct.denominations?.length ?? 0) > 0 ||
+      giftCardProduct.genericGiftCardId != undefined;
     return matchesVendor && matchesCategory && hasDenominations;
   });
 
   function getVendorForGiftCard(giftCardProduct: GiftCardProduct): Vendor | undefined {
-    return $vendorsStore.find(vendor => vendor.id === giftCardProduct.vendorId);
+    return $vendorsStore.find((vendor) => vendor.id === giftCardProduct.vendorId);
   }
 
   onMount(async () => {
@@ -58,20 +64,20 @@
 <div class="container mx-auto px-4 py-6">
   <header class="mb-6">
     <h1 class="text-3xl font-bold text-primary">First Spark Marketplace</h1>
-    <p class="text-muted-foreground mt-2">Discover and connect with our partner services</p>
+    <p class="mt-2 text-muted-foreground">Discover and connect with our partner services</p>
   </header>
 
-  <div class="flex items-center gap-4 mb-6">
+  <div class="mb-6 flex items-center gap-4">
     <div class="relative flex-1">
       <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-      <Input 
-        type="search" 
-        placeholder="Search marketplace" 
+      <Input
+        type="search"
+        placeholder="Search marketplace"
         class="pl-10"
         bind:value={searchQuery}
       />
     </div>
-    
+
     <DropdownMenu.Root>
       <DropdownMenu.Trigger>
         <Button variant="outline" class="flex items-center gap-2">
@@ -79,22 +85,16 @@
           <ChevronDown class="h-4 w-4" />
         </Button>
       </DropdownMenu.Trigger>
-      <DropdownMenu.Content class="bg-background max-h-[300px] overflow-y-auto">
-        <DropdownMenu.Item 
-          onclick={() => selectedCategory = 'All'}
-          class="cursor-pointer"
-        >
+      <DropdownMenu.Content class="max-h-[300px] overflow-y-auto bg-background">
+        <DropdownMenu.Item onclick={() => (selectedCategory = 'All')} class="cursor-pointer">
           All
           {#if selectedCategory === 'All'}
             <DropdownMenu.Shortcut>✓</DropdownMenu.Shortcut>
           {/if}
         </DropdownMenu.Item>
-        
+
         {#each $productCategoriesStore as category}
-          <DropdownMenu.Item 
-            onclick={() => selectedCategory = category}
-            class="cursor-pointer"
-          >
+          <DropdownMenu.Item onclick={() => (selectedCategory = category)} class="cursor-pointer">
             {category.labelEn}
             {#if selectedCategory !== 'All' && selectedCategory.name === category.name}
               <DropdownMenu.Shortcut>✓</DropdownMenu.Shortcut>
@@ -105,32 +105,34 @@
     </DropdownMenu.Root>
   </div>
 
-  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 overflow-y-auto max-h-[calc(100vh-220px)]">
+  <div
+    class="grid max-h-[calc(100vh-220px)] grid-cols-2 gap-4 overflow-y-auto md:grid-cols-3 lg:grid-cols-4"
+  >
     {#each filteredGiftCardProducts as giftCardProduct (giftCardProduct.id)}
       {@const vendor = getVendorForGiftCard(giftCardProduct)}
       {#if vendor}
-        <button 
+        <button
           type="button"
-          class="flex flex-col items-center text-left bg-transparent border-0 p-0 hover:opacity-90 transition-opacity" 
+          class="flex flex-col items-center border-0 bg-transparent p-0 text-left transition-opacity hover:opacity-90"
           onclick={() => navigateToGiftCardDetail(giftCardProduct.id)}
           onkeydown={(e) => e.key === 'Enter' && navigateToGiftCardDetail(giftCardProduct.id)}
           aria-label={`View ${vendor.name} gift card details`}
         >
-          <div class="rounded-xl bg-card shadow-lg overflow-hidden mb-2 w-full aspect-[4/3]">
-            <img 
-              src={giftCardImageDomain + '/giftcards/' + giftCardProduct.imageSourceFront} 
-              alt={vendor.name} 
-              class="w-full h-full object-cover"
+          <div class="mb-2 aspect-[4/3] w-full overflow-hidden rounded-xl bg-card shadow-lg">
+            <img
+              src={giftCardImageDomain + '/giftcards/' + giftCardProduct.imageSourceFront}
+              alt={vendor.name}
+              class="h-full w-full object-cover"
               onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
             />
           </div>
           <div class="flex items-center gap-2">
             {#if !isMobile.current}
-              <div class="w-6 h-6 rounded-full overflow-hidden">
-                <img 
-                  src={giftCardImageDomain + '/vendors/' + vendor.logoImageSource} 
-                  alt="" 
-                  class="w-full h-full object-cover"
+              <div class="h-6 w-6 overflow-hidden rounded-full">
+                <img
+                  src={giftCardImageDomain + '/vendors/' + vendor.logoImageSource}
+                  alt=""
+                  class="h-full w-full object-cover"
                   onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
                 />
               </div>
@@ -142,4 +144,3 @@
     {/each}
   </div>
 </div>
-

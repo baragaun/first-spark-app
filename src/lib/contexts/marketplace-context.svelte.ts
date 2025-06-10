@@ -1,14 +1,7 @@
 import translate from '@/helpers/language/translate';
 import { client } from '@/services/bg-node-client';
 import { AppUiMessage } from '@/types/enums';
-import {
-  CachePolicy,
-  Vendor,
-  GiftCardProduct,
-  ProductCategory,
-  type QueryOptions,
-} from '@baragaun/bg-node-client';
-import { writable } from 'svelte/store';
+import { CachePolicy, GiftCardProduct, ProductCategory, Vendor } from '@baragaun/bg-node-client';
 let isLoading = $state(false);
 
 export class MarketplaceContext {
