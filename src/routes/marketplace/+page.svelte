@@ -1,4 +1,3 @@
-
 <script lang="ts">
   import { m } from '$lib/paraglide/messages.js';
   import { Search, ChevronDown } from 'lucide-svelte';
@@ -31,14 +30,14 @@
       vendor.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
       vendor.id === giftCardProduct.vendorId
     );
-
     // Filter by category
     const matchesCategory = selectedCategory === 'All' || 
       giftCardProduct.categories?.includes(
         selectedCategory.id,
-      );
-    
-    return matchesVendor && matchesCategory;
+      ); 
+
+    const hasDenominations = ((giftCardProduct.denominations?.length ?? 0) > 0  || giftCardProduct.genericGiftCardId != undefined);
+    return matchesVendor && matchesCategory && hasDenominations;
   });
 
   function getVendorForGiftCard(giftCardProduct: GiftCardProduct): Vendor | undefined {
@@ -117,7 +116,7 @@
           onkeydown={(e) => e.key === 'Enter' && navigateToGiftCardDetail(giftCardProduct.id)}
           aria-label={`View ${vendor.name} gift card details`}
         >
-          <div class="rounded-lg border bg-card shadow-sm overflow-hidden mb-2 w-full aspect-[4/3]">
+          <div class="rounded-xl bg-card shadow-lg overflow-hidden mb-2 w-full aspect-[4/3]">
             <img 
               src={giftCardImageDomain + '/giftcards/' + giftCardProduct.imageSourceFront} 
               alt={vendor.name} 
