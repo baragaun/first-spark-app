@@ -70,12 +70,14 @@
   <div class="mb-6 flex items-center gap-4">
     <div class="relative flex-1">
       <!-- Gradient border wrapper -->
-      <div class="relative rounded-full p-[2px] bg-gradient-to-r from-kcu-orange via-kcu-glacier to-kcu-plum">
+      <div
+        class="relative rounded-full bg-gradient-to-r from-kcu-orange via-kcu-glacier to-kcu-plum p-[2px]"
+      >
         <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           type="search"
           placeholder="Search marketplace"
-          class="w-full bg-background border-0 focus:outline-none focus:ring-0 rounded-full px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 md:text-sm pl-10 search-input-override" 
+          class="search-input-override w-full rounded-full border-0 bg-background px-3 py-2 pl-10 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
           bind:value={searchQuery}
         />
       </div>

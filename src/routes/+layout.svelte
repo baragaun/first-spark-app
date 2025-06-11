@@ -12,11 +12,52 @@
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { locales, localizeHref } from '@/paraglide/runtime';
   import type { MyUser } from '@baragaun/bg-node-client';
+  import { onMount } from 'svelte';
+  import { FirstSparkApp, MimbleApp } from '@/types/enums';
+  import MetaTags from '$lib/components/shared/meta-tags.svelte';
 
   let { children } = $props();
   let isOffline: boolean = $derived(myUserContext.isOffline);
   let isAuthenticated: boolean = $derived(myUserContext.isSignedIn);
   let myUser: MyUser | undefined = $derived(myUserContext.myUser);
+
+  let title = $state('');
+  let description = $state('');
+  let canonicalUrl = $state('');
+
+  onMount(() => {
+    console.log('this is always called?');
+
+    let projectName = import.meta.env.PUBLIC_PROJECTNAME;
+    console.log(projectName);
+    switch (projectName) {
+      case 'FirstSpark':
+        title = FirstSparkApp.title;
+        description = FirstSparkApp.description;
+        canonicalUrl = FirstSparkApp.canonicalUrl;
+        break;
+      case 'Mimble':
+        title = MimbleApp.title;
+        description = MimbleApp.description;
+        canonicalUrl = MimbleApp.canonicalUrl;
+        setFavicon('/favicon-kcu.png');
+        break;
+      default:
+        break;
+    }
+  });
+
+  function setFavicon(src: string, type = 'image/png') {
+    let link = document.getElementById('favicon') as HTMLLinkElement | null;
+    if (!link) {
+      link = document.createElement('link');
+      link.id = 'favicon';
+      link.rel = 'icon';
+      document.head.appendChild(link);
+    }
+    link.type = type;
+    link.href = src;
+  }
 
   const onSignOut = async () => {
     // TODO: add a confirmation dialog
@@ -26,6 +67,8 @@
     await goto('/signin');
   };
 </script>
+
+<MetaTags {title} {description} {canonicalUrl} />
 
 <MyUserProvider>
   <div class="flex min-h-screen flex-col bg-background font-sans antialiased">
