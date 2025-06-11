@@ -21,3 +21,15 @@ export enum MsaTokenStatus {
   unset = 'unset',
   verifying = 'verifying',
 }
+
+export enum FirstSparkApp {
+  title = 'First Spark',
+  description = 'Discover and connect with our partner services',
+  canonicalUrl = '/favicon.png',
+}
+
+export enum MimbleApp {
+  title = 'Mimble',
+  description = 'Discover and connect with our partner services',
+  canonicalUrl = '/favicon-kcu.png',
+}
