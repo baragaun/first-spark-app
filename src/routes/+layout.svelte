@@ -15,6 +15,7 @@
   import { onMount } from 'svelte';
   import { FirstSparkApp, MimbleApp } from '@/types/enums';
   import MetaTags from '$lib/components/shared/meta-tags.svelte';
+  import { env } from '$env/dynamic/public';
 
   let { children } = $props();
   let isOffline: boolean = $derived(myUserContext.isOffline);
@@ -26,10 +27,7 @@
   let canonicalUrl = $state('');
 
   onMount(() => {
-    console.log('this is always called?');
-
-    let projectName = import.meta.env.PUBLIC_PROJECTNAME;
-    console.log(projectName);
+    let projectName = env.PUBLIC_PROJECTNAME;
     switch (projectName) {
       case 'FirstSpark':
         title = FirstSparkApp.title;
