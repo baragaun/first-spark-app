@@ -4,12 +4,69 @@
   import type { ChannelListItem } from '@baragaun/bg-node-client';
   import ChannelOptionsMenu from './channel-options-menu.svelte';
   import { myUserContext } from '@/contexts/users/my-user-context.svelte';
-  import { channelContext } from '@/contexts/channels/channel-context.svelte';
+  import { ChannelContext } from '@/contexts/channels/channel-context.svelte';
+  import { getContext, onMount } from 'svelte';
+  import SearchBar from '@/components/ui/search-bar.svelte';
+  import { m } from '@/paraglide/messages';
+  import Button from '@/components/ui/button/button.svelte';
+  import { Plus } from 'lucide-svelte';
+  import { goto } from '$app/navigation';
 
-  let { channels }: { channels: ChannelListItem[] } = $props();
+  let {
+    handleNewChat,
+  }: {
+    handleNewChat: () => void;
+  } = $props();
 
-  // todo change to fetch real user by id
+  const channelsContext = getContext<ChannelContext>('channelContext');
   const currentUserId = myUserContext.myUserId; // This should match the variable name in +layout.ts
+
+  let skip = $state(0);
+  let searchQuery = $state('');
+
+  const handleSearch = (event: CustomEvent<string>) => {
+    searchQuery = event.detail;
+  };
+
+  const handleScroll = async (event: Event) => {
+    const target = event.target as HTMLElement;
+    if (target.scrollHeight - target.scrollTop === target.clientHeight) {
+      // User has scrolled to the bottom
+      console.log('Fetching more channels...');
+      await channelsContext.findMyChannels(skip);
+    }
+  };
+
+  onMount(async () => {
+    if(myUserContext.isSignedIn) {
+    await channelsContext.findMyChannels(0);
+    skip = channels.length
+    } else {
+      goto('/signin');
+    }
+  });
+
+  let channels = $derived( channelsContext.myChannels
+    .filter((channel) => {
+      if (!channel.latestMessage) return false;
+
+      if (!searchQuery) return true;
+
+      const query = searchQuery.toLowerCase();
+      return (
+        channel.name?.toLowerCase().includes(query) ||
+        channel.description?.toLowerCase().includes(query)
+      );
+    })
+    .sort((a, b) => {
+      const aTimestamp = a.latestMessage?.updatedAt || a.latestMessage?.createdAt;
+      const bTimestamp = b.latestMessage?.updatedAt || b.latestMessage?.createdAt;
+
+      if (!aTimestamp || !bTimestamp) return 0;
+      // Descending
+      return new Date(bTimestamp).getTime() - new Date(aTimestamp).getTime();
+    })
+  );
 
   const formatTime = (date: Date | string) => {
     return formatDistanceToNow(new Date(date), { addSuffix: true });
@@ -36,7 +93,7 @@
   };
 
   const handleDeleteChannel = async (participantId: string, channelId: string) => {
-    const response = await channelContext.deleteChannelParticipant(participantId);
+    const response = await channelsContext.deleteChannelParticipant(participantId);
     if (!response) {
       console.error('DeleteChannel: received error.', { response });
       return;
@@ -45,71 +102,80 @@
   };
 
   function handleChannelClick(channel: ChannelListItem) {
-    channelContext.selectChannel(channel);
+    channelsContext.selectChannel(channel);
   }
+
 </script>
 
-<div class="space-y-2">
-  {#if channels.length === 0}
-    <div class="rounded-lg border p-8 text-center">
-      <p class="text-muted-foreground">No conversations yet</p>
+<div class="flex flex-col h-screen">
+  <!-- Sticky Header -->
+  <div class="sticky top-0 z-10 mb-6 flex items-center justify-between">
+    <h1 class="text-2xl font-bold">{m['chat.list_title']()}</h1>
+    <div class="flex items-center gap-2">
+      <SearchBar on:search={handleSearch} />
+      <Button variant="ghost" onclick={handleNewChat}>
+        <Plus class="h-5 w-5" />
+      </Button>
     </div>
-  {:else}
-    {#each channels as channel}
-      {@const recipientNamePromise = getRecipientName(channel)}
-      {#await recipientNamePromise then recipientName}
-        <div
-          class="group relative rounded-lg border p-4 transition-colors hover:bg-muted/50"
-          data-channel-id={channel.id}
-        >
-          <a
-            href={`/chat/${channel.id}`}
-            class="flex items-center gap-4"
-            onclick={() => handleChannelClick(channel)}
+  </div>
+
+  <!-- Scrollable Chat List -->
+  <div class="flex-1 overflow-y-auto p-4 space-y-2" onscroll={handleScroll}>
+    {#if channels.length === 0}
+      <div class="rounded-lg border p-8 text-center">
+        <p class="text-muted-foreground">No conversations yet</p>
+      </div>
+    {:else}
+      {#each channels as channel}
+        {@const recipientNamePromise = getRecipientName(channel)}
+        {#await recipientNamePromise then recipientName}
+          <div
+            class="group relative rounded-lg border p-4 transition-colors hover:bg-muted/50"
+            data-channel-id={channel.id}
           >
-            <Avatar.Root class="h-12 w-12">
-              <Avatar.Fallback>
-                {#if channel.userIds && channel.userIds.length > 2}
-                  {channel.name?.charAt(0) || '?'}
-                {:else}
-                  {recipientName?.charAt(0) || '?'}
-                {/if}
-              </Avatar.Fallback>
-            </Avatar.Root>
-
-            <div class="flex-1 overflow-hidden">
-              <div class="flex items-center justify-between">
-                <h3 class="font-medium">
+            <a
+              href={`/chat/${channel.id}`}
+              class="flex items-center gap-4"
+              onclick={() => handleChannelClick(channel)}
+            >
+              <Avatar.Root class="h-12 w-12">
+                <Avatar.Fallback>
                   {#if channel.userIds && channel.userIds.length > 2}
-                    {channel.name || 'Group Chat'}
+                    {channel.name?.charAt(0) || '?'}
                   {:else}
-                    {recipientName || 'Unknown User'}
+                    {recipientName?.charAt(0) || '?'}
                   {/if}
-                </h3>
-                <div class="flex items-center gap-2">
-                  <span class="text-xs text-muted-foreground"
-                    >{formatTime(
-                      channel.latestMessage?.updatedAt ??
-                        channel.latestMessage?.createdAt ??
-                        new Date(),
-                    )}</span
-                  >
-                  <ChannelOptionsMenu {channel} onDeleteChannel={handleDeleteChannel} />
-                </div>
-              </div>
-              <p class="truncate text-sm text-muted-foreground">
-                {channel.latestMessage?.messageText || 'No latest messages'}
-              </p>
-            </div>
+                </Avatar.Fallback>
+              </Avatar.Root>
 
-            <!-- {#if channel.metadata?.unseenMessageInfo && channel.metadata.unreadCount > 0}
-              <div class="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
-                {channel.unreadCount}
+              <div class="flex-1 overflow-hidden">
+                <div class="flex items-center justify-between">
+                  <h3 class="font-medium">
+                    {#if channel.userIds && channel.userIds.length > 2}
+                      {channel.name || 'Group Chat'}
+                    {:else}
+                      {recipientName || 'Unknown User'}
+                    {/if}
+                  </h3>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs text-muted-foreground"
+                      >{formatTime(
+                        channel.latestMessage?.updatedAt ??
+                          channel.latestMessage?.createdAt ??
+                          new Date(),
+                      )}</span
+                    >
+                    <ChannelOptionsMenu {channel} onDeleteChannel={handleDeleteChannel} />
+                  </div>
+                </div>
+                <p class="truncate text-sm text-muted-foreground">
+                  {channel.latestMessage?.messageText || 'No latest messages'}
+                </p>
               </div>
-            {/if} -->
-          </a>
-        </div>
-      {/await}
-    {/each}
-  {/if}
+            </a>
+          </div>
+        {/await}
+      {/each}
+    {/if}
+  </div>
 </div>

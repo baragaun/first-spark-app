@@ -20,4 +20,10 @@ export default defineConfig({
     exclude: ['tests/e2e/**/*', 'node_modules/**/*'],
     setupFiles: 'tests/setup.ts',
   },
+   server: {
+    host: true, // Allow external connections
+    strictPort: true, // Ensure the port is not changed automatically
+    open: false, // Prevent auto-opening in the browser
+    allowedHosts: ['*'], // Allow all hosts (use cautiously in development)
+  },
 });

@@ -17,7 +17,7 @@ let selectedChannel = $state<ChannelListItem | null>(null);
 export class ChannelContext {
   private client = client;
 
-  async findMyChannels(): Promise<ChannelListItem[] | string | undefined> {
+  async findMyChannels(skip: number): Promise<ChannelListItem[] | string | undefined> {
     if (!this.client.isInitialized) {
       console.error('ChannelContext.findMyChannels: not initialized.');
       return translate(AppUiMessage.systemError);
@@ -28,7 +28,7 @@ export class ChannelContext {
         filter: {},
         match: {},
         queryOptions: { cachePolicy: CachePolicy.network },
-        options: {},
+        options: {skip, limit : 20},
       };
       const participantLimit = 2;
       const response = await this.client.operations.channel.findMyChannels(
@@ -42,7 +42,11 @@ export class ChannelContext {
         return response.error || translate(AppUiMessage.systemError);
       }
 
-      myChannels = response.objects;
+      if (skip === 0) {
+        myChannels = response.objects;
+      } else {
+        myChannels = [...myChannels, ...response.objects];
+      }
 
       return response.objects;
     } catch (error) {
@@ -106,7 +110,7 @@ export class ChannelContext {
         console.error('FindChannelsById: received error.', { response });
         return response.error || translate(AppUiMessage.systemError);
       }
-      
+
       // TODO: Later we expect to get a ChannelListItem so that we can use Participants
       if (response.channel && response.participants) {
         return {
@@ -114,7 +118,7 @@ export class ChannelContext {
           participants: response.participants
         } as ChannelListItem;
       }
-      
+
       return response.channel;
     } catch (error) {
       console.error('FindChannelsById: error', {
