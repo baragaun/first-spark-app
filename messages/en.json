@@ -172,6 +172,9 @@
     "compose": "New message",
     "compose_tip": "Hey, {userHandle}! 👋 The most productive conversations start with a brief introduction, the necessary context, and a simple, actionable request. Do you think you can take it from here?"
   },
+  "users": {
+    "search": "Search for users..."
+  },
   "connection": {
     "offline": "You're offline",
     "online": "Powered by First Spark",

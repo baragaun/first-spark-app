@@ -178,6 +178,9 @@
     "compose": "Neue Nachricht",
     "compose_tip": "Hallo, {userHandle}! 👋 Die produktivsten Gespräche beginnen mit einer kurzen Vorstellung, dem notwendigen Kontext und einer einfachen, umsetzbaren Anfrage. Denkst du, du schaffst es von hier aus?"
   },
+  "users": {
+    "search": "Search for people by username"
+  },
   "setting": {
     "setting_label": "Einstellungen",
     "account": "Konto",

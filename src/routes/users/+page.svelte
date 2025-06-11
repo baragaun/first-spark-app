@@ -9,12 +9,14 @@
   import SearchBar from '@/components/ui/search-bar.svelte';
   import type { UserListItem, ChannelMessage } from '@baragaun/bg-node-client';
   import { getContext, onMount } from 'svelte';
-  import { BadgeInfo, Edit, Ellipsis, Send } from 'lucide-svelte';
+  import { BadgeInfo, Edit, Ellipsis, Send, User, X } from 'lucide-svelte';
   import MessageInput from '../chat/components/message-input.svelte';
   import MessageList from '../chat/components/message-list.svelte';
   import { format } from 'date-fns';
   import type { UsersContext } from '@/contexts/users/users-context.svelte';
   import { m } from '@/paraglide/messages';
+  import { Input } from '@/components/ui/input';
+  import { debounce } from 'throttle-debounce';
 
   const channelContext = getContext<ChannelContext>('channelContext');
   const myUserContext = getContext<MyUserContext>('myUserContext');
@@ -23,29 +25,22 @@
     
   const channelId = $derived(page.params.channelId);
   let openDialogUserId = $state<string | null>(null);
+  let inputRef = $state<HTMLInputElement | null>(null);
+
+  let searchText = $derived(usersContext.searchText);
 
   let userList = $derived.by(() => {
     if (!usersContext?.users) return [];
     
-    if (usersContext.searchText) {
+    if (searchText) {
       const filtered = usersContext.users.filter((user) => 
-        user.userHandle?.toLowerCase().includes(usersContext.searchText.toLowerCase())
+        user.userHandle?.toLowerCase().includes(searchText.toLowerCase())
       );
       return filtered;
     }
     
     return usersContext.users;
   });
-
-  const handleSearch = async (searchText: string) => {
-    if (!usersContext) return;
-    
-    if (searchText.trim()) {
-      await usersContext.searchUsers(searchText, [myUserContext.myUserId || '']);
-    } else {
-      await usersContext.clearSearch([myUserContext.myUserId || '']);
-    }
-  };
 
   const handleSendMessage = async (user: UserListItem, messageText: string) => {
     try {
@@ -86,16 +81,62 @@
       }
     }
   });
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      handleClearSearch();
+    }
+  };
+
+  const debouncedSearch = debounce(300, async (searchQuery: string) => {
+    if (!usersContext) return;
+    
+    if (searchQuery.trim()) {
+      await usersContext.searchUsers(searchQuery, [myUserContext.myUserId || '']);
+    } else {
+      await usersContext.clearSearch([myUserContext.myUserId || '']);
+    }
+  });
+
+  const handleInput = async () => {
+    const currentSearchText = usersContext.searchText;    
+    debouncedSearch(currentSearchText);
+  };
+
+  const handleClearSearch = async () => {
+    searchText = '';
+    if (usersContext) {
+      await usersContext.clearSearch([myUserContext.myUserId || '']);
+    }
+    inputRef?.focus();
+  };
+
 </script>
 
-<div class="p-8">
-  <div class="mb-6 flex items-center justify-between">
-    <h1 class="text-2xl font-bold">Find Users</h1>
-    <div class="flex items-center gap-2">
-      <SearchBar on:search={(event) => handleSearch(event.detail)} />
+<!-- THIS IS BEING REFACTORED INTO A COMPONENT - the original "Find Users" will become "Contacts" later -->
+
+<div class="p-8 flex flex-col gap-6">
+  <div class="relative flex items-center justify-center">
+    <Input
+      bind:ref={inputRef}
+      type="text"
+      placeholder={m['users.search']()}
+      bind:value={usersContext.searchText}
+      onkeydown={handleKeyDown}
+      oninput={handleInput}
+      class="pr-16"
+    />
+    <div class="absolute right-0 flex">
+      <Button
+        variant="ghost"
+        class="h-8 w-8"
+        onclick={searchText ? handleClearSearch : null}
+        aria-label={searchText ? "Clear search" : "Close search"}
+      >
+        <X class="h-4 w-4" />
+      </Button>
     </div>
   </div>
-
   {#if usersContext?.isUserLoading}
     <div class="text-center py-8">Loading users...</div>
   {:else if userList.length === 0}
@@ -103,70 +144,68 @@
       {usersContext?.searchText ? 'No users found matching your search.' : ' No users available.'}
     </div>
   {:else}
-    <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-    {#each userList as user}
-      <Card.Root class='relative'>
-        <Card.Header class="flex gap-2 items-center">
-            <img
-              src={user.avatarUrl || 'src/assets/icon.svg'}
-              alt={user.userHandle}
-              class="aspect-ratio-square max-h-24"
-            />
-          <Button disabled variant='ghost' size='icon' class='absolute top-0 right-2'>
-            <Ellipsis class='h-5 w-5' />
-          </Button> 
-        </Card.Header>
-        <Card.Content class='max-h-48 flex flex-col flex-grow items-center justify-center gap-4'>
-          <Card.Title>{user.userHandle}</Card.Title>
-          <Card.Description>
-            <p class='text-ellipsis'>Connect with {user.userHandle} by viewing their profile or sending a message.</p>
-          </Card.Description>
-        </Card.Content>
-        <Card.Footer class="flex justify-end">
-          <Dialog.Root
-            open={openDialogUserId === user.id} 
-            onOpenChange={(open) => openDialogUserId = open ? user.id : null}
-          >
-            <Dialog.Trigger class={buttonVariants({variant: 'default', size: 'sm'})}>
-              <Send class='h-5 w-5' />
-              Chat
-            </Dialog.Trigger>
-            <Dialog.Content class='rounded-xl'>
-              <Dialog.Header>
-                <Dialog.Title class='flex items-center gap-2'>
-                  <Edit class='h-5 w-5' />
-                  {m['chat.compose']()}
+    <div class="flex flex-col gap-2 py-4 max-h-[50vh] overflow-auto border rounded-lg p-4">
+      {#each userList as user (user.id)}
+        <Dialog.Root
+          open={openDialogUserId === user.id} 
+          onOpenChange={(open) => openDialogUserId = open ? user.id : null}
+        >
+          <Dialog.Trigger>
+            <Card.Root class='relative max-h-36'>
+              <Card.Content class='flex flex-grow items-center justify-between p-4'>
+                <div class='flex items-center gap-4'>
+                  <img
+                    src={user.avatarUrl || 'src/assets/icon.svg'}
+                    alt={user.userHandle}
+                    class="aspect-ratio-square max-h-12"
+                  />
+                  <div class='flex flex-col items-start gap-1'>
+                    <Card.Title>{user.userHandle}</Card.Title>
+                    <Card.Description>
+                      <p class='text-ellipsis'>Connect with {user.userHandle} by sending a message.</p>
+                    </Card.Description>
+                  </div>
+                </div>
+                <Button disabled variant='ghost' size='icon' class=''>
+                  <Ellipsis class='h-5 w-5' />
+                </Button>
+              </Card.Content>
+            </Card.Root>
+          </Dialog.Trigger>
+          <Dialog.Content class='rounded-xl'>
+            <Dialog.Header>
+              <Dialog.Title class='flex items-center gap-2'>
+                <Edit class='h-5 w-5' />
+                {m['chat.compose']()}
+              </Dialog.Title>
+            </Dialog.Header>
+            <div class='flex flex-col items-center justify-center gap-4 py-6'>
+              <img
+                src={user.avatarUrl || 'src/assets/icon.svg'}
+                alt={user.userHandle}
+                class="aspect-ratio-square max-h-24"
+              />
+              <div class='flex flex-col items-center justify-center gap-4'>
+                <Dialog.Title>
+                  <span class='text-muted-foreground'>@</span>{user.userHandle}
                 </Dialog.Title>
-              </Dialog.Header>
-              <div class='flex flex-col items-center justify-center gap-4 py-6'>
-                <img
-                  src={user.avatarUrl || 'src/assets/icon.svg'}
-                  alt={user.userHandle}
-                  class="aspect-ratio-square max-h-24"
-                />
-                <div class='flex flex-col items-center justify-center gap-4'>
-                  <Dialog.Title>
-                    <span class='text-muted-foreground'>@</span>{user.userHandle}
-                  </Dialog.Title>
-                  <div class='flex flex-col gap-6 p-6'>
-                    <div class="flex flex-col rounded-lg rounded-bl-none px-4 py-2 bg-muted">
-                      <span class='text-muted-foreground text-xs self-start'>FirstSpark</span>
-                      <p class="mt-1 flex items-center justify-end gap-1 text-xs text-foreground">
-                        {m['chat.compose_tip']({ userHandle: myUserContext.myUserHandle || 'friend' })}
-                      </p>
-                      <span class='text-muted-foreground text-xs self-end'>a moment ago</span>
-                    </div>
+                <div class='flex flex-col gap-6 p-6'>
+                  <div class="flex flex-col rounded-lg rounded-bl-none px-4 py-2 bg-muted">
+                    <span class='text-muted-foreground text-xs self-start'>FirstSpark</span>
+                    <p class="mt-1 flex items-center justify-end gap-1 text-xs text-foreground">
+                      {m['chat.compose_tip']({ userHandle: myUserContext.myUserHandle || 'friend' })}
+                    </p>
+                    <span class='text-muted-foreground text-xs self-end'>a moment ago</span>
                   </div>
                 </div>
               </div>
-              <Dialog.Footer>
-                <MessageInput onSendMessage={(messageText) => handleSendMessage(user, messageText)} />
-              </Dialog.Footer>
-            </Dialog.Content>
-          </Dialog.Root>
-        </Card.Footer>
-      </Card.Root>
-    {/each}
+            </div>
+            <Dialog.Footer>
+              <MessageInput onSendMessage={(messageText) => handleSendMessage(user, messageText)} />
+            </Dialog.Footer>
+          </Dialog.Content>
+        </Dialog.Root>
+      {/each}
     </div>
   {/if}
 </div>
