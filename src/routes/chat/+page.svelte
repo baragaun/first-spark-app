@@ -4,6 +4,7 @@
   import { MessageSquarePlus, Plus } from 'lucide-svelte';
   import { ChannelContext } from '@/contexts/channels/channel-context.svelte';
   import SearchBar from '@/components/ui/search-bar.svelte';
+  import { m } from '@/paraglide/messages';
   import { getContext, onMount } from 'svelte';
 
   const channelsContext = getContext<ChannelContext>('channelContext');
@@ -48,7 +49,7 @@
 
 <div class="p-8">
   <div class="mb-6 flex items-center justify-between">
-    <h1 class="text-2xl font-bold">Conversations</h1>
+    <h1 class="text-2xl font-bold">{m['chat.list_title']()}</h1>
     <div class="flex items-center gap-2">
       <SearchBar on:search={handleSearch} />
       <Button variant='ghost' onclick={handleNewChat}>

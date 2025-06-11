@@ -14,6 +14,7 @@
   import MessageList from '../chat/components/message-list.svelte';
   import { format } from 'date-fns';
   import type { UsersContext } from '@/contexts/users/users-context.svelte';
+  import { m } from '@/paraglide/messages';
 
   const channelContext = getContext<ChannelContext>('channelContext');
   const myUserContext = getContext<MyUserContext>('myUserContext');
@@ -134,7 +135,7 @@
               <Dialog.Header>
                 <Dialog.Title class='flex items-center gap-2'>
                   <Edit class='h-5 w-5' />
-                  New message
+                  {m['chat.compose']()}
                 </Dialog.Title>
               </Dialog.Header>
               <div class='flex flex-col items-center justify-center gap-4 py-6'>
@@ -151,7 +152,7 @@
                     <div class="flex flex-col rounded-lg rounded-bl-none px-4 py-2 bg-muted">
                       <span class='text-muted-foreground text-xs self-start'>FirstSpark</span>
                       <p class="mt-1 flex items-center justify-end gap-1 text-xs text-foreground">
-                        Hey, {myUserContext.myUserHandle}! 👋 The most productive conversations start with a brief introduction, the necessary context, and a simple, actionable request. Do you think you can take it from here?
+                        {m['chat.compose_tip']({ userHandle: myUserContext.myUserHandle || 'friend' })}
                       </p>
                       <span class='text-muted-foreground text-xs self-end'>a moment ago</span>
                     </div>
