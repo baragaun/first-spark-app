@@ -78,6 +78,7 @@
   },
   "dependencies": {
     "@baragaun/bg-node-client": "^0.0.42",
+    "@sveltejs/adapter-node": "^5.2.12",
     "formsnap": "^2.0.0",
     "mode-watcher": "^0.5.1",
     "rxdb": "^16.8.1",
