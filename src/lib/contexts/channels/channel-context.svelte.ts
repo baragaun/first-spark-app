@@ -17,7 +17,10 @@ let selectedChannel = $state<ChannelListItem | null>(null);
 export class ChannelContext {
   private client = client;
 
-  async findMyChannels(skip: number): Promise<ChannelListItem[] | string | undefined> {
+  async findMyChannels(
+    skip: number,
+    limit: number = 20, // todo we should change is according to requirement
+  ): Promise<ChannelListItem[] | string | undefined> {
     if (!this.client.isInitialized) {
       console.error('ChannelContext.findMyChannels: not initialized.');
       return translate(AppUiMessage.systemError);
@@ -28,7 +31,7 @@ export class ChannelContext {
         filter: {},
         match: {},
         queryOptions: { cachePolicy: CachePolicy.network },
-        options: {skip, limit : 20},
+        options: { skip, limit },
       };
       const participantLimit = 2;
       const response = await this.client.operations.channel.findMyChannels(
@@ -115,7 +118,7 @@ export class ChannelContext {
       if (response.channel && response.participants) {
         return {
           ...response.channel,
-          participants: response.participants
+          participants: response.participants,
         } as ChannelListItem;
       }
 

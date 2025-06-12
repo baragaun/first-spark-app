@@ -14,7 +14,7 @@
     channelsContext.myChannels
       .filter((channel) => {
         if (!channel.latestMessage) return false;
-        
+
         if (!searchQuery) return true;
 
         const query = searchQuery.toLowerCase();
@@ -26,11 +26,11 @@
       .sort((a, b) => {
         const aTimestamp = a.latestMessage?.updatedAt || a.latestMessage?.createdAt;
         const bTimestamp = b.latestMessage?.updatedAt || b.latestMessage?.createdAt;
-      
-        if (!aTimestamp || !bTimestamp) return 0;        
+
+        if (!aTimestamp || !bTimestamp) return 0;
         // Descending
         return new Date(bTimestamp).getTime() - new Date(aTimestamp).getTime();
-      })
+      }),
   );
 
   const handleSearch = (event: CustomEvent<string>) => {
@@ -44,7 +44,7 @@
 
   onMount(async () => {
     await channelsContext.findMyChannels();
-  })
+  });
 </script>
 
 <div class="p-8">
@@ -52,7 +52,7 @@
     <h1 class="text-2xl font-bold">{m['chat.list_title']()}</h1>
     <div class="flex items-center gap-2">
       <SearchBar on:search={handleSearch} />
-      <Button variant='ghost' onclick={handleNewChat}>
+      <Button variant="ghost" onclick={handleNewChat}>
         <Plus class="h-5 w-5" />
       </Button>
     </div>

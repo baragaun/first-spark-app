@@ -38,15 +38,15 @@
   onMount(async () => {
     // Get user ID from URL params
     const userId = $page.params.userId;
-    
+
     if (!userId) {
       console.error('No user ID provided in URL');
       return;
     }
 
     // Find the user from the channelContext users list
-    selectedUser = usersContext.users.find(user => user.id === userId) || null;
-    
+    selectedUser = usersContext.users.find((user) => user.id === userId) || null;
+
     if (!selectedUser) {
       console.error('User not found with ID:', userId);
       return;
@@ -75,7 +75,7 @@
       messageText,
       replyToMessageId,
     };
-    
+
     const response = await channelContext.createChannelMessage(newMessage);
     if (!response || typeof response === 'string') {
       console.error('CreateChannelMessage: received error.', { response });

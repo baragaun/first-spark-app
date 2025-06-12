@@ -26,7 +26,7 @@
     const initials = words?.map((word) => word.charAt(0)).join('');
 
     return initials || '🙃';
-  }
+  };
 
   const handleLogout = async () => {
     await onSignOut();
@@ -65,7 +65,10 @@
       </DropdownMenu.Item>
     </DropdownMenu.Group>
     <DropdownMenu.Separator />
-    <DropdownMenu.Item onclick={handleLogout} class="text-destructive focus:bg-destructive focus:text-destructive-foreground">
+    <DropdownMenu.Item
+      onclick={handleLogout}
+      class="text-destructive focus:bg-destructive focus:text-destructive-foreground"
+    >
       <LogOut class="mr-2 h-4 w-4" />
       {m['nav.auth.sign_out']()}
     </DropdownMenu.Item>

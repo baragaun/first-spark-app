@@ -21,7 +21,7 @@
   const channelsContext = getContext<ChannelContext>('channelContext');
   const currentUserId = myUserContext.myUserId; // This should match the variable name in +layout.ts
 
-  let skip = $state(0);
+  let skip = $derived.by(() => channels.length);
   let searchQuery = $state('');
 
   const handleSearch = (event: CustomEvent<string>) => {
@@ -31,41 +31,39 @@
   const handleScroll = async (event: Event) => {
     const target = event.target as HTMLElement;
     if (target.scrollHeight - target.scrollTop === target.clientHeight) {
-      // User has scrolled to the bottom
-      console.log('Fetching more channels...');
       await channelsContext.findMyChannels(skip);
     }
   };
 
   onMount(async () => {
-    if(myUserContext.isSignedIn) {
-    await channelsContext.findMyChannels(0);
-    skip = channels.length
+    if (myUserContext.isSignedIn) {
+      await channelsContext.findMyChannels(0);
     } else {
       goto('/signin');
     }
   });
 
-  let channels = $derived( channelsContext.myChannels
-    .filter((channel) => {
-      if (!channel.latestMessage) return false;
+  let channels = $derived(
+    channelsContext.myChannels
+      .filter((channel) => {
+        if (!channel.latestMessage) return false;
 
-      if (!searchQuery) return true;
+        if (!searchQuery) return true;
 
-      const query = searchQuery.toLowerCase();
-      return (
-        channel.name?.toLowerCase().includes(query) ||
-        channel.description?.toLowerCase().includes(query)
-      );
-    })
-    .sort((a, b) => {
-      const aTimestamp = a.latestMessage?.updatedAt || a.latestMessage?.createdAt;
-      const bTimestamp = b.latestMessage?.updatedAt || b.latestMessage?.createdAt;
+        const query = searchQuery.toLowerCase();
+        return (
+          channel.name?.toLowerCase().includes(query) ||
+          channel.description?.toLowerCase().includes(query)
+        );
+      })
+      .sort((a, b) => {
+        const aTimestamp = a.latestMessage?.updatedAt || a.latestMessage?.createdAt;
+        const bTimestamp = b.latestMessage?.updatedAt || b.latestMessage?.createdAt;
 
-      if (!aTimestamp || !bTimestamp) return 0;
-      // Descending
-      return new Date(bTimestamp).getTime() - new Date(aTimestamp).getTime();
-    })
+        if (!aTimestamp || !bTimestamp) return 0;
+        // Descending
+        return new Date(bTimestamp).getTime() - new Date(aTimestamp).getTime();
+      }),
   );
 
   const formatTime = (date: Date | string) => {
@@ -104,12 +102,13 @@
   function handleChannelClick(channel: ChannelListItem) {
     channelsContext.selectChannel(channel);
   }
-
 </script>
 
-<div class="flex flex-col h-screen">
-  <!-- Sticky Header -->
-  <div class="sticky top-0 z-10 mb-6 flex items-center justify-between">
+<div class="container mx-auto">
+  <!-- Header (fixed) -->
+  <div
+    class="sticky sticky top-0 z-10 flex items-center justify-between border-b bg-background p-4"
+  >
     <h1 class="text-2xl font-bold">{m['chat.list_title']()}</h1>
     <div class="flex items-center gap-2">
       <SearchBar on:search={handleSearch} />
@@ -119,8 +118,8 @@
     </div>
   </div>
 
-  <!-- Scrollable Chat List -->
-  <div class="flex-1 overflow-y-auto p-4 space-y-2" onscroll={handleScroll}>
+  <!-- Scrollable Chat List (only this div scrolls) -->
+  <div class="max-h-[calc(100vh-220px)] space-y-2 overflow-y-auto p-2" onscroll={handleScroll}>
     {#if channels.length === 0}
       <div class="rounded-lg border p-8 text-center">
         <p class="text-muted-foreground">No conversations yet</p>
