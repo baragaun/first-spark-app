@@ -80,7 +80,6 @@
     if (usersContext && myUserContext.myUserId) {
       try {
         await usersContext.ensureUsersLoaded([myUserContext.myUserId]);
-        console.log('usersContext.skip', skip);
       } catch (error) {
         console.error('Error loading users:', error);
       }
