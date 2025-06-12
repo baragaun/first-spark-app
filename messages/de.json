@@ -1,8 +1,8 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-  "welcome": "Willkommen bei First Spark",
+  "welcome": "Willkommen bei {title}",
   "welcome_subtitle": "Verbinden, inspirieren, wachsen!",
-  "join_first_spark": "Mach mit bei First Spark",
+  "join_first_spark": "Mach mit bei {title}",
   "get_started": "Jetzt starten",
   "sidebar": {
     "logo": {
@@ -32,7 +32,7 @@
     }
   },
   "footer": {
-    "copyright": "© {year} First Spark. Alle Rechte vorbehalten.",
+    "copyright": "© {year} {title}. Alle Rechte vorbehalten.",
     "navigation": {
       "faq": "FAQ",
       "privacy_policy": "Datenschutzerklärung",
@@ -60,7 +60,7 @@
     "description": "Geben Sie unten Ihre E-Mail-Adresse ein, um sich bei Ihrem Konto anzumelden",
     "sign_with_token_description": "Geben Sie den Bestätigungscode ein, der an {identifier} gesendet wurde",
     "sign_with_password_description": "Geben Sie Ihr Passwort ein, um sich als {identifier} anzumelden",
-    "have_account": "Neu bei First Spark?",
+    "have_account": "Neu bei {title}?",
     "forgot_password": "Passwort vergessen?",
     "username_or_email_placeholder": "Benutzername oder E-Mail",
     "identifier_label": "E-Mail oder Benutzername",
@@ -86,7 +86,7 @@
   },
   "signup": {
     "title": "Registrieren",
-    "email_description": "Geben Sie eine E-Mail-Adresse ein, um Ihr First Spark-Konto zu erstellen.",
+    "email_description": "Geben Sie eine E-Mail-Adresse ein, um Ihr {title}-Konto zu erstellen.",
     "verification_description": "Geben Sie den Bestätigungscode ein, den wir an {email} gesendet haben.",
     "create_credentials_description": "Wählen Sie einen Benutzernamen und ein Passwort für Ihr Konto.",
     "email_title": "E-Mail-Adresse",
@@ -163,10 +163,10 @@
   },
   "connection": {
     "offline": "Du bist offline",
-    "online": "Unterstützt von First Spark",
+    "online": "Unterstützt von {title}",
     "offline.description": "Sie sind derzeit nicht verbunden.",
     "reconnected": "Wieder verbunden",
-    "reconnected.description": "Wieder mit First Spark verbunden!"
+    "reconnected.description": "Wieder mit {title} verbunden!"
   },
   "setting": {
     "setting_label": "Einstellungen",
