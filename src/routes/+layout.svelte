@@ -13,35 +13,19 @@
   import { locales, localizeHref } from '@/paraglide/runtime';
   import type { MyUser } from '@baragaun/bg-node-client';
   import { onMount } from 'svelte';
-  import { FirstSparkApp, MimbleApp } from '@/types/enums';
   import MetaTags from '$lib/components/shared/meta-tags.svelte';
   import { env } from '$env/dynamic/public';
+  import { appTitle, appDescription, appCanonicalUrl } from '$lib/stores/app-store';
 
   let { children } = $props();
   let isOffline: boolean = $derived(myUserContext.isOffline);
   let isAuthenticated: boolean = $derived(myUserContext.isSignedIn);
   let myUser: MyUser | undefined = $derived(myUserContext.myUser);
 
-  let title = $state('');
-  let description = $state('');
-  let canonicalUrl = $state('');
-
   onMount(() => {
     let projectName = env.PUBLIC_PROJECTNAME;
-    switch (projectName) {
-      case 'FirstSpark':
-        title = FirstSparkApp.title;
-        description = FirstSparkApp.description;
-        canonicalUrl = FirstSparkApp.canonicalUrl;
-        break;
-      case 'Mimble':
-        title = MimbleApp.title;
-        description = MimbleApp.description;
-        canonicalUrl = MimbleApp.canonicalUrl;
-        setFavicon('/favicon-kcu.png');
-        break;
-      default:
-        break;
+    if (projectName === 'KCU') {
+      setFavicon('/favicon-kcu.png');
     }
   });
 
@@ -66,7 +50,7 @@
   };
 </script>
 
-<MetaTags {title} {description} {canonicalUrl} />
+<MetaTags title={$appTitle} description={$appDescription} canonicalUrl={$appCanonicalUrl} />
 
 <MyUserProvider>
   <div class="flex min-h-screen flex-col bg-background font-sans antialiased">

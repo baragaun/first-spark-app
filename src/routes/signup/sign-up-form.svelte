@@ -31,13 +31,14 @@
   import { getLocale } from '@/paraglide/runtime';
   import { turnstile } from '@svelte-put/cloudflare-turnstile';
   import { env } from '$env/dynamic/public';
+  import { appTitle } from '@/stores/app-store';
 
   let { data }: { data: { form: SuperValidated<SignUpFormSchema> } } = $props();
 
   const steps = [
     {
       schema: zod(schemaFirstStep),
-      description: m['signup.email_description'](),
+      description: m['signup.email_description']({ title: $appTitle }),
       buttonLabel: m['signup.buttons.sign_up'](),
       loadingLabel: m['signup.buttons.sign_up'](),
       requiredFields: ['email'] as const,

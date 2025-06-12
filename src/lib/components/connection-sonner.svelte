@@ -4,6 +4,7 @@
   import { PlugZap, PartyPopper } from 'lucide-svelte';
   import { m } from '$lib/paraglide/messages.js';
   import { onMount } from 'svelte';
+  import { appTitle } from '@/stores/app-store';
 
   let { clientConnection } = $props();
   let hasDisconnected = $state(false);
@@ -24,7 +25,7 @@
     toast.dismiss('connection-offline');
 
     toast.success(m['connection.reconnected'](), {
-      description: m['connection.reconnected.description'](),
+      description: m['connection.reconnected.description']({ title: $appTitle }),
       icon: PartyPopper,
       duration: 5000,
       id: 'connection-online',

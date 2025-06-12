@@ -6,6 +6,7 @@
   import { m } from '@/paraglide/messages';
   import { Button } from '../ui/button';
   import { GiftIcon, House, PlugZap, Settings, Zap } from 'lucide-svelte';
+  import { appTitle, headerIcon } from '$lib/stores/app-store';
 
   const items = [
     {
@@ -84,10 +85,10 @@
         <Sidebar.MenuItem>
           <div class="justify-horizontal flex items-center pt-2">
             <div class="flex aspect-square size-8 items-center justify-center rounded-lg">
-              <img src="/fs-logo.svg" alt="First Spark Logo" class="size-8" />
+              <img src={$headerIcon} alt="First Spark Logo" class="size-8" />
             </div>
             <span class="font-lexend truncate ps-2 text-xl font-bold text-primary">
-              First Spark
+              {$appTitle}
             </span>
           </div>
         </Sidebar.MenuItem>
@@ -113,7 +114,7 @@
     {#if !isAuthenticated}
       <Sidebar.Group class="mb-2 mt-auto px-3 group-data-[collapsible=icon]:hidden">
         <div class="rounded-lg border border-border bg-card p-4 shadow-sm">
-          <h2 class="mb-3 text-sm font-bold">{m['join_first_spark']()}</h2>
+          <h2 class="mb-3 text-sm font-bold">{m['join_first_spark']({ title: $appTitle })}</h2>
           <h3 class="mb-3 text-sm font-medium">{m['welcome_subtitle']()}</h3>
           <div class="flex flex-col gap-2">
             <Button href="/signup" size="sm" class="w-full" onclick={handleItemClick}>
@@ -146,7 +147,11 @@
                 {:else}
                   <PlugZap class="h-5 w-5" />
                 {/if}
-                <span>{isOffline ? m['connection.offline']() : m['connection.online']()}</span>
+                <span
+                  >{isOffline
+                    ? m['connection.offline']()
+                    : m['connection.online']({ title: $appTitle })}</span
+                >
               </Button>
             {/snippet}
           </Sidebar.MenuButton>
