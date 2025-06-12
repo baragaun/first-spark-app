@@ -1,6 +1,8 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
   import { m } from '$lib/paraglide/messages.js';
+  import { appTitle } from '$lib/stores/app-store';
+
   const currentYear = new Date().getFullYear();
 </script>
 
@@ -10,7 +12,7 @@
       <!-- Copyright -->
       <div class="flex flex-col items-center lg:items-start">
         <p class="text-center text-sm text-muted-foreground lg:text-left">
-          {m['footer.copyright']({ year: currentYear })}
+          {m['footer.copyright']({ year: currentYear, title: $appTitle })}
         </p>
       </div>
 

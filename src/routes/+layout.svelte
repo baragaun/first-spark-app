@@ -13,7 +13,7 @@
   let { children } = $props();
 </script>
 
-<MetaTags {title} {description} {canonicalUrl} />
+<MetaTags title={$appTitle} description={$appDescription} canonicalUrl={$appCanonicalUrl} />
 
 <MyUserProvider>
   <div class="flex min-h-screen flex-col bg-background font-sans antialiased">

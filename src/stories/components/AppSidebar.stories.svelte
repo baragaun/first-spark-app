@@ -41,7 +41,7 @@
 
     // Check for connection status button
     const connectionButton = canvas.getByRole('button', {
-      name: new RegExp(m['connection.online']()),
+      name: new RegExp(m['connection.online']({ title: 'First Spark' })),
     });
     expect(connectionButton).toBeInTheDocument();
   }}

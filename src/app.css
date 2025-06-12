@@ -69,8 +69,8 @@
     --popover-foreground: var(--kcu-plum);
     --popover-background: var(--kcu-white);
 
-    --card: var(--kcu-blackberry);
-    --card-foreground: var(--kcu-avocado);
+    --card: var(--kcu-white);
+    --card-foreground: var(--kcu-plum);
 
     --border: var(--kcu-avocado);
     --input: var(--kcu-white); /* Updated from a darker value to be more visible */

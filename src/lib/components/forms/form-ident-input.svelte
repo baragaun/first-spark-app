@@ -64,7 +64,13 @@
           <Input
             {...props}
             bind:value={$formData[fieldName]}
-            class={$errors[fieldName] ? 'border-red-500 focus-visible:ring-red-500' : ''}
+            class={cn(
+              'border-2 transition-all duration-200',
+              $errors[fieldName]
+                ? 'border-red-500 focus-visible:border-transparent focus-visible:ring-red-500'
+                : 'border-gray-300 focus-visible:border-transparent',
+              'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+            )}
             {placeholder}
             {disabled}
           />

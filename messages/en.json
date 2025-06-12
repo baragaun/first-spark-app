@@ -1,8 +1,8 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-  "welcome": "Welcome to First Spark",
+  "welcome": "Welcome to {title}",
   "welcome_subtitle": "Connect, inspire, thrive!",
-  "join_first_spark": "Join First Spark",
+  "join_first_spark": "Join {title}",
   "get_started": "Get started",
   "sidebar": {
     "logo": {
@@ -32,7 +32,7 @@
     }
   },
   "footer": {
-    "copyright": "© {year} First Spark. All rights reserved.",
+    "copyright": "© {year} {title}. All rights reserved.",
     "navigation": {
       "faq": "FAQ",
       "privacy_policy": "Privacy policy",
@@ -60,7 +60,7 @@
     "description": "Enter your email address below to sign in to your account",
     "sign_with_token_description": "Enter the verification code sent to {identifier}",
     "sign_with_password_description": "Enter your password to sign in as {identifier}",
-    "have_account": "New to First Spark?",
+    "have_account": "New to {title}?",
     "forgot_password": "Forgot your password?",
     "username_or_email_placeholder": "Username or Email",
     "identifier_label": "Email or Username",
@@ -86,7 +86,7 @@
   },
   "signup": {
     "title": "Sign up",
-    "email_description": "Provide an email address to create your First Spark account.",
+    "email_description": "Provide an email address to create your {title} account.",
     "verification_description": "Enter the verification code we sent to {email}.",
     "create_credentials_description": "Choose a username and a password for your account.",
     "email_title": "Email address",
@@ -164,10 +164,10 @@
   },
   "connection": {
     "offline": "You're offline",
-    "online": "Powered by First Spark",
+    "online": "Powered by {title}",
     "offline.description": "You are not currently connected.",
     "reconnected": "Reconnected",
-    "reconnected.description": "Reconnected to First Spark!"
+    "reconnected.description": "Reconnected to {title}!"
   },
   "setting": {
     "setting_label": "Settings",

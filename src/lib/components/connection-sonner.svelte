@@ -26,7 +26,7 @@
     toast.dismiss('connection-offline');
 
     toast.success(m['connection.reconnected'](), {
-      description: m['connection.reconnected.description'](),
+      description: m['connection.reconnected.description']({ title: $appTitle }),
       icon: PartyPopper,
       duration: 5000,
       id: 'connection-online',

@@ -28,8 +28,8 @@ export enum FirstSparkApp {
   canonicalUrl = '/favicon.png',
 }
 
-export enum MimbleApp {
-  title = 'Mimble',
+export enum KCUApp {
+  title = 'KCU',
   description = 'Discover and connect with our partner services',
   canonicalUrl = '/favicon-kcu.png',
 }
