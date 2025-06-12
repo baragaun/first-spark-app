@@ -1,8 +1,8 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-  "welcome": "फर्स्ट स्पार्क में आपका स्वागत है।",
+  "welcome": "{title} में आपका स्वागत है।",
   "welcome_subtitle": "जुड़ें, प्रेरित करें, विकसित हों!",
-  "join_first_spark": "फर्स्ट स्पार्क से जुड़ें",
+  "join_first_spark": "{title} से जुड़ें",
   "get_started": "शुरू करें",
   "sidebar": {
     "logo": {
@@ -32,7 +32,7 @@
     }
   },
   "footer": {
-    "copyright": "© {year} फर्स्ट स्पार्क. सर्वाधिकार सुरक्षित।",
+    "copyright": "© {year} {title}. सर्वाधिकार सुरक्षित।",
     "navigation": {
       "faq": "अक्सर पूछे जाने वाले प्रश्न",
       "privacy_policy": "गोपनीयता नीति",
@@ -60,7 +60,7 @@
     "description": "अपने खाते में साइन इन करने के लिए अपना ईमेल पता दर्ज करें",
     "sign_with_token_description": "{identifier} पर भेजे गए सत्यापन कोड को दर्ज करें",
     "sign_with_password_description": "{identifier} के रूप में साइन इन करने के लिए अपना पासवर्ड दर्ज करें",
-    "have_account": "फर्स्ट स्पार्क पर नए हैं?",
+    "have_account": "{title} पर नए हैं?",
     "forgot_password": "पासवर्ड भूल गए?",
     "username_or_email_placeholder": "यूजरनेम या ईमेल",
     "identifier_label": "ईमेल या यूजरनेम",
@@ -86,7 +86,7 @@
   },
   "signup": {
     "title": "साइन अप",
-    "email_description": "अपना फर्स्ट स्पार्क खाता बनाने के लिए ईमेल पता दर्ज करें।",
+    "email_description": "अपना {title} खाता बनाने के लिए ईमेल पता दर्ज करें।",
     "verification_description": "हमने {email} पर एक सत्यापन कोड भेजा है, कृपया उसे दर्ज करें।",
     "create_credentials_description": "अपने खाते के लिए एक यूजरनेम और पासवर्ड चुनें।",
     "email_title": "ईमेल पता",
@@ -163,10 +163,10 @@
   },
   "connection": {
     "offline": "आप ऑफ़लाइन हैं",
-    "online": "फर्स्ट स्पार्क द्वारा संचालित",
+    "online": "{title} द्वारा संचालित",
     "offline.description": "आप वर्तमान में कनेक्ट नहीं हैं।",
     "reconnected": "फिर से कनेक्ट हो गया",
-    "reconnected.description": "फर्स्ट स्पार्क से फिर से कनेक्ट हो गया!"
+    "reconnected.description": "{title} से फिर से कनेक्ट हो गया!"
   },
   "setting": {
     "setting_label": "सेटिंग्स",
