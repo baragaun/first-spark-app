@@ -40,7 +40,7 @@
 
   const handleScroll = async (event: Event) => {
     const target = event.target as HTMLElement;
-    if (target.scrollHeight - target.scrollTop === target.clientHeight) {
+    if (target.scrollHeight - target.scrollTop - target.clientHeight < 100) {
       if (usersContext && myUserContext.myUserId) {
         await usersContext.getAllUsers([myUserContext.myUserId], skip);
       }

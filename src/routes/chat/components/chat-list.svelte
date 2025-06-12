@@ -30,7 +30,7 @@
 
   const handleScroll = async (event: Event) => {
     const target = event.target as HTMLElement;
-    if (target.scrollHeight - target.scrollTop === target.clientHeight) {
+    if (target.scrollHeight - target.scrollTop - target.clientHeight < 100) {
       await channelsContext.findMyChannels(skip);
     }
   };

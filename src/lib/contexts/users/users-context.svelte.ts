@@ -38,7 +38,7 @@ export class UsersContext {
   async getAllUsers(
     excludeIds?: string[],
     skip: number = 0,
-    limit: number = 5, // todo we should change is according to requirement
+    limit: number = 5, // TODO we should change it according to the requirement
   ): Promise<UserListItem[] | string | null | undefined> {
     if (!this.client.isInitialized) {
       console.error('UsersContext.getAllUsers: not initialized.');

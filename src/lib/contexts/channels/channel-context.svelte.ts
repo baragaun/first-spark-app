@@ -19,7 +19,7 @@ export class ChannelContext {
 
   async findMyChannels(
     skip: number,
-    limit: number = 20, // todo we should change is according to requirement
+    limit: number = 20, // TODO we should change it according to the requirement
   ): Promise<ChannelListItem[] | string | undefined> {
     if (!this.client.isInitialized) {
       console.error('ChannelContext.findMyChannels: not initialized.');
