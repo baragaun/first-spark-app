@@ -62,7 +62,7 @@
     --background: var(--kcu-white);
     --foreground: var(--kcu-blackberry);
 
-    --muted: var(--kcu-orange);
+    --muted: 240 4.8% 95.9%;
     --muted-foreground: var(--kcu-plum);
 
     --popover: var(var(--kcu-juniper)) %;

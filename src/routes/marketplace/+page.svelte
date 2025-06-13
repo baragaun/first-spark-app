@@ -63,7 +63,7 @@
 
 <div class="container mx-auto px-4 py-6">
   <header class="mb-6">
-    <h1 class="text-3xl font-bold text-primary">First Spark Marketplace</h1>
+    <h1 class="text-3xl font-bold text-primary">Marketplace</h1>
     <p class="mt-2 text-muted-foreground">Discover and connect with our partner services</p>
   </header>
 
