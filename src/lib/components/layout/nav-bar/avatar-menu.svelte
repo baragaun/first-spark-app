@@ -6,6 +6,7 @@
   import { m } from '@/paraglide/messages.js';
   import type { MyUser } from '@baragaun/bg-node-client';
   import { ArrowUpRight, LogOut, Settings } from 'lucide-svelte';
+  import { getUserInitials } from '@/helpers/get-user-initial-helper.js';
 
   let {
     myUser,
@@ -18,16 +19,6 @@
   let myUsername = $derived(myUser?.userHandle || '');
   let myEmail = $derived(myUser?.email || '');
 
-  const userInitials = () => {
-    if (!myUser?.userHandle) return '🙃';
-
-    const handle = myUser?.userHandle?.trim();
-    const words = handle?.split(/(?=[A-Z])|(?=[^A-Za-z])/);
-    const initials = words?.map((word) => word.charAt(0)).join('');
-
-    return initials || '🙃';
-  };
-
   const handleLogout = async () => {
     await onSignOut();
   };
@@ -38,7 +29,7 @@
     <Button variant="ghost" data-testid="avatar-menu-trigger" class="relative h-8 w-8 rounded-full">
       <Avatar.Root class="h-9 w-9">
         <Avatar.Image src="" alt={`@${myUsername}`} />
-        <Avatar.Fallback>{userInitials()}</Avatar.Fallback>
+        <Avatar.Fallback>{getUserInitials(myUser?.userHandle || '')}</Avatar.Fallback>
       </Avatar.Root>
     </Button>
   </DropdownMenu.Trigger>
@@ -48,7 +39,7 @@
       <div class="flex items-center">
         <Avatar.Root class="mr-2 h-9 w-9">
           <Avatar.Image src="" alt={`@${myUsername}`} />
-          <Avatar.Fallback>{userInitials()}</Avatar.Fallback>
+          <Avatar.Fallback>{getUserInitials(myUser?.userHandle || '')}</Avatar.Fallback>
         </Avatar.Root>
         <div class="flex flex-col space-y-1">
           <p class="text-sm font-medium leading-none">{myUsername}</p>
