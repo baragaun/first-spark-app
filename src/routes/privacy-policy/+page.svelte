@@ -6,12 +6,6 @@
     month: 'long',
     day: 'numeric',
   });
-
-  $effect(() => {
-    if (typeof window !== 'undefined') {
-      console.log(`Privacy Policy viewed at ${new Date().toISOString()}`);
-    }
-  });
 </script>
 
 <MetaTags

@@ -5,11 +5,12 @@
   import { goto } from '$app/navigation';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
   import type { ContactDetails } from '@/helpers/types';
+  import { m } from '@/paraglide/messages';
 
   let { contact: channelDetails }: { contact: ContactDetails | undefined } = $props();
 
   const handleBack = () => {
-    goto('/conversations');
+    goto('/chat');
   };
 </script>
 
@@ -39,15 +40,15 @@
       <DropdownMenu.Content align="end">
         <DropdownMenu.Item>
           <Archive class="mr-2 h-4 w-4" />
-          Archive
+          {m['chat.actions.archive']()}
         </DropdownMenu.Item>
         <DropdownMenu.Item>
           <BellOff class="mr-2 h-4 w-4" />
-          Mute
+          {m['chat.actions.mute']()}
         </DropdownMenu.Item>
         <DropdownMenu.Item>
           <Ban class="mr-2 h-4 w-4" />
-          Block
+          {m['chat.actions.block']()}
         </DropdownMenu.Item>
       </DropdownMenu.Content>
     </DropdownMenu.Root>

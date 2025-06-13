@@ -1,17 +1,20 @@
 <script lang="ts">
   import { page } from '$app/state';
-  import { onMount } from 'svelte';
+  import { getContext, onMount } from 'svelte';
   import ChatHeader from '../components/chat-header.svelte';
   import MessageList from '../components/message-list.svelte';
   import MessageInput from '../components/message-input.svelte';
   import { ChannelListItem, ChannelMessage } from '@baragaun/bg-node-client';
   import { X } from 'lucide-svelte';
   import Button from '@/components/ui/button/button.svelte';
-  import { channelContext } from '@/contexts/channel-context.svelte';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
   import type { ContactDetails } from '@/helpers/types';
+  import type { ChannelContext } from '@/contexts/channels/channel-context.svelte';
+  import type { MyUserContext } from '@/contexts/users/my-user-context.svelte';
 
-  const channelId = page.params.conversationId;
+  const channelId = page.params.channelId;
+
+  const channelsContext = getContext<ChannelContext>('channelContext');
+  const myUserContext = getContext<MyUserContext>('myUserContext');
 
   let channelDetails = $state<ContactDetails | undefined>(undefined);
   let messages = $state<ChannelMessage[]>([]);
@@ -19,24 +22,19 @@
   let isLoading = $state(false);
   let scrollToBottomFn: () => void;
 
-  const currentUserId = myUserContext.myUserId;
-
-  // Function to determine contact info based on channel participants
   const setContactInfo = async (channel: ChannelListItem) => {
     channelDetails = undefined;
     if (!channel || !channel.userIds) return null;
 
     if (channel.userIds.length > 2) {
-      // Group chat - use channel info
       channelDetails = {
         id: channel.id,
         name: channel.name || 'Group Chat',
         avatar: channel.name?.charAt(0) || 'G',
       };
     } else {
-      // Direct message - use recipient info
       const recipientUser = channel.participants?.find(
-        (participant) => participant.userId !== currentUserId,
+        (participant) => participant.userId !== myUserContext.myUserId,
       );
 
       if (!recipientUser) return null;
@@ -55,7 +53,7 @@
 
   const initializeChannel = async () => {
     isLoading = true;
-    const response = await channelContext.findChannelMessages(channelId, messages.length, 20);
+    const response = await channelsContext.findChannelMessages(channelId, messages.length, 20);
     if (!response || !Array.isArray(response)) {
       console.error('FindChannelMessages: received error.', { response });
       messages = [];
@@ -66,17 +64,16 @@
   };
 
   onMount(async () => {
-    if (channelContext.selectedChannel) {
-      setContactInfo(channelContext.selectedChannel);
-      initializeChannel();
-    } else {
-      const response = await channelContext.findChannelById(channelId);
-      console.log('FindChannelById: response:', response);
+    if (!channelsContext.selectedChannel) {
+      const response = await channelsContext.findChannelById(channelId);
       if (response && typeof response !== 'string') {
-        channelContext.selectChannel(response);
+        channelsContext.selectChannel(response);
         setContactInfo(response);
         initializeChannel();
       }
+    } else {
+      setContactInfo(channelsContext.selectedChannel);
+      initializeChannel();
     }
   });
 
@@ -90,7 +87,7 @@
       messageText,
       replyToMessageId,
     };
-    const response = await channelContext.createChannelMessage(newMessage);
+    const response = await channelsContext.createChannelMessage(newMessage);
     if (!response || typeof response === 'string') {
       console.error('CreateChannelMessage: received error.', { response });
       return;
@@ -112,7 +109,7 @@
         : message,
     );
 
-    const response = await channelContext.updateChannelMessage({
+    const response = await channelsContext.updateChannelMessage({
       id,
       messageText: newText,
     });
@@ -124,7 +121,7 @@
   };
 
   const handleDeleteMessage = async (id: string) => {
-    const response = await channelContext.deleteChannelMessage(id);
+    const response = await channelsContext.deleteChannelMessage(id);
     if (!response || typeof response === 'string') {
       console.error('DeleteChannelMessage: received error.', { response });
       return;
@@ -138,10 +135,10 @@
     <div class="flex flex-1 items-center justify-center">
       <div class="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
     </div>
-  {:else if !channelDetails}
+    <!-- {:else if !channelDetails}
     <div class="flex flex-1 items-center justify-center">
       <p>Conversation not found</p>
-    </div>
+    </div> -->
   {:else}
     <div class="sticky top-0 z-30 bg-background shadow-sm">
       <ChatHeader contact={channelDetails} />
@@ -171,10 +168,12 @@
           </Button>
         </div>
       {/if}
-      <MessageInput
-        onSendMessage={(text) => handleSendMessage(text, replyingTo?.id)}
-        placeholder={replyingTo ? 'Type your reply...' : 'Type a message...'}
-      />
+      <div class="p-4">
+        <MessageInput
+          onSendMessage={(text) => handleSendMessage(text, replyingTo?.id)}
+          placeholder={replyingTo ? 'Type your reply...' : 'Type a message...'}
+        />
+      </div>
     </div>
   {/if}
 </div>

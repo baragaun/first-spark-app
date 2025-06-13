@@ -4,7 +4,7 @@
   import { env } from '$env/dynamic/public';
   import { Button } from '@/components/ui/button';
   import * as Sidebar from '@/components/ui/sidebar';
-  import type { MyUserContext } from '@/contexts/my-user-context.svelte';
+  import type { MyUserContext } from '@/contexts/users/my-user-context.svelte';
   import { m } from '@/paraglide/messages';
   import { House, MessageSquare, PlugZap, Settings, User, Zap } from 'lucide-svelte';
 
@@ -15,8 +15,8 @@
       icon: House,
     },
     {
-      title: m['sidebar.menu.conversations'](),
-      url: '/conversations',
+      title: m['sidebar.menu.chats'](),
+      url: '/chat',
       icon: MessageSquare,
       requiresAuth: true,
     },
@@ -29,7 +29,7 @@
     },*/
     {
       title: m['sidebar.menu.users'](),
-      url: '/find-users',
+      url: '/users',
       icon: User,
       requiresAuth: true,
     },

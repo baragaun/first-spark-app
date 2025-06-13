@@ -12,7 +12,7 @@
     "menu": {
       "home": "होम",
       "inbox": "इनबॉक्स",
-      "conversations": "बातचीत",
+      "chats": "चैट",
       "contacts": "संपर्क",
       "users": "यूजर्स",
       "settings": "सेटिंग्स"
@@ -166,6 +166,20 @@
     "offline.description": "आप वर्तमान में कनेक्ट नहीं हैं।",
     "reconnected": "फिर से कनेक्ट हो गया",
     "reconnected.description": "फर्स्ट स्पार्क से फिर से कनेक्ट हो गया!"
+  },
+  "chat": {
+    "list_title": "चैट्स",
+    "actions": {
+      "archive": "संग्रहीत करें",
+      "block": "ब्लॉक करें",
+      "delete": "हटाएं",
+      "mute": "मूक करें"
+    },
+    "compose": "नया सन्देश",
+    "compose_tip": "अरे, {userHandle}! 👋 सबसे ज़्यादा उत्पादक बातचीत एक संक्षिप्त परिचय, ज़रूरी संदर्भ और एक सरल, कार्रवाई योग्य अनुरोध से शुरू होती है। क्या आपको लगता है कि आप इसे यहीं से आगे बढ़ा सकते हैं?"
+  },
+  "users": {
+    "search": "Search for people by username"
   },
   "setting": {
     "setting_label": "सेटिंग्स",

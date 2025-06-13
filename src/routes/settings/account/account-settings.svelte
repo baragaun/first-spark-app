@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Separator } from '$lib/components/ui/separator';
   import { m } from '$lib/paraglide/messages';
-  import type { MyUserContext } from '@/contexts/my-user-context.svelte';
+  import type { MyUserContext } from '@/contexts/users/my-user-context.svelte';
   import DeleteAccountForm from './components/delete-account-form.svelte';
   import SettingsDialog from './components/settings-dialog.svelte';
   import UpdateEmailForm from './components/update-email-form.svelte';

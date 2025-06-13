@@ -7,7 +7,7 @@
   import OTPFormInput from '@/components/forms/form-otp-input.svelte';
   import PasswordFormInput from '@/components/forms/form-password-input.svelte';
   import { MsaListenerHandler } from '@/contexts/msa-listener-handler.svelte';
-  import { type MyUserContext } from '@/contexts/my-user-context.svelte';
+  import { type MyUserContext } from '@/contexts/users/my-user-context.svelte';
   import translate from '@/helpers/language/translate';
   import { AppUiMessage } from '@/types/enums';
   import {

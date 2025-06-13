@@ -7,7 +7,7 @@
   import PasswordFormInput from '@/components/forms/form-password-input.svelte';
   import { Button } from '@/components/ui/button';
   import { MsaListenerHandler } from '@/contexts/msa-listener-handler.svelte';
-  import { type MyUserContext } from '@/contexts/my-user-context.svelte';
+  import { type MyUserContext } from '@/contexts/users/my-user-context.svelte';
   import translate from '@/helpers/language/translate';
   import { m } from '@/paraglide/messages';
   import { AppUiMessage } from '@/types/enums';

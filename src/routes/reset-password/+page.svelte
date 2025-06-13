@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { MyUserContext } from '@/contexts/my-user-context.svelte.js';
+  import { MyUserContext } from '@/contexts/users/my-user-context.svelte.js';
   import { getContext, onMount } from 'svelte';
   import { type PageData } from './$types.js';
   import ResetPasswordForm from './reset-password-form.svelte';

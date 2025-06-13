@@ -12,7 +12,7 @@
     "menu": {
       "home": "Home",
       "inbox": "Inbox",
-      "conversations": "Conversations",
+      "chats": "Chats",
       "contacts": "Contacts",
       "users": "Users",
       "settings": "Settings"
@@ -160,6 +160,20 @@
       "min_length": "Your one-time password must be at least 6 characters",
       "invalid": "We could not verify the token you entered. Please try again."
     }
+  },
+  "chat": {
+    "list_title": "Chats",
+    "actions": {
+      "archive": "Archive",
+      "block": "Block",
+      "delete": "Delete",
+      "mute": "Mute"
+    },
+    "compose": "New message",
+    "compose_tip": "Hey, {userHandle}! 👋 The most productive conversations start with a brief introduction, the necessary context, and a simple, actionable request. Do you think you can take it from here?"
+  },
+  "users": {
+    "search": "Search for users..."
   },
   "connection": {
     "offline": "You're offline",

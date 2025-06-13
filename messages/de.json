@@ -12,7 +12,7 @@
     "menu": {
       "home": "Startseite",
       "inbox": "Posteingang",
-      "conversations": "Gespräche",
+      "chats": "Chats",
       "contacts": "Kontakte",
       "users": "Benutzer",
       "settings": "Einstellungen"
@@ -166,6 +166,20 @@
     "offline.description": "Sie sind derzeit nicht verbunden.",
     "reconnected": "Wieder verbunden",
     "reconnected.description": "Wieder mit First Spark verbunden!"
+  },
+  "chat": {
+    "list_title": "Chats",
+    "actions": {
+      "archive": "Archive",
+      "block": "Block",
+      "delete": "Delete",
+      "mute": "Mute"
+    },
+    "compose": "Neue Nachricht",
+    "compose_tip": "Hallo, {userHandle}! 👋 Die produktivsten Gespräche beginnen mit einer kurzen Vorstellung, dem notwendigen Kontext und einer einfachen, umsetzbaren Anfrage. Denkst du, du schaffst es von hier aus?"
+  },
+  "users": {
+    "search": "Search for people by username"
   },
   "setting": {
     "setting_label": "Einstellungen",

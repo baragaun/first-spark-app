@@ -1,6 +1,7 @@
 <script lang="ts">
   import * as DropdownMenu from '@/components/ui/dropdown-menu';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { myUserContext } from '@/contexts/users/my-user-context.svelte';
+  import { m } from '@/paraglide/messages';
   import type { ChannelListItem } from '@baragaun/bg-node-client';
   import { Archive, Trash2, ChevronDown } from 'lucide-svelte';
 
@@ -31,14 +32,14 @@
     <DropdownMenu.Content align="end">
       <DropdownMenu.Item>
         <Archive class="mr-2 h-4 w-4" />
-        Archive
+        {m['chat.actions.archive']()}
       </DropdownMenu.Item>
       <DropdownMenu.Item
         class="text-destructive focus:bg-destructive focus:text-destructive-foreground"
         onclick={handleDelete}
       >
         <Trash2 class="mr-2 h-4 w-4" />
-        Delete
+        {m['chat.actions.delete']()}
       </DropdownMenu.Item>
     </DropdownMenu.Content>
   </DropdownMenu.Root>

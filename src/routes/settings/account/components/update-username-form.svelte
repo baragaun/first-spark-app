@@ -4,7 +4,7 @@
   import FormButton from '@/components/forms/form-button.svelte';
   import IdentFormInput from '@/components/forms/form-ident-input.svelte';
   import { Button } from '@/components/ui/button';
-  import { type MyUserContext } from '@/contexts/my-user-context.svelte';
+  import { type MyUserContext } from '@/contexts/users/my-user-context.svelte';
   import translate from '@/helpers/language/translate';
   import { AppUiMessage } from '@/types/enums';
   import { UserIdentType } from '@baragaun/bg-node-client';

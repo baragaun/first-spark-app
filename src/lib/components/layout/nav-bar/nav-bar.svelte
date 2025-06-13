@@ -8,7 +8,7 @@
   import AvatarMenu from './avatar-menu.svelte';
   import LanguageButton from './language-button.svelte';
   import ThemeButton from './light-switch.svelte';
-  import type { MyUserContext } from '@/contexts/my-user-context.svelte';
+  import type { MyUserContext } from '@/contexts/users/my-user-context.svelte';
   import { getContext } from 'svelte';
   import type { MyUser } from '@baragaun/bg-node-client';
 

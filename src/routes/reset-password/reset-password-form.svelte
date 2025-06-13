@@ -6,7 +6,7 @@
   import OtpFormInput from '@/components/forms/form-otp-input.svelte';
   import PasswordFormInput from '@/components/forms/form-password-input.svelte';
   import { MsaListenerHandler } from '@/contexts/msa-listener-handler.svelte';
-  import { type MyUserContext } from '@/contexts/my-user-context.svelte.js';
+  import { type MyUserContext } from '@/contexts/users/my-user-context.svelte.js';
   import translate from '@/helpers/language/translate.js';
   import passwordHelpers from '@/helpers/password-helpers.js';
   import { m } from '@/paraglide/messages';

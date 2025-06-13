@@ -4,7 +4,7 @@
   import { PlugZap, PartyPopper } from 'lucide-svelte';
   import { m } from '$lib/paraglide/messages.js';
   import { getContext, onMount } from 'svelte';
-  import type { MyUserContext } from '@/contexts/my-user-context.svelte';
+  import type { MyUserContext } from '@/contexts/users/my-user-context.svelte';
 
   const userContext = getContext<MyUserContext>('myUserContext');
   let isOffline = $derived(userContext.isOffline);

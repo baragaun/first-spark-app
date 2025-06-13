@@ -3,7 +3,7 @@
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
   import * as Tabs from '@/components/ui/tabs';
-  import { MyUserContext } from '@/contexts/my-user-context.svelte';
+  import { MyUserContext } from '@/contexts/users/my-user-context.svelte';
   import { m } from '@/paraglide/messages';
 
   // const userContext = getContext<MyUserContext>('myUserContext');
@@ -46,7 +46,7 @@
   });
 </script>
 
-<div class="container py-8">
+<div class="container p-8">
   <h1 class="font-lexend text-3xl font-bold tracking-tight">{m['setting.setting_label']()}</h1>
 
   <Tabs.Root value={activeTab} class="my-8">
