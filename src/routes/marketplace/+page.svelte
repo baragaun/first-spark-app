@@ -118,22 +118,28 @@
       {#if vendor}
         <button
           type="button"
-          class="flex flex-col items-center border-0 bg-transparent p-0 text-left transition-opacity hover:opacity-90"
+          class="group flex flex-col items-center border-0 bg-transparent p-0 text-left transition-all duration-300 hover:scale-105 hover:opacity-90"
           onclick={() => navigateToGiftCardDetail(giftCardProduct.id)}
           onkeydown={(e) => e.key === 'Enter' && navigateToGiftCardDetail(giftCardProduct.id)}
           aria-label={`View ${vendor.name} gift card details`}
         >
-          <div class="mb-2 aspect-[4/3] w-full overflow-hidden rounded-xl bg-card shadow-lg">
+          <div
+            class="mb-2 aspect-[4/3] w-full overflow-hidden rounded-xl bg-card shadow-lg transition-all duration-300 group-hover:shadow-xl"
+          >
             <img
               src={giftCardImageDomain + '/giftcards/' + giftCardProduct.imageSourceFront}
               alt={vendor.name}
-              class="h-full w-full object-cover"
+              class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
               onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
             />
           </div>
-          <div class="flex items-center gap-2">
+          <div
+            class="flex items-center gap-2 transition-colors duration-300 group-hover:text-primary"
+          >
             {#if !isMobile.current}
-              <div class="h-6 w-6 overflow-hidden rounded-full">
+              <div
+                class="h-6 w-6 overflow-hidden rounded-full transition-transform duration-300 group-hover:scale-110"
+              >
                 <img
                   src={giftCardImageDomain + '/vendors/' + vendor.logoImageSource}
                   alt=""
