@@ -6,6 +6,7 @@
   import { m } from '@/paraglide/messages.js';
   import type { MyUser } from '@baragaun/bg-node-client';
   import { ArrowUpRight, LogOut, Settings } from 'lucide-svelte';
+  import { getUserInitials } from '@/helpers/get-user-initial-helper.js';
 
   let {
     myUser,
@@ -28,7 +29,7 @@
     <Button variant="ghost" data-testid="avatar-menu-trigger" class="relative h-8 w-8 rounded-full">
       <Avatar.Root class="h-9 w-9">
         <Avatar.Image src="" alt={`@${myUsername}`} />
-        <Avatar.Fallback>FS</Avatar.Fallback>
+        <Avatar.Fallback>{getUserInitials(myUser?.userHandle || '')}</Avatar.Fallback>
       </Avatar.Root>
     </Button>
   </DropdownMenu.Trigger>
@@ -38,7 +39,7 @@
       <div class="flex items-center">
         <Avatar.Root class="mr-2 h-9 w-9">
           <Avatar.Image src="" alt={`@${myUsername}`} />
-          <Avatar.Fallback>🙃</Avatar.Fallback>
+          <Avatar.Fallback>{getUserInitials(myUser?.userHandle || '')}</Avatar.Fallback>
         </Avatar.Root>
         <div class="flex flex-col space-y-1">
           <p class="text-sm font-medium leading-none">{myUsername}</p>
@@ -55,7 +56,10 @@
       </DropdownMenu.Item>
     </DropdownMenu.Group>
     <DropdownMenu.Separator />
-    <DropdownMenu.Item onclick={handleLogout}>
+    <DropdownMenu.Item
+      onclick={handleLogout}
+      class="text-destructive focus:bg-destructive focus:text-destructive-foreground"
+    >
       <LogOut class="mr-2 h-4 w-4" />
       {m['nav.auth.sign_out']()}
     </DropdownMenu.Item>

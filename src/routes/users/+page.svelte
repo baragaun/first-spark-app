@@ -1,18 +1,14 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { page } from '$app/state';
   import * as Card from '@/components/ui/card';
   import * as Dialog from '@/components/ui/dialog';
-  import { Button, buttonVariants } from '@/components/ui/button';
+  import { Button } from '@/components/ui/button';
   import type { ChannelContext } from '@/contexts/channels/channel-context.svelte';
   import type { MyUserContext } from '@/contexts/users/my-user-context.svelte';
-  import SearchBar from '@/components/ui/search-bar.svelte';
   import type { UserListItem, ChannelMessage } from '@baragaun/bg-node-client';
   import { getContext, onMount } from 'svelte';
-  import { BadgeInfo, Edit, Ellipsis, Send, User, X } from 'lucide-svelte';
+  import { Edit, Ellipsis, X } from 'lucide-svelte';
   import MessageInput from '../chat/components/message-input.svelte';
-  import MessageList from '../chat/components/message-list.svelte';
-  import { format } from 'date-fns';
   import type { UsersContext } from '@/contexts/users/users-context.svelte';
   import { m } from '@/paraglide/messages';
   import { Input } from '@/components/ui/input';
@@ -22,8 +18,6 @@
   const myUserContext = getContext<MyUserContext>('myUserContext');
   const usersContext = getContext<UsersContext>('usersContext');
 
-    
-  const channelId = $derived(page.params.channelId);
   let openDialogUserId = $state<string | null>(null);
   let inputRef = $state<HTMLInputElement | null>(null);
 
@@ -31,16 +25,27 @@
 
   let userList = $derived.by(() => {
     if (!usersContext?.users) return [];
-    
+
     if (searchText) {
-      const filtered = usersContext.users.filter((user) => 
-        user.userHandle?.toLowerCase().includes(searchText.toLowerCase())
+      const filtered = usersContext.users.filter((user) =>
+        user.userHandle?.toLowerCase().includes(searchText.toLowerCase()),
       );
       return filtered;
     }
-    
+
     return usersContext.users;
   });
+
+  let skip = $derived.by(() => userList.length);
+
+  const handleScroll = async (event: Event) => {
+    const target = event.target as HTMLElement;
+    if (target.scrollHeight - target.scrollTop - target.clientHeight < 100) {
+      if (usersContext && myUserContext.myUserId) {
+        await usersContext.getAllUsers([myUserContext.myUserId], skip);
+      }
+    }
+  };
 
   const handleSendMessage = async (user: UserListItem, messageText: string) => {
     try {
@@ -57,7 +62,7 @@
         channelId: channel.id,
         messageText,
       };
-      
+
       const response = await channelContext.createChannelMessage(newMessage);
       if (!response || typeof response === 'string') {
         console.error('CreateChannelMessage: received error.', { response });
@@ -66,7 +71,6 @@
 
       openDialogUserId = null;
       goto(`/chat/${channel.id}`);
-      
     } catch (error) {
       console.error('Error sending message:', error);
     }
@@ -90,7 +94,7 @@
 
   const debouncedSearch = debounce(300, async (searchQuery: string) => {
     if (!usersContext) return;
-    
+
     if (searchQuery.trim()) {
       await usersContext.searchUsers(searchQuery, [myUserContext.myUserId || '']);
     } else {
@@ -99,7 +103,7 @@
   });
 
   const handleInput = async () => {
-    const currentSearchText = usersContext.searchText;    
+    const currentSearchText = usersContext.searchText;
     debouncedSearch(currentSearchText);
   };
 
@@ -110,12 +114,11 @@
     }
     inputRef?.focus();
   };
-
 </script>
 
 <!-- THIS IS BEING REFACTORED INTO A COMPONENT - the original "Find Users" will become "Contacts" later -->
 
-<div class="p-8 flex flex-col gap-6">
+<div class="flex flex-col gap-6 p-8">
   <div class="relative flex items-center justify-center">
     <Input
       bind:ref={inputRef}
@@ -131,71 +134,78 @@
         variant="ghost"
         class="h-8 w-8"
         onclick={searchText ? handleClearSearch : null}
-        aria-label={searchText ? "Clear search" : "Close search"}
+        aria-label={searchText ? 'Clear search' : 'Close search'}
       >
         <X class="h-4 w-4" />
       </Button>
     </div>
   </div>
-  {#if usersContext?.isUserLoading}
-    <div class="text-center py-8">Loading users...</div>
+  {#if usersContext?.isUserLoading && usersContext.searchText}
+    <div class="py-8 text-center">Loading users...</div>
   {:else if userList.length === 0}
-    <div class="text-center py-8 text-muted-foreground">
+    <div class="py-8 text-center text-muted-foreground">
       {usersContext?.searchText ? 'No users found matching your search.' : ' No users available.'}
     </div>
   {:else}
-    <div class="flex flex-col gap-2 py-4 max-h-[50vh] overflow-auto border rounded-lg p-4">
+    <div
+      class="flex max-h-[calc(100vh-280px)] flex-col space-y-2 overflow-auto py-4"
+      onscroll={handleScroll}
+    >
       {#each userList as user (user.id)}
         <Dialog.Root
-          open={openDialogUserId === user.id} 
-          onOpenChange={(open) => openDialogUserId = open ? user.id : null}
+          open={openDialogUserId === user.id}
+          onOpenChange={(open) => (openDialogUserId = open ? user.id : null)}
         >
           <Dialog.Trigger>
-            <Card.Root class='relative max-h-36'>
-              <Card.Content class='flex flex-grow items-center justify-between p-4'>
-                <div class='flex items-center gap-4'>
+            <Card.Root class="relative max-h-36">
+              <Card.Content class="flex flex-grow items-center justify-between p-4">
+                <div class="flex items-center gap-4">
                   <img
                     src={user.avatarUrl || 'src/assets/icon.svg'}
                     alt={user.userHandle}
                     class="aspect-ratio-square max-h-12"
                   />
-                  <div class='flex flex-col items-start gap-1'>
+                  <div class="flex flex-col items-start gap-1">
                     <Card.Title>{user.userHandle}</Card.Title>
                     <Card.Description>
-                      <p class='text-ellipsis'>Connect with {user.userHandle} by sending a message.</p>
+                      <p class="text-ellipsis">
+                        Connect with {user.userHandle} by sending a message.
+                      </p>
                     </Card.Description>
                   </div>
                 </div>
-                <Button disabled variant='ghost' size='icon' class=''>
-                  <Ellipsis class='h-5 w-5' />
+                <Button disabled variant="ghost" size="icon" class="">
+                  <Ellipsis class="h-5 w-5" />
                 </Button>
               </Card.Content>
             </Card.Root>
           </Dialog.Trigger>
-          <Dialog.Content class='rounded-xl'>
+          <Dialog.Content class="rounded-xl">
             <Dialog.Header>
-              <Dialog.Title class='flex items-center gap-2'>
-                <Edit class='h-5 w-5' />
+              <Dialog.Title class="flex items-center gap-2">
+                <Edit class="h-5 w-5" />
                 {m['chat.compose']()}
               </Dialog.Title>
             </Dialog.Header>
-            <div class='flex flex-col items-center justify-center gap-4 py-6'>
+            <div class="flex flex-col items-center justify-center gap-4 py-6">
               <img
                 src={user.avatarUrl || 'src/assets/icon.svg'}
                 alt={user.userHandle}
                 class="aspect-ratio-square max-h-24"
               />
-              <div class='flex flex-col items-center justify-center gap-4'>
+              <div class="flex flex-col items-center justify-center gap-4">
                 <Dialog.Title>
-                  <span class='text-muted-foreground'>@</span>{user.userHandle}
+                  <span class="text-muted-foreground">@</span>{user.userHandle}
                 </Dialog.Title>
-                <div class='flex flex-col gap-6 p-6'>
-                  <div class="flex flex-col rounded-lg rounded-bl-none px-4 py-2 bg-muted">
-                    <span class='text-muted-foreground text-xs self-start'>FirstSpark</span>
+                <div class="flex flex-col gap-6 p-6">
+                  <div class="flex flex-col rounded-lg rounded-bl-none bg-muted px-4 py-2">
+                    <span class="self-start text-xs text-muted-foreground">FirstSpark</span>
                     <p class="mt-1 flex items-center justify-end gap-1 text-xs text-foreground">
-                      {m['chat.compose_tip']({ userHandle: myUserContext.myUserHandle || 'friend' })}
+                      {m['chat.compose_tip']({
+                        userHandle: myUserContext.myUserHandle || 'friend',
+                      })}
                     </p>
-                    <span class='text-muted-foreground text-xs self-end'>a moment ago</span>
+                    <span class="self-end text-xs text-muted-foreground">a moment ago</span>
                   </div>
                 </div>
               </div>

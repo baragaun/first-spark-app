@@ -1,12 +1,7 @@
 import translate from '@/helpers/language/translate';
 import { client } from '@/services/bg-node-client';
 import { AppUiMessage } from '@/types/enums';
-import {
-  CachePolicy,
-  User,
-  UserListFilter,
-  UserListItem,
-} from '@baragaun/bg-node-client';
+import { CachePolicy, User, UserListFilter, UserListItem } from '@baragaun/bg-node-client';
 
 let isUserLoading = $state(false);
 
@@ -40,31 +35,40 @@ export class UsersContext {
     }
   }
 
-  async getAllUsers(excludeIds?: string[]): Promise<UserListItem[] | string | null | undefined> {
+  async getAllUsers(
+    excludeIds?: string[],
+    skip: number = 0,
+    limit: number = 5, // TODO we should change it according to the requirement
+  ): Promise<UserListItem[] | string | null | undefined> {
     if (!this.client.isInitialized) {
       console.error('UsersContext.getAllUsers: not initialized.');
       return translate(AppUiMessage.systemError);
     }
     try {
       isUserLoading = true;
-      
-      const filter: UserListFilter = { 
+
+      const filter: UserListFilter = {
         excludeIds,
       };
-      
+
       const response = await this.client.operations.user.findUsers(
         filter,
         {},
         {},
-        {},
+        { skip, limit },
         { cachePolicy: CachePolicy.network },
       );
       if (!response || response.error || !response.objects) {
         console.error('getAllUsers: received error.', { response });
         return response.error || translate(AppUiMessage.systemError);
       }
-      
-      this.users = response.objects;
+
+      if (skip === 0) {
+        this.users = response.objects;
+      } else {
+        this.users = [...this.users, ...response.objects];
+      }
+
       this.hasLoadedUsers = true;
       return response.objects;
     } catch (error) {
@@ -78,21 +82,24 @@ export class UsersContext {
     }
   }
 
-  async searchUsers(searchText: string, excludeIds?: string[]): Promise<UserListItem[] | string | null | undefined> {
+  async searchUsers(
+    searchText: string,
+    excludeIds?: string[],
+  ): Promise<UserListItem[] | string | null | undefined> {
     if (!this.client.isInitialized) {
       console.error('UsersContext.searchUsers: not initialized.');
       return translate(AppUiMessage.systemError);
     }
     try {
       isUserLoading = true;
-      
+
       this.searchText = searchText;
-      
-      const filter: UserListFilter = { 
-        searchText, 
+
+      const filter: UserListFilter = {
+        searchText,
         excludeIds,
       };
-      
+
       const response = await this.client.operations.user.findUsers(
         filter,
         {},
@@ -104,7 +111,7 @@ export class UsersContext {
         console.error('searchUsers: received error.', { response });
         return response.error || translate(AppUiMessage.systemError);
       }
-      
+
       this.users = response.objects;
       return response.objects;
     } catch (error) {

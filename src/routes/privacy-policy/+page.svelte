@@ -6,7 +6,6 @@
     month: 'long',
     day: 'numeric',
   });
-
 </script>
 
 <MetaTags

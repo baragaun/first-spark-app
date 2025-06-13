@@ -4,11 +4,18 @@
   import type { ChannelListItem } from '@baragaun/bg-node-client';
   import ChannelOptionsMenu from './channel-options-menu.svelte';
   import { myUserContext } from '@/contexts/users/my-user-context.svelte';
-  import { channelContext } from '@/contexts/channels/channel-context.svelte';
+  import { ChannelContext } from '@/contexts/channels/channel-context.svelte';
+  import { getContext } from 'svelte';
 
-  let { channels }: { channels: ChannelListItem[] } = $props();
+  let {
+    channels,
+    handleScroll,
+  }: {
+    channels: ChannelListItem[];
+    handleScroll: (event: Event) => void;
+  } = $props();
 
-  // todo change to fetch real user by id
+  const channelsContext = getContext<ChannelContext>('channelContext');
   const currentUserId = myUserContext.myUserId; // This should match the variable name in +layout.ts
 
   const formatTime = (date: Date | string) => {
@@ -36,7 +43,7 @@
   };
 
   const handleDeleteChannel = async (participantId: string, channelId: string) => {
-    const response = await channelContext.deleteChannelParticipant(participantId);
+    const response = await channelsContext.deleteChannelParticipant(participantId);
     if (!response) {
       console.error('DeleteChannel: received error.', { response });
       return;
@@ -45,11 +52,11 @@
   };
 
   function handleChannelClick(channel: ChannelListItem) {
-    channelContext.selectChannel(channel);
+    channelsContext.selectChannel(channel);
   }
 </script>
 
-<div class="space-y-2">
+<div class="max-h-[calc(100vh-220px)] space-y-2 overflow-y-auto p-2" onscroll={handleScroll}>
   {#if channels.length === 0}
     <div class="rounded-lg border p-8 text-center">
       <p class="text-muted-foreground">No conversations yet</p>
@@ -101,12 +108,6 @@
                 {channel.latestMessage?.messageText || 'No latest messages'}
               </p>
             </div>
-
-            <!-- {#if channel.metadata?.unseenMessageInfo && channel.metadata.unreadCount > 0}
-              <div class="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
-                {channel.unreadCount}
-              </div>
-            {/if} -->
           </a>
         </div>
       {/await}

@@ -135,7 +135,7 @@
     <div class="flex flex-1 items-center justify-center">
       <div class="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
     </div>
-  <!-- {:else if !channelDetails}
+    <!-- {:else if !channelDetails}
     <div class="flex flex-1 items-center justify-center">
       <p>Conversation not found</p>
     </div> -->
@@ -168,7 +168,7 @@
           </Button>
         </div>
       {/if}
-      <div class='p-4'>
+      <div class="p-4">
         <MessageInput
           onSendMessage={(text) => handleSendMessage(text, replyingTo?.id)}
           placeholder={replyingTo ? 'Type your reply...' : 'Type a message...'}

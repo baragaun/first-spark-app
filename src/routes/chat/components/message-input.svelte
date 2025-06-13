@@ -74,7 +74,7 @@
   });
 </script>
 
-<div class="flex items-center gap-2 w-full">
+<div class="flex w-full items-center gap-2">
   <!-- <div class="relative">
     <Button type="button" variant="ghost" size="icon" onclick={toggleEmojiPicker}>
       <Smile class="h-5 w-5" />
@@ -100,7 +100,7 @@
   <Button
     type="button"
     size="icon"
-    variant='ghost'
+    variant="ghost"
     disabled={!messageText.trim()}
     onclick={handleSubmit}
   >
