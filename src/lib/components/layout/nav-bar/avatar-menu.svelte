@@ -25,10 +25,10 @@
 
 <DropdownMenu.Root>
   <DropdownMenu.Trigger class="ml-2">
-    <Button 
-      variant="ghost" 
-      data-testid="avatar-menu-trigger" 
-      class="relative h-8 w-8 rounded-full hover:text-primary transition-colors"
+    <Button
+      variant="ghost"
+      data-testid="avatar-menu-trigger"
+      class="relative h-8 w-8 rounded-full transition-colors hover:text-primary"
     >
       <Avatar.Root class="h-9 w-9">
         <Avatar.Image src="" alt={`@${myUsername}`} />

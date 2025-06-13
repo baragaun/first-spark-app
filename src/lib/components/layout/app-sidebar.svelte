@@ -120,7 +120,12 @@
           <h2 class="mb-3 text-sm font-bold">{m['join_first_spark']({ title: $appTitle })}</h2>
           <h3 class="mb-3 text-sm font-medium">{m['welcome_subtitle']()}</h3>
           <div class="flex flex-col gap-2">
-            <Button href="/signup" size="sm" class="w-full" onclick={handleItemClick}>
+            <Button
+              href="/signup"
+              size="sm"
+              class="w-full text-background"
+              onclick={handleItemClick}
+            >
               {m['get_started']()}
             </Button>
             <Button
