@@ -25,7 +25,11 @@
 
 <DropdownMenu.Root>
   <DropdownMenu.Trigger class="ml-2">
-    <Button variant="ghost" data-testid="avatar-menu-trigger" class="relative h-8 w-8 rounded-full">
+    <Button 
+      variant="ghost" 
+      data-testid="avatar-menu-trigger" 
+      class="relative h-8 w-8 rounded-full hover:text-primary transition-colors"
+    >
       <Avatar.Root class="h-9 w-9">
         <Avatar.Image src="" alt={`@${myUsername}`} />
         <Avatar.Fallback>FS</Avatar.Fallback>
@@ -33,7 +37,7 @@
     </Button>
   </DropdownMenu.Trigger>
 
-  <DropdownMenu.Content class="mt-2 w-56" align="end">
+  <DropdownMenu.Content class="mt-2 w-56 bg-background" align="end">
     <DropdownMenu.Label class="font-normal">
       <div class="flex items-center">
         <Avatar.Root class="mr-2 h-9 w-9">

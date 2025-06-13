@@ -50,7 +50,7 @@
   <h1 class="font-lexend text-3xl font-bold tracking-tight">{m['setting.setting_label']()}</h1>
 
   <Tabs.Root value={activeTab} class="my-8">
-    <Tabs.List class="mx-auto grid w-3/5 grid-cols-2 border-b">
+    <Tabs.List class="mx-auto grid w-3/5 grid-cols-2">
       {#each tabs as tab}
         <Tabs.Trigger value={tab.id} disabled={tab.disabled} onclick={() => goto(tab.path)}>
           {tab.label}
