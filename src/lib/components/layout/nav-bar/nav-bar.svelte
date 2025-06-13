@@ -57,7 +57,7 @@
             variant="default"
             onclick={() => goto('/signup')}
             aria-label={m['nav.auth.sign_up']()}
-            class="font-lexend shadow-sm hover:shadow-md"
+            class="font-lexend text-background shadow-sm hover:shadow-md"
           >
             {m['nav.auth.sign_up']()}
           </Button>

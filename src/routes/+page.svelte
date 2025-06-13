@@ -22,7 +22,7 @@
         <Button
           variant="default"
           size="lg"
-          class="shadow-lg transition-all hover:scale-105 hover:shadow-primary/25 active:scale-100"
+          class="text-background shadow-lg transition-all hover:scale-105 hover:shadow-primary/25 active:scale-100"
           href="/signup"
         >
           {m['get_started']()}
