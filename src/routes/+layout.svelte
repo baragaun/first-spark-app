@@ -22,6 +22,9 @@
   let isAuthenticated: boolean = $derived(myUserContext.isSignedIn);
   let myUser: MyUser | undefined = $derived(myUserContext.myUser);
 
+  // Check if current route is marketplace detail page
+  let showNavBar = $derived(!page.url.pathname.startsWith('/marketplace/'));
+
   onMount(() => {
     let projectName = env.PUBLIC_PROJECTNAME;
     if (projectName === 'KCU') {
@@ -59,7 +62,9 @@
     <SidebarProvider>
       <AppSidebar bind:isOffline {isAuthenticated} />
       <div class="flex flex-1 flex-col">
-        <NavBar {myUser} {isAuthenticated} {onSignOut} />
+        {#if showNavBar}
+          <NavBar {myUser} {isAuthenticated} {onSignOut} />
+        {/if}
         <main class="flex flex-1 flex-col">
           {@render children?.()}
         </main>
