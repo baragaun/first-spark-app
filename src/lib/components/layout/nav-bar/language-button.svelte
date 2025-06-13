@@ -17,7 +17,7 @@
           <Button
             variant="ghost"
             size="icon"
-            class={`${className} text-muted-foreground hover:text-foreground`}
+            class={`${className} text-muted-foreground hover:bg-transparent hover:text-foreground`}
             aria-label={m['language_button.tooltip']()}
           >
             <Languages class="h-5 w-5" />

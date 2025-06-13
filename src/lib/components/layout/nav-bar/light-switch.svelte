@@ -22,7 +22,7 @@
           <Button
             variant="ghost"
             size={iconButton ? 'icon' : 'sm'}
-            class={`${className} text-muted-foreground hover:text-foreground`}
+            class={`${className} text-muted-foreground hover:bg-transparent hover:text-foreground`}
             aria-label={m['light_switch.tooltip']()}
           >
             <Sun
