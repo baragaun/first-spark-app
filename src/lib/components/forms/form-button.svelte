@@ -40,7 +40,7 @@
   {variant}
   {disabled}
   {type}
-  class={`${isSuccess ? 'pointer-events-none bg-green-700 hover:bg-green-700' : ''} ${fullWidth ? 'w-full' : ''} ${extraClass}`}
+  class={`${isSuccess ? 'pointer-events-none bg-green-700 hover:bg-green-700' : ''} ${fullWidth ? 'w-full' : ''} ${extraClass} text-background`}
   onclick={(e) => {
     if (onClick) {
       e.preventDefault();
