@@ -15,7 +15,8 @@
       "conversations": "Conversations",
       "contacts": "Contacts",
       "settings": "Settings",
-      "marketplace": "Marketplace"
+      "marketplace": "Marketplace",
+      "cart": "Cart"
     }
   },
   "nav": {
