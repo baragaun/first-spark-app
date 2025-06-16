@@ -1,8 +1,7 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
   import { Textarea } from '$lib/components/ui/textarea/index.js';
-  import { Smile, Send } from 'lucide-svelte';
-  import EmojiPicker from './emoji-picker.svelte';
+  import { Send } from 'lucide-svelte';
 
   let {
     onSendMessage,

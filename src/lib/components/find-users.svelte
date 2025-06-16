@@ -1,18 +1,19 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { debounce } from 'throttle-debounce';
+  import { getContext, onMount } from 'svelte';
+  import { Edit, Ellipsis, X } from 'lucide-svelte';
+  import MessageInput from './shared/message-input.svelte';
   import * as Card from '@/components/ui/card';
   import * as Dialog from '@/components/ui/dialog';
   import { Button } from '@/components/ui/button';
   import type { ChannelContext } from '@/contexts/channels/channel-context.svelte';
   import type { MyUserContext } from '@/contexts/users/my-user-context.svelte';
   import type { UserListItem, ChannelMessage } from '@baragaun/bg-node-client';
-  import { getContext, onMount } from 'svelte';
-  import { Edit, Ellipsis, X } from 'lucide-svelte';
-  import MessageInput from '@/components/shared/message-input.svelte';
   import type { UsersContext } from '@/contexts/users/users-context.svelte';
   import { m } from '@/paraglide/messages';
   import { Input } from '@/components/ui/input';
-  import { debounce } from 'throttle-debounce';
+
 
   const channelContext = getContext<ChannelContext>('channelContext');
   const myUserContext = getContext<MyUserContext>('myUserContext');
@@ -42,7 +43,7 @@
     const target = event.target as HTMLElement;
     if (target.scrollHeight - target.scrollTop - target.clientHeight < 100) {
       if (usersContext && myUserContext.myUserId) {
-        await usersContext.getAllUsers([myUserContext.myUserId], skip);
+        await usersContext.searchUsers(searchText, [myUserContext.myUserId], skip);
       }
     }
   };
@@ -118,7 +119,7 @@
 
 <!-- THIS IS BEING REFACTORED INTO A COMPONENT - the original "Find Users" will become "Contacts" later -->
 
-<div class="flex flex-col gap-6 p-8">
+<div class="flex flex-col gap-6 p-4">
   <div class="relative flex items-center justify-center">
     <Input
       bind:ref={inputRef}
@@ -148,7 +149,7 @@
     </div>
   {:else}
     <div
-      class="flex max-h-[calc(100vh-280px)] flex-col space-y-2 overflow-auto py-4"
+      class="flex max-h-[calc(100vh-280px)] flex-col space-y-2 overflow-auto px-2 py-4"
       onscroll={handleScroll}
     >
       {#each userList as user (user.id)}

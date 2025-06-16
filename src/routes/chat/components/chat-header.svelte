@@ -31,7 +31,7 @@
   </div>
 
   <div class="flex items-end gap-2">
-    <DropdownMenu.Root>
+    <!-- <DropdownMenu.Root>
       <DropdownMenu.Trigger aria-label="More chat options">
         <Button variant="ghost" size="icon">
           <MoreVertical class="h-5 w-5" />
@@ -51,6 +51,6 @@
           {m['chat.actions.block']()}
         </DropdownMenu.Item>
       </DropdownMenu.Content>
-    </DropdownMenu.Root>
+    </DropdownMenu.Root> -->
   </div>
 </div>

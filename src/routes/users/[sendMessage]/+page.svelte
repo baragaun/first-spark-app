@@ -3,7 +3,7 @@
   import { getContext, onMount } from 'svelte';
   import ChatHeader from '../../chat/components/chat-header.svelte';
   import MessageList from '../../chat/components/message-list.svelte';
-  import MessageInput from '../../chat/components/message-input.svelte';
+  import MessageInput from '@/components/shared/message-input.svelte';
   import { ChannelMessage, UserListItem } from '@baragaun/bg-node-client';
   import { X } from 'lucide-svelte';
   import Button from '@/components/ui/button/button.svelte';

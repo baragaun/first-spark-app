@@ -9,10 +9,8 @@
   import SearchBar from '@/components/ui/search-bar.svelte';
   import type { UserListItem, ChannelMessage } from '@baragaun/bg-node-client';
   import { getContext, onMount } from 'svelte';
-  import { BadgeInfo, Edit, Ellipsis, Send } from 'lucide-svelte';
-  import MessageInput from '../chat/components/message-input.svelte';
-  import MessageList from '../chat/components/message-list.svelte';
-  import { format } from 'date-fns';
+  import { Edit, Ellipsis, Send } from 'lucide-svelte';
+  import MessageInput from '@/components/shared/message-input.svelte';
   import type { UsersContext } from '@/contexts/users/users-context.svelte';
   import { m } from '@/paraglide/messages';
 

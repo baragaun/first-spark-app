@@ -1,6 +1,6 @@
 <script lang="ts">
   import * as Avatar from '$lib/components/ui/avatar/index.js';
-  import { formatDistanceToNow } from 'date-fns';
+  import { format, formatDistanceToNow, isThisWeek, isToday, isYesterday } from 'date-fns';
   import type { ChannelListItem } from '@baragaun/bg-node-client';
   import ChannelOptionsMenu from './channel-options-menu.svelte';
   import { myUserContext } from '@/contexts/users/my-user-context.svelte';
@@ -19,7 +19,17 @@
   const currentUserId = myUserContext.myUserId; // This should match the variable name in +layout.ts
 
   const formatTime = (date: Date | string) => {
-    return formatDistanceToNow(new Date(date), { addSuffix: true });
+    const parsedDate = new Date(date);
+
+    if (isToday(parsedDate)) {
+      return format(parsedDate, 'h:mm a'); // Show time for today
+    } else if (isYesterday(parsedDate)) {
+      return 'Yesterday'; // Show "Yesterday"
+    } else if (isThisWeek(parsedDate)) {
+      return format(parsedDate, 'EEEE'); // Show day of the week (e.g., "Monday")
+    } else {
+      return format(parsedDate, 'dd/MM/yyyy'); // Show full date (e.g., "15/06/2025")
+    }
   };
 
   const getRecipientName = async (channel: ChannelListItem) => {

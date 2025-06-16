@@ -30,10 +30,10 @@
       <ChevronDown class="h-4 w-4" />
     </DropdownMenu.Trigger>
     <DropdownMenu.Content align="end">
-      <DropdownMenu.Item>
+      <!-- <DropdownMenu.Item>
         <Archive class="mr-2 h-4 w-4" />
         {m['chat.actions.archive']()}
-      </DropdownMenu.Item>
+      </DropdownMenu.Item> -->
       <DropdownMenu.Item
         class="text-destructive focus:bg-destructive focus:text-destructive-foreground"
         onclick={handleDelete}

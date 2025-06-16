@@ -39,6 +39,7 @@ export class UsersContext {
     excludeIds?: string[],
     skip: number = 0,
     limit: number = 5, // TODO we should change it according to the requirement
+    searchText?: string,
   ): Promise<UserListItem[] | string | null | undefined> {
     if (!this.client.isInitialized) {
       console.error('UsersContext.getAllUsers: not initialized.');
@@ -49,6 +50,7 @@ export class UsersContext {
 
       const filter: UserListFilter = {
         excludeIds,
+        searchText,
       };
 
       const response = await this.client.operations.user.findUsers(
@@ -85,6 +87,8 @@ export class UsersContext {
   async searchUsers(
     searchText: string,
     excludeIds?: string[],
+    skip: number = 0,
+    limit: number = 5, // TODO we should change it according to the requirement
   ): Promise<UserListItem[] | string | null | undefined> {
     if (!this.client.isInitialized) {
       console.error('UsersContext.searchUsers: not initialized.');
@@ -104,7 +108,7 @@ export class UsersContext {
         filter,
         {},
         {},
-        {},
+        { skip, limit },
         { cachePolicy: CachePolicy.network },
       );
       if (!response || response.error || !response.objects) {
@@ -112,7 +116,12 @@ export class UsersContext {
         return response.error || translate(AppUiMessage.systemError);
       }
 
-      this.users = response.objects;
+      if (skip === 0) {
+        this.users = response.objects;
+      } else {
+        this.users = [...this.users, ...response.objects];
+      }
+
       return response.objects;
     } catch (error) {
       console.error('searchUsers: error', {

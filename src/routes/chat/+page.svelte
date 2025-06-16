@@ -8,11 +8,11 @@
   import { MyUserContext } from '@/contexts/users/my-user-context.svelte';
   import { UsersContext } from '@/contexts/users/users-context.svelte';
   import SearchBar from '@/components/ui/search-bar.svelte';
-
-  import MessageInput from './components/message-input.svelte';
+  import MessageInput from '@/components/shared/message-input.svelte';
   import { m } from '@/paraglide/messages';
   import { getContext, onMount } from 'svelte';
   import type { UserListItem, ChannelMessage } from '@baragaun/bg-node-client';
+  import FindUsers from '@/components/find-users.svelte';
 
   const channelsContext = getContext<ChannelContext>('channelContext');
   const myUserContext = getContext<MyUserContext>('myUserContext');
@@ -105,7 +105,6 @@
 
   onMount(async () => {
     await channelsContext.findMyChannels(skip);
-
     // Ensure users context is initialized
     if (usersContext && myUserContext.myUserId) {
       try {
@@ -147,9 +146,7 @@
 
       <div class="py-4">
         {#if !selectedUser}
-          <!-- User Search -->
-
-          THE COMPONENT IN USERS/+PAGE.SVELTE WILL LIVE HERE
+          <FindUsers />
         {:else}
           <!-- Selected User & Message Compose -->
           <div class="space-y-6">
