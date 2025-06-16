@@ -4,29 +4,18 @@
   import { Button } from '$lib/components/ui/button';
   import { onMount } from 'svelte';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
-  import type { ShoppingCart, ShoppingCartItem } from '@baragaun/bg-node-client';
+  import type { GiftCardProduct, ShoppingCart, ShoppingCartItem } from '@baragaun/bg-node-client';
   import { writable } from 'svelte/store';
   import { toast } from 'svelte-sonner';
-  import placeholderImage from '../../../assets/images/placeholder.png';
+  import placeholderImage from '../../assets/images/placeholder.png';
+  import { giftCardProductsStore, vendorsStore, dataLoaded } from '$lib/stores/marketplace-store';
 
-  // Interface to match the structure of items in the cart
-  interface CartItem {
-    id: string;
-    productId: string;
-    count: number;
-    price: number;
-    totalPrice: number;
-  }
-
-  // Initialize with an empty array, will be populated by fetched data
-  let cartItems: CartItem[] = [];
-
-  // Placeholder for user's current MIT balance
-  let currentMitBalance = 6062; // Example: MIT 6,062 ($60.62)
-  let selectedPaymentMethod = 'MIT'; // Default selected method
+  let cartItems: ShoppingCartItem[] = [];
+  let currentMitBalance = 6062;
+  let selectedPaymentMethod = 'MIT';
 
   $: subtotal = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
-  $: totalReward = cartItems.reduce((sum, item) => sum + (item.price / 1000), 0);
+  $: totalReward = cartItems.reduce((sum, item) => sum + item.price / 1000, 0);
   $: isOrderExceedingBalance = selectedPaymentMethod === 'MIT' && subtotal > currentMitBalance;
 
   async function removeItem(id: string) {
@@ -36,7 +25,7 @@
         console.error('Error deleting item:', result.error);
         toast.error(`Failed to remove item: ${result.error}`);
       } else {
-        cartItems = cartItems.filter(item => item.id !== id);
+        cartItems = cartItems.filter((item) => item.id !== id);
         toast.success('Item removed from cart!');
       }
     } catch (error) {
@@ -54,11 +43,16 @@
     history.back();
   }
 
+  function filterProduct(productId: String): String {
+    const product = $giftCardProductsStore.find((product) => product.id === productId);
+    return product?.imageSourceFront ?? '';
+  }
+
   const shoppingCart = writable<ShoppingCart | null | undefined>(undefined);
 
   onMount(async () => {
     const cartResult = await marketplaceContext.findMyShoppingCart();
-    
+
     if (typeof cartResult === 'string') {
       // Handle error case, e.g., show a toast or log
       console.error('Failed to load shopping cart:', cartResult);
@@ -66,13 +60,7 @@
     } else if (cartResult) {
       shoppingCart.set(cartResult);
       // We need to map it to our local CartItem interface
-      cartItems = cartResult.items.map(item => ({
-        id: item.id || '',
-        productId: item.productId || '',
-        count: item.count || 0,
-        price: item.price || 0,
-        totalPrice: item.totalPrice || 0,
-      }));
+      cartItems = cartResult.items;
     } else {
       shoppingCart.set(null); // No cart found
     }
@@ -104,15 +92,18 @@
         <div class="grid grid-cols-4 items-center gap-4 border-b border-border py-4 md:grid-cols-6">
           <div class="col-span-2 flex items-center md:col-span-3">
             <div class="mr-4 h-12 w-16 flex-shrink-0">
-              <img 
-                src={item.productId ? `https://d27wpajtnol6ce.cloudfront.net/giftcards/${item.productId}` : ''} 
-                alt="Gift Card" 
-                class="h-full w-full object-contain rounded"
+              <img
+                src={'https://d27wpajtnol6ce.cloudfront.net/giftcards/' +
+                  filterProduct(item.productId)}
+                alt={''}
+                class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
                 onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
               />
             </div>
             <div class="flex flex-col">
-              <span class="text-base font-medium text-primary">{item.productId ? 'Gift Card' : ''}</span>
+              <span class="text-base font-medium text-primary"
+                >{item.productId ? 'Gift Card' : ''}</span
+              >
               <span class="text-sm text-muted-foreground">Reward: MIT {item.price / 1000}</span>
               <Button
                 variant="outline"
@@ -131,13 +122,13 @@
         </div>
       {/each}
     {:else}
-      <div class="text-center py-8 text-muted-foreground">Your cart is empty</div>
+      <div class="py-8 text-center text-muted-foreground">Your cart is empty</div>
     {/if}
 
     <!-- Total Section -->
     <div class="mt-6 flex items-center justify-end text-primary">
       <span class="mr-4 text-lg font-bold">total: MIT {subtotal}</span>
-      <Button variant="outline" class="mr-2">ADD GIFT</Button>
+      <Button variant="outline" class="mr-2" onclick={() => goto(`/marketplace`)}>ADD GIFT</Button>
       <Button variant="outline">ADD MIT</Button>
     </div>
     <div class="mt-2 flex justify-end text-primary">
@@ -148,7 +139,7 @@
     </div>
 
     <!-- Payment Method Section -->
-    <h2 class="mb-4 mt-8 text-lg font-bold text-primary">Payment Method</h2>
+    <!-- <h2 class="mb-4 mt-8 text-lg font-bold text-primary">Payment Method</h2>
     <div class="mb-6 flex space-x-4">
       <button
         class="flex flex-col items-center rounded-lg border p-3 {selectedPaymentMethod === 'MIT'
@@ -197,7 +188,7 @@
         <img src="/litecoin-logo.png" alt="Litecoin" class="mb-1 h-8 w-8" />
         <span class="text-sm text-primary">Litecoin</span>
       </button>
-    </div>
+    </div> -->
 
     <!-- Warning Message -->
     {#if isOrderExceedingBalance}
@@ -229,7 +220,7 @@
 
     <!-- Place Order Button -->
     <Button
-      class="w-full py-3 text-lg font-semibold"
+      class="w-full py-3 text-lg font-semibold text-background"
       disabled={isOrderExceedingBalance}
       onclick={placeOrder}
     >
