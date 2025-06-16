@@ -5,7 +5,7 @@
   import * as Sidebar from '@/components/ui/sidebar';
   import { m } from '@/paraglide/messages';
   import { Button } from '../ui/button';
-  import { GiftIcon, House, PlugZap, Settings, Zap } from 'lucide-svelte';
+  import { GiftIcon, House, PlugZap, Settings, ShoppingCartIcon, Zap } from 'lucide-svelte';
   import { appTitle, headerIcon } from '$lib/stores/app-store';
 
   const items = [
@@ -43,6 +43,12 @@
       title: m['sidebar.menu.marketplace'](),
       url: '/marketplace',
       icon: GiftIcon,
+      requiresAuth: true,
+    },
+    {
+      title: m['sidebar.menu.cart'](),
+      url: '/cart',
+      icon: ShoppingCartIcon,
       requiresAuth: true,
     },
   ];

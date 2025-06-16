@@ -9,11 +9,14 @@
     GiftCardDenomination,
     type GiftCardProduct,
     type Vendor,
+    type ShoppingCartItem,
   } from '@baragaun/bg-node-client';
   import placeholderImage from '../../../assets/images/placeholder.png';
   import { ArrowLeft } from 'lucide-svelte';
   import { giftCardProductsStore, vendorsStore, dataLoaded } from '$lib/stores/marketplace-store';
   import { derived } from 'svelte/store';
+  import { toast } from 'svelte-sonner';
+  import { goto } from '$app/navigation';
 
   // Add a placeholder for user avatar (replace with real user data if available)
   const userAvatarUrl = 'https://randomuser.me/api/portraits/men/32.jpg';
@@ -99,10 +102,54 @@
     }
     return [...denominationsToReturn].sort((a, b) => a.amount - b.amount);
   }
+
+  async function addDenominationToCart(
+    denomination: GiftCardDenomination,
+    giftCardProduct: GiftCardProduct,
+  ) {
+    if (!giftCardProduct.id) {
+      console.error('GiftCardProduct ID is missing, cannot add to cart.');
+      toast.error('Failed to add item to cart: Gift card details missing.');
+      return;
+    }
+
+    // Construct the item to add to cart using the correct type
+    const count = 1;
+    const itemToAdd: Partial<ShoppingCartItem> = {
+      shoppingCartId: giftCardProduct.id,
+      productId: giftCardProduct.id,
+      count: count,
+      price: denomination.amount,
+      totalPrice: count * denomination.amount,
+    };
+
+    try {
+      const result = await marketplaceContext.createShoppingCartItem(itemToAdd);
+
+      if (result.error) {
+        console.error('Error adding item to cart:', result.error);
+        toast.error(`Failed to add item to cart: ${result.error}`);
+      } else if (result.object) {
+        console.log('Item added to cart:', result.object);
+        toast.success(
+          `$${denomination.amount / 1000} ${giftCardProduct.name || 'Gift Card'} added to cart!`,
+        );
+        // Optionally navigate to cart page or update cart count somewhere
+        goto('/cart'); // Navigate to shopping cart page after adding
+      } else {
+        toast.error('Failed to add item to cart: No object returned.');
+      }
+    } catch (error) {
+      console.error('Unexpected error adding item to cart:', error);
+      toast.error('An unexpected error occurred while adding to cart.');
+    }
+  }
 </script>
 
 <!-- Header Bar -->
-<div class="flex items-center justify-between rounded-b-lg bg-primary px-4 py-3 text-white shadow">
+<div
+  class="flex items-center justify-between rounded-b-lg bg-foreground px-4 py-3 text-background shadow"
+>
   <button onclick={() => history.back()} class="flex items-center">
     <ArrowLeft class="h-6 w-6" />
   </button>
@@ -175,8 +222,12 @@
       <div class="text-500 mb-2 text-sm text-secondary-foreground">Gift Card Amount</div>
       <div class="space-y-4">
         {#each getDenominations($giftCardProduct) as denomination}
-          <div
-            class="flex flex-col items-center rounded-xl border px-6 py-4 text-2xl font-bold shadow-sm"
+          <button
+            type="button"
+            class="flex w-full cursor-pointer flex-col items-center rounded-xl border px-6 py-4 text-2xl font-bold shadow-sm transition-colors hover:bg-gray-100"
+            onclick={() => addDenominationToCart(denomination, $giftCardProduct)}
+            onkeydown={(e) =>
+              e.key === 'Enter' && addDenominationToCart(denomination, $giftCardProduct)}
           >
             <span class="flex items-end gap-1">
               <span class="align-bottom text-base text-muted-foreground">USD</span>
@@ -187,7 +238,7 @@
                 >Reward: MIT {denomination.amount / 1000}</span
               >
             {/if}
-          </div>
+          </button>
         {/each}
       </div>
     {/if}
