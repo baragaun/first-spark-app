@@ -85,7 +85,7 @@
       class="grid grid-cols-4 gap-4 border-b border-muted-foreground pb-2 text-sm font-medium text-muted-foreground md:grid-cols-6"
     >
       <div class="col-span-2 md:col-span-3">Product</div>
-      <div class="text-center">Count</div>
+      <div class="text-center">Quantity</div>
       <div class="col-span-1 text-right md:col-span-1">Amount (USD)</div>
       <div class="text-right md:col-span-1"></div>
     </div>
@@ -119,7 +119,7 @@
               </Button>
             </div>
           </div>
-          <div class="text-center text-primary">{item.count || 0}</div>
+          <div class="text-center text-primary">{item.quantity || 0}</div>
           <div class="col-span-1 text-right text-primary md:col-span-1">
             {item.totalPrice || 0}
           </div>
@@ -135,58 +135,6 @@
       <!-- <Button variant="outline" class="mr-2" onclick={() => goto(`/marketplace`)}>ADD GIFT</Button> -->
     </div>
     <div class="mt-2 flex justify-end text-primary"></div>
-
-    <!-- Payment Method Section -->
-    <!-- <h2 class="mb-4 mt-8 text-lg font-bold text-primary">Payment Method</h2>
-    <div class="mb-6 flex space-x-4">
-      <button
-        class="flex flex-col items-center rounded-lg border p-3 {selectedPaymentMethod === 'MIT'
-          ? 'border-primary bg-primary/10'
-          : 'border-border'}"
-        onclick={() => (selectedPaymentMethod = 'MIT')}
-      >
-        <img src="/mit-logo.png" alt="MIT" class="mb-1 h-8 w-8" />
-        <span class="text-sm text-primary">MIT</span>
-      </button>
-      <button
-        class="flex flex-col items-center rounded-lg border p-3 {selectedPaymentMethod ===
-        'CreditCard'
-          ? 'border-primary bg-primary/10'
-          : 'border-border'}"
-        onclick={() => (selectedPaymentMethod = 'CreditCard')}
-      >
-        <img src="/credit-card-logo.png" alt="Credit Card" class="mb-1 h-8 w-8" />
-        <span class="text-sm text-primary">Credit Card</span>
-      </button>
-      <button
-        class="flex flex-col items-center rounded-lg border p-3 {selectedPaymentMethod === 'Bitcoin'
-          ? 'border-primary bg-primary/10'
-          : 'border-border'}"
-        onclick={() => (selectedPaymentMethod = 'Bitcoin')}
-      >
-        <img src="/bitcoin-logo.png" alt="Bitcoin" class="mb-1 h-8 w-8" />
-        <span class="text-sm text-primary">Bitcoin</span>
-      </button>
-      <button
-        class="flex flex-col items-center rounded-lg border p-3 {selectedPaymentMethod === 'DOGE'
-          ? 'border-primary bg-primary/10'
-          : 'border-border'}"
-        onclick={() => (selectedPaymentMethod = 'DOGE')}
-      >
-        <img src="/dogecoin-logo.png" alt="DOGE" class="mb-1 h-8 w-8" />
-        <span class="text-sm text-primary">DOGE</span>
-      </button>
-      <button
-        class="flex flex-col items-center rounded-lg border p-3 {selectedPaymentMethod ===
-        'Litecoin'
-          ? 'border-primary bg-primary/10'
-          : 'border-border'}"
-        onclick={() => (selectedPaymentMethod = 'Litecoin')}
-      >
-        <img src="/litecoin-logo.png" alt="Litecoin" class="mb-1 h-8 w-8" />
-        <span class="text-sm text-primary">Litecoin</span>
-      </button>
-    </div> -->
 
     <!-- Warning Message -->
     {#if isOrderExceedingBalance}

@@ -10,6 +10,7 @@ import {
   Vendor,
   type QueryResult,
 } from '@baragaun/bg-node-client';
+
 let isLoading = $state(false);
 
 export class MarketplaceContext {
@@ -183,7 +184,7 @@ export class MarketplaceContext {
     try {
       isLoading = true;
       const response = await this.client.operations.shoppingCart.findMyShoppingCart();
-      if (!response || response.error || !response.objects) {
+      if (!response || response.error || !response.object) {
         console.error('findShoppingCartItems: received error.', { response });
         return response.error || translate(AppUiMessage.systemError);
       }
