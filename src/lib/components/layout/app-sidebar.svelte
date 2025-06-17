@@ -27,12 +27,12 @@
       icon: Inbox,
       requiresAuth: true,
     },*/
-    {
-      title: m['sidebar.menu.users'](),
-      url: '/users',
-      icon: User,
-      requiresAuth: true,
-    },
+    // {
+    //   title: m['sidebar.menu.users'](),
+    //   url: '/users',
+    //   icon: User,
+    //   requiresAuth: true,
+    // },
     {
       title: m['sidebar.menu.settings'](),
       url: '/settings',
