@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-svelte';
+  import { ArrowLeft, CheckCircle2, AlertCircle, Plus, Minus } from 'lucide-svelte';
   import { goto } from '$app/navigation';
   import { Button } from '$lib/components/ui/button';
   import { onMount } from 'svelte';
@@ -17,6 +17,61 @@
 
   let cartItems: ShoppingCartItem[] = [];
   $: subtotal = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
+
+  // Function to combine items with same productId
+  function combineDuplicateItems(items: ShoppingCartItem[]): ShoppingCartItem[] {
+    const combinedItems = new Map<string, ShoppingCartItem>();
+
+    items.forEach((item) => {
+      if (!item.productId) return;
+
+      if (combinedItems.has(item.productId)) {
+        const existingItem = combinedItems.get(item.productId)!;
+        existingItem.quantity = (existingItem.quantity || 0) + (item.quantity || 0);
+        existingItem.totalPrice = (existingItem.totalPrice || 0) + (item.totalPrice || 0);
+      } else {
+        combinedItems.set(item.productId, { ...item });
+      }
+    });
+
+    return Array.from(combinedItems.values());
+  }
+
+  async function updateItemQuantity(item: ShoppingCartItem, newQuantity: number) {
+    if (newQuantity < 1) {
+      await removeItem(item.id || '');
+      return;
+    }
+
+    try {
+      // First remove the existing item
+      await removeItem(item.id || '');
+
+      // Then create a new item with the updated quantity
+      const newItem = {
+        shoppingCartId: item.shoppingCartId,
+        productId: item.productId,
+        quantity: newQuantity,
+        price: item.price,
+        totalPrice: (item.price || 0) * newQuantity,
+      };
+
+      const result = await marketplaceContext.createShoppingCartItem(newItem);
+      if (result.error) {
+        console.error('Error updating item quantity:', result.error);
+        toast.error(`Failed to update quantity: ${result.error}`);
+      } else if (result.object) {
+        // Update the local cart items
+        cartItems = cartItems.map((cartItem) =>
+          cartItem.id === item.id ? (result.object as ShoppingCartItem) : cartItem,
+        );
+        toast.success('Quantity updated!');
+      }
+    } catch (error) {
+      console.error('Unexpected error updating quantity:', error);
+      toast.error('An unexpected error occurred while updating quantity.');
+    }
+  }
 
   async function removeItem(id: string) {
     console.log(`jahanvi ${id}`);
@@ -75,8 +130,8 @@
       shoppingCart.set(undefined); // Set to undefined on error
     } else if (cartResult) {
       shoppingCart.set(cartResult);
-      // We need to map it to our local CartItem interface
-      cartItems = cartResult.items;
+      // Combine duplicate items before setting cartItems
+      cartItems = combineDuplicateItems(cartResult.items);
     } else {
       shoppingCart.set(null); // No cart found
     }
@@ -89,28 +144,26 @@
     class="relative flex items-center justify-center bg-foreground p-4 text-background shadow-md"
   >
     <h1 class="text-lg font-semibold">Shopping Cart</h1>
-    <Button
-      class="absolute right-4 rounded-lg border border-background text-background"
-      onclick={() => goto(`/marketplace`)}>ADD GIFT</Button
-    >
   </header>
 
   <div class="container mx-auto flex-1 px-4 py-6">
-    <!-- Cart Items Header -->
-    <div
-      class="grid grid-cols-4 gap-4 border-b border-muted-foreground pb-2 text-sm font-medium text-muted-foreground md:grid-cols-6"
-    >
-      <div class="col-span-2 text-center text-base md:col-span-3">Product</div>
-      <div class="text-center text-base">Quantity</div>
-      <div class="text-center text-base">
-        Amount
-        <span class="currency text-xs md:block">(USD)</span>
+    {#if cartItems.length > 0}
+      <!-- Cart Items Header -->
+      <div
+        class="grid grid-cols-4 gap-4 border-b border-muted-foreground pb-2 text-sm font-medium text-muted-foreground md:grid-cols-6"
+      >
+        <div class="col-span-2 text-center text-base md:col-span-3">Product</div>
+        <div class="text-center text-base">Quantity</div>
+        <div class="text-center text-base">
+          Amount
+          <span class="currency text-xs md:block">(USD)</span>
+        </div>
       </div>
-    </div>
+    {/if}
 
     <!-- Cart Items List -->
-    {#if $shoppingCart?.items}
-      {#each $shoppingCart.items as item (item.id)}
+    {#if cartItems.length > 0}
+      {#each cartItems as item (item.id)}
         {@const [product, vendor] = findProductAndVendor(item.productId)}
         <div class="grid grid-cols-4 items-center gap-4 border-b border-border py-4 md:grid-cols-6">
           <div class="col-span-2 flex items-center md:col-span-3">
@@ -130,27 +183,50 @@
                 variant="outline"
                 size="sm"
                 class="mt-1 h-6 w-fit rounded-full border-accent px-2 text-xs text-accent hover:bg-accent hover:text-accent-foreground"
-                onclick={() => removeItem(item.productId || '')}
+                onclick={() => removeItem(item.id || '')}
               >
                 Remove
               </Button>
             </div>
           </div>
-          <div class="text-center text-primary">{item.quantity || 0}</div>
+          <div class="flex items-center justify-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              class="h-8 w-8"
+              onclick={() => updateItemQuantity(item, (item.quantity || 0) - 1)}
+            >
+              <Minus class="h-4 w-4" />
+            </Button>
+            <span class="text-primary">{item.quantity || 0}</span>
+            <Button
+              variant="outline"
+              size="icon"
+              class="h-8 w-8"
+              onclick={() => updateItemQuantity(item, (item.quantity || 0) + 1)}
+            >
+              <Plus class="h-4 w-4" />
+            </Button>
+          </div>
           <div class="text-center text-primary">
             {item.totalPrice / 1000 || 0}
           </div>
         </div>
       {/each}
+      <!-- Total Section -->
+      <div class="mr-4 py-4 text-right text-primary">
+        <span class="text-lg font-bold">Total: USD {subtotal / 1000}</span>
+      </div>
     {:else}
       <div class="py-8 text-center text-muted-foreground">Your cart is empty</div>
     {/if}
 
-    <!-- Total Section -->
-    <div class="mt-6 flex items-center justify-end text-primary">
-      <span class="mr-4 text-lg font-bold">Total: USD {subtotal / 1000}</span>
+    <div>
+      <Button
+        class="mx-auto mb-6 block rounded-full border border-foreground bg-background text-foreground"
+        onclick={() => goto(`/marketplace`)}>Continue shopping</Button
+      >
     </div>
-    <!-- <div class="mt-2 flex justify-end text-primary"></div> -->
 
     <!-- Terms and Conditions -->
     <p class="mb-4 text-sm text-muted-foreground">
