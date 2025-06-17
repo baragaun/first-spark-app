@@ -107,6 +107,7 @@
   async function addDenominationToCart(
     denomination: GiftCardDenomination,
     giftCardProduct: GiftCardProduct,
+    vendor: Vendor,
   ) {
     if (!giftCardProduct.id) {
       console.error('GiftCardProduct ID is missing, cannot add to cart.');
@@ -133,7 +134,7 @@
       } else if (result.object) {
         console.log('Item added to cart:', result.object);
         toast.success(
-          `$${denomination.amount / 1000} ${giftCardProduct.name || 'Gift Card'} added to cart!`,
+          `$${denomination.amount / 1000} ${vendor.name || 'Gift Card'} added to cart!`,
         );
         // Optionally navigate to cart page or update cart count somewhere
         goto('/cart'); // Navigate to shopping cart page after adding
@@ -226,9 +227,9 @@
           <button
             type="button"
             class="flex w-full cursor-pointer flex-col items-center rounded-xl border px-6 py-4 text-2xl font-bold shadow-sm transition-colors hover:bg-gray-100"
-            onclick={() => addDenominationToCart(denomination, $giftCardProduct)}
+            onclick={() => addDenominationToCart(denomination, $giftCardProduct, $vendor)}
             onkeydown={(e) =>
-              e.key === 'Enter' && addDenominationToCart(denomination, $giftCardProduct)}
+              e.key === 'Enter' && addDenominationToCart(denomination, $giftCardProduct, $vendor)}
           >
             <span class="flex items-end gap-1">
               <span class="align-bottom text-base text-muted-foreground">USD</span>
