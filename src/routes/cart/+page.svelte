@@ -73,6 +73,10 @@
     class="relative flex items-center justify-center bg-foreground p-4 text-background shadow-md"
   >
     <h1 class="text-lg font-semibold">Shopping Cart</h1>
+    <Button
+      class="absolute right-4 rounded-lg border border-background text-background"
+      onclick={() => goto(`/marketplace`)}>ADD GIFT</Button
+    >
   </header>
 
   <div class="container mx-auto flex-1 px-4 py-6">
@@ -82,7 +86,7 @@
     >
       <div class="col-span-2 md:col-span-3">Product</div>
       <div class="text-center">Count</div>
-      <div class="col-span-1 text-right md:col-span-1">Amount (MIT)</div>
+      <div class="col-span-1 text-right md:col-span-1">Amount (USD)</div>
       <div class="text-right md:col-span-1"></div>
     </div>
 
@@ -127,16 +131,10 @@
 
     <!-- Total Section -->
     <div class="mt-6 flex items-center justify-end text-primary">
-      <span class="mr-4 text-lg font-bold">total: MIT {subtotal}</span>
-      <Button variant="outline" class="mr-2" onclick={() => goto(`/marketplace`)}>ADD GIFT</Button>
-      <Button variant="outline">ADD MIT</Button>
+      <span class="mr-4 text-lg font-bold">total: USD {subtotal}</span>
+      <!-- <Button variant="outline" class="mr-2" onclick={() => goto(`/marketplace`)}>ADD GIFT</Button> -->
     </div>
-    <div class="mt-2 flex justify-end text-primary">
-      <div class="flex items-center text-sm font-medium text-green-600">
-        <CheckCircle2 class="mr-1 h-4 w-4" />
-        <span>Total reward: MIT {totalReward}</span>
-      </div>
-    </div>
+    <div class="mt-2 flex justify-end text-primary"></div>
 
     <!-- Payment Method Section -->
     <!-- <h2 class="mb-4 mt-8 text-lg font-bold text-primary">Payment Method</h2>

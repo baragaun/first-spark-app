@@ -233,11 +233,6 @@
               <span class="align-bottom text-base text-muted-foreground">USD</span>
               <span class="text-4xl">{denomination.amount / 1000}</span>
             </span>
-            {#if denomination.amount}
-              <span class="text-400 mt-1 text-xs text-secondary-foreground"
-                >Reward: MIT {denomination.amount / 1000}</span
-              >
-            {/if}
           </button>
         {/each}
       </div>
