@@ -5,6 +5,7 @@
   import { Button } from '$lib/components/ui/button';
   import * as Card from '$lib/components/ui/card';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
   import {
     GiftCardDenomination,
     type GiftCardProduct,
@@ -116,9 +117,9 @@
     // Construct the item to add to cart using the correct type
     const count = 1;
     const itemToAdd: Partial<ShoppingCartItem> = {
-      shoppingCartId: giftCardProduct.id,
+      shoppingCartId: myUserContext.myUserId,
       productId: giftCardProduct.id,
-      count: count,
+      quantity: count,
       price: denomination.amount,
       totalPrice: count * denomination.amount,
     };
