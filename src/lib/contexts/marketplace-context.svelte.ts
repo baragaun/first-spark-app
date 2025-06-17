@@ -152,6 +152,34 @@ export class MarketplaceContext {
     }
   }
 
+  // async updateShoppingCartItem(
+  //   props: ShoppingCartItem,
+  // ): Promise<QueryResult<ShoppingCartItem>> {
+  //   if (!this.client.isInitialized) {
+  //     console.error('MarketplaceContext.updateShoppingCartItem: not initialized.');
+  //     return { error: translate(AppUiMessage.systemError) };
+  //   }
+  //   try {
+  //     isLoading = true;
+  //     const response = await this.client.operations.shoppingCartItem.updateShoppingCartItem(
+  //       props,
+  //     );
+  //     if (!response || response.error) {
+  //       console.error('updateShoppingCartItem: received error.', { response });
+  //       return { error: response.error || translate(AppUiMessage.systemError) };
+  //     }
+  //     return response;
+  //   } catch (error) {
+  //     console.error('updateShoppingCartItem: error', {
+  //       error: (error as Error).message,
+  //       stack: (error as Error).stack,
+  //     });
+  //     return { error: translate(AppUiMessage.systemError) };
+  //   } finally {
+  //     isLoading = false;
+  //   }
+  // }
+
   async deleteShoppingCartItem(id: string): Promise<QueryResult<void>> {
     if (!this.client.isInitialized) {
       console.error('MarketplaceContext.deleteShoppingCartItem: not initialized.');
