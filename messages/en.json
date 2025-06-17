@@ -16,7 +16,8 @@
       "contacts": "Contacts",
       "settings": "Settings",
       "marketplace": "Marketplace",
-      "cart": "Cart"
+      "cart": "Cart",
+      "wallet": "Wallet"
     }
   },
   "nav": {

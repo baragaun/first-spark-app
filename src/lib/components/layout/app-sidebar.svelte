@@ -6,7 +6,7 @@
   import * as Sidebar from '@/components/ui/sidebar';
   import type { MyUserContext } from '@/contexts/my-user-context.svelte';
   import { m } from '@/paraglide/messages';
-  import { GiftIcon, House, PlugZap, Settings, ShoppingCartIcon, Zap } from 'lucide-svelte';
+  import { GiftIcon, House, PlugZap, Settings, ShoppingCartIcon, Wallet, Zap } from 'lucide-svelte';
   import { appTitle, headerIcon } from '$lib/stores/app-store';
 
   const items = [
@@ -50,6 +50,12 @@
       title: m['sidebar.menu.cart'](),
       url: '/cart',
       icon: ShoppingCartIcon,
+      requiresAuth: true,
+    },
+    {
+      title: m['sidebar.menu.wallet'](),
+      url: '/wallet',
+      icon: Wallet,
       requiresAuth: true,
     },
   ];
