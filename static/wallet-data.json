@@ -1,0 +1,71 @@
+[
+  {
+    "id": "1",
+    "balance": 1050,
+    "archivedAt": null,
+    "createdAt": "2024-01-01T00:00:00Z",
+    "productId": "6851665fdaae19c44e378e45",
+    "vendorId": "6851665fdaae19c44e378dcd",
+    "name": "Landry’s",
+    "imageSourceFront": "landrys-1.jpg",
+    "instructionsEn": "Please print this e-gift card that contains your gift card number and present it at the time of payment. For mobile redemption, you will be asked to write the e-gift card number on your guest check. The server will verify the e-gift card number on your phone and check the balance.",
+    "termsEn": "This Card is issued by MOCGC, Corp. and may be used to purchase goods and services at any participating Landry’s, Inc. or affiliated location in the U.S. until the full balance is used.  The Card has no cash value; except as required by law, it is not redeemable for cash.",
+    "termsUrl": "https://www.landrysinc.com/giftcards/terms.asp",
+    "hasBarcode": true,
+    "barcodeFormat": "QR_CODE"
+  },
+  {
+    "id": "2",
+    "balance": 2000,
+    "archivedAt": null,
+    "createdAt": "2024-04-01T00:00:00Z",
+    "productId": "6851665fdaae19c44e378e4",
+    "vendorId": "6851665fdaae19c44e378d94",
+    "name": "Crate & Barrel",
+    "imageSourceFront": "crate-&-barrel-1.jpg",
+    "instructionsEn": "There are 3 Ways to Redeem your eGift Card: 1) Online at CrateandBarrel.com, CB2.com, or LandofNod.com. Click \"Apply eGift Card\" during checkout and enter the eGift Card number and PIN. 2) Phone at 800.606.6458 (Crate & Barrel), 800.606.6252 (CB2) or 800.933.9904 (The Land of Nod). Give the eGift Card number and PIN to the Customer Service associate. 3) Visit a Crate & Barrel, CB2, or The Land of Nod store and display the eGift Card number and PIN to the cashier at the time of purchase. Customer Service Associate: Hand key the eGift Card number and PIN into the POS.",
+    "termsEn": "This Crate & Barrel eGift Card is redeemable for merchandise or services at Crate & Barrel stores and Outlets (U.S. only), online at CrateandBarrel.com or by phone to 800.323.5461. It also can be redeemed in stores (U.S. only), online or by phone at CB2 and The Land of Nod. This eGift Card may not be used as payment on a Crate & Barrel Credit Card or any other account. Purchases will be deducted from this eGift Card’s balance until the value reaches zero dollars. Funds on this eGift Card do not expire and cannot be redeemed for cash, except where required by law. Crate & Barrel is not responsible for lost, stolen or damaged eGift Cards, or any unauthorized use. Your acceptance or use of this eGift Card constitutes agreement to these terms and conditions, which may change at any time. To check your balance, visit CrateandBarrel.com/GiftCards or call 877.477.4567. For Customer Service, call 800.606.6458.",
+    "termsUrl": "https://www.landrysinc.com/giftcards/terms.asp",
+    "hasBarcode": true,
+    "barcodeFormat": "QR_CODE"
+  },
+  {
+    "id": "3",
+    "balance": 3000,
+    "archivedAt": null,
+    "createdAt": "2024-06-01T00:00:00Z",
+    "productId": "6851665fdaae19c44e378e4c",
+    "vendorId": "6851665fdaae19c44e378dc4",
+    "name": "Kemah Boardwalk Inn",
+    "imageSourceFront": "kemah-boardwalk-inn.jpg",
+    "instructionsEn": "Please print this e-gift card that contains your gift card number and present it at the time of payment. For mobile redemption, you will be asked to write the e-gift card number on your guest check. The server will verify the e-gift card number on your phone and check the balance.",
+    "termsEn": "This Card is issued by MOCGC, Corp. and may be used to purchase goods and services at any Landry’s, Inc. or affiliated location in the U.S. until the full balance is used. The Card has no cash value; except as required by law, it is not redeemable for cash. It will not be replaced if lost, stolen, altered or damaged.",
+    "termsUrl": "https://www.landrysinc.com/giftcards/terms.asp"
+  },
+  {
+    "id": "4",
+    "balance": 4000,
+    "archivedAt": "2024-01-01T00:00:00Z",
+    "createdAt": "2024-08-01T00:00:00Z",
+    "productId": "6851665fdaae19c44e378e4d",
+    "vendorId": "6851665fdaae19c44e378e0a",
+    "name": "Skates on the Bay",
+    "imageSourceFront": "skates-1.jpg",
+    "instructionsEn": "Please print this e-gift card that contains your gift card number and present it at the time of payment. For mobile redemption, you will be asked to write the e-gift card number on your guest check. The server will verify the e-gift card number on your phone and check the balance.",
+    "termsEn": "This Card is issued by MOCGC, Corp. and may be used to purchase goods and services at any participating Landry’s, Inc. or affiliated location in the U.S. until the full balance is used.  The Card has no cash value; except as required by law, it is not redeemable for cash.",
+    "termsUrl": "https://www.landrysinc.com/giftcards/terms.asp"
+  },
+  {
+    "id": "5",
+    "balance": 5000,
+    "archivedAt": "2024-01-01T00:00:00Z",
+    "createdAt": "2024-10-08T00:00:00Z",
+    "productId": "6851665fdaae19c44e378e50",
+    "vendorId": "6851665fdaae19c44e378d7d",
+    "name": "CanvasPop",
+    "imageSourceFront": "canvaspop.jpg",
+    "instructionsEn": "Gift cards are redeemable online by entering the gift card code at checkout.",
+    "termsEn": "Use of this card constitutes acceptance of the following terms: This Canvasop gift card is redeemable only at www.canvaspop.com. The card may not be redeemed for cash and is non-refundable, except where required by law. The card does not expire.",
+    "termsUrl": "https://www.landrysinc.com/giftcards/terms.asp"
+  }
+]
