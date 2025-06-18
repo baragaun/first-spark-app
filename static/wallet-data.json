@@ -67,5 +67,31 @@
     "instructionsEn": "Gift cards are redeemable online by entering the gift card code at checkout.",
     "termsEn": "Use of this card constitutes acceptance of the following terms: This Canvasop gift card is redeemable only at www.canvaspop.com. The card may not be redeemed for cash and is non-refundable, except where required by law. The card does not expire.",
     "termsUrl": "https://www.landrysinc.com/giftcards/terms.asp"
+  },
+  {
+    "id": "6",
+    "balance": 3000,
+    "archivedAt": null,
+    "createdAt": "2024-06-01T00:00:00Z",
+    "productId": "6851665fdaae19c44e378e4c",
+    "vendorId": "6851665fdaae19c44e378dc4",
+    "name": "Kemah Boardwalk Inn",
+    "imageSourceFront": "kemah-boardwalk-inn.jpg",
+    "instructionsEn": "Please print this e-gift card that contains your gift card number and present it at the time of payment. For mobile redemption, you will be asked to write the e-gift card number on your guest check. The server will verify the e-gift card number on your phone and check the balance.",
+    "termsEn": "This Card is issued by MOCGC, Corp. and may be used to purchase goods and services at any Landry’s, Inc. or affiliated location in the U.S. until the full balance is used. The Card has no cash value; except as required by law, it is not redeemable for cash. It will not be replaced if lost, stolen, altered or damaged.",
+    "termsUrl": "https://www.landrysinc.com/giftcards/terms.asp"
+  },
+  {
+    "id": "7",
+    "balance": 3000,
+    "archivedAt": null,
+    "createdAt": "2024-06-01T00:00:00Z",
+    "productId": "6851665fdaae19c44e378e4c",
+    "vendorId": "6851665fdaae19c44e378dc4",
+    "name": "Kemah Boardwalk Inn",
+    "imageSourceFront": "kemah-boardwalk-inn.jpg",
+    "instructionsEn": "Please print this e-gift card that contains your gift card number and present it at the time of payment. For mobile redemption, you will be asked to write the e-gift card number on your guest check. The server will verify the e-gift card number on your phone and check the balance.",
+    "termsEn": "This Card is issued by MOCGC, Corp. and may be used to purchase goods and services at any Landry’s, Inc. or affiliated location in the U.S. until the full balance is used. The Card has no cash value; except as required by law, it is not redeemable for cash. It will not be replaced if lost, stolen, altered or damaged.",
+    "termsUrl": "https://www.landrysinc.com/giftcards/terms.asp"
   }
 ]
