@@ -73,25 +73,25 @@
     "balance": 3000,
     "archivedAt": null,
     "createdAt": "2024-06-01T00:00:00Z",
-    "productId": "6851665fdaae19c44e378e4c",
-    "vendorId": "6851665fdaae19c44e378dc4",
-    "name": "Kemah Boardwalk Inn",
-    "imageSourceFront": "kemah-boardwalk-inn.jpg",
-    "instructionsEn": "Please print this e-gift card that contains your gift card number and present it at the time of payment. For mobile redemption, you will be asked to write the e-gift card number on your guest check. The server will verify the e-gift card number on your phone and check the balance.",
-    "termsEn": "This Card is issued by MOCGC, Corp. and may be used to purchase goods and services at any Landry’s, Inc. or affiliated location in the U.S. until the full balance is used. The Card has no cash value; except as required by law, it is not redeemable for cash. It will not be replaced if lost, stolen, altered or damaged.",
-    "termsUrl": "https://www.landrysinc.com/giftcards/terms.asp"
+    "productId": "6851665fdaae19c44e378f0e",
+    "vendorId": "6851665fdaae19c44e378dbe",
+    "name": "Jersey Mike's Subs",
+    "imageSourceFront": "jersey-mikes.jpg",
+    "instructionsEn": "<p><span style=\"font-size: 12pt;\"><strong>Online:</strong> During the online checkout process, click the gift card box and enter your 16 digit Jersey Mike's gift card number </span></p>\n<p><span style=\"font-size: 12pt;\"><strong>In-store:</strong> Print your egift card and present to a crew member at register during check out</span></p>",
+    "termsEn": "<p><span style=\"font-size: 12pt;\">Valid only at participating Jersey Mike&rsquo;s Subs&reg; restaurants. Jersey Mike&rsquo;s Gift Cards never expire and we do not charge any fees. Not responsible for lost, damaged or stolen Gift Cards. Card must be activated by cashier if purchased in-store. Not redeemable for cash unless required by law. This Gift Card is sold by Jersey Mike&rsquo;s Franchise Systems, Inc., Manasquan, New Jersey. Purchase or use of this Gift Card constitutes acceptance of the Gift Card Terms &amp; Conditions (&ldquo;Terms&rdquo;) including the agreement to arbitrate disputes on an individual basis. For full Terms, to check Gift Card balance, or to join the Jersey Mike&rsquo;s email club, visit: https://www.jerseymikes.com or call 800-321-7676.</span></p>",
+    "termsUrl": "https://www.jerseymikes.com/gift-cards/terms"
   },
   {
     "id": "7",
     "balance": 3000,
     "archivedAt": null,
     "createdAt": "2024-06-01T00:00:00Z",
-    "productId": "6851665fdaae19c44e378e4c",
-    "vendorId": "6851665fdaae19c44e378dc4",
-    "name": "Kemah Boardwalk Inn",
-    "imageSourceFront": "kemah-boardwalk-inn.jpg",
-    "instructionsEn": "Please print this e-gift card that contains your gift card number and present it at the time of payment. For mobile redemption, you will be asked to write the e-gift card number on your guest check. The server will verify the e-gift card number on your phone and check the balance.",
-    "termsEn": "This Card is issued by MOCGC, Corp. and may be used to purchase goods and services at any Landry’s, Inc. or affiliated location in the U.S. until the full balance is used. The Card has no cash value; except as required by law, it is not redeemable for cash. It will not be replaced if lost, stolen, altered or damaged.",
-    "termsUrl": "https://www.landrysinc.com/giftcards/terms.asp"
+    "productId": "6851665fdaae19c44e378f18",
+    "vendorId": "6851665fdaae19c44e378df3",
+    "name": "PlayStation® Store",
+    "imageSourceFront": "sony-playstation-1.jpg",
+    "instructionsEn": "1) Open a Sony Entertainment Network account (or use an existing account). 2) From your PS4™, PS3™, PS Vita, or PSP system, or a personal computer, access PlayStation®Store. 3) Click the ‘Redeem Codes’ icon. 4)\tEnter the code at the bottom of this card. 5) Select “Confirm” to accept the Terms of Service. 6) For additional redemption instructions, please visit",
+    "termsEn": "Terms and Conditions Your use of this PlayStation®Store card (“Card”) constitutes your acceptance of these terms and any additional terms available at playstationnetwork.com/terms-of-service. Activated Cards can only be redeemed through an SEN master account subject to prior acceptance of the SEN Terms of Service and User Agreement and applicable Privacy Policy available at playstationnetwork.com/terms-of-service. PS4, PS3, PS Vita and PSP systems, personal computers, access to the internet, compatible hardware and software sold separately. Your account will only accept Cards from the country designated on your account. Card is not redeemable for cash, cannot be returned for cash or credit, and may not be used for any other purpose. Card will not be replaced if lost, destroyed, or stolen. Sony Interactive Entertainment LLC, its parent company, affiliated companies and licensors make no express or implied warranties with respect to Card, PSN or the availability of products or services. To the extent permitted by law, your sole and exclusive remedy is the replacement of Card. All rights are reserved. Terms of Card may change without notice. Void where prohibited or restricted by law. For assistance, contact playstation.com/helpme. “PlayStation”, “PSP” “PS” Family Logo, “PS4” and “PS3” are trademarks, and “PSN” and the “PSN” Logo are service marks of Sony Interactive Entertainment Inc.",
+    "termsUrl": "https://www.playstation.com/en-us/legal/psn-terms-of-service"
   }
 ]

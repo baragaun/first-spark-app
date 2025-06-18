@@ -115,10 +115,10 @@
               <span class="text-lg font-bold text-muted-foreground"
                 >${(item.balance / 100).toFixed(2)}</span
               >
+              <span class="text-sm text-muted-foreground">
+                {new Date(item.createdAt).toLocaleDateString()}</span
+              >
             </div>
-          </div>
-          <div class="text-sm text-muted-foreground">
-            {new Date(item.createdAt).toLocaleDateString()}
           </div>
         </button>
       {/each}

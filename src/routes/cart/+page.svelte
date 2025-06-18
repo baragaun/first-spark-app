@@ -209,13 +209,13 @@
             </Button>
           </div>
           <div class="text-center text-primary">
-            {item.totalPrice / 1000 || 0}
+            {(item.totalPrice / 1000 || 0).toFixed(2)}
           </div>
         </div>
       {/each}
       <!-- Total Section -->
       <div class="mr-4 py-4 text-right text-primary">
-        <span class="text-lg font-bold">Total: USD {subtotal / 1000}</span>
+        <span class="text-lg font-bold">Total: USD {(subtotal / 1000).toFixed(2)}</span>
       </div>
     {:else}
       <div class="py-8 text-center text-muted-foreground">Your cart is empty</div>
