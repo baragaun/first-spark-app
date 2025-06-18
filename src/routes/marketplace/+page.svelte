@@ -58,7 +58,6 @@
     const productCategoriesResponse = await marketplaceContext.findProductCategories();
     productCategoriesStore.set(productCategoriesResponse as ProductCategory[]);
     dataLoaded.set(true);
-    console.log(giftCardsresponse as GiftCardProduct[]);
   });
 </script>
 

@@ -250,18 +250,35 @@
     {/if}
 
     {#if selectedTab === 'brand'}
-      <div class="px-2 py-4">
-        <h2 class="text-400 mb-2 text-lg font-semibold text-secondary-foreground">
-          Brand Information
-        </h2>
-        <p class="mb-2">
-          <strong>Brand:</strong>
-          {$walletItemProduct.name}
-        </p>
-        <p class="mb-2">
-          <strong>Description:</strong>
-          {$walletItemProduct.instructionsUrl || 'No description available.'}
-        </p>
+      <div class="flex flex-col items-center py-8">
+        <!-- Brand Logo -->
+        <div
+          class="mb-4 flex h-40 w-40 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-lg"
+        >
+          <img
+            src={'https://d27wpajtnol6ce.cloudfront.net/vendors/' +
+              $walletItemProduct.imageSourceBack}
+            alt={$walletItemProduct.name}
+            class="h-full w-full object-contain"
+            onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
+          />
+        </div>
+        <!-- Brand Description -->
+        {#if $walletItemProduct.instructionsUrl}
+          <div class="text-600 mb-8 max-w-xl text-center">{$walletItemProduct.instructionsUrl}</div>
+        {/if}
+        <!-- Visit Online Button -->
+        {#if $walletItemProduct.termsUrl}
+          <a
+            href={$walletItemProduct.termsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="rounded-lg bg-primary px-8 py-2 font-semibold tracking-wide text-white shadow transition hover:bg-primary/90"
+            style="text-transform: uppercase; letter-spacing: 1px;"
+          >
+            VISIT ONLINE
+          </a>
+        {/if}
       </div>
     {/if}
   </div>
