@@ -14,6 +14,9 @@ importers:
       formsnap:
         specifier: ^2.0.0
         version: 2.0.1(svelte@5.30.1)(sveltekit-superforms@2.25.0(@sveltejs/kit@2.21.0(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.30.1)(vite@6.3.5(@types/node@22.15.18)(jiti@1.21.7)(yaml@2.8.0)))(svelte@5.30.1)(vite@6.3.5(@types/node@22.15.18)(jiti@1.21.7)(yaml@2.8.0)))(@types/json-schema@7.0.15)(svelte@5.30.1)(typescript@5.8.3))
+      jsbarcode:
+        specifier: ^3.12.1
+        version: 3.12.1
       mode-watcher:
         specifier: ^0.5.1
         version: 0.5.1(svelte@5.30.1)
@@ -2661,6 +2664,9 @@ packages:
   js-yaml@4.1.0:
     resolution: {integrity: sha512-wpxZs9NoxZaJESJGIZTyDEaYpl0FKSA+FB9aJiyemKhMwkxQg63h4T1KJgUGHpTqPDNRcmmYLugrRjJlBtWvRA==}
     hasBin: true
+
+  jsbarcode@3.12.1:
+    resolution: {integrity: sha512-QZQSqIknC2Rr/YOUyOkCBqsoiBAOTYK+7yNN3JsqfoUtJtkazxNw1dmPpxuv7VVvqW13kA3/mKiLq+s/e3o9hQ==}
 
   jsdoc-type-pratt-parser@4.1.0:
     resolution: {integrity: sha512-Hicd6JK5Njt2QB6XYFS7ok9e37O8AYk3jTcppG4YVQnYjOemymvTcmc7OWsmq/Qqj5TdRFO5/x/tIPmBeRtGHg==}
@@ -6980,6 +6986,8 @@ snapshots:
   js-yaml@4.1.0:
     dependencies:
       argparse: 2.0.1
+
+  jsbarcode@3.12.1: {}
 
   jsdoc-type-pratt-parser@4.1.0: {}
 
