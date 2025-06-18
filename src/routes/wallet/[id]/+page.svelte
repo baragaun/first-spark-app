@@ -6,11 +6,12 @@
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
   import type { Vendor } from '@baragaun/bg-node-client';
   import placeholderImage from '../../../assets/images/placeholder.png';
-  import { Archive, ArrowLeft, ExternalLink, Gift, Printer } from 'lucide-svelte';
+  import { Archive, ArrowLeft, ExternalLink, Gift, Printer, ZoomOut } from 'lucide-svelte';
   import { vendorsStore } from '$lib/stores/marketplace-store';
   import { derived } from 'svelte/store';
   import { walletItemsStore } from '@/stores/wallet-store';
   import JsBarcode from 'jsbarcode';
+  import BarcodeView from './barcode-view.svelte';
 
   // Add a placeholder for user avatar (replace with real user data if available)
   const userAvatarUrl = 'https://randomuser.me/api/portraits/men/32.jpg';
@@ -35,6 +36,7 @@
   let isLoading = $state(true);
   let error = $state<string | null>(null);
   let selectedTab = $state('use');
+  let isBarcodeViewOpen = $state(false);
 
   const code = '5045 0794 5057 847';
   const pin = '5749';
@@ -71,14 +73,26 @@
   });
 
   onMount(renderBarcode);
+
+  function backAndClose() {
+    if (isBarcodeViewOpen) {
+      isBarcodeViewOpen = false;
+    } else {
+      history.back();
+    }
+  }
 </script>
 
 <!-- Header Bar -->
 <div
   class="flex items-center justify-between rounded-b-lg bg-foreground px-4 py-3 text-background shadow"
 >
-  <button onclick={() => history.back()} class="flex items-center">
-    <ArrowLeft class="h-6 w-6" />
+  <button onclick={backAndClose} class="flex items-center">
+    {#if isBarcodeViewOpen}
+      <ZoomOut class="h-6 w-6" />
+    {:else}
+      <ArrowLeft class="h-6 w-6" />
+    {/if}
   </button>
   <span class="text-lg font-semibold">Gift Card</span>
   <img src={userAvatarUrl} alt="User" class="h-8 w-8 rounded-full object-cover" />
@@ -105,6 +119,11 @@
       <Button href="/marketplace">Return to Marketplace</Button>
     </Card.Footer>
   </Card.Root>
+{:else if isBarcodeViewOpen}
+  <BarcodeView>
+    <canvas bind:this={barcodeRef} style="height: 80px; width: 400px;"></canvas>
+    <h class="text-xl text-black">{code}</h>
+  </BarcodeView>
 {:else if $walletItemProduct}
   <div class="mx-auto max-w-lg px-4 py-6">
     <!-- Gift Card Image -->
@@ -196,13 +215,15 @@
         <!-- Card Code and PIN -->
         {#if code}
           <div class="mt-4 flex flex-col items-center">
-            <canvas bind:this={barcodeRef} style="height: 70px; width: 360px;"></canvas>
+            <canvas bind:this={barcodeRef} style="height: 50px; width: 250px;"></canvas>
           </div>
         {/if}
 
         <h class="text-xl text-black">{code}</h>
         <div class="mt-2 flex items-center gap-2">
-          <Button size="sm" class="h-8 rounded-full">Zoom</Button>
+          <Button size="sm" class="h-8 rounded-full" onclick={() => (isBarcodeViewOpen = true)}
+            >Zoom</Button
+          >
           <Button size="sm" class="h-8 rounded-full">Copy</Button>
         </div>
 
