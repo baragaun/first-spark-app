@@ -79,6 +79,7 @@
   "dependencies": {
     "@baragaun/bg-node-client": "^0.0.46",
     "formsnap": "^2.0.0",
+    "jsbarcode": "^3.12.1",
     "mode-watcher": "^0.5.1",
     "rxdb": "^16.8.1",
     "sveltekit-superforms": "^2.23.1",
