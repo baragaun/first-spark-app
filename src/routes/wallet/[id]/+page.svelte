@@ -121,7 +121,7 @@
   </Card.Root>
 {:else if isBarcodeViewOpen}
   <BarcodeView>
-    <canvas bind:this={barcodeRef} style="height: 80px; width: 400px;"></canvas>
+    <canvas bind:this={barcodeRef} style="height: 80px; width: 350px;"></canvas>
     <h class="text-xl text-black">{code}</h>
   </BarcodeView>
 {:else if $walletItemProduct}
