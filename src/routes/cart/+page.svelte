@@ -228,12 +228,6 @@
       >
     </div>
 
-    <!-- Terms and Conditions -->
-    <p class="mb-4 text-sm text-muted-foreground">
-      By purchasing this gift card you agree to the terms and conditions of the gift card.
-    </p>
-    <p class="mb-6 text-sm text-muted-foreground">① All gift card purchases are final.</p>
-
     <!-- Place Order Button -->
     <Button
       class="w-full py-3 text-lg font-semibold text-background"
