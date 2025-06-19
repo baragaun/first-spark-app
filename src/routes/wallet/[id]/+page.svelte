@@ -221,15 +221,15 @@
 
         <h class="text-xl text-black">{code}</h>
         <div class="mt-2 flex items-center gap-2">
-          <Button size="sm" class="h-8 rounded-full" onclick={() => (isBarcodeViewOpen = true)}
+          <Button size="sm" class="h-8 rounded-full text-background" onclick={() => (isBarcodeViewOpen = true)}
             >Zoom</Button
           >
-          <Button size="sm" class="h-8 rounded-full">Copy</Button>
+          <Button size="sm" class="h-8 rounded-full text-background">Copy</Button>
         </div>
 
         <h class="mt-4 text-xl text-black">{pin}</h>
         <p class="text-sm text-gray-400">Card PIN</p>
-        <Button size="sm" class="mt-2 h-8 rounded-full">Copy PIN</Button>
+        <Button size="sm" class="mt-2 h-8 rounded-full text-background">Copy PIN</Button>
       </div>
     {/if}
 
