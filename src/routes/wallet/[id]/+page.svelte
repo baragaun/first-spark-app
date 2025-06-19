@@ -221,8 +221,10 @@
 
         <h class="text-xl text-black">{code}</h>
         <div class="mt-2 flex items-center gap-2">
-          <Button size="sm" class="h-8 rounded-full text-background" onclick={() => (isBarcodeViewOpen = true)}
-            >Zoom</Button
+          <Button
+            size="sm"
+            class="h-8 rounded-full text-background"
+            onclick={() => (isBarcodeViewOpen = true)}>Zoom</Button
           >
           <Button size="sm" class="h-8 rounded-full text-background">Copy</Button>
         </div>
