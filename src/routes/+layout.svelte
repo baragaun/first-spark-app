@@ -23,7 +23,10 @@
   let myUser: MyUser | undefined = $derived(myUserContext.myUser);
 
   // Check if current route is marketplace detail page
-  let showNavBar = $derived(!page.url.pathname.startsWith('/marketplace/'));
+  let showNavBar = $derived(
+    !page.url.pathname.startsWith('/marketplace/') &&
+      !page.url.pathname.startsWith('/wallet/upload-card'),
+  );
 
   onMount(() => {
     let projectName = env.PUBLIC_PROJECTNAME;

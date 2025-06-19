@@ -12,6 +12,8 @@
   // Tabs and wallet items
   let activeTab = $state<string>('Active');
   let searchQuery = $state<string>('');
+  let fileInputRef: HTMLInputElement;
+
   // Load demo data on mount
   onMount(async () => {
     const res = await fetch('/wallet-data.json');
@@ -34,6 +36,27 @@
 
   function navigateToGiftCardDetail(walletItemId: string) {
     goto(`/wallet/${walletItemId}`);
+  }
+
+  function isMobileDevice() {
+    return /Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+  }
+
+  function uploadAction() {
+    if (fileInputRef) {
+      fileInputRef.value = '';
+      fileInputRef.click();
+    }
+  }
+
+  function handleFileChange(event: Event) {
+    const files = (event.target as HTMLInputElement).files;
+    if (files && files.length > 0) {
+      // Handle the selected file(s) here
+      // For now, just log them
+      console.log(files);
+    }
+    goto('/wallet/upload-card');
   }
 </script>
 
@@ -83,11 +106,21 @@
         </div>
         <Button
           class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-kcu-orange via-kcu-glacier to-kcu-plum p-[2px]"
+          onclick={uploadAction}
+          aria-label="Upload"
         >
           <div class="flex h-full w-full items-center justify-center rounded-full bg-background">
             <Upload class="h-5 w-5 text-primary" />
           </div>
         </Button>
+        <input
+          type="file"
+          bind:this={fileInputRef}
+          class="hidden"
+          onchange={handleFileChange}
+          accept="image/*"
+          capture={isMobileDevice() ? 'environment' : undefined}
+        />
       </div>
     </div>
 
