@@ -14,6 +14,9 @@ importers:
       '@sparticuz/chromium':
         specifier: ^137.0.1
         version: 137.0.1
+      bwip-js:
+        specifier: ^4.6.0
+        version: 4.6.0
       formsnap:
         specifier: ^2.0.0
         version: 2.0.1(svelte@5.34.6)(sveltekit-superforms@2.27.0(@sveltejs/kit@2.21.5(@sveltejs/vite-plugin-svelte@5.1.0(svelte@5.34.6)(vite@6.3.5(@types/node@22.15.32)(jiti@1.21.7)(yaml@2.8.0)))(svelte@5.34.6)(vite@6.3.5(@types/node@22.15.32)(jiti@1.21.7)(yaml@2.8.0)))(@types/json-schema@7.0.15)(esbuild@0.25.5)(svelte@5.34.6)(typescript@5.8.3))
@@ -1824,6 +1827,10 @@ packages:
 
   buffer@6.0.3:
     resolution: {integrity: sha512-FTiCpNxtwiZZHEZbcbTIcZjERVICn9yq/pDFkTl95/AxzD1naBctN7YO68riM/gLSDY7sdrMby8hofADYuuqOA==}
+
+  bwip-js@4.6.0:
+    resolution: {integrity: sha512-Djr1aQ3d1N8rpLz5XgbpNW/yrP4owC+rk5/pZTSzkqXY0WvqzJ0yJTxA8JJA6WDxOAP1hP70AcnTxiDvthy+/g==}
+    hasBin: true
 
   cac@6.7.14:
     resolution: {integrity: sha512-b6Ilus+c3RrdDk+JhLKUAQfzzgLEPy6wcXqS7f/xe1EETvsDP6GORG7SFuOs6cID5YkqchW/LXZbX5bc8j7ZcQ==}
@@ -6164,6 +6171,8 @@ snapshots:
     dependencies:
       base64-js: 1.5.1
       ieee754: 1.2.1
+
+  bwip-js@4.6.0: {}
 
   cac@6.7.14: {}
 
