@@ -1,4 +1,5 @@
 import type { WalletItem } from '@baragaun/bg-node-client';
+import JsBarcode from 'jsbarcode';
 import { jsPDF } from 'jspdf';
 
 async function fetchProxyImageAsDataUrl(imageUrl: string): Promise<string> {
@@ -35,7 +36,7 @@ export async function downloadPdf(
     const walletCardImageDomain = 'https://d27wpajtnol6ce.cloudfront.net';
     const pageWidth = doc.internal.pageSize.getWidth() - 40 * 2;
     let positionY = 30;
-    const topPadding = 20;
+    const topPadding = 30;
     const leftPadding = 40;
 
     // Set up document
@@ -66,9 +67,18 @@ export async function downloadPdf(
 
     // Add code
     positionY += topPadding;
-    doc.setFontSize(12);
-    doc.text(`Code: ${code}`, pageWidth / 2, positionY, { align: 'center' });
-    positionY += topPadding;
+
+    // Add barcode image
+    const barcodeCanvas = document.createElement('canvas');
+    JsBarcode(barcodeCanvas, code, {
+      format: 'CODE128',
+      width: 2,
+      height: 60,
+      displayValue: true,
+    });
+    const barcodeDataUrl = barcodeCanvas.toDataURL('image/png');
+    doc.addImage(barcodeDataUrl, 'PNG', pageWidth / 2 - 80, positionY, 160, 40); // adjust position/size as needed
+    positionY = positionY + 40 + topPadding;
 
     let container = document.createElement('div');
     container.style.width = `${pageWidth.toString()}px`;
@@ -101,6 +111,7 @@ export async function downloadPdf(
         });
         positionY = positionY + heightPx + topPadding;
       } else {
+        doc.setTextColor('#8A1B61');
         doc.text(instructionLines, leftPadding, positionY, { align: 'left', maxWidth: pageWidth });
         positionY = positionY + instructionLines.length * 10 + topPadding;
       }
@@ -130,6 +141,7 @@ export async function downloadPdf(
         });
         positionY = positionY + heightPx + topPadding;
       } else {
+        doc.setTextColor('#8A1B61');
         doc.text(termsLines, leftPadding, positionY, { align: 'left' });
       }
     }
