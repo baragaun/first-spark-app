@@ -21,7 +21,6 @@
   const walletCardImageDomain = 'https://d27wpajtnol6ce.cloudfront.net';
 
   const walletItemProduct = derived([walletItemsStore], ([$products]) => {
-    console.log($products, walletCardId);
     return $products.find((p) => p.id === walletCardId) || null;
   });
 

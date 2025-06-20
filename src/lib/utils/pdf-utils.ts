@@ -26,50 +26,50 @@ export async function downloadPdf(
     doc.setFontSize(16);
     doc.text(walletItemProduct.name || 'Gift Card', 20, 20);
 
+     // Try to add image if available
+    if (walletItemProduct.imageSourceFront) {
+      try {
+        const imgUrl = `${walletCardImageDomain}/giftcards/${walletItemProduct.imageSourceFront}`;
+        const dataUrl = await fetchProxyImageAsDataUrl(imgUrl);
+        doc.addImage(dataUrl, 'JPEG', 20, 25, 80, 50);
+      } catch (imgError) {
+        console.error('Error adding image to PDF:', imgError);
+      }
+    }
+
     // Add balance
     doc.setFontSize(14);
-    doc.text(`Balance: ${walletItemProduct.balance / 100}`, 20, 30);
+    doc.text(`Balance: $${(walletItemProduct.balance / 100).toFixed(2)}`, 20, 85);
 
     // Add code
     doc.setFontSize(12);
-    doc.text(`Code: ${code}`, 20, 40);
+    doc.text(`Code: ${code}`, 20, 95);
 
     // Add instructions if available
     if (walletItemProduct.instructionsEn) {
+      doc.setFontSize(12);
+      doc.text('How to Reedem', 20, 105);
       doc.setFontSize(10);
-      doc.text('Instructions:', 20, 50);
-      doc.setFontSize(8);
       const instructionLines = doc.splitTextToSize(walletItemProduct.instructionsEn, 170);
       if (walletItemProduct.instructionsEn.startsWith('<')) {
         //doc.html(instructionLines, { x: 20, y: 85 } );
-        doc.text(instructionLines, 20, 55);
+        doc.text(instructionLines, 20, 110);
       } else {
-        doc.text(instructionLines, 20, 55);
+        doc.text(instructionLines, 20, 110);
       }
     }
 
     // Add terms if available
     if (walletItemProduct.termsEn) {
+      doc.setFontSize(12);
+      doc.text('Terms & Conditions', 20, 135);
       doc.setFontSize(10);
-      doc.text('Terms:', 20, 80);
-      doc.setFontSize(8);
       const termsLines = doc.splitTextToSize(walletItemProduct.termsEn, 170);
       if (walletItemProduct.termsEn.startsWith('<')) {
         //doc.html(termsLines, { x: 20, y: 85 } );
-        doc.text(termsLines, 20, 85);
+        doc.text(termsLines, 20, 140);
       } else {
-        doc.text(termsLines, 20, 85);
-      }
-    }
-
-    // Try to add image if available
-    if (walletItemProduct.imageSourceFront) {
-      try {
-        const imgUrl = `${walletCardImageDomain}/giftcards/${walletItemProduct.imageSourceFront}`;
-        const dataUrl = await fetchProxyImageAsDataUrl(imgUrl);
-        doc.addImage(dataUrl, 'JPEG', 20, 110, 160, 80);
-      } catch (imgError) {
-        console.error('Error adding image to PDF:', imgError);
+        doc.text(termsLines, 20, 140);
       }
     }
 
@@ -79,7 +79,4 @@ export async function downloadPdf(
     console.error('Error generating PDF:', error);
     throw error;
   }
-}
-function HTMLOptions(x: any, arg1: number, y: any, arg3: number) {
-  throw new Error('Function not implemented.');
 }

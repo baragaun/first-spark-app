@@ -1,7 +1,5 @@
-import chromium from '@sparticuz/chromium';
 import type { RequestHandler } from '@sveltejs/kit';
-import JsBarcode from 'jsbarcode';
-import { JSDOM } from 'jsdom';
+import chromium from '@sparticuz/chromium';
 import puppeteer from 'puppeteer-core';
 
 export const POST: RequestHandler = async ({ request }) => {
@@ -9,28 +7,11 @@ export const POST: RequestHandler = async ({ request }) => {
     const { walletItemProduct, code } = await request.json();
     const barcodeValue = code || '5045 0794 5057 847';
 
-    // Create a virtual DOM to generate the barcode
-    const dom = new JSDOM(
-      '<!DOCTYPE html><html><body><canvas id="barcode"></canvas></body></html>',
-    );
-    const canvas = dom.window.document.getElementById('barcode');
+    console.log('Generating PDF with barcode value:', barcodeValue);
 
     const barcodeFormat = walletItemProduct.barcodeFormat || 'CODE39';
-    const barcodeOptions = {
-      format: barcodeFormat === 'QR_CODE' ? 'qrcode' : 'CODE39',
-      displayValue: false,
-      width: barcodeFormat === 'QR_CODE' ? 4 : 2,
-      height: barcodeFormat === 'QR_CODE' ? 100 : 100,
-    };
-
-    // Generate barcode with the appropriate format
-    JsBarcode(canvas, barcodeValue, barcodeOptions);
-
-    // Get the barcode as a data URL
-    const barcodeDataUrl = canvas.toDataURL('image/png');
-
-    // Log the barcode data URL to check if it's being generated
-    console.log('Barcode data URL length:', barcodeDataUrl.length);
+    // Use a barcode API service
+    const barcodeApiUrl = `https://barcodeapi.org/api/${barcodeFormat === 'QR_CODE' ? 'qr' : 'code39'}/${encodeURIComponent(barcodeValue)}`;
 
     // Configure Puppeteer for server environment
     const browser = await puppeteer.launch({
@@ -57,16 +38,18 @@ export const POST: RequestHandler = async ({ request }) => {
         </head>
         <body>
           <div class="container">
+            <h1>${walletItemProduct.name || 'Gift Card'}</h1>
             <img class="card-image" src="${
               walletItemProduct.imageSourceFront
                 ? `https://d27wpajtnol6ce.cloudfront.net/giftcards/${walletItemProduct.imageSourceFront}`
                 : 'placeholder-image-url'
             }" />
-            <div class="balance">Balance: ${walletItemProduct.balance / 100}</div>
+            <div class="balance">Balance: $${walletItemProduct.balance / 100}</div>
 
-            <!-- Embed the barcode directly as an SVG instead of using a data URL -->
-            <div class="barcode">
-              ${canvas.outerHTML}
+            <!-- Barcode from API -->
+            <div style="border: 1px solid #ccc; padding: 10px; margin: 15px 0;">
+              <p>Barcode:</p>
+              <img src="${barcodeApiUrl}" class="barcode" alt="Barcode" />
             </div>
 
             <div class="code">Code: ${barcodeValue}</div>
@@ -78,6 +61,10 @@ export const POST: RequestHandler = async ({ request }) => {
     `;
 
     await page.setContent(htmlContent);
+    console.log('HTML content set in Puppeteer page');
+
+    // Wait for the barcode image to load
+    await page.waitForSelector('img.barcode');
 
     // Generate PDF
     const pdfBuffer = await page.pdf({
@@ -85,6 +72,7 @@ export const POST: RequestHandler = async ({ request }) => {
       printBackground: true,
       margin: { top: '20px', right: '20px', bottom: '20px', left: '20px' },
     });
+    console.log('PDF generated, buffer size:', pdfBuffer.length);
 
     await browser.close();
 
