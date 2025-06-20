@@ -12,6 +12,7 @@
   import { walletItemsStore } from '@/stores/wallet-store';
   import JsBarcode from 'jsbarcode';
   import BarcodeView from './barcode-view.svelte';
+  import { downloadPdf } from '@/utils/pdf-utils';
 
   // Add a placeholder for user avatar (replace with real user data if available)
   const userAvatarUrl = 'https://randomuser.me/api/portraits/men/32.jpg';
@@ -20,7 +21,6 @@
   const walletCardImageDomain = 'https://d27wpajtnol6ce.cloudfront.net';
 
   const walletItemProduct = derived([walletItemsStore], ([$products]) => {
-    console.log($products, walletCardId);
     return $products.find((p) => p.id === walletCardId) || null;
   });
 
@@ -80,6 +80,11 @@
     } else {
       history.back();
     }
+  }
+
+  function handlePrintPdf() {
+    if (!$walletItemProduct) return;
+    downloadPdf($walletItemProduct);
   }
 </script>
 
@@ -143,11 +148,19 @@
           <span class="text-xs text-gray-500">Gift</span>
         </div>
         <div class="flex flex-col items-center">
-          <Button variant="ghost" size="icon"><ExternalLink aria-label="Brand" /></Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            href={$walletItemProduct.termsUrl}
+            target="_blank"
+            rel="noopener noreferrer"><ExternalLink aria-label="Brand" /></Button
+          >
           <span class="text-xs text-gray-500">Brand</span>
         </div>
         <div class="flex flex-col items-center">
-          <Button variant="ghost" size="icon"><Printer aria-label="Print" /></Button>
+          <Button variant="ghost" size="icon" onclick={handlePrintPdf}
+            ><Printer aria-label="Print" /></Button
+          >
           <span class="text-xs text-gray-500">Print</span>
         </div>
         <div class="flex flex-col items-center">
