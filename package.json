@@ -79,6 +79,7 @@
   "dependencies": {
     "@baragaun/bg-node-client": "^0.0.46",
     "@sparticuz/chromium": "^137.0.1",
+    "bwip-js": "^4.6.0",
     "formsnap": "^2.0.0",
     "html2canvas": "^1.4.1",
     "jsbarcode": "^3.12.1",
