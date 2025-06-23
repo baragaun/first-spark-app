@@ -1,19 +1,23 @@
 <script lang="ts">
-  import { goto } from '$app/navigation';
-  import { debounce } from 'throttle-debounce';
+  // Svelte imports
   import { getContext, onMount } from 'svelte';
+  import { goto } from '$app/navigation';
+
+  // External libraries
+  import { debounce } from 'throttle-debounce';
   import { Edit, Ellipsis, X } from 'lucide-svelte';
+
+  // Internal modules/components
   import MessageInput from './shared/message-input.svelte';
   import * as Card from '@/components/ui/card';
   import * as Dialog from '@/components/ui/dialog';
   import { Button } from '@/components/ui/button';
+  import { Input } from '@/components/ui/input';
+  import { m } from '@/paraglide/messages';
   import type { ChannelContext } from '@/contexts/channels/channel-context.svelte';
   import type { MyUserContext } from '@/contexts/users/my-user-context.svelte';
   import type { UserListItem, ChannelMessage } from '@baragaun/bg-node-client';
   import type { UsersContext } from '@/contexts/users/users-context.svelte';
-  import { m } from '@/paraglide/messages';
-  import { Input } from '@/components/ui/input';
-
 
   const channelContext = getContext<ChannelContext>('channelContext');
   const myUserContext = getContext<MyUserContext>('myUserContext');

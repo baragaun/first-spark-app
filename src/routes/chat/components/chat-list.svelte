@@ -1,6 +1,6 @@
 <script lang="ts">
   import * as Avatar from '$lib/components/ui/avatar/index.js';
-  import { format, formatDistanceToNow, isThisWeek, isToday, isYesterday } from 'date-fns';
+  import { format, isThisWeek, isToday, isYesterday } from 'date-fns';
   import type { ChannelListItem } from '@baragaun/bg-node-client';
   import ChannelOptionsMenu from './channel-options-menu.svelte';
   import { myUserContext } from '@/contexts/users/my-user-context.svelte';
@@ -28,7 +28,8 @@
     } else if (isThisWeek(parsedDate)) {
       return format(parsedDate, 'EEEE'); // Show day of the week (e.g., "Monday")
     } else {
-      return format(parsedDate, 'dd/MM/yyyy'); // Show full date (e.g., "15/06/2025")
+      // Use ISO format for consistency: yyyy-MM-dd
+      return format(parsedDate, 'yyyy-MM-dd');
     }
   };
 

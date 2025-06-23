@@ -8,10 +8,8 @@
   import { MyUserContext } from '@/contexts/users/my-user-context.svelte';
   import { UsersContext } from '@/contexts/users/users-context.svelte';
   import SearchBar from '@/components/ui/search-bar.svelte';
-  import MessageInput from '@/components/shared/message-input.svelte';
   import { m } from '@/paraglide/messages';
   import { getContext, onMount } from 'svelte';
-  import type { UserListItem, ChannelMessage } from '@baragaun/bg-node-client';
   import FindUsers from '@/components/find-users.svelte';
 
   const channelsContext = getContext<ChannelContext>('channelContext');
@@ -20,7 +18,6 @@
 
   let searchQuery = $state('');
   let isNewChatDialogOpen = $state(false);
-  let selectedUser = $state<UserListItem | null>(null);
 
   let filteredChannels = $derived(
     channelsContext.myChannels
@@ -61,46 +58,8 @@
     isNewChatDialogOpen = true;
   };
 
-  const handleUserSelect = (user: UserListItem) => {
-    selectedUser = user;
-  };
-
-  const handleSendMessage = async (messageText: string) => {
-    if (!selectedUser) return;
-
-    try {
-      const channel = await channelsContext.createChannel({
-        userIds: [selectedUser.id],
-      });
-
-      if (!channel || typeof channel === 'string') {
-        console.error('CreateChannel: received error.', { channel });
-        return;
-      }
-
-      const newMessage: Partial<ChannelMessage> = {
-        channelId: channel.id,
-        messageText,
-      };
-
-      const response = await channelsContext.createChannelMessage(newMessage);
-      if (!response || typeof response === 'string') {
-        console.error('CreateChannelMessage: received error.', { response });
-        return;
-      }
-
-      // Close dialog and navigate to new chat
-      isNewChatDialogOpen = false;
-      selectedUser = null;
-      goto(`/chat/${channel.id}`);
-    } catch (error) {
-      console.error('Error sending message:', error);
-    }
-  };
-
   const handleDialogClose = () => {
     isNewChatDialogOpen = false;
-    selectedUser = null;
   };
 
   onMount(async () => {
@@ -145,52 +104,7 @@
       </Dialog.Header>
 
       <div class="py-4">
-        {#if !selectedUser}
-          <FindUsers />
-        {:else}
-          <!-- Selected User & Message Compose -->
-          <div class="space-y-6">
-            <!-- Selected User Display -->
-            <div class="flex items-center gap-3 rounded-lg bg-muted p-4">
-              {#if selectedUser.avatarUrl}
-                <img
-                  src={selectedUser.avatarUrl}
-                  alt={selectedUser.userHandle}
-                  class="h-12 w-12 rounded-full object-cover"
-                />
-              {:else}
-                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-background">
-                  <span class="text-lg font-semibold">
-                    {selectedUser.userHandle?.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-              {/if}
-              <div class="flex-1">
-                <h3 class="font-semibold">@{selectedUser.userHandle}</h3>
-                {#if selectedUser.userHandle && selectedUser.userHandle !== selectedUser.userHandle}
-                  <p class="text-sm text-muted-foreground">{selectedUser.userHandle}</p>
-                {/if}
-              </div>
-              <Button variant="ghost" size="sm" onclick={() => (selectedUser = null)}>
-                Change
-              </Button>
-            </div>
-
-            <!-- Sample Message Preview -->
-            <div class="flex flex-col gap-4 rounded-lg bg-muted/50 p-4">
-              <div class="flex flex-col rounded-lg rounded-bl-none border bg-background px-4 py-2">
-                <span class="self-start text-xs text-muted-foreground">FirstSpark</span>
-                <p class="mt-1 flex items-center justify-end gap-1 text-xs text-foreground">
-                  {m['chat.compose_tip']({ userHandle: myUserContext.myUserHandle || 'friend' })}
-                </p>
-                <span class="self-end text-xs text-muted-foreground">a moment ago</span>
-              </div>
-            </div>
-
-            <!-- Message Input -->
-            <MessageInput onSendMessage={handleSendMessage} />
-          </div>
-        {/if}
+        <FindUsers />
       </div>
     </Dialog.Content>
   </Dialog.Root>

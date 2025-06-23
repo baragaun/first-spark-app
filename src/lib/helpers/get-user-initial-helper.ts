@@ -19,4 +19,4 @@ export const getUserInitials = (handle: string): string => {
   }
 
   return initials.slice(0, 2); // Ensure only up to 2 characters are returned
-}
+};

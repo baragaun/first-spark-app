@@ -35,14 +35,15 @@ export class UsersContext {
     }
   }
 
-  async getAllUsers(
+  // Renamed from getAllUsers to fetchUsers for clarity
+  async fetchUsers(
     excludeIds?: string[],
     skip: number = 0,
     limit: number = 5, // TODO we should change it according to the requirement
     searchText?: string,
   ): Promise<UserListItem[] | string | null | undefined> {
     if (!this.client.isInitialized) {
-      console.error('UsersContext.getAllUsers: not initialized.');
+      console.error('UsersContext.fetchUsers: not initialized.');
       return translate(AppUiMessage.systemError);
     }
     try {
@@ -61,7 +62,7 @@ export class UsersContext {
         { cachePolicy: CachePolicy.network },
       );
       if (!response || response.error || !response.objects) {
-        console.error('getAllUsers: received error.', { response });
+        console.error('fetchUsers: received error.', { response });
         return response.error || translate(AppUiMessage.systemError);
       }
 
@@ -74,7 +75,7 @@ export class UsersContext {
       this.hasLoadedUsers = true;
       return response.objects;
     } catch (error) {
-      console.error('getAllUsers: error', {
+      console.error('fetchUsers: error', {
         error: (error as Error).message,
         stack: (error as Error).stack,
       });
@@ -136,13 +137,13 @@ export class UsersContext {
 
   async ensureUsersLoaded(excludeIds?: string[]): Promise<void> {
     if (!this.hasLoadedUsers) {
-      await this.getAllUsers(excludeIds);
+      await this.fetchUsers(excludeIds);
     }
   }
 
   async clearSearch(excludeIds?: string[]): Promise<void> {
     this.searchText = '';
-    await this.getAllUsers(excludeIds);
+    await this.fetchUsers(excludeIds);
   }
 
   public get isUserLoading(): boolean {
