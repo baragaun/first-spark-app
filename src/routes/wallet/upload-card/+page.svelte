@@ -1,16 +1,38 @@
 <script lang="ts">
-  import { goto } from '$app/navigation';
-  import { AlertDialog } from 'bits-ui';
   import { onMount } from 'svelte';
-  let imageUrl: string | null = 'https://d27wpajtnol6ce.cloudfront.net/giftcards/amazon-1.jpg';
-  let brand = 'Amazon.com';
-  let balance = '';
-  let code = '';
+  import { uploadedCard } from '@/stores/uploaded-card';
 
-  // Optionally, receive uploaded file via query param or store
+  let brand = '';
+  let balance = '';
+  let barcode = '';
+  let pin = '';
+  let imageUrl: string | null = null;
+  let isLoading = false;
+
   onMount(() => {
-    // You can set imageUrl here if you pass it from the upload action
+    uploadedCard.subscribe((data) => {
+      brand = data.brand;
+      balance = data.balance;
+      barcode = data.barcode;
+      pin = data.pin;
+      imageUrl = data.imageUrl;
+      isLoading = data.isLoading ?? false;
+    });
   });
+
+  function formatBarcodeInput(value: string) {
+    return value
+      .replace(/\s+/g, '')
+      .replace(/(.{4})/g, '$1 ')
+      .trim();
+  }
+
+  $: formattedBarcode = formatBarcodeInput(barcode);
+
+  function handleBarcodeInput(event: Event) {
+    const raw = (event.target as HTMLInputElement).value.replace(/\s+/g, '');
+    barcode = raw;
+  }
 
   function handleSubmit(event: Event) {
     event.preventDefault();
@@ -30,6 +52,11 @@
     class="mx-auto flex w-full max-w-md flex-1 flex-col items-center px-4 py-8"
     onsubmit={handleSubmit}
   >
+    {#if isLoading}
+      <div class="mb-6 flex w-full items-center justify-center">
+        <span class="loader mr-2"></span> <span>Fetching card details...</span>
+      </div>
+    {/if}
     {#if imageUrl}
       <img src={imageUrl} alt="Gift Card" class="mb-6 w-64 rounded-xl shadow" />
     {:else}
@@ -54,13 +81,18 @@
       />
     </div>
     <div class="mb-6 w-full">
-      <label for="code" class="mb-1 block text-sm text-gray-500">Code</label>
+      <label for="code" class="mb-1 block text-sm text-gray-500">Barcode</label>
       <input
         id="code"
-        class="w-full rounded border px-3 py-2"
-        bind:value={code}
-        placeholder="Code"
+        class="w-full rounded border px-3 py-2 font-mono tracking-widest"
+        value={formattedBarcode}
+        oninput={handleBarcodeInput}
+        placeholder="Barcode"
       />
+    </div>
+    <div class="mb-6 w-full">
+      <label for="code" class="mb-1 block text-sm text-gray-500">Pin</label>
+      <input id="code" class="w-full rounded border px-3 py-2" bind:value={pin} placeholder="Pin" />
     </div>
     <button
       type="submit"
@@ -68,3 +100,23 @@
     >
   </form>
 </div>
+
+<style>
+  .loader {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #6366f1;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+  }
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+</style>
