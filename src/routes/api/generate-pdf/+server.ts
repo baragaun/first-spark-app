@@ -4,7 +4,7 @@ import puppeteer from 'puppeteer-core';
 
 export const POST: RequestHandler = async ({ request }) => {
   try {
-    const { walletItemProduct, code } = await request.json();
+    const { walletItemProduct, code, pin } = await request.json();
     const barcodeValue = code || '5045 0794 5057 847';
 
     console.log('Generating PDF with barcode value:', barcodeValue);
@@ -31,7 +31,7 @@ export const POST: RequestHandler = async ({ request }) => {
             .container { max-width: 800px; margin: 0 auto; }
             .card-image { width: 300px; height: auto; }
             .balance { font-size: 18px; font-weight: bold; margin: 15px 0; }
-            .barcode { margin: 15px 0; width: 300px; height: auto; display: block; }
+            .barcode { margin: 15px 0; width: 500px; height: 120px; display: block; }
             .code { font-family: monospace; font-size: 16px; margin: 10px 0; }
             .instructions, .terms { font-size: 12px; margin: 10px 0; }
           </style>
@@ -52,7 +52,8 @@ export const POST: RequestHandler = async ({ request }) => {
               <img src="${barcodeApiUrl}" class="barcode" alt="Barcode" />
             </div>
 
-            <div class="code">Code: ${barcodeValue}</div>
+            <div class="code">Code: ${barcodeValue || '5045 0794 5057 847'}</div>
+            <div class="balance">Pin: ${pin || '1234'}</div>
             <div class="instructions">Instructions: ${walletItemProduct.instructionsEn || ''}</div>
             <div class="terms">Terms: ${walletItemProduct.termsEn || ''}</div>
           </div>
