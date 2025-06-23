@@ -10,7 +10,6 @@
   import { vendorsStore } from '$lib/stores/marketplace-store';
   import { derived } from 'svelte/store';
   import { walletItemsStore } from '@/stores/wallet-store';
-  import JsBarcode from 'jsbarcode';
   import BarcodeView from './barcode-view.svelte';
   import { downloadPdf } from '@/utils/pdf-utils';
 
@@ -38,7 +37,7 @@
   let selectedTab = $state('use');
   let isBarcodeViewOpen = $state(false);
 
-  const code = '5045 0794 5057 847';
+  const barcodeValue = '5045 0794 5057 847';
   const pin = '5749';
 
   onMount(async () => {
@@ -58,21 +57,9 @@
     }
   });
 
-  let barcodeRef = $state<HTMLCanvasElement>();
+  const barcodeFormat = $walletItemProduct?.barcodeFormat || 'CODE39';
 
-  function renderBarcode() {
-    if (barcodeRef && code) {
-      JsBarcode(barcodeRef, code, { format: 'CODE39', displayValue: false });
-    }
-  }
-
-  $effect(() => {
-    if (barcodeRef && code) {
-      renderBarcode();
-    }
-  });
-
-  onMount(renderBarcode);
+  const barcodeApiUrl = `https://barcodeapi.org/api/${barcodeFormat === 'QR_CODE' ? 'qr' : 'code39'}/${encodeURIComponent(barcodeValue)}`;
 
   function backAndClose() {
     if (isBarcodeViewOpen) {
@@ -126,8 +113,7 @@
   </Card.Root>
 {:else if isBarcodeViewOpen}
   <BarcodeView>
-    <canvas bind:this={barcodeRef} style="height: 80px; width: 350px;"></canvas>
-    <h class="text-xl text-black">{code}</h>
+    <img src={barcodeApiUrl} class="barcode" alt="Barcode" />
   </BarcodeView>
 {:else if $walletItemProduct}
   <div class="mx-auto max-w-lg px-4 py-6">
@@ -226,14 +212,13 @@
         >
 
         <!-- Card Code and PIN -->
-        {#if code}
+        {#if barcodeValue}
           <div class="mt-4 flex flex-col items-center">
-            <canvas bind:this={barcodeRef} style="height: 50px; width: 250px;"></canvas>
+            <img src={barcodeApiUrl} class="barcode" alt="Barcode" />
           </div>
         {/if}
 
-        <h class="text-xl text-black">{code}</h>
-        <div class="mt-2 flex items-center gap-2">
+        <div class="mt-4 flex items-center gap-2">
           <Button
             size="sm"
             class="h-8 rounded-full text-background"
