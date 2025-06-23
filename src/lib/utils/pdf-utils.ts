@@ -1,5 +1,4 @@
 import type { WalletItem } from '@baragaun/bg-node-client';
-import JsBarcode from 'jsbarcode';
 import { jsPDF } from 'jspdf';
 
 async function fetchProxyImageAsDataUrl(imageUrl: string): Promise<string> {
@@ -29,6 +28,7 @@ function measureHtmlContentHeight(htmlString: string, widthPt: number): number {
 export async function downloadPdf(
   walletItemProduct: WalletItem,
   code: string = '5045 0794 5057 847',
+  pin: string = '1234',
 ) {
   try {
     //const doc = new jsPDF();
@@ -68,23 +68,29 @@ export async function downloadPdf(
     // Add code
     positionY += topPadding;
 
-    // Add barcode image
-    const barcodeCanvas = document.createElement('canvas');
-    JsBarcode(barcodeCanvas, code, {
-      format: 'CODE128',
-      width: 2,
-      height: 60,
-      displayValue: true,
+    // Add barcode image using barcodeapi.org
+    const barcodeFormat = 'code128'; // or 'qr' if you want QR support
+    const barcodeApiUrl = `https://barcodeapi.org/api/${barcodeFormat}/${encodeURIComponent(code)}`;
+    const resp = await fetch(barcodeApiUrl);
+    const blob = await resp.blob();
+    const barcodeDataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = (e) => reject(e);
+      reader.readAsDataURL(blob);
     });
-    const barcodeDataUrl = barcodeCanvas.toDataURL('image/png');
-    doc.addImage(barcodeDataUrl, 'PNG', pageWidth / 2 - 80, positionY, 160, 40); // adjust position/size as needed
-    positionY = positionY + 40 + topPadding;
+    doc.addImage(barcodeDataUrl, 'PNG', pageWidth / 2 - 150, positionY, 300, 80); // larger barcode
+    positionY = positionY + 80 + topPadding;
 
     let container = document.createElement('div');
     container.style.width = `${pageWidth.toString()}px`;
     container.style.fontSize = '12pt';
     container.style.lineHeight = '1.4';
     container.style.fontFamily = 'Arial, sans-serif';
+
+    doc.text(`Pin: ${pin}`, pageWidth / 2, positionY, { align: 'center' });
+
+    positionY += topPadding;
 
     // Add instructions if available
     if (walletItemProduct.instructionsEn) {
