@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { WalletItem } from '@baragaun/bg-node-client';
   import { Tabs } from 'bits-ui';
   import { onMount } from 'svelte';
   import placeholderImage from '../../assets/images/placeholder.png';
@@ -133,8 +132,8 @@
         <button
           type="button"
           class="border-borde col-span-2 flex w-full items-start justify-between border-b text-left focus:outline-none md:col-span-3"
-          onclick={() => navigateToGiftCardDetail(item.id)}
-          onkeydown={(e) => e.key === 'Enter' && navigateToGiftCardDetail(item.id)}
+          onclick={() => navigateToGiftCardDetail(item.walletId)}
+          onkeydown={(e) => e.key === 'Enter' && navigateToGiftCardDetail(item.walletId)}
         >
           <div class="mb-4 flex flex-shrink-0">
             <img
