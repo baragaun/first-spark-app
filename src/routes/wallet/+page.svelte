@@ -8,10 +8,14 @@
   import { Button } from '$lib/components/ui/button';
   import { goto } from '$app/navigation';
   import { walletItemsStore } from '@/stores/wallet-store';
+  import { uploadedCard } from '@/stores/uploaded-card';
+  import Quagga from 'quagga';
+  import Tesseract from 'tesseract.js';
   // Tabs and wallet items
   let activeTab = $state<string>('Active');
   let searchQuery = $state<string>('');
   let fileInputRef: HTMLInputElement;
+  let isLoading = false;
 
   // Load demo data on mount
   onMount(async () => {
@@ -51,11 +55,100 @@
   function handleFileChange(event: Event) {
     const files = (event.target as HTMLInputElement).files;
     if (files && files.length > 0) {
-      // Handle the selected file(s) here
-      // For now, just log them
-      console.log(files);
+      const file = files[0];
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const imageDataUrl = e.target?.result as string;
+
+        // Set loading and navigate instantly
+        uploadedCard.set({
+          brand: '',
+          balance: '',
+          barcode: '',
+          pin: '',
+          imageUrl: imageDataUrl,
+          isLoading: true,
+        });
+        goto('/wallet/upload-card');
+        // Now process extraction in background
+        Quagga.decodeSingle(
+          {
+            src: imageDataUrl,
+            numOfWorkers: 0,
+            inputStream: { size: 800 },
+            decoder: {
+              readers: [
+                'code_128_reader',
+                'ean_reader',
+                'ean_8_reader',
+                'code_39_reader',
+                'upc_reader',
+                'upc_e_reader',
+                'codabar_reader',
+              ],
+            },
+          },
+          async (result: any) => {
+            let barcode = '';
+            let company = '';
+            let price = '';
+            let pin = '';
+            if (result && result.codeResult) {
+              barcode = result.codeResult.code;
+            }
+            const {
+              data: { text },
+            } = await Tesseract.recognize(imageDataUrl, 'eng');
+            console.log(text);
+            const priceMatch = text.match(/\$\s?\d+[.,]?\d*/);
+            price = priceMatch ? priceMatch[0] : '';
+            const lines = text
+              .split(/\r?\n/)
+              .map((l) => l.trim())
+              .filter(Boolean);
+            // Improved brand extraction: find a line that looks like a brand (all uppercase, not price/barcode/pin)
+            const brandLine = lines.find(
+              (l) => /^[A-Z0-9 '&.-]{3,}$/.test(l) && !/\$|pin|\d{4,}/i.test(l),
+            );
+            company = brandLine || lines[0] || '';
+            // Improved barcode extraction: look for 16-20 digit numbers (with or without spaces)
+            if (!barcode) {
+              // Try to find a long number (with or without spaces)
+              const joined = text.replace(/\s+/g, '');
+              const barcodeMatch = joined.match(/\d{16,20}/);
+              if (barcodeMatch) {
+                barcode = barcodeMatch[0];
+              } else {
+                // fallback: try spaced numbers
+                const spacedMatch = text.match(/(\d{4,}\s?){4,6}/);
+                if (spacedMatch) {
+                  barcode = spacedMatch[0].replace(/\s+/g, '');
+                }
+              }
+            }
+            // Improved pin extraction: look for Pin: xxxx or pin xxxx
+            let pinMatch = text.match(/pin\s*:?\s*(\d{4,8})/i);
+            if (!pinMatch) {
+              // fallback: try to find a 4-8 digit number after the word Pin
+              pinMatch = text.match(/Pin[^\d]*(\d{4,8})/i);
+            }
+            if (pinMatch) {
+              pin = pinMatch[1];
+            }
+            // Update store with extracted values and set loading false
+            uploadedCard.set({
+              brand: company,
+              balance: price,
+              barcode,
+              pin,
+              imageUrl: imageDataUrl,
+              isLoading: false,
+            });
+          },
+        );
+      };
+      reader.readAsDataURL(file);
     }
-    goto('/wallet/upload-card');
   }
 </script>
 
