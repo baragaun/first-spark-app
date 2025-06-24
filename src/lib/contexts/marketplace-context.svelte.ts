@@ -5,6 +5,7 @@ import {
   CachePolicy,
   GiftCardProduct,
   ProductCategory,
+  PurchaseOrder,
   ShoppingCart,
   ShoppingCartItem,
   Vendor,
@@ -152,33 +153,29 @@ export class MarketplaceContext {
     }
   }
 
-  // async updateShoppingCartItem(
-  //   props: ShoppingCartItem,
-  // ): Promise<QueryResult<ShoppingCartItem>> {
-  //   if (!this.client.isInitialized) {
-  //     console.error('MarketplaceContext.updateShoppingCartItem: not initialized.');
-  //     return { error: translate(AppUiMessage.systemError) };
-  //   }
-  //   try {
-  //     isLoading = true;
-  //     const response = await this.client.operations.shoppingCartItem.updateShoppingCartItem(
-  //       props,
-  //     );
-  //     if (!response || response.error) {
-  //       console.error('updateShoppingCartItem: received error.', { response });
-  //       return { error: response.error || translate(AppUiMessage.systemError) };
-  //     }
-  //     return response;
-  //   } catch (error) {
-  //     console.error('updateShoppingCartItem: error', {
-  //       error: (error as Error).message,
-  //       stack: (error as Error).stack,
-  //     });
-  //     return { error: translate(AppUiMessage.systemError) };
-  //   } finally {
-  //     isLoading = false;
-  //   }
-  // }
+  async updateShoppingCartItem(props: ShoppingCartItem): Promise<QueryResult<ShoppingCartItem>> {
+    if (!this.client.isInitialized) {
+      console.error('MarketplaceContext.updateShoppingCartItem: not initialized.');
+      return { error: translate(AppUiMessage.systemError) };
+    }
+    try {
+      isLoading = true;
+      const response = await this.client.operations.shoppingCartItem.updateShoppingCartItem(props);
+      if (!response || response.error) {
+        console.error('updateShoppingCartItem: received error.', { response });
+        return { error: response.error || translate(AppUiMessage.systemError) };
+      }
+      return response;
+    } catch (error) {
+      console.error('updateShoppingCartItem: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return { error: translate(AppUiMessage.systemError) };
+    } finally {
+      isLoading = false;
+    }
+  }
 
   async deleteShoppingCartItem(id: string): Promise<QueryResult<void>> {
     if (!this.client.isInitialized) {
@@ -223,6 +220,33 @@ export class MarketplaceContext {
         stack: (error as Error).stack,
       });
       return translate(AppUiMessage.systemError);
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  async createPurchaseOrder(
+    props: PurchaseOrder, // Replace 'any' with the correct type if available
+  ): Promise<QueryResult<PurchaseOrder>> {
+    // Replace 'any' with PurchaseOrder if you have the type
+    if (!this.client.isInitialized) {
+      console.error('MarketplaceContext.createPurchaseOrder: not initialized.');
+      return { error: translate(AppUiMessage.systemError) };
+    }
+    try {
+      isLoading = true;
+      const response = await this.client.operations.purchaseOrder.createPurchaseOrder(props);
+      if (!response || response.error) {
+        console.error('createPurchaseOrder: received error.', { response });
+        return { error: response.error || translate(AppUiMessage.systemError) };
+      }
+      return response;
+    } catch (error) {
+      console.error('createPurchaseOrder: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return { error: translate(AppUiMessage.systemError) };
     } finally {
       isLoading = false;
     }

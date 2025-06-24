@@ -8,7 +8,6 @@
 
   onMount(() => {
     if (myUserContext.isSignedIn) {
-      channelContext.findMyChannels();
     }
   });
 
