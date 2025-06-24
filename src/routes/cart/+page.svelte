@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ArrowLeft, CheckCircle2, AlertCircle, Plus, Minus } from 'lucide-svelte';
+  import { Plus, Minus } from 'lucide-svelte';
   import { goto } from '$app/navigation';
   import { Button } from '$lib/components/ui/button';
   import { onMount } from 'svelte';
@@ -16,6 +16,7 @@
   import { toast } from 'svelte-sonner';
   import placeholderImage from '../../assets/images/placeholder.png';
   import { giftCardProductsStore, vendorsStore, dataLoaded } from '$lib/stores/marketplace-store';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
 
   let cartItems: ShoppingCartItem[] = [];
   $: subtotal = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
@@ -94,7 +95,7 @@
     for (const item of cartItems) {
       let orderItem: PurchaseOrderItem = {
         id: item.id,
-        purchaseOrderId: item.id,
+        purchaseOrderId: item.id!,
         shoppingCartItemId: item.shoppingCartId,
         productId: item.productId,
         vendorId: item.productId,
@@ -109,14 +110,13 @@
     let item = cartItems[0];
 
     const order: PurchaseOrder = {
-      id: item.id,
-      shoppingCartId: item.id,
-      userId: item.id,
+      shoppingCartId: myUserContext.myUserId!,
       sumItemPrice: item.price,
       totalPrice: item.totalPrice,
       vat: 0,
       items: orderItems,
-      createdAt: item.createdAt,
+      userId: '',
+      createdAt: ''
     };
     await marketplaceContext.createPurchaseOrder(order);
   }
