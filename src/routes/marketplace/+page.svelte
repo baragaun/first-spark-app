@@ -71,7 +71,7 @@
     <div class="relative flex-1">
       <!-- Gradient border wrapper -->
       <div
-        class="relative rounded-full bg-gradient-to-r from-kcu-orange via-kcu-glacier to-kcu-plum p-[2px]"
+        class="relative rounded-full bg-gradient-to-r from-kcu-glacier via-kcu-juniper to-kcu-lime p-[2px]"
       >
         <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
