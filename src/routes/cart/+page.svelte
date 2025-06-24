@@ -4,11 +4,13 @@
   import { Button } from '$lib/components/ui/button';
   import { onMount } from 'svelte';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
-  import type {
-    GiftCardProduct,
-    Vendor,
-    ShoppingCart,
+  import {
+    type GiftCardProduct,
+    type Vendor,
+    type ShoppingCart,
+    type PurchaseOrder,
     ShoppingCartItem,
+    PurchaseOrderItem,
   } from '@baragaun/bg-node-client';
   import { writable } from 'svelte/store';
   import { toast } from 'svelte-sonner';
@@ -39,24 +41,20 @@
 
   async function updateItemQuantity(item: ShoppingCartItem, newQuantity: number) {
     if (newQuantity < 1) {
-      await removeItem(item.id || '');
+      //await removeItem(item.id || '');
+      item.quantity = 0;
+      await marketplaceContext.updateShoppingCartItem(item);
       return;
     }
 
     try {
       // First remove the existing item
-      await removeItem(item.id || '');
+      //await removeItem(item.id || '');
 
-      // Then create a new item with the updated quantity
-      const newItem = {
-        shoppingCartId: item.shoppingCartId,
-        productId: item.productId,
-        quantity: newQuantity,
-        price: item.price,
-        totalPrice: (item.price || 0) * newQuantity,
-      };
+      item.quantity = newQuantity;
+      const result = await marketplaceContext.updateShoppingCartItem(item);
 
-      const result = await marketplaceContext.createShoppingCartItem(newItem);
+      //const result = await marketplaceContext.createShoppingCartItem(newItem);
       if (result.error) {
         console.error('Error updating item quantity:', result.error);
         toast.error(`Failed to update quantity: ${result.error}`);
@@ -74,14 +72,13 @@
   }
 
   async function removeItem(id: string) {
-    console.log(`jahanvi ${id}`);
     try {
       const result = await marketplaceContext.deleteShoppingCartItem(id);
       if (result.error) {
         console.error('Error deleting item:', result.error);
         toast.error(`Failed to remove item: ${result.error}`);
       } else {
-        cartItems = cartItems.filter((item) => item.id !== id);
+        cartItems = cartItems.filter((item) => item.shoppingCartId !== id);
         toast.success('Item removed from cart!');
       }
     } catch (error) {
@@ -90,9 +87,38 @@
     }
   }
 
-  function placeOrder() {
+  async function placeOrder() {
     alert('Order Placed!');
-    // Implement actual order placement logic here
+
+    let orderItems: PurchaseOrderItem[] = [];
+    for (const item of cartItems) {
+      let orderItem: PurchaseOrderItem = {
+        id: item.id,
+        purchaseOrderId: item.id,
+        shoppingCartItemId: item.shoppingCartId,
+        productId: item.productId,
+        vendorId: item.productId,
+        quantity: item.quantity,
+        price: item.price,
+        totalPrice: item.totalPrice,
+        createdAt: item.createdAt,
+      };
+      orderItems.push(orderItem);
+    }
+
+    let item = cartItems[0];
+
+    const order: PurchaseOrder = {
+      id: item.id,
+      shoppingCartId: item.id,
+      userId: item.id,
+      sumItemPrice: item.price,
+      totalPrice: item.totalPrice,
+      vat: 0,
+      items: orderItems,
+      createdAt: item.createdAt,
+    };
+    await marketplaceContext.createPurchaseOrder(order);
   }
 
   function goBack() {

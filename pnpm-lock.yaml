@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@baragaun/bg-node-client':
-        specifier: ^0.0.46
-        version: 0.0.46(prettier@3.5.3)(socks@2.8.5)
+        specifier: ^0.0.49
+        version: 0.0.49(prettier@3.5.3)(socks@2.8.5)
       '@sparticuz/chromium':
         specifier: ^137.0.1
         version: 137.0.1
@@ -264,8 +264,8 @@ packages:
     resolution: {integrity: sha512-ETyHEk2VHHvl9b9jZP5IHPavHYk57EhanlRRuae9XCpb/j5bDCbPPMOBfCWhnl/7EDJz0jEMCi/RhccCE8r1+Q==}
     engines: {node: '>=6.9.0'}
 
-  '@baragaun/bg-node-client@0.0.46':
-    resolution: {integrity: sha512-WR1Hx/I/X+f/Hd0Y1SosFyphX35d584isGf+UTqwk58C5xTdiRvW5Osp+DQzvA010zcv+CpW/JZPuACnvK2R9A==}
+  '@baragaun/bg-node-client@0.0.49':
+    resolution: {integrity: sha512-GqFre+6tiQ5NoTMoCAOLVkww2SccuGU6ecBQYfz3rrfkONhe595H/7RnV4cs3AwZ5OnPAXNg7hDtX+Qi++ifFA==}
     engines: {node: '>=20'}
 
   '@bcoe/v8-coverage@1.0.2':
@@ -2128,9 +2128,6 @@ packages:
 
   dexie@4.0.10:
     resolution: {integrity: sha512-eM2RzuR3i+M046r2Q0Optl3pS31qTWf8aFuA7H9wnsHTwl8EPvroVLwvQene/6paAs39Tbk6fWZcn2aZaHkc/w==}
-
-  dexie@4.0.11:
-    resolution: {integrity: sha512-SOKO002EqlvBYYKQSew3iymBoN2EQ4BDw/3yprjh7kAfFzjBYkaMNa/pZvcA7HSWlcKSQb9XhPe3wKyQ0x4A8A==}
 
   didyoumean@1.2.2:
     resolution: {integrity: sha512-gxtyfqMg7GKyhQmb056K7M3xszy/myH8w+B4RT+QXBQsvAOdc3XymqDDPHx1BgPgsdAA5SIifona89YtRATDzw==}
@@ -4586,7 +4583,7 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.27.1
 
-  '@baragaun/bg-node-client@0.0.46(prettier@3.5.3)(socks@2.8.5)':
+  '@baragaun/bg-node-client@0.0.49(prettier@3.5.3)(socks@2.8.5)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
       '@nats-io/jetstream': 3.0.2
@@ -4596,7 +4593,7 @@ snapshots:
       ajv: 8.17.1
       ajv-formats: 3.0.1(ajv@8.17.1)
       chance: 1.1.13
-      dexie: 4.0.11
+      dexie: 4.0.10
       graffle: 8.0.0-next.157(@opentelemetry/api@1.9.0)(graphql@16.11.0)(prettier@3.5.3)
       graphql: 16.11.0
       rxdb: 16.15.0(rxjs@7.8.2)(socks@2.8.5)
@@ -6663,8 +6660,6 @@ snapshots:
   devtools-protocol@0.0.1452169: {}
 
   dexie@4.0.10: {}
-
-  dexie@4.0.11: {}
 
   didyoumean@1.2.2: {}
 
