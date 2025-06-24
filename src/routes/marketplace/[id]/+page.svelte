@@ -50,7 +50,7 @@
       // If data is already loaded in the stores, use it
       if ($dataLoaded) {
         if (!$giftCardProduct) {
-          error = 'Gift card not found';
+          error = m['marketplace.error_gift_card_not_found']();
         }
         isLoading = false;
         return;
@@ -66,7 +66,7 @@
 
       const product = giftCardsResponse?.find((p) => p.id === giftCardId);
       if (!product) {
-        error = 'Gift card not found';
+        error = m['marketplace.error_gift_card_not_found']();
         return;
       }
 
@@ -79,7 +79,7 @@
 
       dataLoaded.set(true);
     } catch (err) {
-      error = 'Failed to load gift card details';
+      error = m['marketplace.error_failed_to_load']();
       console.error(err);
     } finally {
       isLoading = false;
@@ -111,7 +111,7 @@
   ) {
     if (!giftCardProduct.id) {
       console.error('GiftCardProduct ID is missing, cannot add to cart.');
-      toast.error('Failed to add item to cart: Gift card details missing.');
+      toast.error(m['marketplace.add_to_cart_error']({ reason: 'Gift card details missing.' }));
       return;
     }
 
@@ -130,20 +130,23 @@
 
       if (result.error) {
         console.error('Error adding item to cart:', result.error);
-        toast.error(`Failed to add item to cart: ${result.error}`);
+        toast.error(m['marketplace.add_to_cart_error']({ reason: result.error }));
       } else if (result.object) {
         console.log('Item added to cart:', result.object);
         toast.success(
-          `$${denomination.amount / 1000} ${vendor.name || 'Gift Card'} added to cart!`,
+          m['marketplace.add_to_cart_success']({
+            amount: `$${denomination.amount / 1000}`,
+            vendor: vendor.name || m['marketplace.buy_gift_card'](),
+          })
         );
         // Optionally navigate to cart page or update cart count somewhere
         goto('/cart'); // Navigate to shopping cart page after adding
       } else {
-        toast.error('Failed to add item to cart: No object returned.');
+        toast.error(m['marketplace.add_to_cart_no_object']());
       }
     } catch (error) {
       console.error('Unexpected error adding item to cart:', error);
-      toast.error('An unexpected error occurred while adding to cart.');
+      toast.error(m['marketplace.add_to_cart_unexpected_error']());
     }
   }
 </script>
@@ -155,7 +158,7 @@
   <button onclick={() => history.back()} class="flex items-center">
     <ArrowLeft class="h-6 w-6" />
   </button>
-  <span class="text-lg font-semibold">Buy Gift Card</span>
+  <span class="text-lg font-semibold">{m['marketplace.buy_gift_card']()}</span>
   <img src={userAvatarUrl} alt="User" class="h-8 w-8 rounded-full object-cover" />
 </div>
 
@@ -165,19 +168,19 @@
       <div
         class="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"
       ></div>
-      <p class="mt-2 text-muted-foreground">Loading gift card details...</p>
+      <p class="mt-2 text-muted-foreground">{m['marketplace.loading_gift_card_details']()}</p>
     </div>
   </div>
 {:else if error}
   <Card.Root class="mx-auto mt-8 max-w-md">
     <Card.Header>
-      <Card.Title>Error</Card.Title>
+      <Card.Title>{m['marketplace.error_title']()}</Card.Title>
     </Card.Header>
     <Card.Content>
       <p>{error}</p>
     </Card.Content>
     <Card.Footer>
-      <Button href="/marketplace">Return to Marketplace</Button>
+      <Button href="/marketplace">{m['marketplace.return_to_marketplace']()}</Button>
     </Card.Footer>
   </Card.Root>
 {:else if $giftCardProduct && $vendor}
@@ -199,29 +202,29 @@
         style="color: {selectedTab === 'buy'
           ? 'var(--primary)'
           : '#888'}; border-color: {selectedTab === 'buy' ? 'var(--primary)' : 'transparent'};"
-        onclick={() => (selectedTab = 'buy')}>Buy</button
+        onclick={() => (selectedTab = 'buy')}>{m['marketplace.tabs.buy']()}</button
       >
       <button
         class="flex-1 border-b-2 py-2 font-medium"
         style="color: {selectedTab === 'info'
           ? 'var(--primary)'
           : '#888'}; border-color: {selectedTab === 'info' ? 'var(--primary)' : 'transparent'};"
-        onclick={() => (selectedTab = 'info')}>Info</button
+        onclick={() => (selectedTab = 'info')}>{m['marketplace.tabs.info']()}</button
       >
       <button
         class="flex-1 border-b-2 py-2 font-medium"
         style="color: {selectedTab === 'brand'
           ? 'var(--primary)'
           : '#888'}; border-color: {selectedTab === 'brand' ? 'var(--primary)' : 'transparent'};"
-        onclick={() => (selectedTab = 'brand')}>Brand</button
+        onclick={() => (selectedTab = 'brand')}>{m['marketplace.tabs.brand']()}</button
       >
     </div>
 
     {#if selectedTab === 'buy'}
       <!-- Brand and Amounts (Buy Tab) -->
-      <div class="text-500 mb-2 text-sm text-secondary-foreground">Brand</div>
+      <div class="text-500 mb-2 text-sm text-secondary-foreground">{m['marketplace.brand_label']()}</div>
       <div class="mb-4 text-xl font-bold">{$vendor.name}</div>
-      <div class="text-500 mb-2 text-sm text-secondary-foreground">Gift Card Amount</div>
+      <div class="text-500 mb-2 text-sm text-secondary-foreground">{m['marketplace.gift_card_amount_label']()}</div>
       <div class="space-y-4">
         {#each getDenominations($giftCardProduct) as denomination}
           <button
@@ -232,7 +235,7 @@
               e.key === 'Enter' && addDenominationToCart(denomination, $giftCardProduct, $vendor)}
           >
             <span class="flex items-end gap-1">
-              <span class="align-bottom text-base text-muted-foreground">USD</span>
+              <span class="align-bottom text-base text-muted-foreground">{m['marketplace.usd']()}</span>
               <span class="text-4xl">{denomination.amount / 1000}</span>
             </span>
           </button>
@@ -245,7 +248,7 @@
         {#if $giftCardProduct.instructionsEn}
           <div class="mb-6">
             <h2 class="text-400 mb-2 text-lg font-semibold text-secondary-foreground">
-              How To Redeem
+              {m['marketplace.how_to_redeem']()}
             </h2>
             {#if $giftCardProduct.instructionsEn?.trim().startsWith('<')}
               <p class="mb-2">
@@ -261,7 +264,7 @@
         {#if $giftCardProduct.termsEn}
           <div>
             <h2 class="text-400 mb-2 text-lg font-semibold text-secondary-foreground">
-              Terms And Conditions
+              {m['marketplace.terms_and_conditions']()}
             </h2>
             {#if $giftCardProduct.instructionsEn?.trim().startsWith('<')}
               <p class="mb-2">
@@ -303,7 +306,7 @@
             class="rounded-lg bg-primary px-8 py-2 font-semibold tracking-wide text-white shadow transition hover:bg-primary/90"
             style="text-transform: uppercase; letter-spacing: 1px;"
           >
-            VISIT ONLINE
+            {m['marketplace.visit_online']()}
           </a>
         {/if}
       </div>
