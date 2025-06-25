@@ -283,6 +283,7 @@
   },
   "cart": {
     "title": "Einkaufswagen",
+    "subtitle": "Rond nu uw bestelling af",
     "empty": "Ihr Warenkorb ist leer",
     "continue_shopping": "Weiter einkaufen",
     "total": "Gesamt",

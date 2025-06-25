@@ -12,6 +12,7 @@
   import Quagga from 'quagga';
   import Tesseract from 'tesseract.js';
   import { m } from '@/paraglide/messages';
+
   // Tabs and wallet items
   let activeTab = $state<string>('Active');
   let searchQuery = $state<string>('');
@@ -155,9 +156,8 @@
 
 <div class="container mx-auto px-4 py-6">
   <div class="flex">
-    <Wallet class=" mr-2 h-12 w-12" />
     <header class="mb-6">
-      <h1 class="text-3xl font-bold text-primary">{m['wallet.title']()}</h1>
+      <h1 class="text-3xl font-bold text-foreground">{m['wallet.title']()}</h1>
       <p class="mt-2 text-muted-foreground">{m['wallet.subtitle']()}</p>
     </header>
   </div>
@@ -237,7 +237,8 @@
               onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
             />
             <div class="flex flex-col">
-              <span class="text-base font-medium text-primary">{item.name ? item.name : ''}</span>
+              <span class="text-base font-medium text-foreground">{item.name ? item.name : ''}</span
+              >
               <span class="text-lg font-bold text-muted-foreground"
                 >${(item.balance / 100).toFixed(2)}</span
               >
