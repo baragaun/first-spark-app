@@ -15,6 +15,7 @@
     dataLoaded,
   } from '$lib/stores/marketplace-store';
   import { IsMobile } from '$lib/hooks/is-mobile.svelte';
+  import { m } from '@/paraglide/messages';
 
   // Initialize the mobile detector
   const isMobile = new IsMobile();
