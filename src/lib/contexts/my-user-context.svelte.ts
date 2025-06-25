@@ -416,7 +416,7 @@ export class MyUserContext {
     }
   }
 
-  async verifyMyPassword(password: string): Promise<QueryResult<boolean>> {
+  async verifyMyPassword(password: string): Promise<QueryResult<string>> {
     if (!this.client.isInitialized) {
       console.error('MyUserContext.verifyMyPassword: not initialized.');
       return { error: translate(AppUiMessage.systemError) };
@@ -584,11 +584,11 @@ export class MyUserContext {
   public get myUserOnboardingCompletion(): number {
     if (!this.myUser) return 0;
 
-    if (!this.myUser.isEmailVerified) {
-      return 2;
-    } else if (!this.myUser.passwordUpdatedAt) {
-      return 3;
-    }
+    // if (!this.myUser.isEmailVerified) {
+    //   return 2;
+    // } else if (!this.myUser.passwordUpdatedAt) {
+    //   return 3;
+    // }
 
     return 1;
   }
