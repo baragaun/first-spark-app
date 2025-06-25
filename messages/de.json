@@ -16,8 +16,8 @@
       "contacts": "Kontakte",
       "settings": "Einstellungen",
       "marketplace": "Marktplaats",
-      "cart": "Cart",
-      "wallet": "Wallet"
+      "cart": "Warenkorb",
+      "wallet": "Brieftasche"
     }
   },
   "nav": {
@@ -280,5 +280,50 @@
     "how_to_redeem": "Hoe te verzilveren",
     "terms_and_conditions": "Algemene voorwaarden",
     "visit_online": "BEZOEK ONLINE"
+  },
+  "cart": {
+    "title": "Einkaufswagen",
+    "empty": "Ihr Warenkorb ist leer",
+    "continue_shopping": "Weiter einkaufen",
+    "total": "Gesamt",
+    "remove": "Entfernen",
+    "product": "Produkt",
+    "amount": "Betrag",
+    "quantity": "Menge",
+    "place_order": "BESTELLUNG AUFGEBEN",
+    "okay": "OKAY",
+    "order_placed": "Bestellung aufgegeben!",
+    "order_placed_description": "Ihre Bestellung wurde erfolgreich aufgegeben."
+  },
+  "wallet": {
+    "title": "Brieftasche",
+    "subtitle": "Ihr KCU-Token-Guthaben",
+    "empty": "Ihre Brieftasche ist leer",
+    "add_funds": "Geld hinzufügen",
+    "loading": "Brieftasche wird geladen...",
+    "active": "Aktiv",
+    "archive": "Archiv",
+    "search": "Brieftasche durchsuchen",
+    "gift-card": {
+      "title": "Geschenkkarte",
+      "subtitle": "Ihre Geschenkkarten",
+      "loading": "Geschenkkarten werden geladen...",
+      "error": "Geschenkkarten konnten nicht geladen werden",
+      "return_to_marketplace": "Zurück zum Marktplatz",
+      "gift": "Geschenk",
+      "brand": "Marke",
+      "amount": "Betrag",
+      "print": "Drucken",
+      "archive": "Archiviert",
+      "use": "Verwenden",
+      "info": "Info",
+      "look_up_balance": "Guthaben abfragen",
+      "zoom": "Zoom",
+      "copy": "Kopieren",
+      "copy_pin": "PIN kopieren",
+      "how_to_redeem": "So lösen Sie ein",
+      "terms_and_conditions": "Allgemeine Geschäftsbedingungen",
+      "visit_online": "ONLINE BESUCHEN"
+    }
   }
 }

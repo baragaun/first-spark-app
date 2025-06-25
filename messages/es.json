@@ -1,0 +1,330 @@
+{
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "welcome": "Bienvenido a {title}",
+  "welcome_subtitle": "¡Conecta, inspira, prospera!",
+  "join_first_spark": "Únete a {title}",
+  "get_started": "Comenzar",
+  "sidebar": {
+    "logo": {
+      "alt": "Logo de la aplicación",
+      "title": "First Spark"
+    },
+    "menu": {
+      "home": "Inicio",
+      "inbox": "Bandeja de entrada",
+      "conversations": "Conversaciones",
+      "contacts": "Contactos",
+      "settings": "Configuración",
+      "marketplace": "Mercado",
+      "cart": "Carrito",
+      "wallet": "Billetera"
+    }
+  },
+  "nav": {
+    "menu": "Menú",
+    "open_menu": "Abrir menú",
+    "theme": {
+      "light_mode": "Modo claro",
+      "dark_mode": "Modo oscuro"
+    },
+    "auth": {
+      "sign_in": "Iniciar sesión",
+      "sign_up": "Registrarse",
+      "sign_out": "Cerrar sesión"
+    }
+  },
+  "footer": {
+    "copyright": "© {year} {title}. Todos los derechos reservados.",
+    "navigation": {
+      "faq": "Preguntas frecuentes",
+      "privacy_policy": "Política de privacidad",
+      "terms_of_service": "Términos de servicio"
+    }
+  },
+  "user_nav": {
+    "profile": "Perfil",
+    "inbox": "Bandeja de entrada",
+    "settings": "Configuración",
+    "logout": "Cerrar sesión"
+  },
+  "language_button": {
+    "tooltip": "Idioma"
+  },
+  "light_switch": {
+    "tooltip": "Tema",
+    "light": "Claro",
+    "dark": "Oscuro",
+    "system": "Sistema",
+    "kcu": "KCU"
+  },
+  "signin": {
+    "title": "Iniciar sesión",
+    "description": "Ingresa tu dirección de correo electrónico a continuación para iniciar sesión en tu cuenta",
+    "sign_with_token_description": "Ingresa el código de verificación enviado a {identifier}",
+    "sign_with_password_description": "Ingresa tu contraseña para iniciar sesión como {identifier}",
+    "have_account": "¿Nuevo en {title}?",
+    "forgot_password": "¿Olvidaste tu contraseña?",
+    "username_or_email_placeholder": "Nombre de usuario o correo electrónico",
+    "identifier_label": "Correo electrónico o nombre de usuario",
+    "password_label": "Contraseña",
+    "email_placeholder": "Correo electrónico",
+    "identifier_placeholder": "Ingresa tu correo electrónico o nombre de usuario",
+    "password_placeholder": "Ingresa tu contraseña",
+    "buttons": {
+      "signin": "Iniciar sesión",
+      "signin_with_token": "Iniciar sesión con token",
+      "signin_with_password": "Iniciar sesión con contraseña",
+      "forgot_password": "¿Olvidaste tu contraseña?",
+      "back": "← Volver al inicio de sesión",
+      "verify": "Verificar",
+      "verifying": "Verificando...",
+      "Signing_in": "Iniciando sesión...",
+      "signup": "Registrarse"
+    },
+    "error": {
+      "required": "Se requiere nombre de usuario o correo electrónico",
+      "invalid_credentials": "Nombre de usuario, correo electrónico o contraseña inválidos. Por favor, inténtalo de nuevo."
+    }
+  },
+  "signup": {
+    "title": "Registrarse",
+    "email_description": "Proporciona una dirección de correo electrónico para crear tu cuenta de {title}.",
+    "verification_description": "Ingresa el código de verificación que enviamos a {email}.",
+    "create_credentials_description": "Elige un nombre de usuario y una contraseña para tu cuenta.",
+    "email_title": "Dirección de correo electrónico",
+    "username": "Nombre de usuario",
+    "password": "Contraseña",
+    "email_placeholder": "ej. 'estudiante@ejemplo.com'",
+    "username_description": "Los nombres de usuario son identificadores únicos. Verificaremos que el tuyo no esté ya en uso.",
+    "username_placeholder": "ej. 'jirafa08'",
+    "password_placeholder": "Ingresa tu contraseña",
+    "errors": {
+      "email_unavailable": "Este correo electrónico no está disponible actualmente para su uso.",
+      "username_unavailable": "Este nombre de usuario no está disponible actualmente para su uso."
+    },
+    "buttons": {
+      "sign_up": "Registrarse",
+      "sign_in": "Iniciar sesión",
+      "have_account": "¿Ya tienes una cuenta?",
+      "verify": "Verificar",
+      "sending": "Enviando...",
+      "verifying": "Verificando...",
+      "create_account": "Crear cuenta",
+      "creating_account": "Creando cuenta..."
+    }
+  },
+  "reset_password": {
+    "title": "Restablecer tu contraseña",
+    "description": "Proporciona tu nombre de usuario o correo electrónico para obtener un código de verificación",
+    "check_inbox": {
+      "title": "Revisa tu bandeja de entrada",
+      "description": "Hemos enviado un código de verificación a {email}",
+      "code_expiration": "Nota: El código de verificación expirará en 10 minutos.",
+      "didnt_get_email": "¿No recibiste un correo electrónico?"
+    },
+    "form": {
+      "identifier_label": "Correo electrónico o nombre de usuario",
+      "identifier_placeholder": "Ingresa tu correo electrónico o nombre de usuario",
+      "errors": {
+        "default_error": "No se puede procesar tu solicitud. Por favor, inténtalo de nuevo.",
+        "valid_ident_required": "Se requiere un nombre de usuario o correo electrónico válido",
+        "failed_to_send": "Error al enviar el código de verificación. Por favor, inténtalo de nuevo.",
+        "failed_to_resend": "Error al reenviar el código de verificación. Por favor, inténtalo de nuevo.",
+        "failed_to_verify": "Error al verificar el código. Por favor, inténtalo de nuevo."
+      }
+    },
+    "new_password_form": {
+      "description": "Ingresa una nueva contraseña y el código de verificación que enviamos a test para actualizar tu contraseña",
+      "label": "Nueva contraseña",
+      "placeholder": "Ingresa una nueva contraseña",
+      "code_label": "Código de verificación",
+      "otp_description": "Ingresa una nueva contraseña y el código de verificación que enviamos a {identifier} para actualizar tu contraseña"
+    },
+    "buttons": {
+      "send_email": "Envíame un correo electrónico",
+      "sending_email": "Enviando correo electrónico...",
+      "resend_email": "Reenviar correo electrónico",
+      "resend_timer": "Reenviar en {time}",
+      "back_to_login": "Volver al inicio de sesión",
+      "need_help": "¿Necesitas ayuda?",
+      "have_account": "¿No tienes una cuenta?",
+      "update_password": "Actualizar mi contraseña",
+      "processing": "Procesando...",
+      "signup": "Registrarse",
+      "start_over": "Empezar de nuevo"
+    }
+  },
+  "verify_token": {
+    "verification_code": "Código de verificación",
+    "resend": "Reenviar código",
+    "resend_in": "Reenviar en",
+    "error": {
+      "dev_mode_error": "La notificación falló, pero estás en desarrollo.",
+      "min_length": "Tu contraseña de un solo uso debe tener al menos 6 caracteres",
+      "invalid": "No pudimos verificar el token que ingresaste. Por favor, inténtalo de nuevo."
+    }
+  },
+  "connection": {
+    "offline": "Estás desconectado",
+    "online": "Impulsado por {title}",
+    "offline.description": "Actualmente no estás conectado.",
+    "reconnected": "Reconectado",
+    "reconnected.description": "¡Reconectado a {title}!"
+  },
+  "setting": {
+    "setting_label": "Configuración",
+    "account": "Cuenta",
+    "notification": "Notificación",
+    "username": {
+      "label": "Mi nombre de usuario",
+      "change_username": "Cambiar tu nombre de usuario",
+      "change_username_description": "Puedes cambiar tu nombre de usuario en cualquier momento. Tu nombre de usuario anterior queda inmediatamente disponible para su uso.",
+      "current_username": "Nombre de usuario actual",
+      "new_username": "Nuevo nombre de usuario",
+      "suggest_new": "Sugerir nuevo",
+      "generating": "Generando...",
+      "username_placeholder": "ej. 'jirafa08'",
+      "error": {
+        "min_length": "El nombre de usuario debe tener al menos 3 caracteres",
+        "max_length": "El nombre de usuario debe contener como máximo 30 caracteres",
+        "unavailable": "Este nombre de usuario no está disponible actualmente para su uso.",
+        "in_use": "Ya usas este nombre de usuario. Por favor, elige uno diferente.",
+        "alphanumeric": "El nombre de usuario debe contener solo letras y números"
+      }
+    },
+    "email": {
+      "label": "Mi correo electrónico",
+      "change_email": "Cambiar tu correo electrónico registrado",
+      "change_email_description": "Ingresa un correo electrónico diferente y un código de verificación para actualizar tu cuenta.",
+      "current_email": "Correo electrónico actual",
+      "new_email": "Nuevo correo electrónico",
+      "email_placeholder": "ej. ana@ejemplo.com",
+      "error": {
+        "invalid": "Por favor, ingresa una dirección de correo electrónico válida.",
+        "unavailable": "Este correo electrónico no está disponible actualmente para su uso.",
+        "existing": "Por favor, proporciona una dirección de correo electrónico diferente."
+      }
+    },
+    "password": {
+      "label": "Mi contraseña",
+      "change_password": "Cambiar tu contraseña",
+      "change_password_description": "Tu contraseña debe ser única y actualizarse regularmente.",
+      "current_password": "Contraseña actual",
+      "new_password": "Nueva contraseña",
+      "current_password_placeholder": "Ingresa tu contraseña actual",
+      "new_password_placeholder": "Ingresa tu nueva contraseña",
+      "error": {
+        "required": "Se requiere la contraseña actual",
+        "min_length": "Tu contraseña debe tener al menos 8 caracteres",
+        "incorrect": "Contraseña incorrecta. Por favor, verifica e inténtalo de nuevo."
+      }
+    },
+    "danger_zone": "Zona de peligro",
+    "delete_account": {
+      "label": "Eliminar mi cuenta",
+      "sublabel": "Eliminar permanentemente tu cuenta y cualquier dato asociado",
+      "your_account": "Eliminar tu cuenta",
+      "delete_account_description": "¡Lamentamos verte partir! Por favor, proporciona cualquier comentario que puedas tener antes de irte para que podamos mejorar.",
+      "alert_title": "¿Estás seguro de que quieres continuar?",
+      "alert_subtitle": "Tu perfil y todos tus datos serán eliminados permanentemente. Esta acción no se puede recuperar.",
+      "reason": "Razón",
+      "reason_placeholder": "¿Por qué estás eliminando tu cuenta?",
+      "addition_details": "Detalles adicionales",
+      "addition_details_placeholder": "¿Tienes algún comentario adicional?",
+      "confirm_email": "Confirma tu correo electrónico",
+      "error": {
+        "invalid": "Por favor, ingresa una dirección de correo electrónico válida.",
+        "not_found": "El correo electrónico ingresado no coincide con tu cuenta. Por favor, verifica e inténtalo de nuevo."
+      }
+    },
+    "buttons": {
+      "update": "Actualizar",
+      "updating": "Actualizando...",
+      "delete_account": "Eliminar mi cuenta",
+      "cleaning": "Limpiando...",
+      "goodbuy": "¡Adiós!",
+      "cancel": "Cancelar",
+      "verify": "Verificar",
+      "verifying": "Verificando...",
+      "change_email": "Cambiar correo electrónico"
+    }
+  },
+  "form_button_default": {
+    "buttonText": "Enviar",
+    "successText": "¡Éxito!",
+    "loadingText": "Procesando..."
+  },
+  "marketplace": {
+    "title": "Mercado",
+    "subtitle": "Descubre y conecta con nuestros servicios asociados",
+    "search_placeholder": "Buscar en el mercado",
+    "all": "Todos",
+    "view_gift_card_aria": "Ver detalles de la tarjeta de regalo de {vendor}",
+    "buy_gift_card": "Comprar tarjeta de regalo",
+    "loading_gift_card_details": "Cargando detalles de la tarjeta de regalo...",
+    "error_title": "Error",
+    "error_gift_card_not_found": "Tarjeta de regalo no encontrada",
+    "error_failed_to_load": "Error al cargar los detalles de la tarjeta de regalo",
+    "return_to_marketplace": "Volver al mercado",
+    "tabs": {
+      "buy": "Comprar",
+      "info": "Información",
+      "brand": "Marca"
+    },
+    "brand_label": "Marca",
+    "gift_card_amount_label": "Monto de la tarjeta de regalo",
+    "usd": "USD",
+    "add_to_cart_success": "${amount} ${vendor} agregado al carrito!",
+    "add_to_cart_error": "Error al agregar artículo al carrito: {reason}",
+    "add_to_cart_unexpected_error": "Ocurrió un error inesperado al agregar al carrito.",
+    "add_to_cart_no_object": "Error al agregar artículo al carrito: No se devolvió ningún objeto.",
+    "how_to_redeem": "Cómo canjear",
+    "terms_and_conditions": "Términos y condiciones",
+    "visit_online": "VISITAR EN LÍNEA"
+  },
+  "cart": {
+    "title": "Carrito de compras",
+    "empty": "Tu carrito está vacío",
+    "continue_shopping": "Continuar comprando",
+    "total": "Total",
+    "remove": "Eliminar",
+    "product": "Producto",
+    "amount": "Monto",
+    "quantity": "Cantidad",
+    "place_order": "REALIZAR PEDIDO",
+    "okay": "ACEPTAR",
+    "order_placed": "¡Pedido realizado!",
+    "order_placed_description": "Tu pedido ha sido realizado exitosamente."
+  },
+  "wallet": {
+    "title": "Billetera",
+    "subtitle": "Tu saldo de tokens KCU",
+    "empty": "Tu billetera está vacía",
+    "add_funds": "Agregar fondos",
+    "loading": "Cargando billetera...",
+    "active": "Activo",
+    "archive": "Archivo",
+    "search": "Buscar en billetera",
+    "gift-card": {
+      "title": "Tarjeta de regalo",
+      "subtitle": "Tus tarjetas de regalo",
+      "loading": "Cargando tarjetas de regalo...",
+      "error": "Error al cargar las tarjetas de regalo",
+      "return_to_marketplace": "Volver al mercado",
+      "gift": "Regalo",
+      "brand": "Marca",
+      "amount": "Monto",
+      "print": "Imprimir",
+      "archive": "Archivado",
+      "use": "Usar",
+      "info": "Información",
+      "look_up_balance": "Consultar saldo",
+      "zoom": "Zoom",
+      "copy": "Copiar",
+      "copy_pin": "Copiar PIN",
+      "how_to_redeem": "Cómo canjear",
+      "terms_and_conditions": "Términos y condiciones",
+      "visit_online": "VISITAR EN LÍNEA"
+    }
+  }
+}
