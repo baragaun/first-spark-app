@@ -71,7 +71,7 @@
 
   function handlePrintPdf() {
     if (!$walletItemProduct) return;
-    downloadPdf($walletItemProduct);
+    downloadPdf($walletItemProduct, barcodeValue, pin);
   }
 </script>
 

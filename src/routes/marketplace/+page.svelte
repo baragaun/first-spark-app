@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { m } from '$lib/paraglide/messages.js';
   import { Search, ChevronDown } from 'lucide-svelte';
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
@@ -25,7 +24,8 @@
 
   const giftCardImageDomain = 'https://d27wpajtnol6ce.cloudfront.net';
 
-  function navigateToGiftCardDetail(giftCardId: string) {
+  function navigateToGiftCardDetail(giftCardId: string | null | undefined) {
+    if (!giftCardId) return;
     goto(`/marketplace/${giftCardId}`);
   }
 

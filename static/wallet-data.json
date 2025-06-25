@@ -14,6 +14,7 @@
     "termsEn": "This Card is issued by MOCGC, Corp. and may be used to purchase goods and services at any participating Landry’s, Inc. or affiliated location in the U.S. until the full balance is used.  The Card has no cash value; except as required by law, it is not redeemable for cash.",
     "termsUrl": "https://www.landrysinc.com/giftcards/terms.asp",
     "hasBarcode": true,
+    "pin": "1234",
     "barcodeFormat": "QR_CODE"
   },
   {
@@ -31,6 +32,7 @@
     "termsEn": "This Crate & Barrel eGift Card is redeemable for merchandise or services at Crate & Barrel stores and Outlets (U.S. only), online at CrateandBarrel.com or by phone to 800.323.5461. It also can be redeemed in stores (U.S. only), online or by phone at CB2 and The Land of Nod. This eGift Card may not be used as payment on a Crate & Barrel Credit Card or any other account. Purchases will be deducted from this eGift Card’s balance until the value reaches zero dollars. Funds on this eGift Card do not expire and cannot be redeemed for cash, except where required by law. Crate & Barrel is not responsible for lost, stolen or damaged eGift Cards, or any unauthorized use. Your acceptance or use of this eGift Card constitutes agreement to these terms and conditions, which may change at any time. To check your balance, visit CrateandBarrel.com/GiftCards or call 877.477.4567. For Customer Service, call 800.606.6458.",
     "termsUrl": "https://www.crateandbarrel.com",
     "hasBarcode": true,
+    "pin": "1234",
     "barcodeFormat": "QR_CODE"
   },
   {
@@ -82,6 +84,7 @@
     "id": "6",
     "balance": 3000,
     "archivedAt": null,
+    "pin": "1234",
     "createdAt": "2024-06-01T00:00:00Z",
     "productId": "6851665fdaae19c44e378f0e",
     "vendorId": "6851665fdaae19c44e378dbe",

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ArrowLeft, CheckCircle2, AlertCircle, Plus, Minus } from 'lucide-svelte';
+  import { Plus, Minus } from 'lucide-svelte';
   import { goto } from '$app/navigation';
   import { Button } from '$lib/components/ui/button';
   import { onMount } from 'svelte';
@@ -25,6 +25,7 @@
     AlertDialogHeader,
     AlertDialogTitle,
   } from '@/components/ui/alert-dialog';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
 
   let cartItems: ShoppingCartItem[] = [];
   $: subtotal = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
@@ -98,35 +99,36 @@
   }
 
   async function placeOrder() {
-    // let orderItems: PurchaseOrderItem[] = [];
-    // for (const item of cartItems) {
-    //   let orderItem: PurchaseOrderItem = {
-    //     id: item.id,
-    //     purchaseOrderId: item.id,
-    //     shoppingCartItemId: item.shoppingCartId,
-    //     productId: item.productId,
-    //     vendorId: item.productId,
-    //     quantity: item.quantity,
-    //     price: item.price,
-    //     totalPrice: item.totalPrice,
-    //     createdAt: item.createdAt,
-    //   };
-    //   orderItems.push(orderItem);
-    // }
+    let orderItems: PurchaseOrderItem[] = [];
+    for (const item of cartItems) {
+      let orderItem: PurchaseOrderItem = {
+        id: item.id,
+        purchaseOrderId: item.id!,
+        shoppingCartItemId: item.shoppingCartId,
+        productId: item.productId,
+        vendorId: item.productId,
+        quantity: item.quantity,
+        price: item.price,
+        totalPrice: item.totalPrice,
+        createdAt: item.createdAt,
+      };
+      orderItems.push(orderItem);
+    }
 
-    // let item = cartItems[0];
+    let item = cartItems[0];
 
-    // const order: PurchaseOrder = {
-    //   id: item.id,
-    //   shoppingCartId: item.id,
-    //   userId: item.id,
-    //   sumItemPrice: item.price,
-    //   totalPrice: item.totalPrice,
-    //   vat: 0,
-    //   items: orderItems,
-    //   createdAt: item.createdAt,
-    // };
-    // await marketplaceContext.createPurchaseOrder(order);
+    const order: PurchaseOrder = {
+      id: '',
+      shoppingCartId: myUserContext.myUserId!,
+      sumItemPrice: item.price,
+      totalPrice: item.totalPrice,
+      vat: 0,
+      items: orderItems,
+      userId: '',
+      createdAt: '',
+    };
+    await marketplaceContext.createPurchaseOrder(order);
+
     showOrderPlacedDialog = true;
   }
 
