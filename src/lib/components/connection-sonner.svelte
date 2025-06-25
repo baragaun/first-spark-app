@@ -5,6 +5,7 @@
   import { m } from '$lib/paraglide/messages.js';
   import { getContext, onMount } from 'svelte';
   import type { MyUserContext } from '@/contexts/my-user-context.svelte';
+  import { appTitle } from '@/stores/app-store';
 
   const userContext = getContext<MyUserContext>('myUserContext');
   let isOffline = $derived(userContext.isOffline);
