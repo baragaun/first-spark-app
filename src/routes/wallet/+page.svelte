@@ -11,6 +11,7 @@
   import { uploadedCard } from '@/stores/uploaded-card';
   import Quagga from 'quagga';
   import Tesseract from 'tesseract.js';
+  import { m } from '@/paraglide/messages';
   // Tabs and wallet items
   let activeTab = $state<string>('Active');
   let searchQuery = $state<string>('');
@@ -156,8 +157,8 @@
   <div class="flex">
     <Wallet class=" mr-2 h-12 w-12" />
     <header class="mb-6">
-      <h1 class="text-3xl font-bold text-primary">Wallet</h1>
-      <p class="mt-2 text-muted-foreground">Your KCU token balance</p>
+      <h1 class="text-3xl font-bold text-primary">{m['wallet.title']()}</h1>
+      <p class="mt-2 text-muted-foreground">{m['wallet.subtitle']()}</p>
     </header>
   </div>
 
@@ -173,13 +174,13 @@
             value="Active"
             class="inline-flex flex-1 items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
-            Active
+            {m['wallet.active']()}
           </Tabs.Trigger>
           <Tabs.Trigger
             value="Archive"
             class="inline-flex flex-1 items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
-            Archive
+            {m['wallet.archive']()}
           </Tabs.Trigger>
         </Tabs.List>
       </Tabs.Root>
@@ -219,14 +220,14 @@
     <!-- Scrollable Wallet Items Section -->
     <div class="flex-1 overflow-y-auto">
       {#if displayedItems.length === 0}
-        <div class="py-8 text-center text-muted-foreground">Your wallet is empty</div>
+        <div class="py-8 text-center text-muted-foreground">{m['wallet.empty']()}</div>
       {/if}
       {#each displayedItems as item}
         <button
           type="button"
           class="border-borde col-span-2 flex w-full items-start justify-between border-b text-left focus:outline-none md:col-span-3"
-          onclick={() => navigateToGiftCardDetail(item.walletId)}
-          onkeydown={(e) => e.key === 'Enter' && navigateToGiftCardDetail(item.walletId)}
+          onclick={() => navigateToGiftCardDetail(item.id)}
+          onkeydown={(e) => e.key === 'Enter' && navigateToGiftCardDetail(item.id)}
         >
           <div class="mb-4 flex flex-shrink-0">
             <img
