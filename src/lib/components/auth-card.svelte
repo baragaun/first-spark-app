@@ -27,7 +27,7 @@
     </div>
   {/if}
   <CardHeader>
-    <CardTitle class="break-words text-2xl">{title}</CardTitle>
+    <CardTitle class="break-words text-2xl text-foreground">{title}</CardTitle>
     {#if description}
       <CardDescription class="break-words">
         {description}

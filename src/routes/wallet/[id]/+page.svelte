@@ -224,17 +224,17 @@
         <div class="mt-4 flex items-center gap-2">
           <Button
             size="sm"
-            class="h-8 rounded-full text-background"
+            class="h-8 rounded-full bg-primary text-primary-foreground"
             onclick={() => (isBarcodeViewOpen = true)}>{m['wallet.gift-card.zoom']()}</Button
           >
-          <Button size="sm" class="h-8 rounded-full text-background"
+          <Button size="sm" class="h-8 rounded-full bg-primary text-primary-foreground"
             >{m['wallet.gift-card.copy']()}</Button
           >
         </div>
 
         <h class="mt-4 text-xl text-black">{pin}</h>
         <p class="text-sm text-gray-400">Card PIN</p>
-        <Button size="sm" class="mt-2 h-8 rounded-full text-background"
+        <Button size="sm" class="mt-2 h-8 rounded-full bg-primary text-primary-foreground"
           >{m['wallet.gift-card.copy_pin']()}</Button
         >
       </div>
@@ -301,7 +301,7 @@
             href={$walletItemProduct.termsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            class="rounded-lg bg-primary px-8 py-2 font-semibold tracking-wide text-white shadow transition hover:bg-primary/90"
+            class="rounded-lg bg-nav px-8 py-2 font-semibold tracking-wide text-nav-foreground shadow transition hover:bg-primary/90"
             style="text-transform: uppercase; letter-spacing: 1px;"
           >
             {m['wallet.gift-card.visit_online']()}
