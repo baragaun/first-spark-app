@@ -13,6 +13,9 @@
   import MetaTags from '@/components/shared/meta-tags.svelte';
 
   let { children } = $props();
+  let hideNavBar: boolean = $derived(
+    page.url.pathname.startsWith('/marketplace/') || page.url.pathname.startsWith('/wallet/'),
+  );
 </script>
 
 <MetaTags title={$appTitle} description={$appDescription} canonicalUrl={$appCanonicalUrl} />
@@ -24,7 +27,9 @@
     <SidebarProvider>
       <AppSidebar />
       <div class="flex flex-1 flex-col">
-        <NavBar />
+        {#if !hideNavBar}
+          <NavBar />
+        {/if}
         <main class="flex flex-1 flex-col">
           {@render children?.()}
         </main>

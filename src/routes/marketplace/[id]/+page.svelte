@@ -137,7 +137,7 @@
           m['marketplace.add_to_cart_success']({
             amount: `$${denomination.amount / 1000}`,
             vendor: vendor.name || m['marketplace.buy_gift_card'](),
-          })
+          }),
         );
         // Optionally navigate to cart page or update cart count somewhere
         goto('/cart'); // Navigate to shopping cart page after adding
@@ -222,9 +222,13 @@
 
     {#if selectedTab === 'buy'}
       <!-- Brand and Amounts (Buy Tab) -->
-      <div class="text-500 mb-2 text-sm text-secondary-foreground">{m['marketplace.brand_label']()}</div>
+      <div class="text-500 mb-2 text-sm text-secondary-foreground">
+        {m['marketplace.brand_label']()}
+      </div>
       <div class="mb-4 text-xl font-bold">{$vendor.name}</div>
-      <div class="text-500 mb-2 text-sm text-secondary-foreground">{m['marketplace.gift_card_amount_label']()}</div>
+      <div class="text-500 mb-2 text-sm text-secondary-foreground">
+        {m['marketplace.gift_card_amount_label']()}
+      </div>
       <div class="space-y-4">
         {#each getDenominations($giftCardProduct) as denomination}
           <button
@@ -235,7 +239,9 @@
               e.key === 'Enter' && addDenominationToCart(denomination, $giftCardProduct, $vendor)}
           >
             <span class="flex items-end gap-1">
-              <span class="align-bottom text-base text-muted-foreground">{m['marketplace.usd']()}</span>
+              <span class="align-bottom text-base text-muted-foreground"
+                >{m['marketplace.usd']()}</span
+              >
               <span class="text-4xl">{denomination.amount / 1000}</span>
             </span>
           </button>

@@ -25,6 +25,7 @@
     AlertDialogHeader,
     AlertDialogTitle,
   } from '@/components/ui/alert-dialog';
+  import { m } from '@/paraglide/messages';
 
   let cartItems: ShoppingCartItem[] = [];
   $: subtotal = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
@@ -175,10 +176,9 @@
 
 <div class="flex min-h-screen flex-col bg-background font-sans antialiased">
   <!-- Top Bar -->
-  <header
-    class="relative flex items-center justify-center bg-foreground p-4 text-background shadow-md"
-  >
-    <h1 class="text-lg font-semibold">Shopping Cart</h1>
+  <header class="mb-6 px-3 pt-3">
+    <h1 class="text-3xl font-bold text-foreground">{m['cart.title']()}</h1>
+    <p class="mt-2 text-muted-foreground">{m['cart.subtitle']()}</p>
   </header>
 
   <div class="container mx-auto flex-1 px-4 py-6">
@@ -187,10 +187,10 @@
       <div
         class="grid grid-cols-4 gap-4 border-b border-muted-foreground pb-2 text-sm font-medium text-muted-foreground md:grid-cols-6"
       >
-        <div class="col-span-2 text-center text-base md:col-span-3">Product</div>
-        <div class="text-center text-base">Quantity</div>
+        <div class="col-span-2 text-center text-base md:col-span-3">{m['cart.product']()}</div>
+        <div class="text-center text-base">{m['cart.quantity']()}</div>
         <div class="text-center text-base">
-          Amount
+          {m['cart.amount']()}
           <span class="currency text-xs md:block">(USD)</span>
         </div>
       </div>
@@ -211,7 +211,7 @@
               />
             </div>
             <div class="flex flex-col">
-              <span class="text-base font-medium text-primary"
+              <span class="text-base font-medium text-foreground"
                 >{'$' + item.price / 1000 + ' Gift card to ' + vendor?.name}</span
               >
               <Button
@@ -220,7 +220,7 @@
                 class="mt-1 h-6 w-fit rounded-full border-accent px-2 text-xs text-accent hover:bg-accent hover:text-accent-foreground"
                 onclick={() => removeItem(item.id || '')}
               >
-                Remove
+                {m['cart.remove']()}
               </Button>
             </div>
           </div>
@@ -233,7 +233,7 @@
             >
               <Minus class="h-4 w-4" />
             </Button>
-            <span class="text-primary">{item.quantity || 0}</span>
+            <span class="text-foreground">{item.quantity || 0}</span>
             <Button
               variant="outline"
               size="icon"
@@ -243,23 +243,25 @@
               <Plus class="h-4 w-4" />
             </Button>
           </div>
-          <div class="text-center text-primary">
+          <div class="text-center text-foreground">
             {(item.totalPrice / 1000 || 0).toFixed(2)}
           </div>
         </div>
       {/each}
       <!-- Total Section -->
-      <div class="mr-4 py-4 text-right text-primary">
-        <span class="text-lg font-bold">Total: USD {(subtotal / 1000).toFixed(2)}</span>
+      <div class="mr-4 py-4 text-right text-foreground">
+        <span class="text-lg font-bold"
+          >{m['cart.total']()}: USD {(subtotal / 1000).toFixed(2)}</span
+        >
       </div>
     {:else}
-      <div class="py-8 text-center text-muted-foreground">Your cart is empty</div>
+      <div class="py-8 text-center text-muted-foreground">{m['cart.empty']()}</div>
     {/if}
 
     <div>
       <Button
         class="mx-auto mb-6 block rounded-full border border-foreground bg-background text-foreground"
-        onclick={() => goto(`/marketplace`)}>Continue shopping</Button
+        onclick={() => goto(`/marketplace`)}>{m['cart.continue_shopping']()}</Button
       >
     </div>
 
@@ -269,13 +271,13 @@
       onclick={placeOrder}
       disabled={cartItems.length === 0}
     >
-      PLACE ORDER
+      {m['cart.place_order']()}
     </Button>
     <AlertDialog open={showOrderPlacedDialog}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Order Placed!</AlertDialogTitle>
-          <AlertDialogDescription>Your order has been placed successfully.</AlertDialogDescription>
+          <AlertDialogTitle>{m['cart.order_placed']()}</AlertDialogTitle>
+          <AlertDialogDescription>{m['cart.order_placed_description']()}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogAction
@@ -283,7 +285,7 @@
               showOrderPlacedDialog = false;
             }}
           >
-            OK
+            {m['cart.okay']()}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
