@@ -24,6 +24,8 @@
     return $products.find((p) => p.id === walletCardId) || null;
   });
 
+  console.log("walletItemProduct", $walletItemProduct);
+
   // const vendor = derived(
   //   [vendorsStore, walletItemProduct],
   //   ([$vendors, $product]) => {
@@ -103,7 +105,7 @@
 {:else if error}
   <Card.Root class="mx-auto mt-8 max-w-md">
     <Card.Header>
-      <Card.Title>Error</Card.Title>
+      <Card.Title>{m['wallet.gift-card.error']()}</Card.Title>
     </Card.Header>
     <Card.Content>
       <p>{error}</p>
@@ -172,14 +174,14 @@
         style="color: {selectedTab === 'use'
           ? 'var(--primary)'
           : '#888'}; border-color: {selectedTab === 'use' ? 'var(--primary)' : 'transparent'};"
-        onclick={() => (selectedTab = 'use')}>{m['wallet.gift-card.Use']()}</button
+        onclick={() => (selectedTab = 'use')}>{m['wallet.gift-card.use']()}</button
       >
       <button
         class="flex-1 border-b-2 py-2 font-medium"
         style="color: {selectedTab === 'info'
           ? 'var(--primary)'
           : '#888'}; border-color: {selectedTab === 'info' ? 'var(--primary)' : 'transparent'};"
-        onclick={() => (selectedTab = 'info')}>{m['wallet.gift-card.Info']()}</button
+        onclick={() => (selectedTab = 'info')}>{m['wallet.gift-card.info']()}</button
       >
       <button
         class="flex-1 border-b-2 py-2 font-medium"
