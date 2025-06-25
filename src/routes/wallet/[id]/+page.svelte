@@ -12,6 +12,7 @@
   import { walletItemsStore } from '@/stores/wallet-store';
   import BarcodeView from './barcode-view.svelte';
   import { downloadPdf } from '@/utils/pdf-utils';
+  import { m } from '@/paraglide/messages';
 
   // Add a placeholder for user avatar (replace with real user data if available)
   const userAvatarUrl = 'https://randomuser.me/api/portraits/men/32.jpg';
@@ -86,7 +87,7 @@
       <ArrowLeft class="h-6 w-6" />
     {/if}
   </button>
-  <span class="text-lg font-semibold">Gift Card</span>
+  <span class="text-lg font-semibold">{m['wallet.gift-card.title']()}</span>
   <img src={userAvatarUrl} alt="User" class="h-8 w-8 rounded-full object-cover" />
 </div>
 
@@ -96,7 +97,7 @@
       <div
         class="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"
       ></div>
-      <p class="mt-2 text-muted-foreground">Loading gift card details...</p>
+      <p class="mt-2 text-muted-foreground">{m['wallet.gift-card.loading']()}</p>
     </div>
   </div>
 {:else if error}
@@ -108,7 +109,7 @@
       <p>{error}</p>
     </Card.Content>
     <Card.Footer>
-      <Button href="/marketplace">Return to Marketplace</Button>
+      <Button href="/marketplace">{m['wallet.gift-card.return_to_marketplace']()}</Button>
     </Card.Footer>
   </Card.Root>
 {:else if isBarcodeViewOpen}
@@ -131,7 +132,7 @@
       <div class="flex gap-2">
         <div class="flex flex-col items-center">
           <Button variant="ghost" size="icon"><Gift aria-label="Gift" /></Button>
-          <span class="text-xs text-gray-500">Gift</span>
+          <span class="text-xs text-gray-500">{m['wallet.gift-card.gift']()}</span>
         </div>
         <div class="flex flex-col items-center">
           <Button
@@ -141,17 +142,17 @@
             target="_blank"
             rel="noopener noreferrer"><ExternalLink aria-label="Brand" /></Button
           >
-          <span class="text-xs text-gray-500">Brand</span>
+          <span class="text-xs text-gray-500">{m['wallet.gift-card.brand']()}</span>
         </div>
         <div class="flex flex-col items-center">
           <Button variant="ghost" size="icon" onclick={handlePrintPdf}
             ><Printer aria-label="Print" /></Button
           >
-          <span class="text-xs text-gray-500">Print</span>
+          <span class="text-xs text-gray-500">{m['wallet.gift-card.print']()}</span>
         </div>
         <div class="flex flex-col items-center">
           <Button variant="ghost" size="icon"><Archive aria-label="Archive" /></Button>
-          <span class="text-xs text-gray-500">Archive</span>
+          <span class="text-xs text-gray-500">{m['wallet.gift-card.archive']()}</span>
         </div>
       </div>
       <span class="ml-2 flex flex-grow items-center justify-end">
@@ -171,21 +172,21 @@
         style="color: {selectedTab === 'use'
           ? 'var(--primary)'
           : '#888'}; border-color: {selectedTab === 'use' ? 'var(--primary)' : 'transparent'};"
-        onclick={() => (selectedTab = 'use')}>Use</button
+        onclick={() => (selectedTab = 'use')}>{m['wallet.gift-card.Use']()}</button
       >
       <button
         class="flex-1 border-b-2 py-2 font-medium"
         style="color: {selectedTab === 'info'
           ? 'var(--primary)'
           : '#888'}; border-color: {selectedTab === 'info' ? 'var(--primary)' : 'transparent'};"
-        onclick={() => (selectedTab = 'info')}>Info</button
+        onclick={() => (selectedTab = 'info')}>{m['wallet.gift-card.Info']()}</button
       >
       <button
         class="flex-1 border-b-2 py-2 font-medium"
         style="color: {selectedTab === 'brand'
           ? 'var(--primary)'
           : '#888'}; border-color: {selectedTab === 'brand' ? 'var(--primary)' : 'transparent'};"
-        onclick={() => (selectedTab = 'brand')}>Brand</button
+        onclick={() => (selectedTab = 'brand')}>{m['wallet.gift-card.brand']()}</button
       >
     </div>
 
@@ -208,7 +209,7 @@
           href="https://www.google.com"
           target="_blank"
           rel="noopener noreferrer"
-          class="text-primary underline">Look up balance</a
+          class="text-primary underline">{m['wallet.gift-card.look_up_balance']()}</a
         >
 
         <!-- Card Code and PIN -->
@@ -222,14 +223,14 @@
           <Button
             size="sm"
             class="h-8 rounded-full text-background"
-            onclick={() => (isBarcodeViewOpen = true)}>Zoom</Button
+            onclick={() => (isBarcodeViewOpen = true)}>{m['wallet.gift-card.zoom']()}</Button
           >
-          <Button size="sm" class="h-8 rounded-full text-background">Copy</Button>
+          <Button size="sm" class="h-8 rounded-full text-background">{m['wallet.gift-card.copy']()}</Button>
         </div>
 
         <h class="mt-4 text-xl text-black">{pin}</h>
         <p class="text-sm text-gray-400">Card PIN</p>
-        <Button size="sm" class="mt-2 h-8 rounded-full text-background">Copy PIN</Button>
+        <Button size="sm" class="mt-2 h-8 rounded-full text-background">{m['wallet.gift-card.copy_pin']()}</Button>
       </div>
     {/if}
 
@@ -238,7 +239,7 @@
         {#if $walletItemProduct.instructionsEn}
           <div class="mb-6">
             <h2 class="text-400 mb-2 text-lg font-semibold text-secondary-foreground">
-              How To Redeem
+              {m['wallet.gift-card.how_to_redeem']()}
             </h2>
             {#if $walletItemProduct.instructionsEn?.trim().startsWith('<')}
               <p class="mb-2">
@@ -254,7 +255,7 @@
         {#if $walletItemProduct.termsEn}
           <div>
             <h2 class="text-400 mb-2 text-lg font-semibold text-secondary-foreground">
-              Terms And Conditions
+              {m['wallet.gift-card.terms_and_conditions']()}
             </h2>
             {#if $walletItemProduct.instructionsEn?.trim().startsWith('<')}
               <p class="mb-2">
@@ -297,7 +298,7 @@
             class="rounded-lg bg-primary px-8 py-2 font-semibold tracking-wide text-white shadow transition hover:bg-primary/90"
             style="text-transform: uppercase; letter-spacing: 1px;"
           >
-            VISIT ONLINE
+           {m['wallet.gift-card.visit_online']()}
           </a>
         {/if}
       </div>

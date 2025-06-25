@@ -281,5 +281,51 @@
     "how_to_redeem": "How To Redeem",
     "terms_and_conditions": "Terms And Conditions",
     "visit_online": "VISIT ONLINE"
+  },
+  "cart": {
+    "title": "Shopping Cart",
+    "empty": "Your cart is empty",
+    "continue_shopping": "Continue shopping",
+    "total": "Total",
+    "remove": "Remove",
+    "product": "Product",
+    "amount": "Amount",
+    "quantity": "Quantity",
+    "place_order": "PLACE ORDER",
+    "okay": "OKAY",
+    "order_placed": "Order placed!",
+    "order_placed_description": "Your order has been placed successfully."
+  },
+  "wallet": {
+    "title": "Wallet",
+    "subtitle": "Your KCU token balance",
+    "empty": "Your wallet is empty",
+    "add_funds": "Add funds",
+    "loading": "Loading wallet...",
+    "active": "Active",
+    "archive": "Archive",
+    "search": "Search wallet",
+    "gift-card": {
+      "title": "Gift Card",
+      "subtitle": "Your gift cards",
+      "loading": "Loading gift cards...",
+      "error": "Failed to load gift cards",
+      "return_to_marketplace": "Return to Marketplace",
+      "gift": "Gift",
+      "brand": "Brand",
+      "amount": "Amount",
+      "print": "Print",
+      "archive": "Archived",
+      "Use": "Use",
+      "Info": "Info",
+      "look_up_balance": "Look up balance",
+      "zoom": "Zoom",
+      "copy": "Copy",
+      "copy_pin": "Copy PIN",
+      "how_to_redeem": "How To Redeem",
+      "terms_and_conditions": "Terms And Conditions",
+      "visit_online": "VISIT ONLINE"
+
+    }
   }
 }
