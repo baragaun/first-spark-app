@@ -73,12 +73,12 @@
     --popover-background: var(--kcu-white);
 
     --card: var(--kcu-white);
-    --card-foreground: var(--kcu-glacier);
+    --card-foreground: var(--kcu-black);
 
     --border: var(--kcu-juniper);
     --input: var(--kcu-white); /* Updated from a darker value to be more visible */
 
-    --primary: var(--kcu-glacier);
+    --primary: var(--kcu-black);
     --primary-foreground: var(--kcu-white);
 
     --secondary: var(--kcu-tangerine);
