@@ -87,7 +87,7 @@
     --accent: var(--kcu-juniper);
     --accent-foreground: var(--kcu-white);
 
-    --destructive: var(--kcu-avocado); /* Updated to be more prominent */
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: var(--kcu-white);
 
     --ring: var(--kcu-glacier);

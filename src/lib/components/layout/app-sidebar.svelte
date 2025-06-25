@@ -102,7 +102,7 @@
             <div class="flex aspect-square size-8 items-center justify-center rounded-lg">
               <img src={$headerIcon} alt="First Spark Logo" class="size-8" />
             </div>
-            <span class="font-lexend truncate ps-2 text-xl font-bold text-primary">
+            <span class="font-lexend truncate ps-2 text-xl font-bold text-foreground">
               {$appTitle}
             </span>
           </div>
