@@ -284,6 +284,7 @@
   },
   "cart": {
     "title": "Shopping Cart",
+    "subtitle": "Complete your order now",
     "empty": "Your cart is empty",
     "continue_shopping": "Continue shopping",
     "total": "Total",

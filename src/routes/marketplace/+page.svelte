@@ -8,6 +8,7 @@
   import type { GiftCardProduct, Vendor, ProductCategory } from '@baragaun/bg-node-client';
   import placeholderImage from '../../assets/images/placeholder.png';
   import { goto } from '$app/navigation';
+  import { m } from '@/paraglide/messages';
   import {
     giftCardProductsStore,
     vendorsStore,
@@ -15,7 +16,6 @@
     dataLoaded,
   } from '$lib/stores/marketplace-store';
   import { IsMobile } from '$lib/hooks/is-mobile.svelte';
-  import { m } from '@/paraglide/messages';
 
   // Initialize the mobile detector
   const isMobile = new IsMobile();
@@ -64,7 +64,7 @@
 
 <div class="container mx-auto px-4 py-6">
   <header class="mb-6">
-    <h1 class="text-3xl font-bold text-primary">{m['marketplace.title']()}</h1>
+    <h1 class="text-3xl font-bold text-foreground">{m['marketplace.title']()}</h1>
     <p class="mt-2 text-muted-foreground">{m['marketplace.subtitle']()}</p>
   </header>
 
