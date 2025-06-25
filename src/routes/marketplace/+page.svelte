@@ -63,20 +63,20 @@
 
 <div class="container mx-auto px-4 py-6">
   <header class="mb-6">
-    <h1 class="text-3xl font-bold text-primary">Marketplace</h1>
-    <p class="mt-2 text-muted-foreground">Discover and connect with our partner services</p>
+    <h1 class="text-3xl font-bold text-primary">{m['marketplace.title']()}</h1>
+    <p class="mt-2 text-muted-foreground">{m['marketplace.subtitle']()}</p>
   </header>
 
   <div class="mb-6 flex items-center gap-4">
     <div class="relative flex-1">
       <!-- Gradient border wrapper -->
       <div
-        class="relative rounded-full bg-gradient-to-r from-kcu-orange via-kcu-glacier to-kcu-plum p-[2px]"
+        class="relative rounded-full bg-gradient-to-r from-kcu-glacier via-kcu-juniper to-kcu-lime p-[2px]"
       >
         <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           type="search"
-          placeholder="Search marketplace"
+          placeholder={m['marketplace.search_placeholder']()}
           class="search-input-override w-full rounded-full border-0 bg-background px-3 py-2 pl-10 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
           bind:value={searchQuery}
         />
@@ -86,13 +86,13 @@
     <DropdownMenu.Root>
       <DropdownMenu.Trigger>
         <Button variant="outline" class="flex items-center gap-2">
-          {selectedCategory === 'All' ? 'All' : selectedCategory.labelEn}
+          {selectedCategory === 'All' ? m['marketplace.all']() : selectedCategory.labelEn}
           <ChevronDown class="h-4 w-4" />
         </Button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Content class="max-h-[300px] overflow-y-auto bg-background">
         <DropdownMenu.Item onclick={() => (selectedCategory = 'All')} class="cursor-pointer">
-          All
+          {m['marketplace.all']()}
           {#if selectedCategory === 'All'}
             <DropdownMenu.Shortcut>✓</DropdownMenu.Shortcut>
           {/if}
@@ -121,7 +121,7 @@
           class="group flex flex-col items-center border-0 bg-transparent p-0 text-left transition-all duration-300 hover:scale-105 hover:opacity-90"
           onclick={() => navigateToGiftCardDetail(giftCardProduct.id)}
           onkeydown={(e) => e.key === 'Enter' && navigateToGiftCardDetail(giftCardProduct.id)}
-          aria-label={`View ${vendor.name} gift card details`}
+          aria-label={m['marketplace.view_gift_card_aria']({ vendor: vendor.name })}
         >
           <div
             class="mb-2 aspect-[4/3] w-full overflow-hidden rounded-xl bg-card shadow-lg transition-all duration-300 group-hover:shadow-xl"

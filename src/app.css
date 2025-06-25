@@ -60,41 +60,41 @@
     --kcu-wood: 318.1 37.6% 27.6%; /* #5b3427 — Wood — *estimate* using similar deep brown */
 
     --background: var(--kcu-white);
-    --foreground: var(--kcu-blackberry);
+    --foreground: var(--kcu-glacier);
 
     --muted: 240 4.8% 95.9%;
-    --muted-foreground: var(--kcu-plum);
+    --muted-foreground: var(--kcu-glacier);
 
     --popover: var(var(--kcu-juniper)) %;
-    --popover-foreground: var(--kcu-plum);
+    --popover-foreground: var(--kcu-glacier);
     --popover-background: var(--kcu-white);
 
     --card: var(--kcu-white);
-    --card-foreground: var(--kcu-plum);
+    --card-foreground: var(--kcu-glacier);
 
-    --border: var(--kcu-avocado);
+    --border: var(--kcu-juniper);
     --input: var(--kcu-white); /* Updated from a darker value to be more visible */
 
-    --primary: var(--kcu-blackberry);
-    --primary-foreground: var(--kcu-tangerine);
+    --primary: var(--kcu-glacier);
+    --primary-foreground: var(--kcu-white);
 
     --secondary: var(--kcu-tangerine);
-    --secondary-foreground: var(--kcu-avocado);
+    --secondary-foreground: var(--kcu-juniper);
 
-    --accent: var(--kcu-plum);
+    --accent: var(--kcu-juniper);
     --accent-foreground: var(--kcu-white);
 
     --destructive: var(--kcu-avocado); /* Updated to be more prominent */
     --destructive-foreground: var(--kcu-white);
 
-    --ring: var(--kcu-plum);
+    --ring: var(--kcu-glacier);
 
     --sidebar-background: var(--kcu-white);
     --sidebar-foreground: var(--kcu-black);
     --sidebar-primary: var(--kcu-glacier);
     --sidebar-primary-foreground: var(--kcu-avocado);
     --sidebar-accent: var(--kcu-white);
-    --sidebar-accent-foreground: var(--kcu-plum);
+    --sidebar-accent-foreground: var(--kcu-glacier);
     --sidebar-border: var(--kcu-blackberry);
     --sidebar-ring: var(--kcu-juniper);
   }

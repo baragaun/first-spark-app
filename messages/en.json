@@ -253,5 +253,33 @@
     "buttonText": "Submit",
     "successText": "Success!",
     "loadingText": "Processing..."
+  },
+  "marketplace": {
+    "title": "Marketplace",
+    "subtitle": "Discover and connect with our partner services",
+    "search_placeholder": "Search marketplace",
+    "all": "All",
+    "view_gift_card_aria": "View {vendor} gift card details",
+    "buy_gift_card": "Buy Gift Card",
+    "loading_gift_card_details": "Loading gift card details...",
+    "error_title": "Error",
+    "error_gift_card_not_found": "Gift card not found",
+    "error_failed_to_load": "Failed to load gift card details",
+    "return_to_marketplace": "Return to Marketplace",
+    "tabs": {
+      "buy": "Buy",
+      "info": "Info",
+      "brand": "Brand"
+    },
+    "brand_label": "Brand",
+    "gift_card_amount_label": "Gift Card Amount",
+    "usd": "USD",
+    "add_to_cart_success": "${amount} ${vendor} added to cart!",
+    "add_to_cart_error": "Failed to add item to cart: {reason}",
+    "add_to_cart_unexpected_error": "An unexpected error occurred while adding to cart.",
+    "add_to_cart_no_object": "Failed to add item to cart: No object returned.",
+    "how_to_redeem": "How To Redeem",
+    "terms_and_conditions": "Terms And Conditions",
+    "visit_online": "VISIT ONLINE"
   }
 }

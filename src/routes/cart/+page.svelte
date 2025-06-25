@@ -16,10 +16,20 @@
   import { toast } from 'svelte-sonner';
   import placeholderImage from '../../assets/images/placeholder.png';
   import { giftCardProductsStore, vendorsStore, dataLoaded } from '$lib/stores/marketplace-store';
+  import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+  } from '@/components/ui/alert-dialog';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
 
   let cartItems: ShoppingCartItem[] = [];
   $: subtotal = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
+  let showOrderPlacedDialog = false;
 
   // Function to combine items with same productId
   function combineDuplicateItems(items: ShoppingCartItem[]): ShoppingCartItem[] {
@@ -89,8 +99,6 @@
   }
 
   async function placeOrder() {
-    alert('Order Placed!');
-
     let orderItems: PurchaseOrderItem[] = [];
     for (const item of cartItems) {
       let orderItem: PurchaseOrderItem = {
@@ -110,15 +118,18 @@
     let item = cartItems[0];
 
     const order: PurchaseOrder = {
+      id: '',
       shoppingCartId: myUserContext.myUserId!,
       sumItemPrice: item.price,
       totalPrice: item.totalPrice,
       vat: 0,
       items: orderItems,
       userId: '',
-      createdAt: ''
+      createdAt: '',
     };
     await marketplaceContext.createPurchaseOrder(order);
+
+    showOrderPlacedDialog = true;
   }
 
   function goBack() {
@@ -256,11 +267,28 @@
 
     <!-- Place Order Button -->
     <Button
-      class="w-full py-3 text-lg font-semibold text-background"
-      disabled={!$shoppingCart?.items || $shoppingCart.items.length === 0}
+      class="w-full rounded-full bg-primary py-3 text-lg font-bold text-primary-foreground hover:bg-primary/90"
       onclick={placeOrder}
+      disabled={cartItems.length === 0}
     >
       PLACE ORDER
     </Button>
+    <AlertDialog open={showOrderPlacedDialog}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Order Placed!</AlertDialogTitle>
+          <AlertDialogDescription>Your order has been placed successfully.</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogAction
+            onclick={() => {
+              showOrderPlacedDialog = false;
+            }}
+          >
+            OK
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   </div>
 </div>

@@ -376,7 +376,7 @@
 
 <form method="POST" id="sign-in-form" use:enhance>
   <AuthCard title={m['signin.title']()} description={getCurrentStepDescription()}>
-    <div class="space-y-4">
+    <div class="w-full space-y-4">
       {#if step === 1}
         <EmailFormInput
           {form}
@@ -391,10 +391,11 @@
           placeholder={m['signin.password_placeholder']()}
         />
         <div
+          class="w-full overflow-x-hidden"
           use:turnstile
           turnstile-sitekey={env.PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY}
           turnstile-theme="auto"
-          turnstile-size="flexible"
+          turnstile-size="normal"
           turnstile-language={getLocale()}
           turnstile-response-field-name="turnstile"
           turnstile-response-field
@@ -406,7 +407,7 @@
           buttonText={m['signin.buttons.signin']()}
           loadingText={m['signin.buttons.Signing_in']()}
         />
-        <div class="flex justify-between text-sm">
+        <div class="flex flex-col justify-between gap-2 text-sm sm:flex-row">
           <Button variant="link" disabled={!$formData.ident} onclick={() => toggleAuthType()}>
             {m['signin.buttons.signin_with_token']()}
           </Button>
@@ -431,7 +432,7 @@
           buttonText={m['signin.buttons.verify']()}
           loadingText={m['signin.buttons.verifying']()}
         />
-        <div class="flex justify-between text-sm">
+        <div class="flex flex-col justify-between gap-2 text-sm sm:flex-row">
           <Button variant="link" onclick={async () => await toggleAuthType()}>
             {m['signin.buttons.signin_with_password']()}
           </Button>
@@ -440,7 +441,7 @@
           </Button>
         </div>
       {/if}
-      <div class="mt-4 text-center text-sm">
+      <div class="mt-4 break-words text-center text-sm">
         {m['signin.have_account']({ title: $appTitle })}
         <a href="/signup" class="underline"> {m['signin.buttons.signup']()} </a>
       </div>
