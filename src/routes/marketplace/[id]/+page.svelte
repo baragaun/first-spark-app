@@ -239,9 +239,7 @@
               e.key === 'Enter' && addDenominationToCart(denomination, $giftCardProduct, $vendor)}
           >
             <span class="flex items-end gap-1">
-              <span class="align-bottom text-base text-muted-foreground"
-                >{m['marketplace.usd']()}</span
-              >
+              <span class="align-bottom text-base text-gray-400">{m['marketplace.usd']()}</span>
               <span class="text-4xl">{denomination.amount / 1000}</span>
             </span>
           </button>
