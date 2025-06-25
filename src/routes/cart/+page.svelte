@@ -178,10 +178,9 @@
 
 <div class="flex min-h-screen flex-col bg-background font-sans antialiased">
   <!-- Top Bar -->
-  <header
-    class="relative flex items-center justify-center bg-foreground p-4 text-background shadow-md"
-  >
-    <h1 class="text-lg font-semibold">{m['cart.title']()}</h1>
+  <header class="px-4 py-6">
+    <h1 class="text-3xl font-bold text-foreground">{m['cart.title']()}</h1>
+    <p class="mt-2 text-muted-foreground">{m['cart.subtitle']()}</p>
   </header>
 
   <div class="container mx-auto flex-1 px-4 py-6">
@@ -214,7 +213,7 @@
               />
             </div>
             <div class="flex flex-col">
-              <span class="text-base font-medium text-primary"
+              <span class="text-base font-medium text-foreground"
                 >{'$' + item.price / 1000 + ' Gift card to ' + vendor?.name}</span
               >
               <Button
@@ -236,7 +235,7 @@
             >
               <Minus class="h-4 w-4" />
             </Button>
-            <span class="text-primary">{item.quantity || 0}</span>
+            <span class="text-foreground">{item.quantity || 0}</span>
             <Button
               variant="outline"
               size="icon"
@@ -246,13 +245,13 @@
               <Plus class="h-4 w-4" />
             </Button>
           </div>
-          <div class="text-center text-primary">
+          <div class="text-center text-foreground">
             {(item.totalPrice / 1000 || 0).toFixed(2)}
           </div>
         </div>
       {/each}
       <!-- Total Section -->
-      <div class="mr-4 py-4 text-right text-primary">
+      <div class="mr-4 py-4 text-right text-foreground">
         <span class="text-lg font-bold"
           >{m['cart.total']()}: USD {(subtotal / 1000).toFixed(2)}</span
         >
@@ -264,10 +263,8 @@
     <div>
       <Button
         class="mx-auto mb-6 block rounded-full border border-foreground bg-background text-foreground"
-        onclick={() => goto(`/marketplace`)}
+        onclick={() => goto(`/marketplace`)}>{m['cart.continue_shopping']()}</Button
       >
-        {m['cart.continue_shopping']()}
-      </Button>
     </div>
 
     <!-- Place Order Button -->
@@ -282,9 +279,7 @@
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{m['cart.order_placed']()}</AlertDialogTitle>
-          <AlertDialogDescription>
-            {m['cart.order_placed_description']()}
-          </AlertDialogDescription>
+          <AlertDialogDescription>{m['cart.order_placed_description']()}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogAction

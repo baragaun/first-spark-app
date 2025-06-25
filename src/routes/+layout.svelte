@@ -25,7 +25,8 @@
   // Check if current route is marketplace detail page
   let showNavBar = $derived(
     !page.url.pathname.startsWith('/marketplace/') &&
-      !page.url.pathname.startsWith('/wallet/upload-card'),
+      !page.url.pathname.startsWith('/wallet/upload-card') &&
+      !page.url.pathname.startsWith('/wallet/'),
   );
 
   onMount(() => {

@@ -284,6 +284,7 @@
   },
   "cart": {
     "title": "Carrito de compras",
+    "subtitle": "Completa tu pedido ahora",
     "empty": "Tu carrito está vacío",
     "continue_shopping": "Continuar comprando",
     "total": "Total",

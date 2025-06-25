@@ -80,7 +80,7 @@
 
 <!-- Header Bar -->
 <div
-  class="flex items-center justify-between rounded-b-lg bg-foreground px-4 py-3 text-background shadow"
+  class="flex items-center justify-between rounded-b-lg bg-nav px-4 py-3 text-nav-foreground shadow"
 >
   <button onclick={backAndClose} class="flex items-center">
     {#if isBarcodeViewOpen}
