@@ -69,7 +69,7 @@ export async function downloadPdf(
     positionY += topPadding;
 
     // Add barcode image using barcodeapi.org
-    const barcodeFormat = 'code128'; // or 'qr' if you want QR support
+    const barcodeFormat = walletItemProduct.barcodeFormat ?? 'code128';
     const barcodeApiUrl = `https://barcodeapi.org/api/${barcodeFormat}/${encodeURIComponent(code)}`;
     const resp = await fetch(barcodeApiUrl);
     const blob = await resp.blob();
@@ -79,8 +79,21 @@ export async function downloadPdf(
       reader.onerror = (e) => reject(e);
       reader.readAsDataURL(blob);
     });
-    doc.addImage(barcodeDataUrl, 'PNG', pageWidth / 2 - 150, positionY, 300, 80); // larger barcode
-    positionY = positionY + 80 + topPadding;
+    let barcodeHeight = 200;
+    let barcodeWidth = 200;
+    if (walletItemProduct.barcodeFormat == null || walletItemProduct.barcodeFormat == undefined) {
+      barcodeHeight = 80;
+      barcodeWidth = 300;
+    }
+    doc.addImage(
+      barcodeDataUrl,
+      'PNG',
+      pageWidth / 2 - barcodeWidth / 2,
+      positionY,
+      barcodeWidth,
+      barcodeHeight,
+    ); // larger barcode
+    positionY = positionY + barcodeHeight + topPadding;
 
     let container = document.createElement('div');
     container.style.width = `${pageWidth.toString()}px`;
@@ -95,10 +108,10 @@ export async function downloadPdf(
     // Add instructions if available
     if (walletItemProduct.instructionsEn) {
       doc.setFontSize(12);
-      doc.setTextColor('#4E5E31');
       doc.text('How to Reedem', leftPadding, positionY);
       positionY += topPadding;
       doc.setFontSize(10);
+      doc.setTextColor('#808080');
       const instructionLines = doc.splitTextToSize(walletItemProduct.instructionsEn, pageWidth);
       if (walletItemProduct.instructionsEn.startsWith('<')) {
         const heightPx = measureHtmlContentHeight(walletItemProduct.instructionsEn, pageWidth);
@@ -117,7 +130,6 @@ export async function downloadPdf(
         });
         positionY = positionY + heightPx + topPadding;
       } else {
-        doc.setTextColor('#8A1B61');
         doc.text(instructionLines, leftPadding, positionY, { align: 'left', maxWidth: pageWidth });
         positionY = positionY + instructionLines.length * 10 + topPadding;
       }
@@ -126,10 +138,11 @@ export async function downloadPdf(
     // Add terms if available
     if (walletItemProduct.termsEn) {
       doc.setFontSize(12);
-      doc.setTextColor('#4E5E31');
+      doc.setTextColor('#000000');
       doc.text('Terms & Conditions', leftPadding, positionY);
       positionY += topPadding;
       doc.setFontSize(10);
+      doc.setTextColor('#808080');
       const termsLines = doc.splitTextToSize(walletItemProduct.termsEn, pageWidth);
       if (walletItemProduct.termsEn.startsWith('<')) {
         const heightPx = measureHtmlContentHeight(walletItemProduct.termsEn, pageWidth);
@@ -147,7 +160,6 @@ export async function downloadPdf(
         });
         positionY = positionY + heightPx + topPadding;
       } else {
-        doc.setTextColor('#8A1B61');
         doc.text(termsLines, leftPadding, positionY, { align: 'left' });
       }
     }
