@@ -9,6 +9,8 @@
   import { SidebarProvider } from '@/components/ui/sidebar';
   import MyUserProvider from '@/contexts/my-user-provider.svelte';
   import { locales, localizeHref } from '@/paraglide/runtime';
+  import { appTitle, appDescription, appCanonicalUrl } from '$lib/stores/app-store';
+  import MetaTags from '@/components/shared/meta-tags.svelte';
 
   let { children } = $props();
 </script>
