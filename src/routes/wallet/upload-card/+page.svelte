@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { uploadedCard } from '@/stores/uploaded-card';
   import { m } from '@/paraglide/messages';
+  import { Button } from '@/components/ui/button';
 
   let brand = '';
   let balance = '';
@@ -43,7 +44,7 @@
 </script>
 
 <div class="flex min-h-screen flex-col bg-background">
-  <header class="flex items-center justify-between bg-foreground px-4 py-3 text-background">
+  <header class="flex items-center justify-between bg-nav px-4 py-3 text-nav-foreground">
     <button onclick={() => history.back()} class="text-background">←</button>
     <span class="text-lg font-semibold">{m['upload_card.title']()}</span>
     <div class="h-8 w-8 rounded-full bg-gray-200"></div>
@@ -98,12 +99,9 @@
       <label for="code" class="mb-1 block text-sm text-gray-500">{m['upload_card.pin']()}</label>
       <input id="code" class="w-full rounded border px-3 py-2" bind:value={pin} placeholder="Pin" />
     </div>
-    <button
-      type="submit"
-      class="w-full rounded bg-foreground py-3 font-semibold text-background shadow"
-    >
+    <Button variant="default" class="w-full rounded py-3 font-semibold shadow">
       {m['upload_card.submit']()}
-    </button>
+    </Button>
   </form>
 </div>
 
