@@ -253,7 +253,9 @@
       {/each}
       <!-- Total Section -->
       <div class="mr-4 py-4 text-right text-primary">
-        <span class="text-lg font-bold">{m['cart.total']()}: USD {(subtotal / 1000).toFixed(2)}</span>
+        <span class="text-lg font-bold"
+          >{m['cart.total']()}: USD {(subtotal / 1000).toFixed(2)}</span
+        >
       </div>
     {:else}
       <div class="py-8 text-center text-muted-foreground">{m['cart.empty']()}</div>
@@ -262,10 +264,10 @@
     <div>
       <Button
         class="mx-auto mb-6 block rounded-full border border-foreground bg-background text-foreground"
-        onclick={() => goto(`/marketplace`)}>
-        {m['cart.continue_shopping']()}
-      </Button
+        onclick={() => goto(`/marketplace`)}
       >
+        {m['cart.continue_shopping']()}
+      </Button>
     </div>
 
     <!-- Place Order Button -->
