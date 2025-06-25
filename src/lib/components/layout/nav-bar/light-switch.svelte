@@ -22,7 +22,7 @@
           <Button
             variant="ghost"
             size={iconButton ? 'icon' : 'sm'}
-            class={`${className} text-muted-foreground hover:bg-transparent hover:text-foreground`}
+            class={`${className} text-nav-foreground hover:bg-transparent hover:text-foreground`}
             aria-label={m['light_switch.tooltip']()}
           >
             <Sun
@@ -42,7 +42,7 @@
       </Tooltip.Root>
     </Tooltip.Provider>
   </DropdownMenu.Trigger>
-  <DropdownMenu.Content class="bg-background">
+  <DropdownMenu.Content class="bg-nav-foreground">
     {#each themeOptions as option}
       <DropdownMenu.Item onclick={option.action} class="flex justify-between">
         {option.label}
