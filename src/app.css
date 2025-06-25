@@ -60,13 +60,16 @@
     --kcu-wood: 318.1 37.6% 27.6%; /* #5b3427 — Wood — *estimate* using similar deep brown */
 
     --background: var(--kcu-white);
-    --foreground: var(--kcu-glacier);
+    --foreground: var(--kcu-black);
+
+    --nav: var(--kcu-glacier);
+    --nav-foreground: var(--kcu-white);
 
     --muted: 240 4.8% 95.9%;
-    --muted-foreground: var(--kcu-glacier);
+    --muted-foreground: var(--kcu-juniper);
 
     --popover: var(var(--kcu-juniper)) %;
-    --popover-foreground: var(--kcu-glacier);
+    --popover-foreground: var(--kcu-black);
     --popover-background: var(--kcu-white);
 
     --card: var(--kcu-white);
@@ -102,6 +105,9 @@
   .dark {
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
+
+    --nav: 240 10% 3.9%;
+    --nav-foreground: 0 0% 98%;
 
     --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;

@@ -25,24 +25,22 @@
   };
 </script>
 
-<nav
-  class="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
->
+<nav class="sticky top-0 z-50 border-b bg-nav backdrop-blur supports-[backdrop-filter]:bg-nav">
   <div class="flex h-16 items-center px-4">
     <!-- Sidebar Trigger -->
-    <div class="mr-1 flex-none">
+    <div class="mr-1 flex-none text-nav-foreground">
       <Sidebar.Trigger />
     </div>
 
     <!-- Logo and App Name (Mobile Only) -->
     <div class="flex flex-1 justify-start md:justify-center">
-      <a href="/" class="flex items-center gap-2 transition-colors hover:opacity-90 md:hidden">
+      <!-- <a href="/" class="flex items-center gap-2 transition-colors hover:opacity-90 md:hidden">
         <img src="/fs-logo.svg" alt="App Logo" class="h-8 w-8" />
-      </a>
+      </a> -->
     </div>
 
     <!-- Right side items -->
-    <div class="flex flex-none items-center gap-2">
+    <div class="ml-auto flex flex-none items-center gap-2">
       <ThemeButton class="flex" />
       <LanguageButton class="flex" />
       {#if !isSignedIn}
@@ -55,7 +53,7 @@
                   size="icon"
                   onclick={() => goto('/signin')}
                   aria-label={m['nav.auth.sign_in']()}
-                  class="font-lexend text-muted-foreground hover:text-foreground"
+                  class="font-lexend text-nav-foreground hover:text-foreground"
                 >
                   <LogIn class="mr-2 h-4 w-4" />
                 </Button>
@@ -70,7 +68,7 @@
             variant="default"
             onclick={() => goto('/signup')}
             aria-label={m['nav.auth.sign_up']()}
-            class="font-lexend text-background shadow-sm hover:shadow-md"
+            class="font-lexend text-nav-foreground"
           >
             {m['nav.auth.sign_up']()}
           </Button>
