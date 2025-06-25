@@ -327,5 +327,14 @@
       "terms_and_conditions": "Terms And Conditions",
       "visit_online": "VISIT ONLINE"
     }
+  },
+  "upload_card": {
+    "title": "Upload Gift Card",
+    "brand": "Brand",
+    "balance": "Balance",
+    "barcode": "Barcode",
+    "pin": "Pin",
+    "submit": "SUBMIT",
+    "loading": "Fetching card details..."
   }
 }

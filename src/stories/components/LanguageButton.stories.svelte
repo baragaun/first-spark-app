@@ -31,6 +31,7 @@
       expect(within(document.body).getByText('English')).toBeInTheDocument();
       expect(within(document.body).getByText('हिन्दी')).toBeInTheDocument();
       expect(within(document.body).getByText('Deutsch')).toBeInTheDocument();
+      expect(within(document.body).getByText('español')).toBeInTheDocument();
     });
   }}
 >
