@@ -197,10 +197,10 @@
       <div class="flex flex-col items-center justify-center px-2 py-4">
         <div class="flex items-end justify-center">
           <p class="mr-2 text-xl text-gray-400">USD</p>
-          <span class="text-400 text-5xl font-semibold text-secondary-foreground">
+          <span class="text-400 text-5xl font-semibold text-foreground">
             {($walletItemProduct.balance / 100).toFixed(0)}
           </span>
-          <span class="text-lg font-semibold text-secondary-foreground">
+          <span class="text-lg font-semibold text-foreground">
             .{($walletItemProduct.balance / 100).toFixed(2).split('.')[1]}
           </span>
         </div>
