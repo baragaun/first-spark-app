@@ -283,7 +283,6 @@
   },
   "cart": {
     "title": "Einkaufswagen",
-    "subtitle": "Rond nu uw bestelling af",
     "empty": "Ihr Warenkorb ist leer",
     "continue_shopping": "Weiter einkaufen",
     "total": "Gesamt",
@@ -326,5 +325,14 @@
       "terms_and_conditions": "Allgemeine Geschäftsbedingungen",
       "visit_online": "ONLINE BESUCHEN"
     }
+  },
+  "upload_card": {
+    "title": "Geschenkkarte hochladen",
+    "brand": "Marke",
+    "balance": "Guthaben",
+    "barcode": "Barcode",
+    "pin": "PIN",
+    "submit": "EINREICHEN",
+    "loading": "Kartendetails werden abgerufen..."
   }
 }

@@ -327,5 +327,14 @@
       "terms_and_conditions": "Términos y condiciones",
       "visit_online": "VISITAR EN LÍNEA"
     }
+  },
+  "upload_card": {
+    "title": "Subir tarjeta de regalo",
+    "brand": "Marca",
+    "balance": "Saldo",
+    "barcode": "Código de barras",
+    "pin": "PIN",
+    "submit": "ENVIAR",
+    "loading": "Obteniendo detalles de la tarjeta..."
   }
 }

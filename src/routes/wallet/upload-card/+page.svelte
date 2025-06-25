@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { uploadedCard } from '@/stores/uploaded-card';
+  import { m } from '@/paraglide/messages';
 
   let brand = '';
   let balance = '';
@@ -44,7 +45,7 @@
 <div class="flex min-h-screen flex-col bg-background">
   <header class="flex items-center justify-between bg-foreground px-4 py-3 text-background">
     <button onclick={() => history.back()} class="text-background">←</button>
-    <span class="text-lg font-semibold">Upload Gift Card</span>
+    <span class="text-lg font-semibold">{m['upload_card.title']()}</span>
     <div class="h-8 w-8 rounded-full bg-gray-200"></div>
   </header>
 
@@ -54,7 +55,7 @@
   >
     {#if isLoading}
       <div class="mb-6 flex w-full items-center justify-center">
-        <span class="loader mr-2"></span> <span>Fetching card details...</span>
+        <span class="loader mr-2"></span> <span>{m['upload_card.loading']()}</span>
       </div>
     {/if}
     {#if imageUrl}
@@ -67,12 +68,14 @@
       </div>
     {/if}
     <div class="mb-4 w-full">
-      <label for="brand" class="mb-1 block text-sm text-gray-500">Brand</label>
+      <label for="brand" class="mb-1 block text-sm text-gray-500">{m['upload_card.brand']()}</label>
       <label for="brand" class="mb-1 block text-sm text-foreground">{brand}</label>
       <!-- <input id="brand" class="w-full rounded border px-3 py-2" bind:value={brand} placeholder="Amazon.com" /> -->
     </div>
     <div class="mb-4 w-full">
-      <label for="balance" class="mb-1 block text-sm text-gray-500">Balance</label>
+      <label for="balance" class="mb-1 block text-sm text-gray-500"
+        >{m['upload_card.balance']()}</label
+      >
       <input
         id="balance"
         class="w-full rounded border px-3 py-2"
@@ -81,7 +84,8 @@
       />
     </div>
     <div class="mb-6 w-full">
-      <label for="code" class="mb-1 block text-sm text-gray-500">Barcode</label>
+      <label for="code" class="mb-1 block text-sm text-gray-500">{m['upload_card.barcode']()}</label
+      >
       <input
         id="code"
         class="w-full rounded border px-3 py-2 font-mono tracking-widest"
@@ -91,13 +95,15 @@
       />
     </div>
     <div class="mb-6 w-full">
-      <label for="code" class="mb-1 block text-sm text-gray-500">Pin</label>
+      <label for="code" class="mb-1 block text-sm text-gray-500">{m['upload_card.pin']()}</label>
       <input id="code" class="w-full rounded border px-3 py-2" bind:value={pin} placeholder="Pin" />
     </div>
     <button
       type="submit"
-      class="w-full rounded bg-foreground py-3 font-semibold text-background shadow">SUBMIT</button
+      class="w-full rounded bg-foreground py-3 font-semibold text-background shadow"
     >
+      {m['upload_card.submit']()}
+    </button>
   </form>
 </div>
 
