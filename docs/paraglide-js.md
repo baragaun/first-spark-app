@@ -3,15 +3,16 @@
 ## Adding Messages
 
 Messages are added to the json files in the `messages` directory, there is one file per language. The locales
-are defined in `project.inlang/settings.json`, 3 are currently supported:
+are defined in `project.inlang/settings.json`, 4 are currently supported:
 
 - `en` - English (default)
 - `de` - German
 - `hi` - Hindi
+- `es` - Spanish
 
-When adding a new message, make sure to add it to all languages. If you are not a fluent speaker of a language, you 
+When adding a new message, make sure to add it to all languages. If you are not a fluent speaker of a language, you
 can machine translate the message and note the message's name in `messages/todo.txt` to be verified or corrected later
-by a fluent speaker. Alternatively, you can add `TODO` as a placeholder message and note the message's name in 
+by a fluent speaker. Alternatively, you can add `TODO` as a placeholder message and note the message's name in
 `messages/todo.txt` to be translated later.
 
 ## Compiling Messages
