@@ -327,6 +327,7 @@
     }
   },
   "upload_card": {
+    "select_brand": "Selecteer een merk",
     "title": "Geschenkkarte hochladen",
     "brand": "Marke",
     "balance": "Guthaben",

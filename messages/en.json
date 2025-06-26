@@ -329,6 +329,7 @@
     }
   },
   "upload_card": {
+    "select_brand": "Select a brand",
     "title": "Upload Gift Card",
     "brand": "Brand",
     "balance": "Balance",

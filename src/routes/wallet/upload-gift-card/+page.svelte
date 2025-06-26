@@ -56,7 +56,7 @@
   <button onclick={() => history.back()} class="flex items-center">
     <ArrowLeft class="h-6 w-6" />
   </button>
-  <span class="text-lg font-semibold">Select a Brand</span>
+  <span class="text-lg font-semibold">{m['upload_card.select_brand']()}</span>
   <img
     src={userAvatarUrl}
     alt="User"
