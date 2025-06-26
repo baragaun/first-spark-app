@@ -11,6 +11,7 @@ import {
   Vendor,
   type QueryResult,
 } from '@baragaun/bg-node-client';
+import type { ServiceRequest } from '../../../../bg-node-client/lib/fsdata/gql/graphql';
 
 let isLoading = $state(false);
 
@@ -225,9 +226,33 @@ export class MarketplaceContext {
     }
   }
 
+  async emptyMyShoppingCart(): Promise<QueryResult<void>> {
+    if (!this.client.isInitialized) {
+      console.error('MarketplaceContext.emptyMyShoppingCart: not initialized.');
+      return { error: translate(AppUiMessage.systemError) };
+    }
+    try {
+      isLoading = true;
+      const response = await this.client.operations.shoppingCart.emptyMyShoppingCart();
+      if (!response || response.error) {
+        console.error('emptyMyShoppingCart: received error.', { response });
+        return { error: response.error || translate(AppUiMessage.systemError) };
+      }
+      return response;
+    } catch (error) {
+      console.error('emptyMyShoppingCart: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return { error: translate(AppUiMessage.systemError) };
+    } finally {
+      isLoading = false;
+    }
+  }
+
   async createPurchaseOrder(
     props: PurchaseOrder, // Replace 'any' with the correct type if available
-  ): Promise<QueryResult<PurchaseOrder>> {
+  ): Promise<QueryResult<ServiceRequest>> {
     // Replace 'any' with PurchaseOrder if you have the type
     if (!this.client.isInitialized) {
       console.error('MarketplaceContext.createPurchaseOrder: not initialized.');
@@ -247,6 +272,42 @@ export class MarketplaceContext {
         stack: (error as Error).stack,
       });
       return { error: translate(AppUiMessage.systemError) };
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  async findPurchaseOrders(): Promise<PurchaseOrder[] | string | undefined> {
+    if (!this.client.isInitialized) {
+      console.error('MarketplaceContext.findPurchaseOrders: not initialized.');
+      return translate(AppUiMessage.systemError);
+    }
+    try {
+      isLoading = true;
+      const input = {
+        filter: {},
+        match: {},
+        options: { cachePolicy: CachePolicy.network },
+        queryOptions: {},
+      };
+      const response = await this.client.operations.purchaseOrder.findPurchaseOrders(
+        null,
+        null,
+        null,
+        input.queryOptions,
+        input.options,
+      );
+      if (!response || response.error || !response.objects) {
+        console.error('findPurchaseOrders: received error.', { response });
+        return response.error || translate(AppUiMessage.systemError);
+      }
+      return response.objects;
+    } catch (error) {
+      console.error('findPurchaseOrders: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return translate(AppUiMessage.systemError);
     } finally {
       isLoading = false;
     }

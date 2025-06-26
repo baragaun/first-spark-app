@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ArrowLeft, CheckCircle2, AlertCircle, Plus, Minus } from 'lucide-svelte';
+  import { Plus, Minus } from 'lucide-svelte';
   import { goto } from '$app/navigation';
   import { Button } from '$lib/components/ui/button';
   import { onMount } from 'svelte';
@@ -10,7 +10,6 @@
     type ShoppingCart,
     type PurchaseOrder,
     ShoppingCartItem,
-    PurchaseOrderItem,
   } from '@baragaun/bg-node-client';
   import { writable } from 'svelte/store';
   import { toast } from 'svelte-sonner';
@@ -26,6 +25,7 @@
     AlertDialogTitle,
   } from '@/components/ui/alert-dialog';
   import { m } from '@/paraglide/messages';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
 
   let cartItems: ShoppingCartItem[] = [];
   $: subtotal = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
@@ -99,36 +99,23 @@
   }
 
   async function placeOrder() {
-    // let orderItems: PurchaseOrderItem[] = [];
-    // for (const item of cartItems) {
-    //   let orderItem: PurchaseOrderItem = {
-    //     id: item.id,
-    //     purchaseOrderId: item.id,
-    //     shoppingCartItemId: item.shoppingCartId,
-    //     productId: item.productId,
-    //     vendorId: item.productId,
-    //     quantity: item.quantity,
-    //     price: item.price,
-    //     totalPrice: item.totalPrice,
-    //     createdAt: item.createdAt,
-    //   };
-    //   orderItems.push(orderItem);
-    // }
-
-    // let item = cartItems[0];
-
-    // const order: PurchaseOrder = {
-    //   id: item.id,
-    //   shoppingCartId: item.id,
-    //   userId: item.id,
-    //   sumItemPrice: item.price,
-    //   totalPrice: item.totalPrice,
-    //   vat: 0,
-    //   items: orderItems,
-    //   createdAt: item.createdAt,
-    // };
-    // await marketplaceContext.createPurchaseOrder(order);
-    showOrderPlacedDialog = true;
+    const order: PurchaseOrder = {
+      shoppingCartId: myUserContext.myUserId!,
+      userId: myUserContext.myUserId!,
+      sumItemPrice: subtotal,
+      totalPrice: subtotal,
+      vat: 0,
+    };
+    await marketplaceContext.createPurchaseOrder(order).then(async (result) => {
+      if (result.error) {
+        console.error('Error creating purchase order:', result.error);
+        toast.error(`Failed to create purchase order: ${result.error}`);
+      } else {
+        toast.success('Purchase order created!');
+        await marketplaceContext.emptyMyShoppingCart();
+        showOrderPlacedDialog = true;
+      }
+    });
   }
 
   function goBack() {

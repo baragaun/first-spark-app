@@ -12,6 +12,7 @@
   import Quagga from 'quagga';
   import Tesseract from 'tesseract.js';
   import { m } from '@/paraglide/messages';
+  import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
 
   // Tabs and wallet items
   let activeTab = $state<string>('Active');
@@ -19,10 +20,12 @@
   let fileInputRef: HTMLInputElement;
   let isLoading = false;
 
+
   // Load demo data on mount
   onMount(async () => {
     const res = await fetch('/wallet-data.json');
     walletItemsStore.set(await res.json());
+    loadWalletItems();
   });
 
   let displayedItems = $derived.by(() => {
@@ -39,7 +42,22 @@
     }
   });
 
-  function navigateToGiftCardDetail(walletItemId: string) {
+  async function loadWalletItems() {
+    isLoading = true;
+    const response = await marketplaceContext.findPurchaseOrders();
+    if (typeof response === 'string') {
+      console.error('Failed to load wallet items:', response);
+      return;
+    }
+    if(!response) return;
+
+    console.log('Find Purchase Orders: ', response);
+    // walletItemsStore.set(response);
+    isLoading = false;
+  }
+
+  function navigateToGiftCardDetail(walletItemId: string | null | undefined) {
+    if (!walletItemId) return;
     goto(`/wallet/${walletItemId}`);
   }
 
@@ -243,7 +261,7 @@
                 >${(item.balance / 100).toFixed(2)}</span
               >
               <span class="text-sm text-muted-foreground">
-                {new Date(item.createdAt).toLocaleDateString()}</span
+                {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : ''}</span
               >
             </div>
           </div>
