@@ -65,7 +65,7 @@
 </div>
 
 <!-- Search Bar -->
-<div class="mx-auto my-4 w-full max-w-xl px-4">
+<div class="sticky top-[56px] z-20 bg-background px-4 py-4">
   <div
     class="relative rounded-full bg-gradient-to-r from-kcu-glacier via-kcu-juniper to-kcu-lime p-[2px]"
   >
@@ -80,30 +80,36 @@
 </div>
 
 <!-- Brands Grid -->
-<div class="mx-auto w-full max-w-5xl px-4 pb-8">
-  <div
-    class="grid grid-cols-2 gap-x-2 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
-  >
-    {#each filteredProducts as product (product.id)}
-      {@const vendor = getVendorForGiftCard(product)}
-      {#if vendor}
-        <button
-          class="group flex flex-col items-center justify-center focus:outline-none"
-          onclick={() => handleBrandClick(product, vendor)}
-          onkeydown={(e) => e.key === 'Enter' && handleBrandClick(product, vendor)}
-        >
-          <img
-            src={giftCardImageDomain + '/vendors/' + vendor.logoImageSource}
-            alt={vendor.name}
-            class="mb-2 h-10 w-16 object-contain transition-transform group-hover:scale-105"
-            onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
-          />
-          <span
-            class="text-center text-sm text-gray-500 group-hover:text-primary"
-            style="word-break:break-word;">{vendor.name}</span
-          >
-        </button>
-      {/if}
-    {/each}
+<div class="flex h-full flex-col">
+  <div class="flex-1 overflow-y-auto">
+    <div class="mx-auto w-full max-w-5xl px-4 pb-8" style="height: calc(100vh - 120px);">
+      <div
+        class="grid h-full grid-cols-3 items-start gap-x-2 gap-y-6 overflow-y-auto sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7"
+      >
+        {#each filteredProducts as product (product.id)}
+          {@const vendor = getVendorForGiftCard(product)}
+          {#if vendor}
+            <button
+              class="group flex flex-col items-center justify-center focus:outline-none"
+              onclick={() => handleBrandClick(product, vendor)}
+              onkeydown={(e) => e.key === 'Enter' && handleBrandClick(product, vendor)}
+            >
+              <img
+                src={giftCardImageDomain + '/vendors/' + vendor.logoImageSource}
+                alt={vendor.name}
+                class="mb-2 h-10 w-16 object-contain transition-transform group-hover:scale-105"
+                onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
+              />
+              <span
+                class="max-w-[5.5rem] break-words text-center text-xs leading-tight text-gray-500 group-hover:text-primary"
+                style="word-break:break-word;"
+              >
+                {vendor.name}
+              </span>
+            </button>
+          {/if}
+        {/each}
+      </div>
+    </div>
   </div>
 </div>
