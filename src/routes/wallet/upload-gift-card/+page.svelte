@@ -13,7 +13,6 @@
 
   let search = '';
   const giftCardImageDomain = 'https://d27wpajtnol6ce.cloudfront.net';
-  const userAvatarUrl = 'https://randomuser.me/api/portraits/men/32.jpg';
 
   $: filteredProducts = $giftCardProductsStore.filter((product) => {
     const vendor = $vendorsStore.find((v) => v.id === product.vendorId);
@@ -56,12 +55,7 @@
   <button onclick={() => history.back()} class="flex items-center">
     <ArrowLeft class="h-6 w-6" />
   </button>
-  <span class="text-lg font-semibold">{m['upload_card.select_brand']()}</span>
-  <img
-    src={userAvatarUrl}
-    alt="User"
-    class="h-9 w-9 rounded-full border-2 border-white object-cover"
-  />
+  <span class="flex-1 text-lg font-semibold text-center">{m['upload_card.select_brand']()}</span>
 </div>
 
 <!-- Search Bar -->

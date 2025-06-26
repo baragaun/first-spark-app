@@ -19,9 +19,6 @@
   import { toast } from 'svelte-sonner';
   import { goto } from '$app/navigation';
 
-  // Add a placeholder for user avatar (replace with real user data if available)
-  const userAvatarUrl = 'https://randomuser.me/api/portraits/men/32.jpg';
-
   const giftCardId = $page.params.id;
   const giftCardImageDomain = 'https://d27wpajtnol6ce.cloudfront.net';
 
@@ -158,8 +155,7 @@
   <button onclick={() => history.back()} class="flex items-center">
     <ArrowLeft class="h-6 w-6" />
   </button>
-  <span class="text-lg font-semibold">{m['marketplace.buy_gift_card']()}</span>
-  <img src={userAvatarUrl} alt="User" class="h-8 w-8 rounded-full object-cover" />
+  <span class="flex-1 text-center text-lg font-semibold">{m['marketplace.buy_gift_card']()}</span>
 </div>
 
 {#if isLoading}
