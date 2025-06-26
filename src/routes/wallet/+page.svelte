@@ -48,10 +48,12 @@
   }
 
   function uploadAction() {
-    if (fileInputRef) {
-      fileInputRef.value = '';
-      fileInputRef.click();
-    }
+    goto(`/wallet/upload-gift-card`);
+    // TODO - below code will allow to browse files
+    // if (fileInputRef) {
+    //   fileInputRef.value = '';
+    //   fileInputRef.click();
+    // }
   }
 
   function handleFileChange(event: Event) {
