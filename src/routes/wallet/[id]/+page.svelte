@@ -301,7 +301,7 @@
             href={$walletItemProduct.termsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            class="rounded-lg bg-nav px-8 py-2 font-semibold tracking-wide text-nav-foreground shadow transition hover:bg-primary/90"
+            class="rounded-lg bg-nav px-8 py-2 font-semibold tracking-wide text-nav-foreground shadow transition hover:bg-nav/90"
             style="text-transform: uppercase; letter-spacing: 1px;"
           >
             {m['wallet.gift-card.visit_online']()}

@@ -6,6 +6,7 @@
   import * as Form from '$lib/components/ui/form/index.js';
   import { Input } from '$lib/components/ui/input/index.js';
   import { Eye, EyeOff } from 'lucide-svelte';
+  import { cn } from '@/utils';
   import type { FormPathLeaves, SuperForm } from 'sveltekit-superforms';
 
   let {
@@ -35,7 +36,13 @@
           bind:value={$formData[fieldName]}
           {placeholder}
           type={showPassword ? 'text' : 'password'}
-          class={$errors[fieldName] ? 'border-red-500 focus-visible:ring-red-500' : ''}
+          class={cn(
+            'border-2 transition-all duration-200',
+            $errors[fieldName]
+              ? 'border-red-500 focus-visible:border-transparent focus-visible:ring-red-500'
+              : 'border-gray-300 focus-visible:border-transparent',
+            'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+          )}
         />
         <button
           type="button"
