@@ -267,7 +267,7 @@
 
     <!-- Place Order Button -->
     <Button
-      class="w-full rounded-full bg-nav py-3 text-lg font-bold text-nav-foreground hover:bg-primary/90"
+      class="w-full rounded-full bg-nav py-3 text-lg font-bold text-nav-foreground hover:bg-nav/90"
       onclick={placeOrder}
       disabled={cartItems.length === 0}
     >
