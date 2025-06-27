@@ -329,6 +329,7 @@
     }
   },
   "upload_card": {
+    "select_brand": "Selecciona una marca",
     "title": "Subir tarjeta de regalo",
     "brand": "Marca",
     "balance": "Saldo",

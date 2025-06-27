@@ -14,9 +14,6 @@
   import { downloadPdf } from '@/utils/pdf-utils';
   import { m } from '@/paraglide/messages';
 
-  // Add a placeholder for user avatar (replace with real user data if available)
-  const userAvatarUrl = 'https://randomuser.me/api/portraits/men/32.jpg';
-
   const walletCardId = $page.params.id;
   const walletCardImageDomain = 'https://d27wpajtnol6ce.cloudfront.net';
 
@@ -89,8 +86,7 @@
       <ArrowLeft class="h-6 w-6" />
     {/if}
   </button>
-  <span class="text-lg font-semibold">{m['wallet.gift-card.title']()}</span>
-  <img src={userAvatarUrl} alt="User" class="h-8 w-8 rounded-full object-cover" />
+  <span class="flex-1 text-center text-lg font-semibold">{m['wallet.gift-card.title']()}</span>
 </div>
 
 {#if isLoading}

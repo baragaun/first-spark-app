@@ -49,11 +49,11 @@
             <Tooltip.Root>
               <Tooltip.Trigger>
                 <Button
-                  variant="ghost"
+                  variant="default"
                   size="icon"
                   onclick={() => goto('/signin')}
                   aria-label={m['nav.auth.sign_in']()}
-                  class="font-lexend text-nav-foreground hover:text-foreground"
+                  class="font-lexend text-nav-foreground hover:text-nav-foreground"
                 >
                   <LogIn class="mr-2 h-4 w-4" />
                 </Button>
