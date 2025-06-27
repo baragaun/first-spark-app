@@ -187,7 +187,10 @@ export class MarketplaceContext {
     }
     try {
       isLoading = true;
-      const response = await this.client.operations.shoppingCartItem.deleteShoppingCartItem(id, true);
+      const response = await this.client.operations.shoppingCartItem.deleteShoppingCartItem(
+        id,
+        true,
+      );
       if (!response || response.error) {
         console.error('deleteShoppingCartItem: received error.', { response });
         return { error: response.error || translate(AppUiMessage.systemError) };

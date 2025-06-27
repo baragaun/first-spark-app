@@ -20,7 +20,6 @@
   let fileInputRef: HTMLInputElement;
   let isLoading = false;
 
-
   // Load demo data on mount
   onMount(async () => {
     const res = await fetch('/wallet-data.json');
@@ -49,7 +48,7 @@
       console.error('Failed to load wallet items:', response);
       return;
     }
-    if(!response) return;
+    if (!response) return;
 
     console.log('Find Purchase Orders: ', response);
     // walletItemsStore.set(response);
