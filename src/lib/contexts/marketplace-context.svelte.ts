@@ -6,9 +6,11 @@ import {
   GiftCardProduct,
   ProductCategory,
   PurchaseOrder,
+  PurchaseOrderInput,
   ShoppingCart,
   ShoppingCartItem,
   Vendor,
+  Wallet,
   type QueryResult,
 } from '@baragaun/bg-node-client';
 import type { ServiceRequest } from '../../../../bg-node-client/lib/fsdata/gql/graphql';
@@ -178,14 +180,14 @@ export class MarketplaceContext {
     }
   }
 
-  async deleteShoppingCartItem(id: string): Promise<QueryResult<void>> {
+  async deleteShoppingCartItem(id: string): Promise<QueryResult<ServiceRequest>> {
     if (!this.client.isInitialized) {
       console.error('MarketplaceContext.deleteShoppingCartItem: not initialized.');
       return { error: translate(AppUiMessage.systemError) };
     }
     try {
       isLoading = true;
-      const response = await this.client.operations.shoppingCartItem.deleteShoppingCartItem(id);
+      const response = await this.client.operations.shoppingCartItem.deleteShoppingCartItem(id, true);
       if (!response || response.error) {
         console.error('deleteShoppingCartItem: received error.', { response });
         return { error: response.error || translate(AppUiMessage.systemError) };
@@ -251,7 +253,7 @@ export class MarketplaceContext {
   }
 
   async createPurchaseOrder(
-    props: PurchaseOrder, // Replace 'any' with the correct type if available
+    props: PurchaseOrderInput, // Replace 'any' with the correct type if available
   ): Promise<QueryResult<ServiceRequest>> {
     // Replace 'any' with PurchaseOrder if you have the type
     if (!this.client.isInitialized) {
@@ -304,6 +306,30 @@ export class MarketplaceContext {
       return response.objects;
     } catch (error) {
       console.error('findPurchaseOrders: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return translate(AppUiMessage.systemError);
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  async findWalletItems(): Promise<Wallet[] | string | undefined> {
+    if (!this.client.isInitialized) {
+      console.error('MarketplaceContext.findWalletItems: not initialized.');
+      return translate(AppUiMessage.systemError);
+    }
+    try {
+      isLoading = true;
+      const response = await this.client.operations.wallet.findMyWallet();
+      if (!response || response.error || !response.object) {
+        console.error('findWalletItems: received error.', { response });
+        return response.error || translate(AppUiMessage.systemError);
+      }
+      return response.objects;
+    } catch (error) {
+      console.error('findWalletItems: error', {
         error: (error as Error).message,
         stack: (error as Error).stack,
       });

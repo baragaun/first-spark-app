@@ -44,7 +44,7 @@
 
   async function loadWalletItems() {
     isLoading = true;
-    const response = await marketplaceContext.findPurchaseOrders();
+    const response = await marketplaceContext.findWalletItems();
     if (typeof response === 'string') {
       console.error('Failed to load wallet items:', response);
       return;
