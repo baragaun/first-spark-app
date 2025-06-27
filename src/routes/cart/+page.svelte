@@ -11,7 +11,7 @@
     type PurchaseOrder,
     ShoppingCartItem,
   } from '@baragaun/bg-node-client';
-  import { writable } from 'svelte/store';
+  import { writable, derived } from 'svelte/store';
   import { toast } from 'svelte-sonner';
   import placeholderImage from '../../assets/images/placeholder.png';
   import { giftCardProductsStore, vendorsStore, dataLoaded } from '$lib/stores/marketplace-store';
@@ -26,10 +26,12 @@
   } from '@/components/ui/alert-dialog';
   import { m } from '@/paraglide/messages';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import type { PurchaseOrderInput } from '../../../../bg-node-client/lib/fsdata/gql/graphql';
 
-  let cartItems: ShoppingCartItem[] = [];
-  $: subtotal = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
-  let showOrderPlacedDialog = false;
+  let cartItems = $state<ShoppingCartItem[]>([]);
+  let total = $derived.by(() => cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0));
+
+  let showOrderPlacedDialog = $state(false);
 
   // Function to combine items with same productId
   function combineDuplicateItems(items: ShoppingCartItem[]): ShoppingCartItem[] {
@@ -89,7 +91,7 @@
         console.error('Error deleting item:', result.error);
         toast.error(`Failed to remove item: ${result.error}`);
       } else {
-        cartItems = cartItems.filter((item) => item.shoppingCartId !== id);
+        cartItems = cartItems.filter((item) => item.id !== id);
         toast.success('Item removed from cart!');
       }
     } catch (error) {
@@ -99,11 +101,11 @@
   }
 
   async function placeOrder() {
-    const order: PurchaseOrder = {
+    const order: PurchaseOrderInput = {
       shoppingCartId: myUserContext.myUserId!,
       userId: myUserContext.myUserId!,
-      sumItemPrice: subtotal,
-      totalPrice: subtotal,
+      sumItemPrice: total,
+      totalPrice: total,
       vat: 0,
     };
     await marketplaceContext.createPurchaseOrder(order).then(async (result) => {
@@ -238,7 +240,7 @@
       <!-- Total Section -->
       <div class="mr-4 py-4 text-right text-foreground">
         <span class="text-lg font-bold"
-          >{m['cart.total']()}: USD {(subtotal / 1000).toFixed(2)}</span
+          >{m['cart.total']()}: USD {(total / 1000).toFixed(2)}</span
         >
       </div>
     {:else}
