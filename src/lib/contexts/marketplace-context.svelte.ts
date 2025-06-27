@@ -7,13 +7,13 @@ import {
   ProductCategory,
   PurchaseOrder,
   PurchaseOrderInput,
+  ServiceRequest,
   ShoppingCart,
   ShoppingCartItem,
   Vendor,
   Wallet,
   type QueryResult,
 } from '@baragaun/bg-node-client';
-import type { ServiceRequest } from '../../../../bg-node-client/lib/fsdata/gql/graphql';
 
 let isLoading = $state(false);
 
@@ -156,7 +156,7 @@ export class MarketplaceContext {
     }
   }
 
-  async updateShoppingCartItem(props: ShoppingCartItem): Promise<QueryResult<ShoppingCartItem>> {
+  async updateShoppingCartItem(props: ShoppingCartItem): Promise<QueryResult<ServiceRequest>> {
     if (!this.client.isInitialized) {
       console.error('MarketplaceContext.updateShoppingCartItem: not initialized.');
       return { error: translate(AppUiMessage.systemError) };

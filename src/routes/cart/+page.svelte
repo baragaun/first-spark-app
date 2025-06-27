@@ -10,6 +10,7 @@
     type ShoppingCart,
     type PurchaseOrder,
     ShoppingCartItem,
+    PurchaseOrderInput,
   } from '@baragaun/bg-node-client';
   import { writable, derived } from 'svelte/store';
   import { toast } from 'svelte-sonner';
@@ -26,7 +27,6 @@
   } from '@/components/ui/alert-dialog';
   import { m } from '@/paraglide/messages';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
-  import type { PurchaseOrderInput } from '../../../../bg-node-client/lib/fsdata/gql/graphql';
 
   let cartItems = $state<ShoppingCartItem[]>([]);
   let total = $derived.by(() => cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0));
@@ -73,9 +73,9 @@
         toast.error(`Failed to update quantity: ${result.error}`);
       } else if (result.object) {
         // Update the local cart items
-        cartItems = cartItems.map((cartItem) =>
-          cartItem.id === item.id ? (result.object as ShoppingCartItem) : cartItem,
-        );
+        // cartItems = cartItems.map((cartItem) =>
+        //   cartItem.id === item.id ? (result.object as ShoppingCartItem) : cartItem,
+        // );
         toast.success('Quantity updated!');
       }
     } catch (error) {
