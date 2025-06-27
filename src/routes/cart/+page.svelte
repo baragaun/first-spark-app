@@ -29,23 +29,26 @@
   import type { PurchaseOrderInput } from '../../../../bg-node-client/lib/fsdata/gql/graphql';
 
   let cartItems = $state<ShoppingCartItem[]>([]);
-  let total = $derived.by(() => cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0));
+  let total = $derived.by(() =>
+    cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
+  );
 
   let showOrderPlacedDialog = $state(false);
 
-  // Function to combine items with same productId
+  // Function to combine items with same productId AND same price
   function combineDuplicateItems(items: ShoppingCartItem[]): ShoppingCartItem[] {
     const combinedItems = new Map<string, ShoppingCartItem>();
 
     items.forEach((item) => {
       if (!item.productId) return;
-
-      if (combinedItems.has(item.productId)) {
-        const existingItem = combinedItems.get(item.productId)!;
+      // Use both productId and price as the key
+      const key = `${item.productId}-${item.price}`;
+      if (combinedItems.has(key)) {
+        const existingItem = combinedItems.get(key)!;
         existingItem.quantity = (existingItem.quantity || 0) + (item.quantity || 0);
         existingItem.totalPrice = (existingItem.totalPrice || 0) + (item.totalPrice || 0);
       } else {
-        combinedItems.set(item.productId, { ...item });
+        combinedItems.set(key, { ...item });
       }
     });
 
@@ -53,21 +56,28 @@
   }
 
   async function updateItemQuantity(item: ShoppingCartItem, newQuantity: number) {
+    if (item == null || item == undefined) return;
+
     if (newQuantity < 1) {
-      //await removeItem(item.id || '');
-      item.quantity = 0;
-      await marketplaceContext.updateShoppingCartItem(item);
+      await removeItem(item.id || '');
       return;
     }
 
     try {
-      // First remove the existing item
-      //await removeItem(item.id || '');
+      // First remove the all other existing items
+      for (const cartItem of $shoppingCart?.items ?? []) {
+        if (
+          cartItem.id != item.id &&
+          cartItem.productId === item.productId &&
+          cartItem.price === item.price
+        ) {
+          await removeItem(cartItem.id);
+        }
+      }
 
       item.quantity = newQuantity;
       const result = await marketplaceContext.updateShoppingCartItem(item);
 
-      //const result = await marketplaceContext.createShoppingCartItem(newItem);
       if (result.error) {
         console.error('Error updating item quantity:', result.error);
         toast.error(`Failed to update quantity: ${result.error}`);
@@ -239,9 +249,7 @@
       {/each}
       <!-- Total Section -->
       <div class="mr-4 py-4 text-right text-foreground">
-        <span class="text-lg font-bold"
-          >{m['cart.total']()}: USD {(total / 1000).toFixed(2)}</span
-        >
+        <span class="text-lg font-bold">{m['cart.total']()}: USD {(total / 1000).toFixed(2)}</span>
       </div>
     {:else}
       <div class="py-8 text-center text-muted-foreground">{m['cart.empty']()}</div>
