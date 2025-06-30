@@ -2,6 +2,7 @@ import translate from '@/helpers/language/translate';
 import { client } from '@/services/bg-node-client';
 import { AppUiMessage } from '@/types/enums';
 import {
+  Brand,
   CachePolicy,
   GiftCardProduct,
   ProductCategory,
@@ -9,7 +10,6 @@ import {
   ServiceRequest,
   ShoppingCart,
   ShoppingCartItem,
-  Brand,
   Wallet,
   type QueryResult,
 } from '@baragaun/bg-node-client';
