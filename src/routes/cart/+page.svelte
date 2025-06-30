@@ -81,10 +81,6 @@
         console.error('Error updating item quantity:', result.error);
         toast.error(`Failed to update quantity: ${result.error}`);
       } else if (result.object) {
-        // Update the local cart items
-        // cartItems = cartItems.map((cartItem) =>
-        //   cartItem.id === item.id ? (result.object as ShoppingCartItem) : cartItem,
-        // );
         toast.success('Quantity updated!');
       }
     } catch (error) {
@@ -109,8 +105,16 @@
     }
   }
 
+  async function removeAllItems(item: ShoppingCartItem) {
+    for (const cartItem of $shoppingCart?.items ?? []) {
+      if (cartItem.productId === item.productId && cartItem.price === item.price) {
+        await removeItem(cartItem.id);
+      }
+    }
+  }
+
   async function placeOrder() {
-    const order:  Partial<PurchaseOrder> = {
+    const order: Partial<PurchaseOrder> = {
       shoppingCartId: myUserContext.myUserId!,
       userId: myUserContext.myUserId!,
       sumItemPrice: total,
@@ -218,7 +222,7 @@
                 variant="outline"
                 size="sm"
                 class="mt-1 h-6 w-fit rounded-full border-accent px-2 text-xs text-accent hover:bg-accent hover:text-accent-foreground"
-                onclick={() => removeItem(item.id || '')}
+                onclick={() => removeAllItems(item)}
               >
                 {m['cart.remove']()}
               </Button>
@@ -244,7 +248,7 @@
             </Button>
           </div>
           <div class="text-center text-foreground">
-            {(item.totalPrice / 1000 || 0).toFixed(2)}
+            {(item.price / 1000 || 0).toFixed(2)}
           </div>
         </div>
       {/each}
