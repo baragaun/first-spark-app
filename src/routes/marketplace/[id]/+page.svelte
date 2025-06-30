@@ -9,12 +9,12 @@
   import {
     GiftCardDenomination,
     type GiftCardProduct,
-    type Vendor,
+    type Brand,
     type ShoppingCartItem,
   } from '@baragaun/bg-node-client';
   import placeholderImage from '../../../assets/images/placeholder.png';
   import { ArrowLeft } from 'lucide-svelte';
-  import { giftCardProductsStore, vendorsStore, dataLoaded } from '$lib/stores/marketplace-store';
+  import { giftCardProductsStore, brandsStore, dataLoaded } from '$lib/stores/marketplace-store';
   import { derived } from 'svelte/store';
   import { toast } from 'svelte-sonner';
   import { goto } from '$app/navigation';
@@ -25,17 +25,17 @@
   const giftCardId = $page.params.id;
   const giftCardImageDomain = 'https://d27wpajtnol6ce.cloudfront.net';
 
-  // Create derived stores for the specific gift card and vendor
+  // Create derived stores for the specific gift card and brand
   const giftCardProduct = derived([giftCardProductsStore, dataLoaded], ([$products, $loaded]) => {
     if (!$loaded) return null;
     return $products.find((p) => p.id === giftCardId) || null;
   });
 
-  const vendor = derived(
-    [vendorsStore, giftCardProduct, dataLoaded],
-    ([$vendors, $product, $loaded]) => {
+  const brand = derived(
+    [brandsStore, giftCardProduct, dataLoaded],
+    ([$brands, $product, $loaded]) => {
       if (!$loaded || !$product) return null;
-      return $vendors.find((v) => v.id === $product.vendorId) || null;
+      return $brands.find((v) => v.id === $product.brandId) || null;
     },
   );
 
@@ -70,12 +70,12 @@
         return;
       }
 
-      const vendorsResponse = await marketplaceContext.findVendors();
-      if (typeof vendorsResponse === 'string') {
-        error = vendorsResponse;
+      const brandsResponse = await marketplaceContext.findBrands();
+      if (typeof brandsResponse === 'string') {
+        error = brandsResponse;
         return;
       }
-      vendorsStore.set(vendorsResponse as Vendor[]);
+      brandsStore.set(brandsResponse as Brand[]);
 
       dataLoaded.set(true);
     } catch (err) {
@@ -107,7 +107,7 @@
   async function addDenominationToCart(
     denomination: GiftCardDenomination,
     giftCardProduct: GiftCardProduct,
-    vendor: Vendor,
+    brand: Brand,
   ) {
     if (!giftCardProduct.id) {
       console.error('GiftCardProduct ID is missing, cannot add to cart.');
@@ -136,7 +136,7 @@
         toast.success(
           m['marketplace.add_to_cart_success']({
             amount: `$${denomination.amount / 1000}`,
-            vendor: vendor.name || m['marketplace.buy_gift_card'](),
+            vendor: brand.name || m['marketplace.buy_gift_card'](),
           }),
         );
         // Optionally navigate to cart page or update cart count somewhere
@@ -183,13 +183,13 @@
       <Button href="/marketplace">{m['marketplace.return_to_marketplace']()}</Button>
     </Card.Footer>
   </Card.Root>
-{:else if $giftCardProduct && $vendor}
+{:else if $giftCardProduct && $brand}
   <div class="mx-auto max-w-lg px-4 py-6">
     <!-- Gift Card Image -->
     <div class="my-6 flex justify-center">
       <img
         src={giftCardImageDomain + '/giftcards/' + $giftCardProduct.imageSourceFront}
-        alt={$vendor.name + ' gift card'}
+        alt={$brand.name + ' gift card'}
         class="aspect-[16/9] w-full max-w-md rounded-2xl object-contain shadow-lg"
         onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
       />
@@ -225,7 +225,7 @@
       <div class="text-500 mb-2 text-sm text-secondary-foreground">
         {m['marketplace.brand_label']()}
       </div>
-      <div class="mb-4 text-xl font-bold">{$vendor.name}</div>
+      <div class="mb-4 text-xl font-bold">{$brand.name}</div>
       <div class="text-500 mb-2 text-sm text-secondary-foreground">
         {m['marketplace.gift_card_amount_label']()}
       </div>
@@ -234,9 +234,9 @@
           <button
             type="button"
             class="flex w-full cursor-pointer flex-col items-center rounded-xl border px-6 py-4 text-2xl font-bold shadow-sm transition-colors hover:bg-gray-100"
-            onclick={() => addDenominationToCart(denomination, $giftCardProduct, $vendor)}
+            onclick={() => addDenominationToCart(denomination, $giftCardProduct, $brand)}
             onkeydown={(e) =>
-              e.key === 'Enter' && addDenominationToCart(denomination, $giftCardProduct, $vendor)}
+              e.key === 'Enter' && addDenominationToCart(denomination, $giftCardProduct, $brand)}
           >
             <span class="flex items-end gap-1">
               <span class="align-bottom text-base text-gray-400">{m['marketplace.usd']()}</span>
@@ -291,20 +291,20 @@
           class="mb-4 flex h-40 w-40 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-lg"
         >
           <img
-            src={giftCardImageDomain + '/vendors/' + $vendor.logoImageSource}
-            alt={$vendor.name}
+            src={giftCardImageDomain + '/brands/' + $brand.logoImageSource}
+            alt={$brand.name}
             class="h-full w-full object-contain"
             onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
           />
         </div>
         <!-- Brand Description -->
-        {#if $vendor.description}
-          <div class="text-600 mb-8 max-w-xl text-center">{$vendor.description}</div>
+        {#if $brand.description}
+          <div class="text-600 mb-8 max-w-xl text-center">{$brand.description}</div>
         {/if}
         <!-- Visit Online Button -->
-        {#if $vendor.url}
+        {#if $brand.url}
           <a
-            href={$vendor.url}
+            href={$brand.url}
             target="_blank"
             rel="noopener noreferrer"
             class="rounded-lg bg-nav px-8 py-2 font-semibold tracking-wide text-nav-foreground shadow transition hover:bg-nav/90"
