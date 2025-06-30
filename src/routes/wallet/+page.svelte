@@ -22,8 +22,8 @@
 
   // Load demo data on mount
   onMount(async () => {
-    const res = await fetch('/wallet-data.json');
-    walletItemsStore.set(await res.json());
+    // const res = await fetch('/wallet-data.json');
+    // walletItemsStore.set(await res.json());
     loadWalletItems();
   });
 
@@ -43,15 +43,14 @@
 
   async function loadWalletItems() {
     isLoading = true;
-    const response = await marketplaceContext.findPurchaseOrders();
+    const response = await marketplaceContext.findWalletItems();
     if (typeof response === 'string') {
       console.error('Failed to load wallet items:', response);
       return;
     }
     if (!response) return;
 
-    console.log('Find Purchase Orders: ', response);
-    // walletItemsStore.set(response);
+    walletItemsStore.set(response);
     isLoading = false;
   }
 
