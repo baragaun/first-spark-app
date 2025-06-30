@@ -17,7 +17,8 @@
       "settings": "Einstellungen",
       "marketplace": "Marktplaats",
       "cart": "Warenkorb",
-      "wallet": "Brieftasche"
+      "wallet": "Brieftasche",
+      "order_history": "bestelgeschiedenis"
     }
   },
   "nav": {
