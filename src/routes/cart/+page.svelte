@@ -110,15 +110,12 @@
   }
 
   async function placeOrder() {
-    const order: PurchaseOrder = {
+    const order:  Partial<PurchaseOrder> = {
       shoppingCartId: myUserContext.myUserId!,
       userId: myUserContext.myUserId!,
       sumItemPrice: total,
       totalPrice: total,
       vat: 0,
-      items: [],
-      id: '',
-      createdAt: ''
     };
     await marketplaceContext.createPurchaseOrder(order).then(async (result) => {
       if (result.error) {
@@ -126,7 +123,9 @@
         toast.error(`Failed to create purchase order: ${result.error}`);
       } else {
         toast.success('Purchase order created!');
-        await marketplaceContext.emptyMyShoppingCart();
+        // Clear the cart
+        cartItems = [];
+        // await marketplaceContext.emptyMyShoppingCart();
         showOrderPlacedDialog = true;
       }
     });

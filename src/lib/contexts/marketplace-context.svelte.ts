@@ -255,7 +255,7 @@ export class MarketplaceContext {
   }
 
   async createPurchaseOrder(
-    props: PurchaseOrder, // Replace 'any' with the correct type if available
+    props: Partial<PurchaseOrder>, // Replace 'any' with the correct type if available
   ): Promise<QueryResult<PurchaseOrder>> {
     // Replace 'any' with PurchaseOrder if you have the type
     if (!this.client.isInitialized) {
