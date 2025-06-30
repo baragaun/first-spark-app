@@ -24,17 +24,6 @@
     return $products.find((p) => p.id === walletCardId) || null;
   });
 
-  console.log('walletItemProduct', $walletItemProduct);
-
-  // const brand = derived(
-  //   [brandsStore, walletItemProduct],
-  //   ([$brands, $product]) => {
-  //     if (!$product) return null;
-  //     console.log($brands, $product.brandId);
-  //     return $brands.find((v) => v.id === $product.brandId) || null;
-  //   },
-  // );
-
   let isLoading = $state(true);
   let error = $state<string | null>(null);
   let selectedTab = $state('use');

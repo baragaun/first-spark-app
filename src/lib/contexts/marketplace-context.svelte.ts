@@ -11,6 +11,7 @@ import {
   ShoppingCart,
   ShoppingCartItem,
   Wallet,
+  WalletItem,
   type QueryResult,
 } from '@baragaun/bg-node-client';
 
@@ -317,15 +318,27 @@ export class MarketplaceContext {
     }
   }
 
-  async findWalletItems(): Promise<Wallet[] | string | undefined> {
+  async findWalletItems(): Promise<WalletItem[] | string | undefined> {
     if (!this.client.isInitialized) {
       console.error('MarketplaceContext.findWalletItems: not initialized.');
       return translate(AppUiMessage.systemError);
     }
+    let args = {
+      filter: {},
+      match: {},
+      options: { cachePolicy: CachePolicy.network },
+      queryOptions: {},
+    }
     try {
       isLoading = true;
-      const response = await this.client.operations.wallet.findMyWallet();
-      if (!response || response.error || !response.object) {
+      const response = await this.client.operations.walletItem.findWalletItems(
+        null,
+        null,
+        null,
+        args.queryOptions,
+        args.options,
+      );
+      if (!response || response.error || !response.objects) {
         console.error('findWalletItems: received error.', { response });
         return response.error || translate(AppUiMessage.systemError);
       }
