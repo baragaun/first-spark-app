@@ -6,16 +6,15 @@
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
   import {
     type GiftCardProduct,
-    type Vendor,
+    type Brand,
     type ShoppingCart,
     type PurchaseOrder,
     ShoppingCartItem,
-    PurchaseOrderInput,
   } from '@baragaun/bg-node-client';
   import { writable, derived } from 'svelte/store';
   import { toast } from 'svelte-sonner';
   import placeholderImage from '../../assets/images/placeholder.png';
-  import { giftCardProductsStore, vendorsStore, dataLoaded } from '$lib/stores/marketplace-store';
+  import { giftCardProductsStore, brandsStore, dataLoaded } from '$lib/stores/marketplace-store';
   import {
     AlertDialog,
     AlertDialogAction,
@@ -111,12 +110,15 @@
   }
 
   async function placeOrder() {
-    const order: PurchaseOrderInput = {
+    const order: PurchaseOrder = {
       shoppingCartId: myUserContext.myUserId!,
       userId: myUserContext.myUserId!,
       sumItemPrice: total,
       totalPrice: total,
       vat: 0,
+      items: [],
+      id: '',
+      createdAt: ''
     };
     await marketplaceContext.createPurchaseOrder(order).then(async (result) => {
       if (result.error) {
@@ -134,12 +136,12 @@
     history.back();
   }
 
-  function findProductAndVendor(
+  function findProductAndBrand(
     productId: String,
-  ): [GiftCardProduct | undefined, Vendor | undefined] {
+  ): [GiftCardProduct | undefined, Brand | undefined] {
     const product = $giftCardProductsStore.find((product) => product.id === productId);
-    const vendor = $vendorsStore.find((vendor) => vendor.id === product?.vendorId);
-    return [product, vendor];
+    const brand = $brandsStore.find((b) => b.id === product?.brandId);
+    return [product, brand];
   }
 
   const shoppingCart = writable<ShoppingCart | null | undefined>(undefined);
@@ -150,8 +152,8 @@
       const giftCardsResponse = await marketplaceContext.findGiftCardProducts();
       giftCardProductsStore.set(giftCardsResponse as GiftCardProduct[]);
 
-      const vendorsResponse = await marketplaceContext.findVendors();
-      vendorsStore.set(vendorsResponse as Vendor[]);
+      const brandsResponse = await marketplaceContext.findBrands();
+      brandsStore.set(brandsResponse as Brand[]);
 
       dataLoaded.set(true);
     }
@@ -198,7 +200,7 @@
     <!-- Cart Items List -->
     {#if cartItems.length > 0}
       {#each cartItems as item (item.id)}
-        {@const [product, vendor] = findProductAndVendor(item.productId)}
+        {@const [product, brand] = findProductAndBrand(item.productId)}
         <div class="grid grid-cols-4 items-center gap-4 border-b border-border py-4 md:grid-cols-6">
           <div class="col-span-2 flex items-center md:col-span-3">
             <div class="mr-4 h-12 w-16 flex-shrink-0">
@@ -211,7 +213,7 @@
             </div>
             <div class="flex flex-col">
               <span class="text-base font-medium text-foreground"
-                >{'$' + item.price / 1000 + ' Gift card to ' + vendor?.name}</span
+                >{'$' + item.price / 1000 + ' Gift card to ' + brand?.name}</span
               >
               <Button
                 variant="outline"

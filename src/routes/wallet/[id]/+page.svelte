@@ -4,10 +4,10 @@
   import { Button } from '$lib/components/ui/button';
   import * as Card from '$lib/components/ui/card';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
-  import type { Vendor } from '@baragaun/bg-node-client';
+  import type { Brand } from '@baragaun/bg-node-client';
   import placeholderImage from '../../../assets/images/placeholder.png';
   import { Archive, ArrowLeft, ExternalLink, Gift, Printer, ZoomOut } from 'lucide-svelte';
-  import { vendorsStore } from '$lib/stores/marketplace-store';
+  import { brandsStore } from '$lib/stores/marketplace-store';
   import { derived } from 'svelte/store';
   import { walletItemsStore } from '@/stores/wallet-store';
   import BarcodeView from './barcode-view.svelte';
@@ -23,12 +23,12 @@
 
   console.log('walletItemProduct', $walletItemProduct);
 
-  // const vendor = derived(
-  //   [vendorsStore, walletItemProduct],
-  //   ([$vendors, $product]) => {
+  // const brand = derived(
+  //   [brandsStore, walletItemProduct],
+  //   ([$brands, $product]) => {
   //     if (!$product) return null;
-  //     console.log($vendors, $product.vendorId);
-  //     return $vendors.find((v) => v.id === $product.vendorId) || null;
+  //     console.log($brands, $product.brandId);
+  //     return $brands.find((v) => v.id === $product.brandId) || null;
   //   },
   // );
 
@@ -43,12 +43,12 @@
   onMount(async () => {
     try {
       isLoading = true;
-      const vendorsResponse = await marketplaceContext.findVendors();
-      if (typeof vendorsResponse === 'string') {
-        error = vendorsResponse;
+      const brandsResponse = await marketplaceContext.findBrands();
+      if (typeof brandsResponse === 'string') {
+        error = brandsResponse;
         return;
       }
-      vendorsStore.set(vendorsResponse as Vendor[]);
+      brandsStore.set(brandsResponse as Brand[]);
     } catch (err) {
       error = 'Failed to load gift card details';
       console.error(err);
@@ -280,7 +280,7 @@
           class="mb-4 flex h-40 w-40 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-lg"
         >
           <img
-            src={'https://d27wpajtnol6ce.cloudfront.net/vendors/' +
+            src={'https://d27wpajtnol6ce.cloudfront.net/brands/' +
               $walletItemProduct.imageSourceBack}
             alt={$walletItemProduct.name}
             class="h-full w-full object-contain"

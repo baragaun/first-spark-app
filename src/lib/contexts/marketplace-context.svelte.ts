@@ -6,11 +6,10 @@ import {
   GiftCardProduct,
   ProductCategory,
   PurchaseOrder,
-  PurchaseOrderInput,
   ServiceRequest,
   ShoppingCart,
   ShoppingCartItem,
-  Vendor,
+  Brand,
   Wallet,
   type QueryResult,
 } from '@baragaun/bg-node-client';
@@ -56,9 +55,9 @@ export class MarketplaceContext {
     }
   }
 
-  async findVendors(): Promise<Vendor[] | string | undefined> {
+  async findBrands(): Promise<Brand[] | string | undefined> {
     if (!this.client.isInitialized) {
-      console.error('ConversationContext.findVendors: not initialized.');
+      console.error('ConversationContext.findBrands: not initialized.');
       return translate(AppUiMessage.systemError);
     }
     try {
@@ -69,7 +68,7 @@ export class MarketplaceContext {
         options: { cachePolicy: CachePolicy.network },
         queryOptions: {},
       };
-      const response = await this.client.operations.vendor.findVendors(
+      const response = await this.client.operations.brand.findBrands(
         null,
         null,
         null,
@@ -77,12 +76,12 @@ export class MarketplaceContext {
         input.options,
       );
       if (!response || response.error || !response.objects) {
-        console.error('findVendors: received error.', { response });
+        console.error('findBrands: received error.', { response });
         return response.error || translate(AppUiMessage.systemError);
       }
       return response.objects;
     } catch (error) {
-      console.error('findVendors: error', {
+      console.error('findBrands: error', {
         error: (error as Error).message,
         stack: (error as Error).stack,
       });
@@ -256,8 +255,8 @@ export class MarketplaceContext {
   }
 
   async createPurchaseOrder(
-    props: PurchaseOrderInput, // Replace 'any' with the correct type if available
-  ): Promise<QueryResult<ServiceRequest>> {
+    props: PurchaseOrder, // Replace 'any' with the correct type if available
+  ): Promise<QueryResult<PurchaseOrder>> {
     // Replace 'any' with PurchaseOrder if you have the type
     if (!this.client.isInitialized) {
       console.error('MarketplaceContext.createPurchaseOrder: not initialized.');
