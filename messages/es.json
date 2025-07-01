@@ -338,5 +338,28 @@
     "pin": "PIN",
     "submit": "ENVIAR",
     "loading": "Obteniendo detalles de la tarjeta..."
+  },
+  "order_history": {
+    "title": "Historial de pedidos",
+    "filter": "Filtrar",
+    "all_orders": "Todos los pedidos",
+    "delivered": "Entregado",
+    "processing": "Procesando",
+    "order_placed": "Pedido realizado: {date}",
+    "total": "Total: ${amount}",
+    "status": "Estado: {status}",
+    "no_orders": "No hay pedidos que coincidan con el filtro.",
+    "order": "Pedido",
+    "type": "Tipo",
+    "type_purchase": "Compra",
+    "paid_with": "Pagado con",
+    "paid_with_credit_card": "Tarjeta de crédito",
+    "reference_id": "ID de referencia",
+    "open": "ABRIR",
+    "id": "ID",
+    "brand": "Marca",
+    "purchase_date": "Fecha de compra",
+    "amount": "Cantidad",
+    "not_found": "Pedido no encontrado."
   }
 }

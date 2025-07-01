@@ -17,14 +17,15 @@
   import { goto } from '$app/navigation';
   import { orderHistoryStore, orderHistoryLoaded } from '$lib/stores/order-history';
   import { get } from 'svelte/store';
+  import { m } from '@/paraglide/messages';
 
   let purchaseOrders = $state<PurchaseOrder[]>([]);
   let isLoading = $state(true);
-  let filterStatus = $state('All Orders');
+  let filterStatus = $state(m['order_history.all_orders']());
 
   let filteredOrders = $derived(
     purchaseOrders.filter((order) => {
-      if (filterStatus === 'All Orders') return true;
+      if (filterStatus === m['order_history.all_orders']()) return true;
       const o = order as any;
       return o.status?.toLowerCase() === filterStatus.toLowerCase();
     }),
@@ -57,12 +58,13 @@
 
 <div class="container mx-auto px-4 py-6">
   <header class="mb-6">
-    <h1 class="text-3xl font-bold text-foreground">{'Order History'}</h1>
+    <h1 class="text-3xl font-bold text-foreground">{m['order_history.title']()}</h1>
   </header>
 
   <main class="flex-1 overflow-y-auto bg-gray-100 p-4 dark:bg-gray-900">
     <div class="mb-4 bg-white p-4 dark:bg-background">
-      <Label for="filter" class="text-sm text-muted-foreground">Filter</Label>
+      <Label for="filter" class="text-sm text-muted-foreground">{m['order_history.filter']()}</Label
+      >
       <DropdownMenu>
         <DropdownMenuTrigger>
           <button
@@ -73,13 +75,14 @@
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent class="w-[--radix-dropdown-menu-trigger-width] bg-background">
-          <DropdownMenuItem onclick={() => (filterStatus = 'All Orders')}
-            >All Orders</DropdownMenuItem
+          <DropdownMenuItem onclick={() => (filterStatus = m['order_history.all_orders']())}
+            >{m['order_history.all_orders']()}</DropdownMenuItem
           >
-          <DropdownMenuItem onclick={() => (filterStatus = 'delivered')}>Delivered</DropdownMenuItem
+          <DropdownMenuItem onclick={() => (filterStatus = m['order_history.delivered']())}
+            >{m['order_history.delivered']()}</DropdownMenuItem
           >
-          <DropdownMenuItem onclick={() => (filterStatus = 'processing')}
-            >Processing</DropdownMenuItem
+          <DropdownMenuItem onclick={() => (filterStatus = m['order_history.processing']())}
+            >{m['order_history.processing']()}</DropdownMenuItem
           >
         </DropdownMenuContent>
       </DropdownMenu>
@@ -99,15 +102,13 @@
           >
             <div>
               <p class="text-gray-600 dark:text-gray-400">
-                Order Placed: {formatDate(order.createdAt)}
+                {m['order_history.order_placed']({ date: formatDate(order.createdAt) })}
               </p>
               <p class="text-gray-800 dark:text-gray-200">
-                Total: <span class="font-medium text-foreground"
-                  >${(order.totalPrice / 1000).toFixed(2)}</span
-                >
+                {m['order_history.total']({ amount: (order.totalPrice / 1000).toFixed(2) })}
               </p>
               <p class="text-gray-600 dark:text-gray-400">
-                Status: {order.items.length ?? 'N/A'}
+                {m['order_history.status']({ status: order.items.length ?? 'N/A' })}
               </p>
             </div>
             <ChevronRight class="h-5 w-5 text-gray-400" />
@@ -118,7 +119,7 @@
         {/each}
       {:else}
         <div class="flex h-40 items-center justify-center">
-          <p class="text-muted-foreground">No orders match the filter.</p>
+          <p class="text-muted-foreground">{m['order_history.no_orders']()}</p>
         </div>
       {/if}
     </div>

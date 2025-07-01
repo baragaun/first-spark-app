@@ -338,5 +338,28 @@
     "pin": "Pin",
     "submit": "SUBMIT",
     "loading": "Fetching card details..."
+  },
+  "order_history": {
+    "title": "Order History",
+    "filter": "Filter",
+    "all_orders": "All Orders",
+    "delivered": "Delivered",
+    "processing": "Processing",
+    "order_placed": "Order Placed: {date}",
+    "total": "Total: ${amount}",
+    "status": "Status: {status}",
+    "no_orders": "No orders match the filter.",
+    "order": "Order",
+    "type": "Type",
+    "type_purchase": "Purchase",
+    "paid_with": "Paid with",
+    "paid_with_credit_card": "Credit Card",
+    "reference_id": "Reference ID",
+    "open": "OPEN",
+    "id": "ID",
+    "brand": "Brand",
+    "purchase_date": "Purchase Date",
+    "amount": "Amount",
+    "not_found": "Order not found."
   }
 }

@@ -336,5 +336,28 @@
     "pin": "पिन",
     "submit": "सबमिट करें",
     "loading": "कार्ड विवरण प्राप्त किए जा रहे हैं..."
+  },
+  "order_history": {
+    "title": "ऑर्डर इतिहास",
+    "filter": "फ़िल्टर",
+    "all_orders": "सभी ऑर्डर",
+    "delivered": "डिलीवर किया गया",
+    "processing": "प्रसंस्करण में",
+    "order_placed": "ऑर्डर दिया गया: {date}",
+    "total": "कुल: ${amount}",
+    "status": "स्थिति: {status}",
+    "no_orders": "कोई ऑर्डर फ़िल्टर से मेल नहीं खाते।",
+    "order": "ऑर्डर",
+    "type": "प्रकार",
+    "type_purchase": "खरीद",
+    "paid_with": "से भुगतान किया गया",
+    "paid_with_credit_card": "क्रेडिट कार्ड",
+    "reference_id": "संदर्भ आईडी",
+    "open": "खोलें",
+    "id": "आईडी",
+    "brand": "ब्रांड",
+    "purchase_date": "खरीद की तारीख",
+    "amount": "राशि",
+    "not_found": "ऑर्डर नहीं मिला।"
   }
 }
