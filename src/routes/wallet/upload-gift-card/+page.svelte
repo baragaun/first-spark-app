@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
-  import { vendorsStore, giftCardProductsStore, dataLoaded } from '$lib/stores/marketplace-store';
-  import type { GiftCardProduct, Vendor } from '@baragaun/bg-node-client';
+  import { brandsStore, giftCardProductsStore, dataLoaded } from '$lib/stores/marketplace-store';
+  import type { GiftCardProduct, Brand } from '@baragaun/bg-node-client';
   import { goto } from '$app/navigation';
   import placeholderImage from '../../../assets/images/placeholder.png';
   import { Search } from 'lucide-svelte';
@@ -15,28 +15,28 @@
   const giftCardImageDomain = 'https://d27wpajtnol6ce.cloudfront.net';
 
   $: filteredProducts = $giftCardProductsStore.filter((product) => {
-    const vendor = $vendorsStore.find((v) => v.id === product.vendorId);
+    const vendor = $brandsStore.find((v) => v.id === product.brandId);
     return vendor && vendor.name.toLowerCase().includes(search.toLowerCase());
   });
 
-  function getVendorForGiftCard(giftCardProduct: GiftCardProduct): Vendor | undefined {
-    return $vendorsStore.find((vendor) => vendor.id === giftCardProduct.vendorId);
+  function getVendorForGiftCard(giftCardProduct: GiftCardProduct): Brand | undefined {
+    return $brandsStore.find((brand) => brand.id === giftCardProduct.brandId);
   }
 
   onMount(async () => {
     if (!$dataLoaded) {
       const products = await marketplaceContext.findGiftCardProducts();
       if (Array.isArray(products)) giftCardProductsStore.set(products);
-      const vendors = await marketplaceContext.findVendors();
-      if (Array.isArray(vendors)) vendorsStore.set(vendors);
+      const vendors = await marketplaceContext.findBrands();
+      if (Array.isArray(vendors)) brandsStore.set(vendors);
       dataLoaded.set(true);
     }
   });
 
-  function handleBrandClick(product: GiftCardProduct, vendor: Vendor) {
+  function handleBrandClick(product: GiftCardProduct, brand: Brand) {
     let imageUrl = giftCardImageDomain + '/giftcards/' + product.imageSourceFront;
     uploadedCard.set({
-      brand: vendor.name,
+      brand: brand.name,
       balance: '',
       barcode: '',
       pin: '',
@@ -55,7 +55,7 @@
   <button onclick={() => history.back()} class="flex items-center">
     <ArrowLeft class="h-6 w-6" />
   </button>
-  <span class="flex-1 text-lg font-semibold text-center">{m['upload_card.select_brand']()}</span>
+  <span class="flex-1 text-center text-lg font-semibold">{m['upload_card.select_brand']()}</span>
 </div>
 
 <!-- Search Bar -->

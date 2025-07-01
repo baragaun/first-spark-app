@@ -10,7 +10,6 @@ import {
   ServiceRequest,
   ShoppingCart,
   ShoppingCartItem,
-  Wallet,
   WalletItem,
   type QueryResult,
 } from '@baragaun/bg-node-client';
@@ -328,7 +327,7 @@ export class MarketplaceContext {
       match: {},
       options: { cachePolicy: CachePolicy.network },
       queryOptions: {},
-    }
+    };
     try {
       isLoading = true;
       const response = await this.client.operations.walletItem.findWalletItems(
