@@ -13,9 +13,9 @@
   import BarcodeView from './barcode-view.svelte';
   import { downloadPdf } from '@/utils/pdf-utils';
   import { m } from '@/paraglide/messages';
+  import { giftCardImageDomain } from '$lib/constants';
 
   const walletCardId = $page.params.id;
-  const walletCardImageDomain = 'https://d27wpajtnol6ce.cloudfront.net';
 
   const walletItemProduct = derived([walletItemsStore], ([$products]) => {
     return $products.find((p) => p.id === walletCardId) || null;
@@ -108,7 +108,7 @@
     <!-- Gift Card Image -->
     <div class="my-2 flex justify-center">
       <img
-        src={walletCardImageDomain + '/giftcards/' + $walletItemProduct.imageSourceFront}
+        src={giftCardImageDomain + '/giftcards/' + $walletItemProduct.imageSourceFront}
         alt={$walletItemProduct.name}
         class="aspect-[16/9] w-full max-w-md rounded-2xl object-contain shadow-lg"
         onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
@@ -269,8 +269,7 @@
           class="mb-4 flex h-40 w-40 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-lg"
         >
           <img
-            src={'https://d27wpajtnol6ce.cloudfront.net/brands/' +
-              $walletItemProduct.imageSourceBack}
+            src={giftCardImageDomain + '/brands/' + $walletItemProduct.imageSourceBack}
             alt={$walletItemProduct.name}
             class="h-full w-full object-contain"
             onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}

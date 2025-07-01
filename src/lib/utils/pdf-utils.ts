@@ -1,3 +1,4 @@
+import { giftCardImageDomain } from '@/constants';
 import type { WalletItem } from '@baragaun/bg-node-client';
 import { jsPDF } from 'jspdf';
 
@@ -33,7 +34,6 @@ export async function downloadPdf(
   try {
     //const doc = new jsPDF();
     const doc = new jsPDF('p', 'pt', 'a4');
-    const walletCardImageDomain = 'https://d27wpajtnol6ce.cloudfront.net';
     const pageWidth = doc.internal.pageSize.getWidth() - 40 * 2;
     let positionY = 30;
     const topPadding = 30;
@@ -47,7 +47,7 @@ export async function downloadPdf(
     // Try to add image if available
     if (walletItemProduct.imageSourceFront) {
       try {
-        const imgUrl = `${walletCardImageDomain}/giftcards/${walletItemProduct.imageSourceFront}`;
+        const imgUrl = `${giftCardImageDomain}/giftcards/${walletItemProduct.imageSourceFront}`;
         const dataUrl = await fetchProxyImageAsDataUrl(imgUrl);
         doc.addImage(dataUrl, 'JPEG', pageWidth / 2 - 100, positionY, 200, 120);
       } catch (imgError) {

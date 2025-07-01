@@ -26,6 +26,7 @@
   } from '@/components/ui/alert-dialog';
   import { m } from '@/paraglide/messages';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { giftCardImageDomain } from '$lib/constants';
 
   let cartItems = $state<ShoppingCartItem[]>([]);
   let total = $derived.by(() =>
@@ -207,7 +208,7 @@
           <div class="col-span-2 flex items-center md:col-span-3">
             <div class="mr-4 h-12 w-16 flex-shrink-0">
               <img
-                src={'https://d27wpajtnol6ce.cloudfront.net/giftcards/' + product?.imageSourceFront}
+                src={giftCardImageDomain + '/giftcards/' + product?.imageSourceFront}
                 alt={''}
                 class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
                 onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}

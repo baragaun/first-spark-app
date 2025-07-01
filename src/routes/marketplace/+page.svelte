@@ -16,14 +16,13 @@
     dataLoaded,
   } from '$lib/stores/marketplace-store';
   import { IsMobile } from '$lib/hooks/is-mobile.svelte';
+  import { giftCardImageDomain } from '$lib/constants';
 
   // Initialize the mobile detector
   const isMobile = new IsMobile();
 
   let searchQuery = '';
   let selectedCategory: ProductCategory | 'All' = 'All';
-
-  const giftCardImageDomain = 'https://d27wpajtnol6ce.cloudfront.net';
 
   function navigateToGiftCardDetail(giftCardId: string | null | undefined) {
     if (!giftCardId) return;
