@@ -58,6 +58,12 @@
       icon: Wallet,
       requiresAuth: true,
     },
+    {
+      title: m['sidebar.menu.order_history'](),
+      url: '/order-history',
+      icon: Wallet,
+      requiresAuth: true,
+    },
   ];
 
   let {

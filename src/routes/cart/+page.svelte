@@ -1,21 +1,20 @@
 <script lang="ts">
-  import { ArrowLeft, CheckCircle2, AlertCircle, Plus, Minus } from 'lucide-svelte';
+  import { Plus, Minus } from 'lucide-svelte';
   import { goto } from '$app/navigation';
   import { Button } from '$lib/components/ui/button';
   import { onMount } from 'svelte';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
   import {
     type GiftCardProduct,
-    type Vendor,
+    type Brand,
     type ShoppingCart,
     type PurchaseOrder,
     ShoppingCartItem,
-    PurchaseOrderItem,
   } from '@baragaun/bg-node-client';
-  import { writable } from 'svelte/store';
+  import { writable, derived } from 'svelte/store';
   import { toast } from 'svelte-sonner';
   import placeholderImage from '../../assets/images/placeholder.png';
-  import { giftCardProductsStore, vendorsStore, dataLoaded } from '$lib/stores/marketplace-store';
+  import { giftCardProductsStore, brandsStore, dataLoaded } from '$lib/stores/marketplace-store';
   import {
     AlertDialog,
     AlertDialogAction,
@@ -26,24 +25,29 @@
     AlertDialogTitle,
   } from '@/components/ui/alert-dialog';
   import { m } from '@/paraglide/messages';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
 
-  let cartItems: ShoppingCartItem[] = [];
-  $: subtotal = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
-  let showOrderPlacedDialog = false;
+  let cartItems = $state<ShoppingCartItem[]>([]);
+  let total = $derived.by(() =>
+    cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
+  );
 
-  // Function to combine items with same productId
+  let showOrderPlacedDialog = $state(false);
+
+  // Function to combine items with same productId AND same price
   function combineDuplicateItems(items: ShoppingCartItem[]): ShoppingCartItem[] {
     const combinedItems = new Map<string, ShoppingCartItem>();
 
     items.forEach((item) => {
       if (!item.productId) return;
-
-      if (combinedItems.has(item.productId)) {
-        const existingItem = combinedItems.get(item.productId)!;
+      // Use both productId and price as the key
+      const key = `${item.productId}-${item.price}`;
+      if (combinedItems.has(key)) {
+        const existingItem = combinedItems.get(key)!;
         existingItem.quantity = (existingItem.quantity || 0) + (item.quantity || 0);
         existingItem.totalPrice = (existingItem.totalPrice || 0) + (item.totalPrice || 0);
       } else {
-        combinedItems.set(item.productId, { ...item });
+        combinedItems.set(key, { ...item });
       }
     });
 
@@ -51,29 +55,32 @@
   }
 
   async function updateItemQuantity(item: ShoppingCartItem, newQuantity: number) {
+    if (item == null || item == undefined) return;
+
     if (newQuantity < 1) {
-      //await removeItem(item.id || '');
-      item.quantity = 0;
-      await marketplaceContext.updateShoppingCartItem(item);
+      await removeItem(item.id || '');
       return;
     }
 
     try {
-      // First remove the existing item
-      //await removeItem(item.id || '');
+      // First remove the all other existing items
+      for (const cartItem of $shoppingCart?.items ?? []) {
+        if (
+          cartItem.id != item.id &&
+          cartItem.productId === item.productId &&
+          cartItem.price === item.price
+        ) {
+          await removeItem(cartItem.id);
+        }
+      }
 
       item.quantity = newQuantity;
       const result = await marketplaceContext.updateShoppingCartItem(item);
 
-      //const result = await marketplaceContext.createShoppingCartItem(newItem);
       if (result.error) {
         console.error('Error updating item quantity:', result.error);
         toast.error(`Failed to update quantity: ${result.error}`);
       } else if (result.object) {
-        // Update the local cart items
-        cartItems = cartItems.map((cartItem) =>
-          cartItem.id === item.id ? (result.object as ShoppingCartItem) : cartItem,
-        );
         toast.success('Quantity updated!');
       }
     } catch (error) {
@@ -89,7 +96,7 @@
         console.error('Error deleting item:', result.error);
         toast.error(`Failed to remove item: ${result.error}`);
       } else {
-        cartItems = cartItems.filter((item) => item.shoppingCartId !== id);
+        cartItems = cartItems.filter((item) => item.id !== id);
         toast.success('Item removed from cart!');
       }
     } catch (error) {
@@ -98,49 +105,46 @@
     }
   }
 
+  async function removeAllItems(item: ShoppingCartItem) {
+    for (const cartItem of $shoppingCart?.items ?? []) {
+      if (cartItem.productId === item.productId && cartItem.price === item.price) {
+        await removeItem(cartItem.id);
+      }
+    }
+  }
+
   async function placeOrder() {
-    // let orderItems: PurchaseOrderItem[] = [];
-    // for (const item of cartItems) {
-    //   let orderItem: PurchaseOrderItem = {
-    //     id: item.id,
-    //     purchaseOrderId: item.id,
-    //     shoppingCartItemId: item.shoppingCartId,
-    //     productId: item.productId,
-    //     vendorId: item.productId,
-    //     quantity: item.quantity,
-    //     price: item.price,
-    //     totalPrice: item.totalPrice,
-    //     createdAt: item.createdAt,
-    //   };
-    //   orderItems.push(orderItem);
-    // }
-
-    // let item = cartItems[0];
-
-    // const order: PurchaseOrder = {
-    //   id: item.id,
-    //   shoppingCartId: item.id,
-    //   userId: item.id,
-    //   sumItemPrice: item.price,
-    //   totalPrice: item.totalPrice,
-    //   vat: 0,
-    //   items: orderItems,
-    //   createdAt: item.createdAt,
-    // };
-    // await marketplaceContext.createPurchaseOrder(order);
-    showOrderPlacedDialog = true;
+    const order: Partial<PurchaseOrder> = {
+      shoppingCartId: myUserContext.myUserId!,
+      userId: myUserContext.myUserId!,
+      sumItemPrice: total,
+      totalPrice: total,
+      vat: 0,
+    };
+    await marketplaceContext.createPurchaseOrder(order).then(async (result) => {
+      if (result.error) {
+        console.error('Error creating purchase order:', result.error);
+        toast.error(`Failed to create purchase order: ${result.error}`);
+      } else {
+        toast.success('Purchase order created!');
+        // Clear the cart
+        cartItems = [];
+        // await marketplaceContext.emptyMyShoppingCart();
+        showOrderPlacedDialog = true;
+      }
+    });
   }
 
   function goBack() {
     history.back();
   }
 
-  function findProductAndVendor(
+  function findProductAndBrand(
     productId: String,
-  ): [GiftCardProduct | undefined, Vendor | undefined] {
+  ): [GiftCardProduct | undefined, Brand | undefined] {
     const product = $giftCardProductsStore.find((product) => product.id === productId);
-    const vendor = $vendorsStore.find((vendor) => vendor.id === product?.vendorId);
-    return [product, vendor];
+    const brand = $brandsStore.find((b) => b.id === product?.brandId);
+    return [product, brand];
   }
 
   const shoppingCart = writable<ShoppingCart | null | undefined>(undefined);
@@ -151,8 +155,8 @@
       const giftCardsResponse = await marketplaceContext.findGiftCardProducts();
       giftCardProductsStore.set(giftCardsResponse as GiftCardProduct[]);
 
-      const vendorsResponse = await marketplaceContext.findVendors();
-      vendorsStore.set(vendorsResponse as Vendor[]);
+      const brandsResponse = await marketplaceContext.findBrands();
+      brandsStore.set(brandsResponse as Brand[]);
 
       dataLoaded.set(true);
     }
@@ -199,7 +203,7 @@
     <!-- Cart Items List -->
     {#if cartItems.length > 0}
       {#each cartItems as item (item.id)}
-        {@const [product, vendor] = findProductAndVendor(item.productId)}
+        {@const [product, brand] = findProductAndBrand(item.productId)}
         <div class="grid grid-cols-4 items-center gap-4 border-b border-border py-4 md:grid-cols-6">
           <div class="col-span-2 flex items-center md:col-span-3">
             <div class="mr-4 h-12 w-16 flex-shrink-0">
@@ -212,13 +216,13 @@
             </div>
             <div class="flex flex-col">
               <span class="text-base font-medium text-foreground"
-                >{'$' + item.price / 1000 + ' Gift card to ' + vendor?.name}</span
+                >{'$' + item.price / 1000 + ' Gift card to ' + brand?.name}</span
               >
               <Button
                 variant="outline"
                 size="sm"
                 class="mt-1 h-6 w-fit rounded-full border-accent px-2 text-xs text-accent hover:bg-accent hover:text-accent-foreground"
-                onclick={() => removeItem(item.id || '')}
+                onclick={() => removeAllItems(item)}
               >
                 {m['cart.remove']()}
               </Button>
@@ -244,15 +248,13 @@
             </Button>
           </div>
           <div class="text-center text-foreground">
-            {(item.totalPrice / 1000 || 0).toFixed(2)}
+            {(item.price / 1000 || 0).toFixed(2)}
           </div>
         </div>
       {/each}
       <!-- Total Section -->
       <div class="mr-4 py-4 text-right text-foreground">
-        <span class="text-lg font-bold"
-          >{m['cart.total']()}: USD {(subtotal / 1000).toFixed(2)}</span
-        >
+        <span class="text-lg font-bold">{m['cart.total']()}: USD {(total / 1000).toFixed(2)}</span>
       </div>
     {:else}
       <div class="py-8 text-center text-muted-foreground">{m['cart.empty']()}</div>

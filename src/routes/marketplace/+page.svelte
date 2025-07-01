@@ -5,13 +5,13 @@
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
   import { onMount } from 'svelte';
-  import type { GiftCardProduct, Vendor, ProductCategory } from '@baragaun/bg-node-client';
+  import type { GiftCardProduct, Brand, ProductCategory } from '@baragaun/bg-node-client';
   import placeholderImage from '../../assets/images/placeholder.png';
   import { goto } from '$app/navigation';
   import { m } from '@/paraglide/messages';
   import {
     giftCardProductsStore,
-    vendorsStore,
+    brandsStore,
     productCategoriesStore,
     dataLoaded,
   } from '$lib/stores/marketplace-store';
@@ -31,11 +31,11 @@
   }
 
   $: filteredGiftCardProducts = $giftCardProductsStore.filter((giftCardProduct) => {
-    // Filter by search query (vendor name)
-    const matchesVendor = $vendorsStore.some(
-      (vendor) =>
-        vendor.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-        vendor.id === giftCardProduct.vendorId,
+    // Filter by search query (brand name)
+    const matchesBrand = $brandsStore.some(
+      (brand) =>
+        brand.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+        brand.id === giftCardProduct.brandId,
     );
     // Filter by category
     const matchesCategory =
@@ -44,18 +44,18 @@
     const hasDenominations =
       (giftCardProduct.denominations?.length ?? 0) > 0 ||
       giftCardProduct.genericGiftCardId != undefined;
-    return matchesVendor && matchesCategory && hasDenominations;
+    return matchesBrand && matchesCategory && hasDenominations;
   });
 
-  function getVendorForGiftCard(giftCardProduct: GiftCardProduct): Vendor | undefined {
-    return $vendorsStore.find((vendor) => vendor.id === giftCardProduct.vendorId);
+  function getBrandForGiftCard(giftCardProduct: GiftCardProduct): Brand | undefined {
+    return $brandsStore.find((brand) => brand.id === giftCardProduct.brandId);
   }
 
   onMount(async () => {
     const giftCardsresponse = await marketplaceContext.findGiftCardProducts();
     giftCardProductsStore.set(giftCardsresponse as GiftCardProduct[]);
-    const vendorsResponse = await marketplaceContext.findVendors();
-    vendorsStore.set(vendorsResponse as Vendor[]);
+    const brandsResponse = await marketplaceContext.findBrands();
+    brandsStore.set(brandsResponse as Brand[]);
     const productCategoriesResponse = await marketplaceContext.findProductCategories();
     productCategoriesStore.set(productCategoriesResponse as ProductCategory[]);
     dataLoaded.set(true);
@@ -115,21 +115,21 @@
     class="grid max-h-[calc(100vh-220px)] grid-cols-2 gap-4 overflow-y-auto md:grid-cols-3 lg:grid-cols-4"
   >
     {#each filteredGiftCardProducts as giftCardProduct (giftCardProduct.id)}
-      {@const vendor = getVendorForGiftCard(giftCardProduct)}
-      {#if vendor}
+      {@const brand = getBrandForGiftCard(giftCardProduct)}
+      {#if brand}
         <button
           type="button"
           class="group flex flex-col items-center border-0 bg-transparent p-0 text-left transition-all duration-300 hover:scale-105 hover:opacity-90"
           onclick={() => navigateToGiftCardDetail(giftCardProduct.id)}
           onkeydown={(e) => e.key === 'Enter' && navigateToGiftCardDetail(giftCardProduct.id)}
-          aria-label={m['marketplace.view_gift_card_aria']({ vendor: vendor.name })}
+          aria-label={m['marketplace.view_gift_card_aria']({ vendor: brand.name })}
         >
           <div
             class="mb-2 aspect-[4/3] w-full overflow-hidden rounded-xl bg-card shadow-lg transition-all duration-300 group-hover:shadow-xl"
           >
             <img
               src={giftCardImageDomain + '/giftcards/' + giftCardProduct.imageSourceFront}
-              alt={vendor.name}
+              alt={brand.name}
               class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
               onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
             />
@@ -142,14 +142,14 @@
                 class="h-6 w-6 overflow-hidden rounded-full transition-transform duration-300 group-hover:scale-110"
               >
                 <img
-                  src={giftCardImageDomain + '/vendors/' + vendor.logoImageSource}
+                  src={giftCardImageDomain + '/brands/' + brand.logoImageSource}
                   alt=""
                   class="h-full w-full object-cover"
                   onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
                 />
               </div>
             {/if}
-            <span class="text-sm font-medium">{vendor.name}</span>
+            <span class="text-sm font-medium">{brand.name}</span>
           </div>
         </button>
       {/if}

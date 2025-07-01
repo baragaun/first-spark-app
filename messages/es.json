@@ -17,7 +17,8 @@
       "settings": "Configuración",
       "marketplace": "Mercado",
       "cart": "Carrito",
-      "wallet": "Billetera"
+      "wallet": "Billetera",
+      "order_history": "historial de pedidos"
     }
   },
   "nav": {
