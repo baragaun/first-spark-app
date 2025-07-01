@@ -14,6 +14,9 @@
     DropdownMenuTrigger,
   } from '$lib/components/ui/dropdown-menu';
   import AvatarMenu from '$lib/components/layout/nav-bar/avatar-menu.svelte';
+  import { goto } from '$app/navigation';
+  import { orderHistoryStore, orderHistoryLoaded } from '$lib/stores/order-history';
+  import { get } from 'svelte/store';
 
   let purchaseOrders = $state<PurchaseOrder[]>([]);
   let isLoading = $state(true);
@@ -29,11 +32,18 @@
 
   onMount(async () => {
     isLoading = true;
-    const result = await marketplaceContext.findPurchaseOrders();
-    if (result && typeof result !== 'string') {
-      purchaseOrders = result;
+    if (!get(orderHistoryLoaded)) {
+      const result = await marketplaceContext.findPurchaseOrders();
+      if (result && typeof result !== 'string') {
+        orderHistoryStore.set(result);
+        orderHistoryLoaded.set(true);
+        purchaseOrders = result;
+      } else {
+        console.error('Failed to fetch purchase orders:', result);
+      }
     } else {
-      console.error('Failed to fetch purchase orders:', result);
+      const storeValue = get(orderHistoryStore);
+      purchaseOrders = storeValue || [];
     }
     isLoading = false;
   });
@@ -55,15 +65,14 @@
       <Label for="filter" class="text-sm text-muted-foreground">Filter</Label>
       <DropdownMenu>
         <DropdownMenuTrigger>
-          <Button
-            variant="outline"
-            class="mt-1 w-full justify-between border-0 border-b-2 border-gray-200 bg-transparent px-1 shadow-none focus-visible:ring-0 dark:border-gray-700"
+          <button
+            class="mt-1 flex w-full items-center justify-between border-0 border-b-2 border-gray-200 bg-background px-1 shadow-none focus-visible:ring-0 dark:border-gray-700"
           >
             {filterStatus}
             <ChevronRight class="h-4 w-4 -rotate-90" />
-          </Button>
+          </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent class="w-[--radix-dropdown-menu-trigger-width]">
+        <DropdownMenuContent class="w-[--radix-dropdown-menu-trigger-width] bg-background">
           <DropdownMenuItem onclick={() => (filterStatus = 'All Orders')}
             >All Orders</DropdownMenuItem
           >
@@ -83,7 +92,11 @@
         </div>
       {:else if filteredOrders.length > 0}
         {#each filteredOrders as order, i (order.id)}
-          <div class="flex items-center justify-between py-4">
+          <button
+            type="button"
+            class="flex w-full cursor-pointer items-center justify-between rounded py-4 text-left transition"
+            onclick={() => goto(`/order-history/${order.id}`)}
+          >
             <div>
               <p class="text-gray-600 dark:text-gray-400">
                 Order Placed: {formatDate(order.createdAt)}
@@ -98,7 +111,7 @@
               </p>
             </div>
             <ChevronRight class="h-5 w-5 text-gray-400" />
-          </div>
+          </button>
           {#if i < filteredOrders.length - 1}
             <Separator />
           {/if}

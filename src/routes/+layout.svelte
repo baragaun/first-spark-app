@@ -14,7 +14,9 @@
 
   let { children } = $props();
   let hideNavBar: boolean = $derived(
-    page.url.pathname.startsWith('/marketplace/') || page.url.pathname.startsWith('/wallet/'),
+    page.url.pathname.startsWith('/marketplace/') ||
+      page.url.pathname.startsWith('/wallet/') ||
+      page.url.pathname.startsWith('/order-history/'),
   );
 </script>
 
