@@ -328,6 +328,33 @@ export class MarketplaceContext {
       isLoading = false;
     }
   }
+
+  async archiveWalletItem(id: string, archived: boolean): Promise<QueryResult<WalletItem>> {
+    if (!this.client.isInitialized) {
+      console.error('MarketplaceContext.archiveWalletItem: not initialized.');
+      return { error: translate(AppUiMessage.systemError) };
+    }
+    try {
+      isLoading = true;
+      const response = await this.client.operations.walletItem.updateWalletItem({
+        id,
+        archivedAt: archived ? new Date().toISOString() : null,
+      });
+      if (!response || response.error) {
+        console.error('archiveWalletItem: received error.', { response });
+        return { error: response.error || translate(AppUiMessage.systemError) };
+      }
+      return response;
+    } catch (error) {
+      console.error('archiveWalletItem: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return { error: translate(AppUiMessage.systemError) };
+    } finally {
+      isLoading = false;
+    }
+  }
 }
 
 // Create a singleton instance
