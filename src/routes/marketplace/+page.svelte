@@ -142,7 +142,7 @@
                 class="h-6 w-6 overflow-hidden rounded-full transition-transform duration-300 group-hover:scale-110"
               >
                 <img
-                  src={giftCardImageDomain + '/brands/' + brand.logoImageSource}
+                  src={giftCardImageDomain + '/vendors/' + brand.logoImageSource}
                   alt=""
                   class="h-full w-full object-cover"
                   onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
