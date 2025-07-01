@@ -287,7 +287,7 @@
           class="mb-4 flex h-40 w-40 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-lg"
         >
           <img
-            src={giftCardImageDomain + '/brands/' + $brand.logoImageSource}
+            src={giftCardImageDomain + '/vendors/' + $brand.logoImageSource}
             alt={$brand.name}
             class="h-full w-full object-contain"
             onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}

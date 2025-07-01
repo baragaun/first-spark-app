@@ -230,30 +230,6 @@ export class MarketplaceContext {
     }
   }
 
-  async emptyMyShoppingCart(): Promise<QueryResult<void>> {
-    if (!this.client.isInitialized) {
-      console.error('MarketplaceContext.emptyMyShoppingCart: not initialized.');
-      return { error: translate(AppUiMessage.systemError) };
-    }
-    try {
-      isLoading = true;
-      const response = await this.client.operations.shoppingCart.emptyMyShoppingCart();
-      if (!response || response.error) {
-        console.error('emptyMyShoppingCart: received error.', { response });
-        return { error: response.error || translate(AppUiMessage.systemError) };
-      }
-      return response;
-    } catch (error) {
-      console.error('emptyMyShoppingCart: error', {
-        error: (error as Error).message,
-        stack: (error as Error).stack,
-      });
-      return { error: translate(AppUiMessage.systemError) };
-    } finally {
-      isLoading = false;
-    }
-  }
-
   async createPurchaseOrder(
     props: Partial<PurchaseOrder>, // Replace 'any' with the correct type if available
   ): Promise<QueryResult<PurchaseOrder>> {

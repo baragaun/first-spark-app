@@ -129,7 +129,6 @@
         toast.success('Purchase order created!');
         // Clear the cart
         cartItems = [];
-        // await marketplaceContext.emptyMyShoppingCart();
         showOrderPlacedDialog = true;
       }
     });
