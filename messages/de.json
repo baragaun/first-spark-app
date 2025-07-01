@@ -336,5 +336,28 @@
     "pin": "PIN",
     "submit": "EINREICHEN",
     "loading": "Kartendetails werden abgerufen..."
+  },
+  "order_history": {
+    "title": "Bestellverlauf",
+    "filter": "Filter",
+    "all_orders": "Alle Bestellungen",
+    "delivered": "Geliefert",
+    "processing": "In Bearbeitung",
+    "order_placed": "Bestellung aufgegeben: {date}",
+    "total": "Gesamt: ${amount}",
+    "status": "Status: {status}",
+    "no_orders": "Keine Bestellungen entsprechen dem Filter.",
+    "order": "Bestellung",
+    "type": "Typ",
+    "type_purchase": "Kauf",
+    "paid_with": "Bezahlt mit",
+    "paid_with_credit_card": "Kreditkarte",
+    "reference_id": "Referenz-ID",
+    "open": "ÖFFNEN",
+    "id": "ID",
+    "brand": "Marke",
+    "purchase_date": "Kaufdatum",
+    "amount": "Betrag",
+    "not_found": "Bestellung nicht gefunden."
   }
 }

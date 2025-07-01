@@ -12,6 +12,7 @@
   import { get } from 'svelte/store';
   import { giftCardProductsStore, brandsStore, dataLoaded } from '@/stores/marketplace-store';
   import { giftCardImageDomain } from '$lib/constants';
+  import { m } from '@/paraglide/messages';
 
   let order: PurchaseOrder | undefined;
   let isLoading = true;
@@ -70,7 +71,7 @@
   <button onclick={() => history.back()} class="flex items-center">
     <ArrowLeft class="h-6 w-6" />
   </button>
-  <span class="flex-1 text-center text-lg font-semibold">Order</span>
+  <span class="flex-1 text-center text-lg font-semibold">{m['order_history.order']()}</span>
 </div>
 
 <div class="container mx-auto px-4 py-6">
@@ -81,13 +82,15 @@
   {:else if order}
     <div class="mb-8">
       <div class="mb-1 text-lg font-semibold">{order?.shoppingCartId}</div>
-      <div class="text-sm text-muted-foreground">Type</div>
-      <div class="mb-2 font-bold">Purchase</div>
-      <div class="text-sm text-muted-foreground">Paid with</div>
-      <div class="mb-2 font-bold">Credit Card</div>
-      <div class="text-sm text-muted-foreground">Reference ID</div>
+      <div class="text-sm text-muted-foreground">{m['order_history.type']()}</div>
+      <div class="mb-2 font-bold">{m['order_history.type_purchase']()}</div>
+      <div class="text-sm text-muted-foreground">{m['order_history.paid_with']()}</div>
+      <div class="mb-2 font-bold">{m['order_history.paid_with_credit_card']()}</div>
+      <div class="text-sm text-muted-foreground">{m['order_history.reference_id']()}</div>
       <div class="mb-2 break-all font-bold">{order.id}</div>
-      <Button variant="outline" class="border-primary text-primary">OPEN</Button>
+      <Button variant="outline" class="border-primary text-primary"
+        >{m['order_history.open']()}</Button
+      >
     </div>
 
     {#each order.items as item}
@@ -95,7 +98,9 @@
       <div class="mb-8">
         <div class="mb-2 flex items-center">
           <span class="mr-2 text-2xl">🎁</span>
-          <span class="text-lg font-semibold text-muted-foreground">Purchase</span>
+          <span class="text-lg font-semibold text-muted-foreground"
+            >{m['order_history.type_purchase']()}</span
+          >
         </div>
         <img
           src={giftCardImageDomain + '/giftcards/' + product?.imageSourceFront}
@@ -103,18 +108,20 @@
           class="mb-2 h-24 w-40 rounded object-cover shadow"
           onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
         />
-        <div class="text-sm text-muted-foreground">ID</div>
+        <div class="text-sm text-muted-foreground">{m['order_history.id']()}</div>
         <div class="mb-2 break-all font-bold">{item.id}</div>
-        <div class="text-sm text-muted-foreground">Brand</div>
+        <div class="text-sm text-muted-foreground">{m['order_history.brand']()}</div>
         <div class="mb-2 font-bold">{brand?.name}</div>
-        <div class="text-sm text-muted-foreground">Purchase Date</div>
+        <div class="text-sm text-muted-foreground">{m['order_history.purchase_date']()}</div>
         <div class="mb-2 font-bold">{formatDateTime(item.createdAt)}</div>
-        <div class="text-sm text-muted-foreground">Amount</div>
+        <div class="text-sm text-muted-foreground">{m['order_history.amount']()}</div>
         <div class="mb-2 font-bold">${(item.price / 1000).toFixed(0)}</div>
-        <Button variant="outline" class="border-primary text-primary">OPEN</Button>
+        <Button variant="outline" class="border-primary text-primary"
+          >{m['order_history.open']()}</Button
+        >
       </div>
     {/each}
   {:else}
-    <div class="text-center text-muted-foreground">Order not found.</div>
+    <div class="text-center text-muted-foreground">{m['order_history.not_found']()}</div>
   {/if}
 </div>
