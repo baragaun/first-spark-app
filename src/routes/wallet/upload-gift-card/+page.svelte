@@ -10,9 +10,9 @@
   import { uploadedCard } from '@/stores/uploaded-card';
   import { m } from '@/paraglide/messages';
   import { Input } from '$lib/components/ui/input';
+  import { giftCardImageDomain } from '$lib/constants';
 
   let search = '';
-  const giftCardImageDomain = 'https://d27wpajtnol6ce.cloudfront.net';
 
   $: filteredProducts = $giftCardProductsStore.filter((product) => {
     const vendor = $brandsStore.find((v) => v.id === product.brandId);

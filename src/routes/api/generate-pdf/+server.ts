@@ -1,3 +1,4 @@
+import { giftCardImageDomain } from '$lib/constants';
 import chromium from '@sparticuz/chromium';
 import type { RequestHandler } from '@sveltejs/kit';
 import puppeteer from 'puppeteer-core';
@@ -41,7 +42,7 @@ export const POST: RequestHandler = async ({ request }) => {
             <h1>${walletItemProduct.name || 'Gift Card'}</h1>
             <img class="card-image" src="${
               walletItemProduct.imageSourceFront
-                ? `https://d27wpajtnol6ce.cloudfront.net/giftcards/${walletItemProduct.imageSourceFront}`
+                ? `${giftCardImageDomain}/giftcards/${walletItemProduct.imageSourceFront}`
                 : 'placeholder-image-url'
             }" />
             <div class="balance">Balance: $${walletItemProduct.balance / 100}</div>

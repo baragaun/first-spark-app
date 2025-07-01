@@ -13,6 +13,7 @@
   import Tesseract from 'tesseract.js';
   import { m } from '@/paraglide/messages';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
+  import { giftCardImageDomain } from '@/constants';
 
   // Tabs and wallet items
   let activeTab = $state<string>('Active');
@@ -249,7 +250,7 @@
         >
           <div class="mb-4 flex flex-shrink-0">
             <img
-              src={'https://d27wpajtnol6ce.cloudfront.net/giftcards/' + item.imageSourceFront}
+              src={giftCardImageDomain + '/giftcards/' + item.imageSourceFront}
               alt={item.imageSourceFront}
               class="mr-4 w-32 rounded-lg object-cover transition-transform duration-300 group-hover:scale-110"
               onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}

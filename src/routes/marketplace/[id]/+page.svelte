@@ -18,10 +18,9 @@
   import { derived } from 'svelte/store';
   import { toast } from 'svelte-sonner';
   import { goto } from '$app/navigation';
+  import { giftCardImageDomain } from '$lib/constants';
 
   const giftCardId = $page.params.id;
-  const giftCardImageDomain = 'https://d27wpajtnol6ce.cloudfront.net';
-
   // Create derived stores for the specific gift card and brand
   const giftCardProduct = derived([giftCardProductsStore, dataLoaded], ([$products, $loaded]) => {
     if (!$loaded) return null;
