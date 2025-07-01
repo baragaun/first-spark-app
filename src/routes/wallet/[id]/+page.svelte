@@ -26,6 +26,14 @@
   let selectedTab = $state('use');
   let isBarcodeViewOpen = $state(false);
 
+  const brand = derived(
+    [brandsStore, walletItemProduct],
+    ([$brands, $product]) => {
+      if (!$product) return null;
+      return $brands.find((v) => v.id === $product.brandId) || null;
+    },
+  );
+
   onMount(async () => {
     try {
       isLoading = true;
@@ -272,8 +280,8 @@
           class="mb-4 flex h-40 w-40 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-lg"
         >
           <img
-            src={giftCardImageDomain + '/brands/' + $walletItemProduct.imageSourceBack}
-            alt={$walletItemProduct.name}
+            src={giftCardImageDomain + '/vendors/' + $brand?.logoImageSource}
+            alt={$brand?.name}
             class="h-full w-full object-contain"
             onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
           />
