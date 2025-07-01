@@ -26,9 +26,6 @@
   let selectedTab = $state('use');
   let isBarcodeViewOpen = $state(false);
 
-  const barcodeValue = '5045 0794 5057 847';
-  const pin = '5749';
-
   onMount(async () => {
     try {
       isLoading = true;
@@ -48,7 +45,7 @@
 
   const barcodeFormat = $walletItemProduct?.barcodeFormat || 'CODE39';
 
-  const barcodeApiUrl = `https://barcodeapi.org/api/${barcodeFormat === 'QR_CODE' ? 'qr' : 'code39'}/${encodeURIComponent(barcodeValue)}`;
+  const barcodeApiUrl = `https://barcodeapi.org/api/${barcodeFormat === 'QR_CODE' ? 'qr' : 'code39'}/${encodeURIComponent($walletItemProduct?.code || '')}`;
 
   function backAndClose() {
     if (isBarcodeViewOpen) {
@@ -58,9 +55,15 @@
     }
   }
 
-  function handlePrintPdf() {
+  async function archiveWalletItem() {
     if (!$walletItemProduct) return;
-    downloadPdf($walletItemProduct, barcodeValue, pin);
+    await marketplaceContext.archiveWalletItem($walletItemProduct.id, !$walletItemProduct?.archivedAt);
+    history.back();
+  }
+
+  function handlePrintPdf() {
+    if (!$walletItemProduct || !$walletItemProduct.code || !$walletItemProduct.pin) return;
+    downloadPdf($walletItemProduct, $walletItemProduct.code, $walletItemProduct.pin);
   }
 </script>
 
@@ -138,7 +141,7 @@
           <span class="text-xs text-gray-500">{m['wallet.gift-card.print']()}</span>
         </div>
         <div class="flex flex-col items-center">
-          <Button variant="ghost" size="icon"><Archive aria-label="Archive" /></Button>
+          <Button variant="ghost" size="icon" onclick={archiveWalletItem}><Archive aria-label="Archive" /></Button>
           <span class="text-xs text-gray-500">{m['wallet.gift-card.archive']()}</span>
         </div>
       </div>
@@ -200,7 +203,7 @@
         >
 
         <!-- Card Code and PIN -->
-        {#if barcodeValue}
+        {#if $walletItemProduct.code}
           <div class="mt-4 flex flex-col items-center">
             <img src={barcodeApiUrl} class="barcode" alt="Barcode" />
           </div>
@@ -217,7 +220,7 @@
           >
         </div>
 
-        <h class="mt-4 text-xl text-black">{pin}</h>
+        <h class="mt-4 text-xl text-black">{$walletItemProduct.pin}</h>
         <p class="text-sm text-gray-400">Card PIN</p>
         <Button size="sm" class="mt-2 h-8 rounded-full bg-primary text-primary-foreground"
           >{m['wallet.gift-card.copy_pin']()}</Button
