@@ -2,17 +2,12 @@
   import { onMount } from 'svelte';
   import type { PurchaseOrder } from '@baragaun/bg-node-client';
   import { marketplaceContext } from '$lib/contexts/marketplace-context.svelte';
-  import { ArrowLeft, ChevronRight } from 'lucide-svelte';
+  import { ArrowLeft, ChevronRight, ChevronDown } from 'lucide-svelte';
   import { Button } from '$lib/components/ui/button';
   import { Label } from '$lib/components/ui/label';
   import { Separator } from '$lib/components/ui/separator';
   import SpinLoadIndicator from '$lib/components/forms/spin-load-indicator.svelte';
-  import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-  } from '$lib/components/ui/dropdown-menu';
+  import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
   import AvatarMenu from '$lib/components/layout/nav-bar/avatar-menu.svelte';
   import { goto } from '$app/navigation';
   import { orderHistoryStore, orderHistoryLoaded } from '$lib/stores/order-history';
@@ -62,30 +57,39 @@
   </header>
 
   <main class="flex-1 overflow-y-auto bg-gray-100 p-4 dark:bg-gray-900">
-    <div class="mb-4 bg-white p-4 dark:bg-background">
-      <Label for="filter" class="text-sm text-muted-foreground">{m['order_history.filter']()}</Label
-      >
-      <DropdownMenu>
-        <DropdownMenuTrigger>
-          <button
-            class="mt-1 flex w-full items-center justify-between border-0 border-b-2 border-gray-200 bg-background px-1 shadow-none focus-visible:ring-0 dark:border-gray-700"
-          >
+    <div
+      class="relative mb-3 rounded-xl bg-gradient-to-r from-kcu-lime via-kcu-glacier to-kcu-juniper p-[2px]"
+    >
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger class="w-full">
+          <Button variant="outline" class="w-full justify-between rounded-xl hover:bg-transparent">
             {filterStatus}
-            <ChevronRight class="h-4 w-4 -rotate-90" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent class="w-[--radix-dropdown-menu-trigger-width] bg-background">
-          <DropdownMenuItem onclick={() => (filterStatus = m['order_history.all_orders']())}
-            >{m['order_history.all_orders']()}</DropdownMenuItem
+            <ChevronDown class="h-4 w-4" />
+          </Button>
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Content
+          class="let-10 relative max-h-[300px] w-full overflow-y-auto bg-background"
+        >
+          <DropdownMenu.Item
+            onclick={() => (filterStatus = m['order_history.all_orders']())}
+            class="cursor-pointer"
           >
-          <DropdownMenuItem onclick={() => (filterStatus = m['order_history.delivered']())}
-            >{m['order_history.delivered']()}</DropdownMenuItem
+            {m['order_history.all_orders']()}
+          </DropdownMenu.Item>
+          <DropdownMenu.Item
+            onclick={() => (filterStatus = m['order_history.delivered']())}
+            class="cursor-pointer"
           >
-          <DropdownMenuItem onclick={() => (filterStatus = m['order_history.processing']())}
-            >{m['order_history.processing']()}</DropdownMenuItem
+            {m['order_history.delivered']()}
+          </DropdownMenu.Item>
+          <DropdownMenu.Item
+            onclick={() => (filterStatus = m['order_history.processing']())}
+            class="w-full cursor-pointer"
           >
-        </DropdownMenuContent>
-      </DropdownMenu>
+            {m['order_history.processing']()}
+          </DropdownMenu.Item>
+        </DropdownMenu.Content>
+      </DropdownMenu.Root>
     </div>
 
     <div class="space-y-1 bg-white p-4 dark:bg-background">
