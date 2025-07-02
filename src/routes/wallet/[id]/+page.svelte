@@ -65,8 +65,16 @@
 
   async function archiveWalletItem() {
     if (!$walletItemProduct) return;
-    await marketplaceContext.archiveWalletItem($walletItemProduct.id, !$walletItemProduct?.archivedAt);
-    history.back();
+    await marketplaceContext.archiveWalletItem($walletItemProduct.id, !$walletItemProduct?.archivedAt).then(() => {
+      walletItemsStore.update((items) => {
+        return items.map((item) => {
+          if (item.id === $walletItemProduct?.id) {
+            item.archivedAt = $walletItemProduct?.archivedAt ? null : new Date().toISOString();
+          }
+          return item;
+        });
+      });
+    });
   }
 
   function handlePrintPdf() {
@@ -150,7 +158,7 @@
         </div>
         <div class="flex flex-col items-center">
           <Button variant="ghost" size="icon" onclick={archiveWalletItem}><Archive aria-label="Archive" /></Button>
-          <span class="text-xs text-gray-500">{m['wallet.gift-card.archive']()}</span>
+          <span class="text-xs text-gray-500">{$walletItemProduct.archivedAt ? m['wallet.gift-card.unarchive']() : m['wallet.gift-card.archive']()}</span>
         </div>
       </div>
       <span class="ml-2 flex flex-grow items-center justify-end">

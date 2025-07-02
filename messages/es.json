@@ -318,6 +318,7 @@
       "amount": "Monto",
       "print": "Imprimir",
       "archive": "Archivado",
+      "unarchive": "Desarchivar",
       "use": "Usar",
       "info": "Información",
       "look_up_balance": "Consultar saldo",
