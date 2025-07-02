@@ -316,6 +316,7 @@
       "amount": "Betrag",
       "print": "Drucken",
       "archive": "Archiviert",
+      "unarchive": "Wiederherstellen",
       "use": "Verwenden",
       "info": "Info",
       "look_up_balance": "Guthaben abfragen",

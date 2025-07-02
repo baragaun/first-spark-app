@@ -318,6 +318,7 @@
       "amount": "Amount",
       "print": "Print",
       "archive": "Archived",
+      "unarchive": "Unarchive",
       "use": "Use",
       "info": "Info",
       "look_up_balance": "Look up balance",
