@@ -13,6 +13,7 @@
   import { giftCardProductsStore, brandsStore, dataLoaded } from '@/stores/marketplace-store';
   import { giftCardImageDomain } from '$lib/constants';
   import { m } from '@/paraglide/messages';
+  import { ShoppingBag, GiftIcon } from 'lucide-svelte';
 
   let order: PurchaseOrder | undefined;
   let isLoading = true;
@@ -80,6 +81,12 @@
       <SpinLoadIndicator />
     </div>
   {:else if order}
+    <div class="mb-2 flex items-center">
+      <ShoppingBag size={24} color="#005f61" />
+      <span class="pl-2 text-lg font-semibold text-muted-foreground"
+        >{m['order_history.order']()}</span
+      >
+    </div>
     <div class="mb-8">
       <div class="mb-1 text-lg font-semibold">{order?.shoppingCartId}</div>
       <div class="text-sm text-muted-foreground">{m['order_history.type']()}</div>
@@ -88,17 +95,14 @@
       <div class="mb-2 font-bold">{m['order_history.paid_with_credit_card']()}</div>
       <div class="text-sm text-muted-foreground">{m['order_history.reference_id']()}</div>
       <div class="mb-2 break-all font-bold">{order.id}</div>
-      <Button variant="outline" class="border-primary text-primary"
-        >{m['order_history.open']()}</Button
-      >
     </div>
 
     {#each order.items as item}
       {@const [product, brand] = findProductAndBrand(item.productId)}
       <div class="mb-8">
         <div class="mb-2 flex items-center">
-          <span class="mr-2 text-2xl">🎁</span>
-          <span class="text-lg font-semibold text-muted-foreground"
+          <GiftIcon size={24} color="#005f61" />
+          <span class="pl-2 text-lg font-semibold text-muted-foreground"
             >{m['order_history.type_purchase']()}</span
           >
         </div>
@@ -116,8 +120,10 @@
         <div class="mb-2 font-bold">{formatDateTime(item.createdAt)}</div>
         <div class="text-sm text-muted-foreground">{m['order_history.amount']()}</div>
         <div class="mb-2 font-bold">${(item.price / 1000).toFixed(0)}</div>
-        <Button variant="outline" class="border-primary text-primary"
-          >{m['order_history.open']()}</Button
+        <Button
+          variant="outline"
+          onclick={() => goto(`/wallet/${item?.id}`)}
+          class="h-8 rounded-xl border-primary text-primary">{m['order_history.open']()}</Button
         >
       </div>
     {/each}

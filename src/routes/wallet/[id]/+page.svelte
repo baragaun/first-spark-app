@@ -26,13 +26,10 @@
   let selectedTab = $state('use');
   let isBarcodeViewOpen = $state(false);
 
-  const brand = derived(
-    [brandsStore, walletItemProduct],
-    ([$brands, $product]) => {
-      if (!$product) return null;
-      return $brands.find((v) => v.id === $product.brandId) || null;
-    },
-  );
+  const brand = derived([brandsStore, walletItemProduct], ([$brands, $product]) => {
+    if (!$product) return null;
+    return $brands.find((v) => v.id === $product.brandId) || null;
+  });
 
   onMount(async () => {
     try {
@@ -65,16 +62,18 @@
 
   async function archiveWalletItem() {
     if (!$walletItemProduct) return;
-    await marketplaceContext.archiveWalletItem($walletItemProduct.id, !$walletItemProduct?.archivedAt).then(() => {
-      walletItemsStore.update((items) => {
-        return items.map((item) => {
-          if (item.id === $walletItemProduct?.id) {
-            item.archivedAt = $walletItemProduct?.archivedAt ? null : new Date().toISOString();
-          }
-          return item;
+    await marketplaceContext
+      .archiveWalletItem($walletItemProduct.id, !$walletItemProduct?.archivedAt)
+      .then(() => {
+        walletItemsStore.update((items) => {
+          return items.map((item) => {
+            if (item.id === $walletItemProduct?.id) {
+              item.archivedAt = $walletItemProduct?.archivedAt ? null : new Date().toISOString();
+            }
+            return item;
+          });
         });
       });
-    });
   }
 
   function handlePrintPdf() {
@@ -157,8 +156,14 @@
           <span class="text-xs text-gray-500">{m['wallet.gift-card.print']()}</span>
         </div>
         <div class="flex flex-col items-center">
-          <Button variant="ghost" size="icon" onclick={archiveWalletItem}><Archive aria-label="Archive" /></Button>
-          <span class="text-xs text-gray-500">{$walletItemProduct.archivedAt ? m['wallet.gift-card.unarchive']() : m['wallet.gift-card.archive']()}</span>
+          <Button variant="ghost" size="icon" onclick={archiveWalletItem}
+            ><Archive aria-label="Archive" /></Button
+          >
+          <span class="text-xs text-gray-500"
+            >{$walletItemProduct.archivedAt
+              ? m['wallet.gift-card.unarchive']()
+              : m['wallet.gift-card.archive']()}</span
+          >
         </div>
       </div>
       <span class="ml-2 flex flex-grow items-center justify-end">
@@ -202,10 +207,10 @@
         <div class="flex items-end justify-center">
           <p class="mr-2 text-xl text-gray-400">USD</p>
           <span class="text-400 text-5xl font-semibold text-foreground">
-            {($walletItemProduct.balance / 100).toFixed(0)}
+            {($walletItemProduct.balance / 1000).toFixed(0)}
           </span>
           <span class="text-lg font-semibold text-foreground">
-            .{($walletItemProduct.balance / 100).toFixed(2).split('.')[1]}
+            .{($walletItemProduct.balance / 1000).toFixed(2).split('.')[1]}
           </span>
         </div>
         <p class="text-sm text-gray-400">
