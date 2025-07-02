@@ -259,7 +259,7 @@
               <span class="text-base font-medium text-foreground">{item.name ? item.name : ''}</span
               >
               <span class="text-lg font-bold text-muted-foreground"
-                >${(item.balance / 100).toFixed(2)}</span
+                >${(item.balance / 1000).toFixed(2)}</span
               >
               <span class="text-sm text-muted-foreground">
                 {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : ''}</span
