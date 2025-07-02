@@ -68,7 +68,7 @@
           </Button>
         </DropdownMenu.Trigger>
         <DropdownMenu.Content
-          class="let-10 relative max-h-[300px] w-full overflow-y-auto bg-background"
+          class="relative w-full max-h-[300px] overflow-y-auto bg-background"
         >
           <DropdownMenu.Item
             onclick={() => (filterStatus = m['order_history.all_orders']())}
@@ -84,7 +84,7 @@
           </DropdownMenu.Item>
           <DropdownMenu.Item
             onclick={() => (filterStatus = m['order_history.processing']())}
-            class="w-full cursor-pointer"
+            class="cursor-pointer"
           >
             {m['order_history.processing']()}
           </DropdownMenu.Item>
