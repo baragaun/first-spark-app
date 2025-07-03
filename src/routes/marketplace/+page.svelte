@@ -21,30 +21,33 @@
   // Initialize the mobile detector
   const isMobile = new IsMobile();
 
-  let searchQuery = '';
-  let selectedCategory: ProductCategory | 'All' = 'All';
+  let searchQuery = $state('');
+  let selectedCategory = $state<ProductCategory | 'All'>('All');
 
   function navigateToGiftCardDetail(giftCardId: string | null | undefined) {
     if (!giftCardId) return;
     goto(`/marketplace/${giftCardId}`);
   }
 
-  $: filteredGiftCardProducts = $giftCardProductsStore.filter((giftCardProduct) => {
-    // Filter by search query (brand name)
-    const matchesBrand = $brandsStore.some(
-      (brand) =>
-        brand.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-        brand.id === giftCardProduct.brandId,
-    );
-    // Filter by category
-    const matchesCategory =
-      selectedCategory === 'All' || giftCardProduct.categories?.includes(selectedCategory.importId);
+  let filteredGiftCardProducts = $derived(
+    $giftCardProductsStore.filter((giftCardProduct) => {
+      // Filter by search query (brand name)
+      const matchesBrand = $brandsStore.some(
+        (brand) =>
+          brand.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+          brand.id === giftCardProduct.brandId,
+      );
+      // Filter by category
+      const matchesCategory =
+        selectedCategory === 'All' ||
+        giftCardProduct.categories?.includes(selectedCategory.importId);
 
-    const hasDenominations =
-      (giftCardProduct.denominations?.length ?? 0) > 0 ||
-      giftCardProduct.genericGiftCardId != undefined;
-    return matchesBrand && matchesCategory && hasDenominations;
-  });
+      const hasDenominations =
+        (giftCardProduct.denominations?.length ?? 0) > 0 ||
+        giftCardProduct.genericGiftCardId != undefined;
+      return matchesBrand && matchesCategory && hasDenominations;
+    }),
+  );
 
   function getBrandForGiftCard(giftCardProduct: GiftCardProduct): Brand | undefined {
     return $brandsStore.find((brand) => brand.id === giftCardProduct.brandId);
