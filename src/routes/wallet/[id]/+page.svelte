@@ -14,6 +14,7 @@
   import { downloadPdf } from '@/utils/pdf-utils';
   import { m } from '@/paraglide/messages';
   import { giftCardImageDomain } from '$lib/constants';
+  import { goto } from '$app/navigation';
 
   const walletCardId = $page.params.id;
 
@@ -80,6 +81,10 @@
     if (!$walletItemProduct || !$walletItemProduct.code || !$walletItemProduct.pin) return;
     downloadPdf($walletItemProduct, $walletItemProduct.code, $walletItemProduct.pin);
   }
+
+  function sendGiftCard() {
+    goto(`/wallet/send-gift`);
+  }
 </script>
 
 <!-- Header Bar -->
@@ -136,7 +141,7 @@
     <div class="flex items-center border-b bg-gray-50 px-4 py-2">
       <div class="flex gap-2">
         <div class="flex flex-col items-center">
-          <Button variant="ghost" size="icon"><Gift aria-label="Gift" /></Button>
+          <Button variant="ghost" size="icon" onclick={sendGiftCard}><Gift aria-label="Gift" /></Button>
           <span class="text-xs text-gray-500">{m['wallet.gift-card.gift']()}</span>
         </div>
         <div class="flex flex-col items-center">
