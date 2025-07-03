@@ -58,7 +58,7 @@
   }
 
   function findProductAndBrand(
-    productId: String,
+    productId: string,
   ): [GiftCardProduct | undefined, Brand | undefined] {
     const product = $giftCardProductsStore.find((product) => product.id === productId);
     const brand = $brandsStore.find((b) => b.id === product?.brandId);
