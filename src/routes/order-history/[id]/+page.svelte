@@ -14,6 +14,7 @@
   import { giftCardImageDomain } from '$lib/constants';
   import { m } from '@/paraglide/messages';
   import { ShoppingBag, GiftIcon } from 'lucide-svelte';
+  import { walletItemsStore } from '@/stores/wallet-store';
 
   let order: PurchaseOrder | undefined;
   let isLoading = true;
@@ -63,6 +64,15 @@
     const product = $giftCardProductsStore.find((product) => product.id === productId);
     const brand = $brandsStore.find((b) => b.id === product?.brandId);
     return [product, brand];
+  }
+
+  function navigateToWalletItemDetailScreen(purchaseOrderItemId: string) {
+    const walletItem = $walletItemsStore.find(
+      (item) => item.purchaseOrderItemId == purchaseOrderItemId,
+    );
+    if (walletItem != undefined && walletItem != null) {
+      goto(`/wallet/${walletItem?.id}`);
+    }
   }
 </script>
 
@@ -122,7 +132,7 @@
         <div class="mb-2 font-bold">${(item.price / 1000).toFixed(0)}</div>
         <Button
           variant="outline"
-          onclick={() => goto(`/wallet/${item?.id}`)}
+          onclick={() => navigateToWalletItemDetailScreen(item.id)}
           class="h-8 rounded-xl border-primary text-primary">{m['order_history.open']()}</Button
         >
       </div>
