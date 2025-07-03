@@ -13,6 +13,7 @@
   import { orderHistoryStore, orderHistoryLoaded } from '$lib/stores/order-history';
   import { get } from 'svelte/store';
   import { m } from '@/paraglide/messages';
+  import * as Select from '$lib/components/ui/select/index.js';
 
   let purchaseOrders = $state<PurchaseOrder[]>([]);
   let isLoading = $state(true);
@@ -49,6 +50,12 @@
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US');
   }
+
+  const statusOptions = [
+    m['order_history.all_orders'](),
+    m['order_history.delivered'](),
+    m['order_history.processing'](),
+  ];
 </script>
 
 <div class="container mx-auto px-4 py-6">
@@ -57,37 +64,17 @@
   </header>
 
   <main class="flex-1 overflow-y-auto bg-gray-100 p-4 dark:bg-gray-900">
-    <div
-      class="relative mb-3 rounded-xl bg-gradient-to-r from-kcu-lime via-kcu-glacier to-kcu-juniper p-[2px]"
-    >
-      <DropdownMenu.Root>
-        <DropdownMenu.Trigger class="w-full">
-          <Button variant="outline" class="w-full justify-between rounded-xl hover:bg-transparent">
-            {filterStatus}
-            <ChevronDown class="h-4 w-4" />
-          </Button>
-        </DropdownMenu.Trigger>
-        <DropdownMenu.Content class="relative max-h-[300px] w-full overflow-y-auto bg-background">
-          <DropdownMenu.Item
-            onclick={() => (filterStatus = m['order_history.all_orders']())}
-            class="cursor-pointer"
-          >
-            {m['order_history.all_orders']()}
-          </DropdownMenu.Item>
-          <DropdownMenu.Item
-            onclick={() => (filterStatus = m['order_history.delivered']())}
-            class="cursor-pointer"
-          >
-            {m['order_history.delivered']()}
-          </DropdownMenu.Item>
-          <DropdownMenu.Item
-            onclick={() => (filterStatus = m['order_history.processing']())}
-            class="cursor-pointer"
-          >
-            {m['order_history.processing']()}
-          </DropdownMenu.Item>
-        </DropdownMenu.Content>
-      </DropdownMenu.Root>
+    <div class="relative mb-3 rounded-xl p-[2px]">
+      <Select.Root type="single" bind:value={filterStatus}>
+        <Select.Trigger class="w-full rounded-2xl bg-black/5 dark:bg-background">
+          {filterStatus}
+        </Select.Trigger>
+        <Select.Content class="w-full rounded-2xl bg-white dark:bg-background">
+          {#each statusOptions as option}
+            <Select.Item value={option} class="rounded-xl">{option}</Select.Item>
+          {/each}
+        </Select.Content>
+      </Select.Root>
     </div>
 
     <div class="space-y-1 bg-white p-4 dark:bg-background">
