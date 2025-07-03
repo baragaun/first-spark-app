@@ -95,7 +95,7 @@ export async function downloadPdf(
     ); // larger barcode
     positionY = positionY + barcodeHeight + topPadding;
 
-    let container = document.createElement('div');
+    const container = document.createElement('div');
     container.style.width = `${pageWidth.toString()}px`;
     container.style.fontSize = '12pt';
     container.style.lineHeight = '1.4';

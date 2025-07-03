@@ -1,0 +1,429 @@
+<script lang="ts">
+  import { onMount } from 'svelte';
+  import { Button } from '$lib/components/ui/button';
+  import * as Card from '$lib/components/ui/card';
+  import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
+  import {
+    GiftCardDenomination,
+    ShoppingCartItem,
+    WalletItem,
+    type Brand,
+    type GiftCardProduct,
+  } from '@baragaun/bg-node-client';
+  import placeholderImage from '../../../assets/images/placeholder.png';
+  import { Archive, ArrowLeft, ExternalLink, Gift, Printer, ZoomOut } from 'lucide-svelte';
+  import { brandsStore, giftCardProductsStore } from '$lib/stores/marketplace-store';
+  import { walletItemsStore } from '@/stores/wallet-store';
+  import BarcodeView from './barcode-view.svelte';
+  import { downloadPdf } from '@/utils/pdf-utils';
+  import { m } from '@/paraglide/messages';
+  import { giftCardImageDomain } from '$lib/constants';
+  import { goto } from '$app/navigation';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { toast } from 'svelte-sonner';
+
+  interface Props {
+    walletItem: WalletItem | null;
+    giftCardItem: GiftCardProduct | null;
+  }
+
+  let { walletItem, giftCardItem }: Props = $props();
+
+  let product = walletItem || giftCardItem;
+
+  let isLoading = $state(true);
+  let error = $state<string | null>(null);
+  let selectedTab = $state(walletItem ? 'use' : 'buy');
+  let isBarcodeViewOpen = $state(false);
+
+  const brand =
+    $brandsStore.find((v) => v.id === (walletItem?.brandId || giftCardItem?.brandId)) || null;
+
+  onMount(async () => {
+    try {
+      isLoading = true;
+      const brandsResponse = await marketplaceContext.findBrands();
+      if (typeof brandsResponse === 'string') {
+        error = brandsResponse;
+        return;
+      }
+      brandsStore.set(brandsResponse as Brand[]);
+    } catch (err) {
+      error = 'Failed to load gift card details';
+      console.error(err);
+    } finally {
+      isLoading = false;
+    }
+  });
+
+  const barcodeFormat = walletItem?.barcodeFormat || 'CODE39';
+
+  const barcodeApiUrl = `https://barcodeapi.org/api/${barcodeFormat === 'QR_CODE' ? 'qr' : 'code39'}/${encodeURIComponent(walletItem?.code || '')}`;
+
+  function backAndClose() {
+    if (isBarcodeViewOpen) {
+      isBarcodeViewOpen = false;
+    } else {
+      history.back();
+    }
+  }
+
+  async function archiveWalletItem() {
+    if (!walletItem) return;
+    await marketplaceContext.archiveWalletItem(walletItem.id, !walletItem?.archivedAt).then(() => {
+      walletItemsStore.update((items) => {
+        return items.map((item) => {
+          if (item.id === walletItem?.id) {
+            item.archivedAt = walletItem?.archivedAt ? null : new Date().toISOString();
+          }
+          return item;
+        });
+      });
+    });
+  }
+
+  function handlePrintPdf() {
+    if (!walletItem || !walletItem.code || !walletItem.pin) return;
+    downloadPdf(walletItem, walletItem.code, walletItem.pin);
+  }
+
+  function getDenominations(
+    giftCardProduct: GiftCardProduct | null | undefined,
+  ): GiftCardDenomination[] {
+    let denominationsToReturn: GiftCardDenomination[] = [];
+    if (giftCardProduct?.denominations && giftCardProduct.denominations.length > 0) {
+      denominationsToReturn = giftCardProduct.denominations;
+    } else if (giftCardProduct?.genericGiftCardId) {
+      const genericProduct = $giftCardProductsStore.find(
+        (product) => product.id === giftCardProduct.genericGiftCardId,
+      );
+
+      if (genericProduct?.denominations && genericProduct.denominations.length > 0) {
+        denominationsToReturn = genericProduct.denominations;
+      }
+    }
+    return [...denominationsToReturn].sort((a, b) => a.amount - b.amount);
+  }
+
+  async function addDenominationToCart(
+    denomination: GiftCardDenomination,
+    giftCardProduct: GiftCardProduct,
+    brand: Brand | null,
+  ) {
+    if (!giftCardProduct.id) {
+      console.error('GiftCardProduct ID is missing, cannot add to cart.');
+      toast.error(m['marketplace.add_to_cart_error']({ reason: 'Gift card details missing.' }));
+      return;
+    }
+
+    // Construct the item to add to cart using the correct type
+    const count = 1;
+    const itemToAdd: Partial<ShoppingCartItem> = {
+      shoppingCartId: myUserContext.myUserId,
+      productId: giftCardProduct.id,
+      quantity: count,
+      price: denomination.amount,
+      totalPrice: count * denomination.amount,
+    };
+
+    try {
+      const result = await marketplaceContext.createShoppingCartItem(itemToAdd);
+
+      if (result.error) {
+        console.error('Error adding item to cart:', result.error);
+        toast.error(m['marketplace.add_to_cart_error']({ reason: result.error }));
+      } else if (result.object) {
+        console.log('Item added to cart:', result.object);
+        toast.success(
+          m['marketplace.add_to_cart_success']({
+            amount: `$${denomination.amount / 1000}`,
+            vendor: brand?.name || m['marketplace.buy_gift_card'](),
+          }),
+        );
+        // Optionally navigate to cart page or update cart count somewhere
+        goto('/cart'); // Navigate to shopping cart page after adding
+      } else {
+        toast.error(m['marketplace.add_to_cart_no_object']());
+      }
+    } catch (error) {
+      console.error('Unexpected error adding item to cart:', error);
+      toast.error(m['marketplace.add_to_cart_unexpected_error']());
+    }
+  }
+</script>
+
+<!-- Header Bar -->
+<div
+  class="flex items-center justify-between rounded-b-lg bg-nav px-4 py-3 text-nav-foreground shadow"
+>
+  <button onclick={backAndClose} class="flex items-center">
+    {#if isBarcodeViewOpen}
+      <ZoomOut class="h-6 w-6" />
+    {:else}
+      <ArrowLeft class="h-6 w-6" />
+    {/if}
+  </button>
+  <span class="flex-1 text-center text-lg font-semibold">{m['wallet.gift-card.title']()}</span>
+</div>
+
+{#if isLoading}
+  <div class="flex h-[60vh] items-center justify-center">
+    <div class="text-center">
+      <div
+        class="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"
+      ></div>
+      <p class="mt-2 text-muted-foreground">{m['wallet.gift-card.loading']()}</p>
+    </div>
+  </div>
+{:else if error}
+  <Card.Root class="mx-auto mt-8 max-w-md">
+    <Card.Header>
+      <Card.Title>{m['wallet.gift-card.error']()}</Card.Title>
+    </Card.Header>
+    <Card.Content>
+      <p>{error}</p>
+    </Card.Content>
+    <Card.Footer>
+      <Button href="/marketplace">{m['wallet.gift-card.return_to_marketplace']()}</Button>
+    </Card.Footer>
+  </Card.Root>
+{:else if isBarcodeViewOpen}
+  <BarcodeView>
+    <img src={barcodeApiUrl} class="barcode" alt="Barcode" />
+  </BarcodeView>
+{:else if walletItem || giftCardItem}
+  <div class="mx-auto max-w-lg px-4 py-6">
+    <!-- Gift Card Image -->
+    <div class="my-2 flex justify-center">
+      <img
+        src={giftCardImageDomain + '/giftcards/' + product?.imageSourceFront}
+        alt={product?.name}
+        class="aspect-[16/9] w-full max-w-md rounded-2xl object-contain shadow-lg"
+        onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
+      />
+    </div>
+
+    <!-- Actions -->
+    {#if walletItem}
+      <div class="flex items-center border-b bg-gray-50 px-4 py-2">
+        <div class="flex gap-2">
+          <div class="flex flex-col items-center">
+            <Button variant="ghost" size="icon" onclick={() => goto('/wallet/send-gift')}><Gift aria-label="Gift" /></Button>
+            <span class="text-xs text-gray-500">{m['wallet.gift-card.gift']()}</span>
+          </div>
+          <div class="flex flex-col items-center">
+            <Button
+              variant="ghost"
+              size="icon"
+              href={walletItem.termsUrl}
+              target="_blank"
+              rel="noopener noreferrer"><ExternalLink aria-label="Brand" /></Button
+            >
+            <span class="text-xs text-gray-500">{m['wallet.gift-card.brand']()}</span>
+          </div>
+          <div class="flex flex-col items-center">
+            <Button variant="ghost" size="icon" onclick={handlePrintPdf}
+              ><Printer aria-label="Print" /></Button
+            >
+            <span class="text-xs text-gray-500">{m['wallet.gift-card.print']()}</span>
+          </div>
+          <div class="flex flex-col items-center">
+            <Button variant="ghost" size="icon" onclick={archiveWalletItem}
+              ><Archive aria-label="Archive" /></Button
+            >
+            <span class="text-xs text-gray-500"
+              >{walletItem.archivedAt
+                ? m['wallet.gift-card.unarchive']()
+                : m['wallet.gift-card.archive']()}</span
+            >
+          </div>
+        </div>
+        <span class="ml-2 flex flex-grow items-center justify-end">
+          <span
+            class={`mr-1 inline-block h-3 w-3 rounded-full ${walletItem.archivedAt ? 'bg-red-500' : 'bg-green-500'}`}
+          ></span>
+          <span class="text-xs text-gray-500">{walletItem.archivedAt ? 'Archived' : 'Active'}</span>
+        </span>
+      </div>
+    {/if}
+
+    <!-- Tabs -->
+    <div class="mb-4 flex border-b">
+      {#if walletItem}
+        <button
+          class="flex-1 border-b-2 py-2 font-medium"
+          style="color: {selectedTab === 'use'
+            ? 'var(--primary)'
+            : '#888'}; border-color: {selectedTab === 'use' ? 'var(--primary)' : 'transparent'};"
+          onclick={() => (selectedTab = 'use')}>{m['wallet.gift-card.use']()}</button
+        >
+      {:else}
+        <button
+          class="flex-1 border-b-2 py-2 font-medium"
+          style="color: {selectedTab === 'Buy'
+            ? 'var(--primary)'
+            : '#888'}; border-color: {selectedTab === 'buy' ? 'var(--primary)' : 'transparent'};"
+          onclick={() => (selectedTab = 'buy')}>{m['marketplace.tabs.buy']()}</button
+        >
+      {/if}
+      <button
+        class="flex-1 border-b-2 py-2 font-medium"
+        style="color: {selectedTab === 'info'
+          ? 'var(--primary)'
+          : '#888'}; border-color: {selectedTab === 'info' ? 'var(--primary)' : 'transparent'};"
+        onclick={() => (selectedTab = 'info')}>{m['wallet.gift-card.info']()}</button
+      >
+      <button
+        class="flex-1 border-b-2 py-2 font-medium"
+        style="color: {selectedTab === 'brand'
+          ? 'var(--primary)'
+          : '#888'}; border-color: {selectedTab === 'brand' ? 'var(--primary)' : 'transparent'};"
+        onclick={() => (selectedTab = 'brand')}>{m['wallet.gift-card.brand']()}</button
+      >
+    </div>
+
+    {#if selectedTab === 'use' && walletItem}
+      <!-- Brand and Amounts (Buy Tab) -->
+      <div class="flex flex-col items-center justify-center px-2 py-4">
+        <div class="flex items-end justify-center">
+          <p class="mr-2 text-xl text-gray-400">USD</p>
+          <span class="text-400 text-5xl font-semibold text-foreground">
+            {(walletItem.balance / 1000).toFixed(0)}
+          </span>
+          <span class="text-lg font-semibold text-foreground">
+            .{(walletItem.balance / 1000).toFixed(2).split('.')[1]}
+          </span>
+        </div>
+        <p class="text-sm text-gray-400">
+          Balance as of {new Date(walletItem.createdAt).toLocaleDateString()}
+        </p>
+        <a
+          href="https://www.google.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-primary underline">{m['wallet.gift-card.look_up_balance']()}</a
+        >
+
+        <!-- Card Code and PIN -->
+        {#if walletItem.code}
+          <div class="mt-4 flex flex-col items-center">
+            <img src={barcodeApiUrl} class="barcode" alt="Barcode" />
+          </div>
+        {/if}
+
+        <div class="mt-4 flex items-center gap-2">
+          <Button
+            size="sm"
+            class="h-8 rounded-full bg-primary text-primary-foreground"
+            onclick={() => (isBarcodeViewOpen = true)}>{m['wallet.gift-card.zoom']()}</Button
+          >
+          <Button size="sm" class="h-8 rounded-full bg-primary text-primary-foreground"
+            >{m['wallet.gift-card.copy']()}</Button
+          >
+        </div>
+
+        <h class="mt-4 text-xl text-black">{walletItem.pin}</h>
+        <p class="text-sm text-gray-400">Card PIN</p>
+        <Button size="sm" class="mt-2 h-8 rounded-full bg-primary text-primary-foreground"
+          >{m['wallet.gift-card.copy_pin']()}</Button
+        >
+      </div>
+    {/if}
+
+    {#if selectedTab === 'buy' && giftCardItem}
+      <!-- Brand and Amounts (Buy Tab) -->
+      <div class="text-500 mb-2 text-sm text-secondary-foreground">
+        {m['marketplace.brand_label']()}
+      </div>
+      <div class="mb-4 text-xl font-bold">{brand?.name}</div>
+      <div class="text-500 mb-2 text-sm text-secondary-foreground">
+        {m['marketplace.gift_card_amount_label']()}
+      </div>
+      <div class="space-y-4">
+        {#each getDenominations(giftCardItem) as denomination}
+          <button
+            type="button"
+            class="flex w-full cursor-pointer flex-col items-center rounded-xl border px-6 py-4 text-2xl font-bold shadow-sm transition-colors hover:bg-gray-100"
+            onclick={() => addDenominationToCart(denomination, giftCardItem, brand)}
+            onkeydown={(e) =>
+              e.key === 'Enter' && addDenominationToCart(denomination, giftCardItem, brand)}
+          >
+            <span class="flex items-end gap-1">
+              <span class="align-bottom text-base text-gray-400">{m['marketplace.usd']()}</span>
+              <span class="text-4xl">{denomination.amount / 1000}</span>
+            </span>
+          </button>
+        {/each}
+      </div>
+    {/if}
+
+    {#if selectedTab === 'info'}
+      <div class="px-2 py-4">
+        {#if product?.instructionsEn}
+          <div class="mb-6">
+            <h2 class="text-400 mb-2 text-lg font-semibold text-secondary-foreground">
+              {m['wallet.gift-card.how_to_redeem']()}
+            </h2>
+            {#if product?.instructionsEn?.trim().startsWith('<')}
+              <p class="mb-2">
+                {@html product?.instructionsEn}
+              </p>
+            {:else}
+              <p class="mb-2">
+                {product?.instructionsEn}
+              </p>
+            {/if}
+          </div>
+        {/if}
+        {#if product?.termsEn}
+          <div>
+            <h2 class="text-400 mb-2 text-lg font-semibold text-secondary-foreground">
+              {m['wallet.gift-card.terms_and_conditions']()}
+            </h2>
+            {#if product?.instructionsEn?.trim().startsWith('<')}
+              <p class="mb-2">
+                {@html product?.termsEn}
+              </p>
+            {:else}
+              <p class="mb-2">
+                {product?.termsEn}
+              </p>
+            {/if}
+          </div>
+        {/if}
+      </div>
+    {/if}
+
+    {#if selectedTab === 'brand'}
+      <div class="flex flex-col items-center py-8">
+        <!-- Brand Logo -->
+        <div
+          class="mb-4 flex h-40 w-40 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-lg"
+        >
+          <img
+            src={giftCardImageDomain + '/vendors/' + brand?.logoImageSource}
+            alt={brand?.name}
+            class="h-full w-full object-contain"
+            onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
+          />
+        </div>
+        <!-- Brand Description -->
+        {#if brand?.description}
+          <div class="text-600 mb-8 max-w-xl text-center">{brand.description}</div>
+        {/if}
+        <!-- Visit Online Button -->
+        {#if brand?.url}
+          <a
+            href={brand.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="rounded-lg bg-nav px-8 py-2 font-semibold tracking-wide text-nav-foreground shadow transition hover:bg-nav/90"
+            style="text-transform: uppercase; letter-spacing: 1px;"
+          >
+            {m['marketplace.visit_online']()}
+          </a>
+        {/if}
+      </div>
+    {/if}
+  </div>
+{/if}

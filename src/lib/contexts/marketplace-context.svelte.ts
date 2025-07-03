@@ -13,6 +13,7 @@ import {
   WalletItem,
   type QueryResult,
 } from '@baragaun/bg-node-client';
+import { myUserContext } from './my-user-context.svelte';
 
 let isLoading = $state(false);
 
@@ -33,8 +34,8 @@ export class MarketplaceContext {
         queryOptions: {},
       };
       const response = await this.client.operations.giftCardProduct.findGiftCardProducts(
-        null,
-        null,
+        input.filter,
+        input.match,
         null,
         input.queryOptions,
         input.options,
@@ -69,8 +70,8 @@ export class MarketplaceContext {
         queryOptions: {},
       };
       const response = await this.client.operations.brand.findBrands(
-        null,
-        null,
+        input.filter,
+        input.match,
         null,
         input.queryOptions,
         input.options,
@@ -266,13 +267,13 @@ export class MarketplaceContext {
       isLoading = true;
       const input = {
         filter: {},
-        match: {},
+        match: { createdBy: myUserContext.myUserId },
         options: { cachePolicy: CachePolicy.network },
         queryOptions: {},
       };
       const response = await this.client.operations.purchaseOrder.findPurchaseOrders(
-        null,
-        null,
+        input.filter,
+        input.match,
         null,
         input.queryOptions,
         input.options,
@@ -298,17 +299,18 @@ export class MarketplaceContext {
       console.error('MarketplaceContext.findWalletItems: not initialized.');
       return translate(AppUiMessage.systemError);
     }
-    let args = {
+
+    const args = {
       filter: {},
-      match: {},
+      match: { createdBy: myUserContext.myUserId },
       options: { cachePolicy: CachePolicy.network },
       queryOptions: {},
     };
     try {
       isLoading = true;
       const response = await this.client.operations.walletItem.findWalletItems(
-        null,
-        null,
+        args.filter,
+        args.match,
         null,
         args.queryOptions,
         args.options,
