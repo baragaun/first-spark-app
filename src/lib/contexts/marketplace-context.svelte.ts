@@ -300,9 +300,9 @@ export class MarketplaceContext {
       return translate(AppUiMessage.systemError);
     }
 
-    let args = {
+    const args = {
       filter: {},
-      match: {createdBy: myUserContext.myUserId },
+      match: { createdBy: myUserContext.myUserId },
       options: { cachePolicy: CachePolicy.network },
       queryOptions: {},
     };

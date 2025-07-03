@@ -67,9 +67,7 @@
             <ChevronDown class="h-4 w-4" />
           </Button>
         </DropdownMenu.Trigger>
-        <DropdownMenu.Content
-          class="relative w-full max-h-[300px] overflow-y-auto bg-background"
-        >
+        <DropdownMenu.Content class="relative max-h-[300px] w-full overflow-y-auto bg-background">
           <DropdownMenu.Item
             onclick={() => (filterStatus = m['order_history.all_orders']())}
             class="cursor-pointer"

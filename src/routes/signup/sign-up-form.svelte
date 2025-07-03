@@ -460,7 +460,8 @@
       if (!isNaN(targetStep) && targetStep > 1 && targetStep <= steps.length) {
         setStep(targetStep);
 
-        identifier = formState.step === 2 ? userContext.myEmail || '' : userContext.myUserHandle || '';
+        identifier =
+          formState.step === 2 ? userContext.myEmail || '' : userContext.myUserHandle || '';
         $formData = {
           email: userContext.myEmail || '',
           token: '',
