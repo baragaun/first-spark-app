@@ -7,27 +7,56 @@
   import { Input } from '$lib/components/ui/input';
   import { Button } from '$lib/components/ui/button';
   import { UserIdentType } from '@baragaun/bg-node-client';
+  import { debounce } from 'throttle-debounce';
+
+  const DEBOUNCE_DELAY = 350;
 
   const form = superForm(zod(sendGiftSchema) as any, {
     dataType: 'json',
     resetForm: false,
     validationMethod: 'submit-only',
+    async onChange() {
+      debouncedValidation();
+    },
+    async onSubmit({ cancel }) {
+      cancel(); // Avoid the server-side form action
+      await handleFormSubmit();
+    },
   });
 
   const { form: formData, errors, enhance, validateForm } = form;
 
-  async function handleSubmit(event: Event) {
-    event.preventDefault();
+  let formState = $state({
+    isLoading: false,
+    hasError: false,
+  });
+
+  const handleFormSubmit = async () => {
     const result = await validateForm({ update: true, focusOnError: true });
-    if (!result.valid) return;
-    // Handle send gift logic here
+    if (!result.valid) {
+      formState.hasError = true;
+      return;
+    }
+
     alert('Gift sent!');
-  }
+  };
+
+  const debouncedValidation = debounce(DEBOUNCE_DELAY, async () => {
+    try {
+      const result = await validateForm({ update: true, focusOnError: false });
+      formState.hasError = !result.valid;
+    } catch (error) {
+      console.error('Error validating form:', error);
+    } finally {
+      formState.isLoading = false;
+    }
+  });
 </script>
 
 <form
+  method="POST"
   use:enhance
-  on:submit={handleSubmit}
+  onsubmit={handleFormSubmit}
   class="mx-auto max-w-md space-y-4 rounded-xl bg-white p-6 shadow dark:bg-background"
 >
   <IdentFormInput
