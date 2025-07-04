@@ -2,11 +2,13 @@
   import { superForm } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
   import { sendGiftSchema } from './schema';
+  import { z } from 'zod';
   import IdentFormInput from '$lib/components/forms/form-ident-input.svelte';
   import { Input } from '$lib/components/ui/input';
   import { Button } from '$lib/components/ui/button';
+  import { UserIdentType } from '@baragaun/bg-node-client';
 
-  const form = superForm(zod(sendGiftSchema), {
+  const form = superForm(zod(sendGiftSchema) as any, {
     dataType: 'json',
     resetForm: false,
     validationMethod: 'submit-only',
@@ -23,21 +25,27 @@
   }
 </script>
 
-<form use:enhance on:submit={handleSubmit} class="space-y-4 max-w-md mx-auto bg-white dark:bg-background p-6 rounded-xl shadow">
+<form
+  use:enhance
+  on:submit={handleSubmit}
+  class="mx-auto max-w-md space-y-4 rounded-xl bg-white p-6 shadow dark:bg-background"
+>
   <IdentFormInput
-    form={form}
+    {form}
     fieldName="senderName"
     label="Sender Name"
     placeholder="Enter your name"
+    identType={UserIdentType.userHandle}
   />
   <IdentFormInput
-    form={form}
+    {form}
     fieldName="senderEmail"
     label="Sender Email"
     placeholder="Enter your email"
+    identType={UserIdentType.email}
   />
   <div>
-    <label class="block text-sm font-medium mb-1" for="message">Message</label>
+    <label class="mb-1 block text-sm font-medium" for="message">Message</label>
     <Input
       id="message"
       type="text"
@@ -46,7 +54,7 @@
       placeholder="Write a message (optional)"
     />
     {#if $errors.message}
-      <div class="text-red-500 text-xs mt-1">{$errors.message[0]}</div>
+      <div class="mt-1 text-xs text-red-500">{$errors.message[0]}</div>
     {/if}
   </div>
   <Button type="submit" class="w-full">Send Gift</Button>

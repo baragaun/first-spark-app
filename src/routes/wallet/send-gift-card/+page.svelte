@@ -1,6 +1,6 @@
 <script lang="ts">
-
-import { ArrowLeft } from 'lucide-svelte';
+  import { ArrowLeft } from 'lucide-svelte';
+  import SendGiftForm from './send-gift-form.svelte';
 
   let senderName = '';
   let senderEmail = '';
@@ -13,7 +13,13 @@ import { ArrowLeft } from 'lucide-svelte';
   }
 </script>
 
-<div
+<div class="flex h-full w-full items-center justify-center px-4">
+  <div class="w-full max-w-md">
+    <SendGiftForm />
+  </div>
+</div>
+
+<!-- <div
   class="flex items-center justify-between rounded-b-lg bg-nav px-4 py-3 text-nav-foreground shadow"
 >
   <button onclick={() => history.back()} class="flex items-center">
@@ -63,4 +69,4 @@ import { ArrowLeft } from 'lucide-svelte';
       <p class="text-green-600 text-center mt-2">Gift sent!</p>
     {/if}
   </form>
-</div>
+</div> -->
