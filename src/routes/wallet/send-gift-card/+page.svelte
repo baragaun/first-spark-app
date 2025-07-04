@@ -1,6 +1,6 @@
 <script lang="ts">
   import { ArrowLeft } from 'lucide-svelte';
-  import SendGiftForm from './send-gift-form.svelte';
+  import SendGiftCardForm from './send-gift-card-form.svelte';
   let submitted = false;
 
   function handleSubmit() {
@@ -19,6 +19,6 @@
 </div>
 <div class="flex h-full w-full items-center justify-center px-4">
   <div class="w-full max-w-md">
-    <SendGiftForm />
+    <SendGiftCardForm />
   </div>
 </div>

@@ -8,6 +8,8 @@
   import { Button } from '$lib/components/ui/button';
   import { UserIdentType } from '@baragaun/bg-node-client';
   import { debounce } from 'throttle-debounce';
+  import FormButton from '@/components/forms/form-button.svelte';
+  import { onMount } from 'svelte';
 
   const DEBOUNCE_DELAY = 350;
 
@@ -15,6 +17,7 @@
     dataType: 'json',
     resetForm: false,
     validationMethod: 'submit-only',
+    validators: zod(sendGiftSchema),
     async onChange() {
       debouncedValidation();
     },
@@ -24,11 +27,22 @@
     },
   });
 
-  const { form: formData, errors, enhance, validateForm } = form;
+  const { form: formData, errors, delayed, enhance, validateForm } = form;
 
   let formState = $state({
     isLoading: false,
     hasError: false,
+  });
+
+  const buttonState = $derived.by(() => ({
+    isDisabled: !isFormValid || formState.isLoading || formState.hasError,
+    isLoading: ($delayed || formState.isLoading) && !formState.hasError,
+  }));
+
+  const isFormValid = $derived.by(() => {
+    console.log('jahanvi');
+    console.log($formData.email);
+    return $formData.email && $formData.username && $formData.message;
   });
 
   const handleFormSubmit = async () => {
@@ -37,7 +51,6 @@
       formState.hasError = true;
       return;
     }
-
     alert('Gift sent!');
   };
 
@@ -50,6 +63,15 @@
     } finally {
       formState.isLoading = false;
     }
+  });
+
+  onMount(async () => {
+    $formData = {
+      email: '',
+      token: '',
+      username: '',
+      password: '',
+    };
   });
 </script>
 
@@ -86,5 +108,11 @@
       <div class="mt-1 text-xs text-red-500">{$errors.message[0]}</div>
     {/if}
   </div>
-  <Button type="submit" class="w-full">Send Gift</Button>
+  <span>{isFormValid}</span>
+  <FormButton
+    disabled={buttonState.isDisabled}
+    isLoading={buttonState.isLoading}
+    buttonText="Send Gift"
+    loadingText="sending"
+  />
 </form>
