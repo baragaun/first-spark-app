@@ -1,7 +1,9 @@
 import { z } from 'zod';
 import { emailSchema, usernameSchema } from '../../../lib/schemas/common';
 
-export const sendGiftSchema = z.object({
+export { emailSchema, usernameSchema };
+
+export const sendGiftCardSchema = z.object({
   senderName: usernameSchema
     .optional()
     .default('')
@@ -13,4 +15,6 @@ export const sendGiftSchema = z.object({
   message: z.string().max(500, 'Message is too long').optional(),
 });
 
-export type SendGiftSchema = typeof sendGiftSchema;
+//export type SendGiftCardSchema = typeof sendGiftCardSchema;
+
+export type SendGiftCardSchema = z.infer<typeof sendGiftCardSchema>;
