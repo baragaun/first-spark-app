@@ -360,5 +360,15 @@
     "purchase_date": "खरीद की तारीख",
     "amount": "राशि",
     "not_found": "ऑर्डर नहीं मिला।"
+  },
+  "send_gift_card": {
+    "sender_name": "प्रेषक का नाम",
+    "sender_email": "प्रेषक ईमेल",
+    "message": "संदेश",
+    "message_placeholder": "एक संदेश लिखें (वैकल्पिक)",
+    "send_gift": "उपहार भेजें",
+    "sent_title": "उपहार भेजा गया!",
+    "sent_success": "आपका उपहार सफलतापूर्वक भेजा गया है।",
+    "ok": "ठीक है"
   }
 }

@@ -362,5 +362,17 @@
     "purchase_date": "Purchase Date",
     "amount": "Amount",
     "not_found": "Order not found."
+  },
+  "send_gift_card": {
+    "sender_name": "Sender Name",
+    "sender_name_placeholder": "Enter your name",
+    "sender_email": "Sender Email",
+    "sender_email_placeholder": "Enter your email",
+    "message": "Message",
+    "message_placeholder": "Write a message (optional)",
+    "send_gift": "Send Gift",
+    "sent_title": "Gift card sent!",
+    "sent_success": "Your gift has been sent successfully.",
+    "ok": "OK"
   }
 }
