@@ -9,6 +9,16 @@
   import FormButton from '@/components/forms/form-button.svelte';
   import { onMount } from 'svelte';
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
+  import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+  } from '@/components/ui/alert-dialog';
+  import { m } from '@/paraglide/messages';
 
   const DEBOUNCE_DELAY = 350;
 
@@ -44,13 +54,15 @@
     return $formData.senderName && $formData.senderEmail && $formData.message;
   });
 
+  let showDialog = $state(false);
+
   const handleFormSubmit = async () => {
     const result = await validateForm({ update: true, focusOnError: true });
     if (!result.valid) {
       formState.hasError = true;
       return;
     }
-    alert('Gift sent!');
+    showDialog = true;
   };
 
   const debouncedValidation = debounce(DEBOUNCE_DELAY, async () => {
@@ -107,3 +119,21 @@
     loadingText="sending"
   />
 </form>
+
+<AlertDialog open={showDialog}>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>Gift card sent!</AlertDialogTitle>
+      <AlertDialogDescription>Your gift has been sent successfully.</AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogAction
+        onclick={() => {
+          showDialog = false;
+        }}
+      >
+        {m['cart.okay']()}
+      </AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
