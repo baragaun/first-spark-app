@@ -19,6 +19,7 @@
     AlertDialogTitle,
   } from '@/components/ui/alert-dialog';
   import { m } from '@/paraglide/messages';
+  import { goto } from '$app/navigation';
 
   const DEBOUNCE_DELAY = 350;
 
@@ -51,7 +52,7 @@
   }));
 
   const isFormValid = $derived.by(() => {
-    return $formData.senderName && $formData.senderEmail && $formData.message;
+    return $formData.senderName && $formData.senderEmail;
   });
 
   let showDialog = $state(false);
@@ -88,26 +89,29 @@
   <IdentFormInput
     {form}
     fieldName="senderName"
-    label="Sender Name"
-    placeholder="Enter your name"
+    label={m['send_gift_card.sender_name']()}
+    placeholder={m['send_gift_card.sender_name_placeholder']()}
     identType={UserIdentType.userHandle}
   />
   <IdentFormInput
     {form}
     fieldName="senderEmail"
-    label="Sender Email"
-    placeholder="Enter your email"
+    label={m['send_gift_card.sender_email_placeholder']()}
+    placeholder={m['send_gift_card.sender_name']()}
     identType={UserIdentType.email}
   />
   <div>
-    <label class="mb-1 block text-sm font-medium" for="message">Message</label>
-    <Input
+    <label class="mb-1 block text-sm font-medium" for="message"
+      >{m['send_gift_card.message']()}</label
+    >
+    <textarea
       id="message"
-      type="text"
       bind:value={$formData.message}
-      class="w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
-      placeholder="Write a message (optional)"
-    />
+      name="message"
+      rows="5"
+      class="min-h-[120px] w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+      placeholder={m['send_gift_card.message_placeholder']()}
+    ></textarea>
     {#if $errors.message}
       <div class="mt-1 text-xs text-red-500">{$errors.message[0]}</div>
     {/if}
@@ -115,7 +119,7 @@
   <FormButton
     disabled={buttonState.isDisabled}
     isLoading={buttonState.isLoading}
-    buttonText="Send Gift"
+    buttonText={m['send_gift_card.send_gift']()}
     loadingText="sending"
   />
 </form>
@@ -123,13 +127,14 @@
 <AlertDialog open={showDialog}>
   <AlertDialogContent>
     <AlertDialogHeader>
-      <AlertDialogTitle>Gift card sent!</AlertDialogTitle>
-      <AlertDialogDescription>Your gift has been sent successfully.</AlertDialogDescription>
+      <AlertDialogTitle>{m['send_gift_card.sent_title']()}</AlertDialogTitle>
+      <AlertDialogDescription>{m['send_gift_card.sent_success']()}</AlertDialogDescription>
     </AlertDialogHeader>
     <AlertDialogFooter>
       <AlertDialogAction
         onclick={() => {
           showDialog = false;
+          goto('/wallet');
         }}
       >
         {m['cart.okay']()}

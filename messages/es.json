@@ -362,5 +362,15 @@
     "purchase_date": "Fecha de compra",
     "amount": "Cantidad",
     "not_found": "Pedido no encontrado."
+  },
+  "send_gift_card": {
+    "sender_name": "Nombre del remitente",
+    "sender_email": "Correo electrónico del remitente",
+    "message": "Mensaje",
+    "message_placeholder": "Escribe un mensaje (opcional)",
+    "send_gift": "Enviar regalo",
+    "sent_title": "¡Regalo enviado!",
+    "sent_success": "Tu regalo ha sido enviado con éxito.",
+    "ok": "OK"
   }
 }
