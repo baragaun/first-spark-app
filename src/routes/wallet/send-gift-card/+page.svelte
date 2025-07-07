@@ -1,6 +1,9 @@
 <script lang="ts">
   import { ArrowLeft } from 'lucide-svelte';
   import SendGiftCardForm from './send-gift-card-form.svelte';
+  import type { PageData } from './$types';
+
+  let { data }: { data: PageData } = $props();
   let submitted = false;
 
   function handleSubmit() {
@@ -19,6 +22,6 @@
 </div>
 <div class="flex h-full w-full items-center justify-center px-4">
   <div class="w-full max-w-md">
-    <SendGiftCardForm />
+    <SendGiftCardForm {data} />
   </div>
 </div>

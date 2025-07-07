@@ -1,23 +1,24 @@
 <script lang="ts">
-  import { superForm } from 'sveltekit-superforms';
   import { zod } from 'sveltekit-superforms/adapters';
-  import { sendGiftSchema } from './schema';
+  import { sendGiftCardSchema, type SendGiftCardSchema } from './schema';
   import { z } from 'zod';
   import IdentFormInput from '$lib/components/forms/form-ident-input.svelte';
   import { Input } from '$lib/components/ui/input';
-  import { Button } from '$lib/components/ui/button';
   import { UserIdentType } from '@baragaun/bg-node-client';
   import { debounce } from 'throttle-debounce';
   import FormButton from '@/components/forms/form-button.svelte';
   import { onMount } from 'svelte';
+  import { superForm, type SuperValidated } from 'sveltekit-superforms';
 
   const DEBOUNCE_DELAY = 350;
 
-  const form = superForm(zod(sendGiftSchema) as any, {
+  let { data }: { data: { form: SuperValidated<SendGiftCardSchema> } } = $props();
+
+  const form = superForm(data.form, {
     dataType: 'json',
+    validators: zod(sendGiftCardSchema),
     resetForm: false,
     validationMethod: 'submit-only',
-    validators: zod(sendGiftSchema),
     async onChange() {
       debouncedValidation();
     },
@@ -40,9 +41,7 @@
   }));
 
   const isFormValid = $derived.by(() => {
-    console.log('jahanvi');
-    console.log($formData.email);
-    return $formData.email && $formData.username && $formData.message;
+    return $formData.senderName && $formData.senderEmail && $formData.message;
   });
 
   const handleFormSubmit = async () => {
@@ -65,14 +64,7 @@
     }
   });
 
-  onMount(async () => {
-    $formData = {
-      email: '',
-      token: '',
-      username: '',
-      password: '',
-    };
-  });
+  onMount(async () => {});
 </script>
 
 <form
@@ -108,7 +100,6 @@
       <div class="mt-1 text-xs text-red-500">{$errors.message[0]}</div>
     {/if}
   </div>
-  <span>{isFormValid}</span>
   <FormButton
     disabled={buttonState.isDisabled}
     isLoading={buttonState.isLoading}
