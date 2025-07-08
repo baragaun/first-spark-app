@@ -64,7 +64,7 @@
   </header>
 
   <main class="flex-1 overflow-y-auto bg-gray-100 p-4 dark:bg-gray-900">
-    <div class="relative mb-3 rounded-xl p-[2px]">
+    <!-- <div class="relative mb-3 rounded-xl p-[2px]">
       <Select.Root type="single" bind:value={filterStatus}>
         <Select.Trigger class="w-full rounded-2xl bg-black/5 dark:bg-background">
           {filterStatus}
@@ -75,7 +75,7 @@
           {/each}
         </Select.Content>
       </Select.Root>
-    </div>
+    </div> -->
 
     <div class="space-y-1 bg-white p-4 dark:bg-background">
       {#if isLoading}
@@ -95,9 +95,6 @@
               </p>
               <p class="text-gray-800 dark:text-gray-200">
                 {m['order_history.total']({ amount: (order.totalPrice / 1000).toFixed(2) })}
-              </p>
-              <p class="text-gray-600 dark:text-gray-400">
-                {m['order_history.status']({ status: order.items.length ?? 'N/A' })}
               </p>
             </div>
             <ChevronRight class="h-5 w-5 text-gray-400" />

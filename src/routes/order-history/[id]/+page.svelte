@@ -99,10 +99,8 @@
     </div>
     <div class="mb-8">
       <div class="mb-1 text-lg font-semibold">{order?.shoppingCartId}</div>
-      <div class="text-sm text-muted-foreground">{m['order_history.type']()}</div>
-      <div class="mb-2 font-bold">{m['order_history.type_purchase']()}</div>
-      <div class="text-sm text-muted-foreground">{m['order_history.paid_with']()}</div>
-      <div class="mb-2 font-bold">{m['order_history.paid_with_credit_card']()}</div>
+      <div class="text-sm text-muted-foreground">{m['order_history.purchase_date']()}</div>
+      <div class="mb-2 font-bold">{formatDateTime(order.createdAt)}</div>
       <div class="text-sm text-muted-foreground">{m['order_history.reference_id']()}</div>
       <div class="mb-2 break-all font-bold">{order.id}</div>
     </div>
