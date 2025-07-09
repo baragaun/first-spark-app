@@ -11,9 +11,11 @@ import {
   ShoppingCart,
   ShoppingCartItem,
   WalletItem,
+  WalletItemTransfer,
   type QueryResult,
 } from '@baragaun/bg-node-client';
 import { myUserContext } from './my-user-context.svelte';
+import type { WalletItemTransferInput } from '../../../../bg-node-client/lib/fsdata/gql/graphql';
 
 let isLoading = $state(false);
 
@@ -322,6 +324,66 @@ export class MarketplaceContext {
       return response.objects;
     } catch (error) {
       console.error('findWalletItems: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return translate(AppUiMessage.systemError);
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  async createWalletItemTransfer(props: WalletItemTransferInput): Promise<QueryResult<WalletItemTransfer>> {
+    if (!this.client.isInitialized) {
+      console.error('MarketplaceContext.createWalletItem: not initialized.');
+      return { error: translate(AppUiMessage.systemError) };
+    }
+    try {
+      isLoading = true;
+      const response = await this.client.operations.walletItemTransfer.createWalletItemTransfer(props);
+      if (!response || response.error) {
+        console.error('createWalletItem: received error.', { response });
+        return { error: response.error || translate(AppUiMessage.systemError) };
+      }
+      return response;
+    } catch (error) {
+      console.error('createWalletItem: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return { error: translate(AppUiMessage.systemError) };
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  async findWalletItemTransfers(): Promise<WalletItemTransfer[] | string | undefined> {
+    if (!this.client.isInitialized) {
+      console.error('MarketplaceContext.findWalletItemTransfers: not initialized.');
+      return translate(AppUiMessage.systemError);
+    }
+    try {
+      isLoading = true;
+      const input = {
+        filter: {},
+        match: { createdBy: myUserContext.myUserId },
+        options: { cachePolicy: CachePolicy.network },
+        queryOptions: {},
+      };
+      const response = await this.client.operations.walletItemTransfer.findWalletItemTransfers(
+        input.filter,
+        input.match,
+        null,
+        input.queryOptions,
+        input.options,
+      );
+      if (!response || response.error || !response.objects) {
+        console.error('findWalletItemTransfers: received error.', { response });
+        return response.error || translate(AppUiMessage.systemError);
+      }
+      return response.objects;
+    } catch (error) {
+      console.error('findWalletItemTransfers: error', {
         error: (error as Error).message,
         stack: (error as Error).stack,
       });

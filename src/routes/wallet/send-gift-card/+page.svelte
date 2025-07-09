@@ -2,13 +2,14 @@
   import { ArrowLeft } from 'lucide-svelte';
   import SendGiftCardForm from './send-gift-card-form.svelte';
   import type { PageData } from './$types';
+  import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
 
   let { data }: { data: PageData } = $props();
   let submitted = false;
 
   function handleSubmit() {
     submitted = true;
-    // Add your submit logic here
+    marketplaceContext.createWalletItemTransfer(data.form.data);
   }
 </script>
 
