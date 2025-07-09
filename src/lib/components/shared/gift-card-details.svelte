@@ -150,6 +150,16 @@
       toast.error(m['marketplace.add_to_cart_unexpected_error']());
     }
   }
+
+  async function sendGiftCard() {
+    if (!walletItem) return;
+    await marketplaceContext.createWalletItemTransfer({
+      walletItemId: walletItem.id,
+      recipientFullName: 'User C',
+      recipientEmail: 'userc@test.com',
+      messageText: 'Happy Birthday!',
+    });
+  }
 </script>
 
 <!-- Header Bar -->
@@ -208,7 +218,8 @@
       <div class="flex items-center border-b bg-gray-50 px-4 py-2">
         <div class="flex gap-2">
           <div class="flex flex-col items-center">
-            <Button variant="ghost" size="icon" onclick={() => goto('/wallet/send-gift-card')}
+            <!-- <Button variant="ghost" size="icon" onclick={() => goto('/wallet/send-gift-card')} -->
+             <Button variant="ghost" size="icon" onclick={sendGiftCard}
               ><Gift aria-label="Gift" /></Button
             >
             <span class="text-xs text-gray-500">{m['wallet.gift-card.gift']()}</span>

@@ -21,11 +21,9 @@
   let fileInputRef: HTMLInputElement;
   let isLoading = false;
 
-  // Load demo data on mount
   onMount(async () => {
-    // const res = await fetch('/wallet-data.json');
-    // walletItemsStore.set(await res.json());
     loadWalletItems();
+    // loadWalletItemTransfers();
   });
 
   let displayedItems = $derived.by(() => {
@@ -52,6 +50,20 @@
     if (!response) return;
 
     walletItemsStore.set(response);
+    isLoading = false;
+  }
+
+  //todo test function
+  async function loadWalletItemTransfers() {
+    isLoading = true;
+    const response = await marketplaceContext.findWalletItemTransfers();
+    if (typeof response === 'string') {
+      console.error('Failed to load wallet item transfers:', response);
+      return;
+    }
+    if (!response) return;
+
+    console.log(response);
     isLoading = false;
   }
 
