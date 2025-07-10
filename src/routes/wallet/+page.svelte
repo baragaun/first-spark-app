@@ -32,6 +32,11 @@
         (item) =>
           item.archivedAt == null && item.name.toLowerCase().includes(searchQuery.toLowerCase()),
       );
+    } else if (activeTab === 'Transferred') {
+      return $walletItemsStore.filter(
+        (item) =>
+          item.transferredAt != null && item.name.toLowerCase().includes(searchQuery.toLowerCase()),
+      );
     } else {
       return $walletItemsStore.filter(
         (item) =>
@@ -213,6 +218,12 @@
           >
             {m['wallet.archive']()}
           </Tabs.Trigger>
+          <Tabs.Trigger
+            value="Transferred"
+            class="inline-flex flex-1 items-center justify-center whitespace-nowrap rounded-xl px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          >
+            Transferred
+          </Tabs.Trigger>
         </Tabs.List>
       </Tabs.Root>
       <!-- Search -->
@@ -251,7 +262,9 @@
     <!-- Scrollable Wallet Items Section -->
     <div class="flex-1 overflow-y-auto">
       {#if displayedItems.length === 0}
-        <div class="py-8 text-center text-muted-foreground">{m['wallet.empty']()}</div>
+        <div class="py-8 text-center text-muted-foreground">
+          {m['wallet.empty']()}
+        </div>
       {/if}
       {#each displayedItems as item}
         <button
