@@ -304,7 +304,7 @@ export class MarketplaceContext {
 
     const args = {
       filter: {},
-      match: { createdBy: myUserContext.myUserId },
+      match: { walletId: myUserContext.myUserId },
       options: { cachePolicy: CachePolicy.network },
       queryOptions: {},
     };
