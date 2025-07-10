@@ -362,13 +362,19 @@
     "not_found": "ऑर्डर नहीं मिला।"
   },
   "send_gift_card": {
-    "sender_name": "प्रेषक का नाम",
-    "sender_email": "प्रेषक ईमेल",
-    "message": "संदेश",
-    "message_placeholder": "एक संदेश लिखें (वैकल्पिक)",
-    "send_gift": "उपहार भेजें",
-    "sent_title": "उपहार भेजा गया!",
-    "sent_success": "आपका उपहार सफलतापूर्वक भेजा गया है।",
-    "ok": "ठीक है"
+    "sender_name": "प्राप्तकर्ता का नाम",
+    "sender_name_placeholder": "नाम दर्ज करें",
+    "sender_email": "प्राप्तकर्ता का ईमेल",
+    "sender_email_placeholder": "ईमेल दर्ज करें",
+    "message": "आपका संदेश",
+    "message_placeholder": "संदेश लिखें (वैकल्पिक)",
+    "send_gift": "गिफ्ट भेजें",
+    "sent_title": "गिफ्ट कार्ड भेजा गया!",
+    "sent_success": "आपका गिफ्ट सफलतापूर्वक भेजा गया है।",
+    "ok": "ठीक है",
+    "error": {
+      "sender_name_max_length": "प्रेषक का नाम अधिकतम 30 अक्षरों का होना चाहिए",
+      "message_max_length": "संदेश अधिकतम 500 अक्षरों का होना चाहिए"
+    }
   }
 }

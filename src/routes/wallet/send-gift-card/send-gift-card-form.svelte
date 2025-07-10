@@ -109,8 +109,8 @@
   <IdentFormInput
     {form}
     fieldName="senderEmail"
-    label={m['send_gift_card.sender_email_placeholder']()}
-    placeholder={m['send_gift_card.sender_name']()}
+    label={m['send_gift_card.sender_email']()}
+    placeholder={m['send_gift_card.sender_email_placeholder']()}
     identType={UserIdentType.email}
   />
   <div>
