@@ -14,7 +14,6 @@ import {
   WalletItemTransfer,
   type QueryResult,
 } from '@baragaun/bg-node-client';
-import type { WalletItemTransferInput } from '../../../../bg-node-client/lib/fsdata/gql/graphql';
 import { myUserContext } from './my-user-context.svelte';
 
 let isLoading = $state(false);
@@ -334,7 +333,7 @@ export class MarketplaceContext {
   }
 
   async createWalletItemTransfer(
-    props: WalletItemTransferInput,
+    props: Partial<WalletItemTransfer>,
   ): Promise<QueryResult<WalletItemTransfer>> {
     if (!this.client.isInitialized) {
       console.error('MarketplaceContext.createWalletItem: not initialized.');
@@ -376,7 +375,6 @@ export class MarketplaceContext {
       const response = await this.client.operations.walletItemTransfer.findWalletItemTransfers(
         input.filter,
         input.match,
-        null,
         input.queryOptions,
         input.options,
       );
