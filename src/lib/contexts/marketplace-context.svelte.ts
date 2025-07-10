@@ -14,8 +14,8 @@ import {
   WalletItemTransfer,
   type QueryResult,
 } from '@baragaun/bg-node-client';
-import { myUserContext } from './my-user-context.svelte';
 import type { WalletItemTransferInput } from '../../../../bg-node-client/lib/fsdata/gql/graphql';
+import { myUserContext } from './my-user-context.svelte';
 
 let isLoading = $state(false);
 
@@ -333,14 +333,17 @@ export class MarketplaceContext {
     }
   }
 
-  async createWalletItemTransfer(props: WalletItemTransferInput): Promise<QueryResult<WalletItemTransfer>> {
+  async createWalletItemTransfer(
+    props: WalletItemTransferInput,
+  ): Promise<QueryResult<WalletItemTransfer>> {
     if (!this.client.isInitialized) {
       console.error('MarketplaceContext.createWalletItem: not initialized.');
       return { error: translate(AppUiMessage.systemError) };
     }
     try {
       isLoading = true;
-      const response = await this.client.operations.walletItemTransfer.createWalletItemTransfer(props);
+      const response =
+        await this.client.operations.walletItemTransfer.createWalletItemTransfer(props);
       if (!response || response.error) {
         console.error('createWalletItem: received error.', { response });
         return { error: response.error || translate(AppUiMessage.systemError) };
