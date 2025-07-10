@@ -155,9 +155,9 @@
     if (!walletItem) return;
     await marketplaceContext.createWalletItemTransfer({
       walletItemId: walletItem.id,
-      recipientFullName: 'User C',
-      recipientEmail: 'userc@test.com',
-      messageText: 'Happy Birthday!',
+      recipientFullName: 'User D',
+      recipientEmail: 'wallet-t2@test.com',
+      messageText: 'Bonus for joining.',
     });
   }
 </script>
