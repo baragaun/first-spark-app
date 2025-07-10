@@ -2,15 +2,8 @@
   import { ArrowLeft } from 'lucide-svelte';
   import SendGiftCardForm from './send-gift-card-form.svelte';
   import type { PageData } from './$types';
-  import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
 
   let { data }: { data: PageData } = $props();
-  let submitted = false;
-
-  function handleSubmit() {
-    submitted = true;
-    marketplaceContext.createWalletItemTransfer(data.form.data);
-  }
 </script>
 
 <div
@@ -23,6 +16,6 @@
 </div>
 <div class="flex h-full w-full items-center justify-center px-4">
   <div class="w-full max-w-md">
-    <SendGiftCardForm {data} />
+    <SendGiftCardForm data={{ form: data.form, walletItemId: data.walletItemId ?? '' }} />
   </div>
 </div>
