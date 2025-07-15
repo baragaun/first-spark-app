@@ -14,6 +14,7 @@
   import { m } from '@/paraglide/messages';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
   import { giftCardImageDomain } from '@/constants';
+  import type { WalletItem } from '@baragaun/bg-node-client';
 
   // Tabs and wallet items
   let activeTab = $state<string>('Active');
@@ -30,7 +31,9 @@
     if (activeTab === 'Active') {
       return $walletItemsStore.filter(
         (item) =>
-          item.archivedAt == null && item.name.toLowerCase().includes(searchQuery.toLowerCase()),
+          item.archivedAt == null &&
+          item.transferredAt == null &&
+          item.name.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     } else if (activeTab === 'Transferred') {
       return $walletItemsStore.filter(
@@ -72,9 +75,10 @@
     isLoading = false;
   }
 
-  function navigateToGiftCardDetail(walletItemId: string | null | undefined) {
-    if (!walletItemId) return;
-    goto(`/wallet/${walletItemId}`);
+  function navigateToGiftCardDetail(walletItem: WalletItem) {
+    if (!walletItem.id) return;
+    if (walletItem.transferredAt == null) goto(`/wallet/${walletItem.id}`);
+    else goto(`/wallet/transferred/${walletItem.id}`);
   }
 
   function isMobileDevice() {
@@ -270,8 +274,8 @@
         <button
           type="button"
           class="border-borde col-span-2 flex w-full items-start justify-between border-b text-left focus:outline-none md:col-span-3"
-          onclick={() => navigateToGiftCardDetail(item.id)}
-          onkeydown={(e) => e.key === 'Enter' && navigateToGiftCardDetail(item.id)}
+          onclick={() => navigateToGiftCardDetail(item)}
+          onkeydown={(e) => e.key === 'Enter' && navigateToGiftCardDetail(item)}
         >
           <div class="mb-4 flex flex-shrink-0">
             <img

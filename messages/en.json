@@ -328,6 +328,17 @@
       "how_to_redeem": "How To Redeem",
       "terms_and_conditions": "Terms And Conditions",
       "visit_online": "VISIT ONLINE"
+    },
+    "transferred": {
+      "recipient_details": "Recipient Details",
+      "name": "Name",
+      "email": "Email",
+      "message": "Message",
+      "date_sent": "Date sent",
+      "gift_was_accepted": "Gift Was Accepted",
+      "active": "active",
+      "transferred": "transferred",
+      "no_items_found": "No items found"
     }
   },
   "upload_card": {
