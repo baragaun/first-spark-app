@@ -326,6 +326,17 @@
       "how_to_redeem": "रिडीम कैसे करें",
       "terms_and_conditions": "नियम और शर्तें",
       "visit_online": "ऑनलाइन देखें"
+    },
+    "transferred": {
+      "recipient_details": "प्राप्तकर्ता विवरण",
+      "name": "नाम",
+      "email": "ईमेल",
+      "message": "संदेश",
+      "date_sent": "भेजने की तिथि",
+      "gift_was_accepted": "उपहार स्वीकार किया गया",
+      "active": "सक्रिय",
+      "transferred": "स्थानांतरित",
+      "no_items_found": "कोई आइटम नहीं मिला"
     }
   },
   "upload_card": {

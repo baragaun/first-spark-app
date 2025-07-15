@@ -328,6 +328,17 @@
       "how_to_redeem": "Cómo canjear",
       "terms_and_conditions": "Términos y condiciones",
       "visit_online": "VISITAR EN LÍNEA"
+    },
+    "transferred": {
+      "recipient_details": "Detalles del destinatario",
+      "name": "Nombre",
+      "email": "Correo electrónico",
+      "message": "Mensaje",
+      "date_sent": "Fecha de envío",
+      "gift_was_accepted": "El regalo fue aceptado",
+      "active": "activo",
+      "transferred": "transferido",
+      "no_items_found": "No se encontraron elementos"
     }
   },
   "upload_card": {
