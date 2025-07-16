@@ -360,7 +360,7 @@
     "order_placed": "Order Placed: {date}",
     "total": "Total: ${amount}",
     "status": "Status: {status}",
-    "no_orders": "No orders match the filter.",
+    "no_orders": "No orders found.",
     "order": "Order",
     "type": "Type",
     "type_purchase": "Purchase",
