@@ -108,13 +108,6 @@
 
     <br />
 
-    <!-- Gift Status -->
-    <div class="mb-2 text-lg font-semibold text-gray-700">
-      {m['wallet.transferred.gift_was_accepted']()}
-    </div>
-
-    <br />
-
     <div class="mb-8">
       <div class="mb-2 flex items-center">
         <User size={24} color="#005f61" />
