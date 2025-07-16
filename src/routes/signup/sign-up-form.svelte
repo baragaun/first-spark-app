@@ -267,7 +267,8 @@
       } catch (error) {
         console.error('SignUpForm.setupOtpMsaHandler error updating verification:', { error });
       }
-      if (!userContext.myUser?.passwordUpdatedAt) {
+      // TODO - replaced passwordUpdatedAt with passwordHash as passwordUpdatedAt is no longer a property in backend.
+      if (!userContext.myUser?.passwordHash) {
         setStep(3);
       } else {
         // If this user already has a password, consider their onboarding complete
