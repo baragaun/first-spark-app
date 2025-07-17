@@ -454,7 +454,7 @@ export class MyUserContext {
         newPassword,
       );
 
-      if (response.error || !response.object) {
+      if (response.error || !response.object || response.object?.result !== 'ok') {
         console.error(
           'MyUserContext.verifyMultiStepActionToken: failed calling client.verifyMultiStepActionToken',
           { response },
