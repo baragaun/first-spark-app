@@ -267,7 +267,7 @@
     <div class="flex-1 overflow-y-auto">
       {#if displayedItems.length === 0}
         <div class="py-8 text-center text-muted-foreground">
-          {m['wallet.empty']()}
+          {activeTab === 'Active' ? m['wallet.empty']() : m['wallet.transferred.no_items_found']()}
         </div>
       {/if}
       {#each displayedItems as item}

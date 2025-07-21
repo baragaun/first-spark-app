@@ -332,6 +332,33 @@ export class MarketplaceContext {
     }
   }
 
+  async updateWalletItem(id: string): Promise<QueryResult<WalletItem>> {
+    if (!this.client.isInitialized) {
+      console.error('MarketplaceContext.updateWalletItem: not initialized.');
+      return { error: translate(AppUiMessage.systemError) };
+    }
+    try {
+      isLoading = true;
+      const response = await this.client.operations.walletItem.updateWalletItem({
+        id,
+        transferredAt: null,
+      });
+      if (!response || response.error) {
+        console.error('updateWalletItem: received error.', { response });
+        return { error: response.error || translate(AppUiMessage.systemError) };
+      }
+      return response;
+    } catch (error) {
+      console.error('updateWalletItem: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return { error: translate(AppUiMessage.systemError) };
+    } finally {
+      isLoading = false;
+    }
+  }
+
   async createWalletItemTransfer(
     props: Partial<WalletItemTransfer>,
   ): Promise<QueryResult<WalletItemTransfer>> {
@@ -375,8 +402,8 @@ export class MarketplaceContext {
       const response = await this.client.operations.walletItemTransfer.findWalletItemTransfers(
         input.filter,
         input.match,
-        input.queryOptions,
         input.options,
+        input.queryOptions,
       );
       if (!response || response.error || !response.objects) {
         console.error('findWalletItemTransfers: received error.', { response });
@@ -405,6 +432,7 @@ export class MarketplaceContext {
         id,
         archivedAt: archived ? new Date().toISOString() : null,
       });
+
       if (!response || response.error) {
         console.error('archiveWalletItem: received error.', { response });
         return { error: response.error || translate(AppUiMessage.systemError) };

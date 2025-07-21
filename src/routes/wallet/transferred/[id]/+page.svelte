@@ -5,12 +5,24 @@
   import { m } from '@/paraglide/messages';
   import { Button } from '$lib/components/ui/button';
   import placeholderImage from '../../../../assets/images/placeholder.png';
-  import { ExternalLink, Archive, ShoppingBag, User, ArrowLeft } from 'lucide-svelte';
+  import {
+    ExternalLink,
+    Archive,
+    ShoppingBag,
+    User,
+    ArrowLeft,
+    Printer,
+    DeleteIcon,
+    StopCircle,
+    StopCircleIcon,
+    X,
+  } from 'lucide-svelte';
   import { giftCardImageDomain } from '@/constants';
   import { onMount } from 'svelte';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
   import { walletItemTransfersStore } from '@/stores/wallet-store';
   import type { WalletItem, WalletItemTransfer } from '@baragaun/bg-node-client';
+  import { Cancel } from '@/components/ui/alert-dialog';
 
   // Get wallet item by id from store
   const walletCardId = page.params.id;
@@ -49,6 +61,16 @@
         });
       });
     });
+  }
+
+  async function cancelWalletItem() {
+    if (!$walletItem) return;
+    const result = await marketplaceContext.updateWalletItem($walletItem.id);
+    if (result.error) {
+      console.error('Error cancel wallet item transfer:', result.error);
+      return;
+    }
+    history.back();
   }
 </script>
 
@@ -94,6 +116,12 @@
             ? m['wallet.gift-card.unarchive']()
             : m['wallet.gift-card.archive']()}</span
         >
+      </div>
+      <div class="flex flex-col items-center">
+        <Button variant="ghost" size="icon" onclick={cancelWalletItem}>
+          <X aria-label="Close" />
+        </Button>
+        <span class="text-xs text-gray-500">{m['setting.buttons.cancel']()}</span>
       </div>
 
       <span class="ml-2 flex flex-grow items-center justify-end gap-2">
