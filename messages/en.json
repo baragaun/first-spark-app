@@ -380,7 +380,7 @@
     "sender_email": "Recipient Email",
     "sender_email_placeholder": "Enter email",
     "message": "Your Message",
-    "message_placeholder": "Write a message (optional)",
+    "message_placeholder": "Write a message",
     "send_gift": "Send Gift",
     "sent_title": "Gift card sent!",
     "sent_success": "Your gift has been sent successfully.",

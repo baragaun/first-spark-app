@@ -54,7 +54,7 @@
   }));
 
   const isFormValid = $derived.by(() => {
-    return $formData.senderName && $formData.senderEmail;
+    return $formData.senderName && $formData.senderEmail && $formData.message;
   });
 
   let showDialog = $state(false);
