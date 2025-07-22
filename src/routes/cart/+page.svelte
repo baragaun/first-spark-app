@@ -27,6 +27,7 @@
   import { m } from '@/paraglide/messages';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { giftCardImageDomain } from '$lib/constants';
+  import { orderHistoryStore, orderHistoryLoaded } from '@/stores/order-history';
 
   let cartItems = $state<ShoppingCartItem[]>([]);
   let total = $derived.by(() =>
@@ -131,6 +132,8 @@
         // Clear the cart
         cartItems = [];
         showOrderPlacedDialog = true;
+        orderHistoryStore.set(null);
+        orderHistoryLoaded.set(false);
       }
     });
   }
