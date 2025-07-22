@@ -373,19 +373,19 @@
     "not_found": "Bestellung nicht gefunden."
   },
   "send_gift_card": {
-    "sender_name": "Naam ontvanger",
-    "sender_name_placeholder": "Voer naam in",
-    "sender_email": "E-mail ontvanger",
-    "sender_email_placeholder": "Voer e-mail in",
-    "message": "Uw bericht",
-    "message_placeholder": "Schrijf een bericht",
-    "send_gift": "Cadeau versturen",
-    "sent_title": "Cadeaubon verzonden!",
-    "sent_success": "Uw cadeau is succesvol verzonden.",
+    "sender_name": "Absendername",
+    "sender_name_placeholder": "Name eingeben",
+    "sender_email": "E‑Mail des Empfängers",
+    "sender_email_placeholder": "E‑Mail eingeben",
+    "message": "Ihre Nachricht",
+    "message_placeholder": "Nachricht schreiben",
+    "send_gift": "Geschenk senden",
+    "sent_title": "Gutschein gesendet!",
+    "sent_success": "Ihr Geschenk wurde erfolgreich versendet.",
     "ok": "OK",
     "error": {
-      "sender_name_max_length": "Naam afzender mag maximaal 30 tekens bevatten",
-      "message_max_length": "Bericht mag maximaal 500 tekens bevatten"
+      "sender_name_max_length": "Der Name des Absenders darf maximal 30 Zeichen enthalten",
+      "message_max_length": "Die Nachricht darf maximal 500 Zeichen enthalten"
     }
   }
 }

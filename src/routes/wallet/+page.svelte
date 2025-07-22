@@ -70,8 +70,6 @@
       return;
     }
     if (!response) return;
-
-    console.log(response);
     isLoading = false;
   }
 
