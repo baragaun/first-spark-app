@@ -11,6 +11,7 @@
   import type { MyUserContext } from '@/contexts/my-user-context.svelte';
   import { getContext } from 'svelte';
   import type { MyUser } from '@baragaun/bg-node-client';
+  import { orderHistoryLoaded, orderHistoryStore } from '@/stores/order-history';
 
   const userContext = getContext<MyUserContext>('myUserContext');
   let isSignedIn: boolean = $derived(userContext.isSignedIn);
@@ -20,6 +21,8 @@
     // TODO: add a confirmation dialog
     // Solution for putting a dialog in a dropdown menu:
     // https://stackoverflow.com/questions/77185827/shadcn-dialog-inside-of-dropdown-closes-automatically
+    orderHistoryStore.set(null);
+    orderHistoryLoaded.set(false);
     await userContext.signMeOut();
     await goto('/signin');
   };
