@@ -363,7 +363,7 @@ export class MarketplaceContext {
     props: Partial<WalletItemTransfer>,
   ): Promise<QueryResult<WalletItemTransfer>> {
     if (!this.client.isInitialized) {
-      console.error('MarketplaceContext.createWalletItem: not initialized.');
+      console.error('MarketplaceContext.createWalletItemTransfer: not initialized.');
       return { error: translate(AppUiMessage.systemError) };
     }
     try {
@@ -371,12 +371,12 @@ export class MarketplaceContext {
       const response =
         await this.client.operations.walletItemTransfer.createWalletItemTransfer(props);
       if (!response || response.error) {
-        console.error('createWalletItem: received error.', { response });
+        console.error('createWalletItemTransfer: received error.', { response });
         return { error: response.error || translate(AppUiMessage.systemError) };
       }
       return response;
     } catch (error) {
-      console.error('createWalletItem: error', {
+      console.error('createWalletItemTransfer: error', {
         error: (error as Error).message,
         stack: (error as Error).stack,
       });

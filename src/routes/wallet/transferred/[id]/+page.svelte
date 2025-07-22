@@ -5,24 +5,12 @@
   import { m } from '@/paraglide/messages';
   import { Button } from '$lib/components/ui/button';
   import placeholderImage from '../../../../assets/images/placeholder.png';
-  import {
-    ExternalLink,
-    Archive,
-    ShoppingBag,
-    User,
-    ArrowLeft,
-    Printer,
-    DeleteIcon,
-    StopCircle,
-    StopCircleIcon,
-    X,
-  } from 'lucide-svelte';
+  import { ExternalLink, Archive, ShoppingBag, User, ArrowLeft, X } from 'lucide-svelte';
   import { giftCardImageDomain } from '@/constants';
   import { onMount } from 'svelte';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
   import { walletItemTransfersStore } from '@/stores/wallet-store';
-  import type { WalletItem, WalletItemTransfer } from '@baragaun/bg-node-client';
-  import { Cancel } from '@/components/ui/alert-dialog';
+  import type { WalletItemTransfer } from '@baragaun/bg-node-client';
 
   // Get wallet item by id from store
   const walletCardId = page.params.id;
@@ -33,6 +21,10 @@
 
   onMount(async () => {
     const response = await marketplaceContext.findWalletItemTransfers();
+    if (typeof response === 'string') {
+      console.error('Failed to load wallet item transfers:', response);
+      return;
+    }
     walletItemTransfersStore.set(response as WalletItemTransfer[]);
     walletItemTransfer = $walletItemTransfersStore.find(
       (walletItemTransfer) => walletItemTransfer.walletItemId === walletCardId,
@@ -51,7 +43,7 @@
 
   async function archiveWalletItem() {
     if (!walletItem) return;
-    await marketplaceContext.archiveWalletItem(walletCardId, !$walletItem?.archivedAt).then(() => {
+    marketplaceContext.archiveWalletItem(walletCardId, !$walletItem?.archivedAt).then(() => {
       walletItemsStore.update((items) => {
         return items.map((item) => {
           if (item.id === $walletItem?.id) {
