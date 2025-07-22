@@ -9,7 +9,7 @@ export const sendGiftCardSchema = z.object({
     .optional()
     .default('')
     .transform((val) => (val ? val.trim() : val)),
-  message: z.string().max(500, m['send_gift_card.error.sender_name_max_length']()).optional(),
+  message: z.string().max(500, m['send_gift_card.error.message_max_length']()).optional(),
 });
 
 //export type SendGiftCardSchema = typeof sendGiftCardSchema;
