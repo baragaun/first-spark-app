@@ -35,7 +35,9 @@ export class ChannelContext {
         options: {},
       };
       const participantLimit = 2;
-      const response = await this.client.operations.channel.findMyChannels(
+      const response = await this.client.operations.channel.findMyChannelsV2(
+        participantLimit,
+        true,
         input.options,
         input.queryOptions,
       );
