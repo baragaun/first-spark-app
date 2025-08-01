@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@baragaun/bg-node-client':
-        specifier: ^0.0.44
-        version: 0.0.44(prettier@3.5.3)
+        specifier: ^0.0.55
+        version: 0.0.55(prettier@3.5.3)
       '@svelte-put/cloudflare-turnstile':
         specifier: ^1.2.0
         version: 1.2.0(svelte@5.30.1)
@@ -189,8 +189,8 @@ importers:
 
 packages:
 
-  '@0no-co/graphql.web@1.1.2':
-    resolution: {integrity: sha512-N2NGsU5FLBhT8NZ+3l2YrzZSHITjNXNuDhC4iDiikv0IujaJ0Xc6xIxQZ/Ek3Cb+rgPjnLHYyJm11tInuJn+cw==}
+  '@0no-co/graphql.web@1.2.0':
+    resolution: {integrity: sha512-/1iHy9TTr63gE1YcR5idjx8UREz1s0kFhydf3bBLCXyqjhkIc6igAzTOx3zPifCwFR87tsh/4Pa9cNts6d2otw==}
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
     peerDependenciesMeta:
@@ -249,8 +249,8 @@ packages:
     resolution: {integrity: sha512-+EzkxvLNfiUeKMgy/3luqfsCWFRXLb7U6wNQTk60tovuckwB15B191tJWvpp4HjiQWdJkCxO3Wbvc6jlk3Xb2Q==}
     engines: {node: '>=6.9.0'}
 
-  '@baragaun/bg-node-client@0.0.44':
-    resolution: {integrity: sha512-o5T+IhTOs3n73J1fhWKay1FaKtky1txY5JH68W2u6j9Vt1p+kEkNsDmVVNySDXoBTRRPOMKnTV9KvMyKZaIfqw==}
+  '@baragaun/bg-node-client@0.0.55':
+    resolution: {integrity: sha512-cIIr8VtwExJd/WRSr+hQu3bSwL04I5fstFSTO/PetKpFu1rTvv5UARKbpJ5+p6cwbAGObE4tBTlonp8UxqhqWQ==}
     engines: {node: '>=20'}
 
   '@bcoe/v8-coverage@1.0.2':
@@ -838,11 +838,11 @@ packages:
   '@mongodb-js/saslprep@1.2.2':
     resolution: {integrity: sha512-EB0O3SCSNRUFk66iRCpI+cXzIjdswfCs7F6nOC3RAGJ7xr5YhaicvsRwJ9eyzYvYRlCSDUO/c7g4yNulxKC1WA==}
 
-  '@nats-io/jetstream@3.0.2':
-    resolution: {integrity: sha512-dR789x1xhMyEukXILPWDo6ODW53nHpBD9LnsnnywA+pTkwYFydEkYdyhv9HzFc6s6Nfrb2TpibrT4znijlg2dg==}
+  '@nats-io/jetstream@3.1.0':
+    resolution: {integrity: sha512-L+IEqEo2Bb8533tGNCsfsFW1kArYrQIkq3YMz8KDzBXJUjH3e5pFNaL2j7xeN/klToYFFLmuhsM6FwRYarkR0w==}
 
-  '@nats-io/nats-core@3.0.2':
-    resolution: {integrity: sha512-gACbRIhY3yQTO+5C4E1LY/qO2e5EhGUBeDsnPDT8Hd3qY9mfhNtluY6R7d7WX7/JMGsXRPbYdSLSADr/ECSy3w==}
+  '@nats-io/nats-core@3.1.0':
+    resolution: {integrity: sha512-xsSkLEGGcqNF+Ru8dMjPmKtfbBeq/U4meuJJX4Zi+5TBHpjpjNjs4YkCBC/pGYWnEum1/vdNPizjE1RdNHCyBg==}
 
   '@nats-io/nkeys@2.0.3':
     resolution: {integrity: sha512-JVt56GuE6Z89KUkI4TXUbSI9fmIfAmk6PMPknijmuL72GcD+UgIomTcRWiNvvJKxA01sBbmIPStqJs5cMRBC3A==}
@@ -852,8 +852,8 @@ packages:
     resolution: {integrity: sha512-TpA3HEBna/qMVudy+3HZr5M3mo/L1JPofpVT4t0HkFGkz2Cn9wrlrQC8tvR8Md5Oa9//GtGG26eN0qEWF5Vqew==}
     engines: {node: '>= 18.x'}
 
-  '@nats-io/transport-node@3.0.2':
-    resolution: {integrity: sha512-hPuep/ObVepjAM1dFy+XhqMlIzga3bQpbgQiOWM5AxwNZ9CF7GHAtfaxG7WY6+t057tBW8axC0nBL71Q8chQBQ==}
+  '@nats-io/transport-node@3.1.0':
+    resolution: {integrity: sha512-k5pH7IOKUetwXOMraVgcB5zG0wibcHOwJJuyuY1/5Q4K0XfBJDnb/IbczP5/JJWwMYfxSL9O+46ojtdBHvHRSw==}
     engines: {node: '>= 18.0.0'}
 
   '@nodelib/fs.scandir@2.1.5':
@@ -4165,7 +4165,7 @@ packages:
 
 snapshots:
 
-  '@0no-co/graphql.web@1.1.2(graphql@16.11.0)':
+  '@0no-co/graphql.web@1.2.0(graphql@16.11.0)':
     optionalDependencies:
       graphql: 16.11.0
 
@@ -4223,12 +4223,12 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.27.1
 
-  '@baragaun/bg-node-client@0.0.44(prettier@3.5.3)':
+  '@baragaun/bg-node-client@0.0.55(prettier@3.5.3)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
-      '@nats-io/jetstream': 3.0.2
-      '@nats-io/nats-core': 3.0.2
-      '@nats-io/transport-node': 3.0.2
+      '@nats-io/jetstream': 3.1.0
+      '@nats-io/nats-core': 3.1.0
+      '@nats-io/transport-node': 3.1.0
       '@opentelemetry/api': 1.9.0
       ajv: 8.17.1
       ajv-formats: 3.0.1(ajv@8.17.1)
@@ -4935,11 +4935,11 @@ snapshots:
     dependencies:
       sparse-bitfield: 3.0.3
 
-  '@nats-io/jetstream@3.0.2':
+  '@nats-io/jetstream@3.1.0':
     dependencies:
-      '@nats-io/nats-core': 3.0.2
+      '@nats-io/nats-core': 3.1.0
 
-  '@nats-io/nats-core@3.0.2':
+  '@nats-io/nats-core@3.1.0':
     dependencies:
       '@nats-io/nkeys': 2.0.3
       '@nats-io/nuid': 2.0.3
@@ -4950,9 +4950,9 @@ snapshots:
 
   '@nats-io/nuid@2.0.3': {}
 
-  '@nats-io/transport-node@3.0.2':
+  '@nats-io/transport-node@3.1.0':
     dependencies:
-      '@nats-io/nats-core': 3.0.2
+      '@nats-io/nats-core': 3.1.0
       '@nats-io/nkeys': 2.0.3
       '@nats-io/nuid': 2.0.3
 
@@ -6751,7 +6751,7 @@ snapshots:
 
   graffle@8.0.0-next.157(@opentelemetry/api@1.9.0)(graphql@16.11.0)(prettier@3.5.3):
     dependencies:
-      '@0no-co/graphql.web': 1.1.2(graphql@16.11.0)
+      '@0no-co/graphql.web': 1.2.0(graphql@16.11.0)
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
       '@molt/command': 0.9.0
       es-toolkit: 1.37.2

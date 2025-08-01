@@ -534,11 +534,11 @@ export class MyUserContext {
   public get myUserOnboardingCompletion(): number {
     if (!this.myUser) return 0;
 
-    if (!this.myUser.isEmailVerified) {
-      return 2;
-    } else if (!this.myUser.passwordUpdatedAt) {
-      return 3;
-    }
+    // if (!this.myUser.isEmailVerified) {
+    //   return 2;
+    // } else if (!this.myUser.passwordUpdatedAt) {
+    //   return 3;
+    // }
 
     return 1;
   }

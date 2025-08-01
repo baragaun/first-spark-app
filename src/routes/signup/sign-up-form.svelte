@@ -60,9 +60,6 @@
 
   const userContext = getContext<MyUserContext>('myUserContext');
   let cloudflareToken = $state('');
-  let step = $state(1);
-  let isLoading = $state(false);
-  let hasStepError = $state(false);
 
   let canResend = $state(false);
   let resendTimer = $state(30);
@@ -71,6 +68,11 @@
 
   let identifier = $state('');
   let identType = $state(UserIdentType.email);
+  let formState = $state({
+    isLoading: false,
+    hasStepError: false,
+    step: 1,
+  });
 
   let timerInterval: ReturnType<typeof setInterval>;
   const DEBOUNCE_DELAY = 500; // ms
@@ -78,37 +80,37 @@
 
   const debouncedFormValidation = debounce(DEBOUNCE_DELAY, async () => {
     try {
-      const requiredFields = steps[step - 1].requiredFields;
+      const requiredFields = steps[formState.step - 1].requiredFields;
 
       const missingRequiredFields = requiredFields.some(
         (field) => !$formData[field] || $formData[field].trim() === '',
       );
 
       if (missingRequiredFields) {
-        hasStepError = true;
+        formState.hasStepError = true;
         return;
       }
 
       // Validate the identifier
       const result = await validateForm({ update: true, focusOnError: false });
-      isLoading = true;
+      formState.isLoading = true;
 
       // Check availability if needed
-      if (step === 1 || step === 3) {
+      if (formState.step === 1 || formState.step === 3) {
         const availability = await checkIdentAvailability();
-        hasStepError = !availability || !result.valid;
-      } else if (step === 2) {
+        formState.hasStepError = !availability || !result.valid;
+      } else if (formState.step === 2) {
         // For OTP verification step, only check if the form is valid
-        hasStepError = !result.valid || !$formData.token || $formData.token.length < 6;
+        formState.hasStepError = !result.valid || !$formData.token || $formData.token.length < 6;
       }
     } catch (error) {
       console.error('Error debouncing the form input:', error);
     } finally {
-      isLoading = false;
+      formState.isLoading = false;
     }
   });
 
-  const getCurrentValidator = () => steps[step - 1].schema;
+  const getCurrentValidator = () => steps[formState.step - 1].schema;
 
   const form = superForm(data.form, {
     dataType: 'json',
@@ -127,11 +129,11 @@
   const { form: formData, errors, enhance, delayed, validateForm, options } = form;
 
   const isFormValid = $derived.by(() => {
-    if (step === 1) {
+    if (formState.step === 1) {
       return $formData.email && cloudflareToken;
-    } else if (step === 2) {
+    } else if (formState.step === 2) {
       return $formData.token;
-    } else if (step === 3) {
+    } else if (formState.step === 3) {
       return $formData.username && $formData.password;
     }
     return false;
@@ -150,11 +152,11 @@
   const handleFormSubmit = async () => {
     const result = await validateForm({ update: true, focusOnError: true });
     if (!result.valid) {
-      hasStepError = true;
+      formState.hasStepError = true;
       return;
     }
 
-    switch (step) {
+    switch (formState.step) {
       case 1:
         await registerNewEmail();
         break;
@@ -182,28 +184,29 @@
   };
 
   const setStep = (newStep: number) => {
-    step = newStep;
-    hasStepError = true; // Disable button initially when step changes
+    console.log('jahanvi, setStep', newStep);
+    formState.step = newStep;
+    formState.hasStepError = true; // Disable button initially when step changes
   };
 
   const getCurrentStepDescription = (): string => {
-    const description = steps[step - 1].description;
-    return step === 2
+    const description = steps[formState.step - 1].description;
+    return formState.step === 2
       ? m['signup.verification_description']({ email: $formData.email || '' })
       : description;
   };
 
   const checkIdentAvailability = async (): Promise<boolean> => {
-    isLoading = true;
+    formState.isLoading = true;
 
-    if (step === 1) {
+    if (formState.step === 1) {
       identifier = $formData.email || '';
       if (!identifier) return false;
       identType = UserIdentType.email;
 
       const validationResult = emailSchema.safeParse($formData.email);
       if (!validationResult.success) return false;
-    } else if (step === 3) {
+    } else if (formState.step === 3) {
       identifier = $formData.username || '';
       if (!identifier) return false;
       identType = UserIdentType.userHandle;
@@ -224,7 +227,7 @@
       const response = await userContext.isUserIdentAvailable(identifier, identType);
 
       if (response.error) {
-        updateFormErrors(step === 1 ? 'email' : 'username', response.error);
+        updateFormErrors(formState.step === 1 ? 'email' : 'username', response.error);
         return false;
       }
 
@@ -239,7 +242,7 @@
       updateFormErrors(fieldName, translate(AppUiMessage.systemError));
       return false;
     } finally {
-      isLoading = false;
+      formState.isLoading = false;
     }
   };
 
@@ -247,30 +250,33 @@
     msaVerificationResponse: QueryResult<MultiStepActionProgressResult>,
   ) => {
     const msaId = msaVerificationResponse.object?.actionProgress?.actionId || '';
-
+    console.log('jahanvi, received notification');
+    console.log('jahanvi, msaVerificationResponse', msaVerificationResponse);
     const onNotificationSent = () => {
+      console.log('jahanvi, setstep = 2');
       setStep(2);
-      isLoading = false;
+      formState.isLoading = false;
     };
 
     const onFailure = () => {
       console.error('onFailure');
-      isLoading = false;
+      formState.isLoading = false;
     };
 
     const onSuccess = async () => {
+      console.log('jahanvi, received notification - onSuccess');
       try {
         await userContext.updateMyUser({ isEmailVerified: true });
       } catch (error) {
         console.error('SignUpForm.setupOtpMsaHandler error updating verification:', { error });
       }
-      if (!userContext.myUser?.passwordUpdatedAt) {
+      if (!userContext.myUser?.passwordHash) {
         setStep(3);
       } else {
         // If this user already has a password, consider their onboarding complete
         await goto('/');
       }
-      isLoading = false;
+      formState.isLoading = false;
     };
 
     return {
@@ -286,7 +292,7 @@
   };
 
   const registerNewEmail = async () => {
-    isLoading = true;
+    formState.isLoading = true;
 
     if (!$formData.email) {
       validateForm({ update: true });
@@ -295,7 +301,8 @@
 
     try {
       const signUpResponse = await userContext.signUpUser($formData.email);
-
+      console.log('jahanvi');
+      console.log('signUpResponse', signUpResponse);
       if (signUpResponse !== true) {
         console.error('SignUpForm.registerNewEmail: signUpUser failed.', { signUpResponse });
         updateFormErrors('email', signUpResponse);
@@ -303,7 +310,8 @@
       }
 
       const verificationResponse = await userContext.verifyMyEmail($formData.email);
-
+      console.log('jahanvi');
+      console.log('verificationResponse', verificationResponse);
       if (
         !verificationResponse ||
         verificationResponse?.error ||
@@ -326,7 +334,7 @@
       console.error('SignUpForm.registerNewEmail:', { error });
       updateFormErrors('email', translate(AppUiMessage.systemError));
     } finally {
-      isLoading = false;
+      formState.isLoading = false;
     }
   };
 
@@ -338,7 +346,7 @@
         return;
       }
 
-      isLoading = true;
+      formState.isLoading = true;
 
       const response = await userContext.verifyMultiStepActionToken(msaId, $formData.token || '');
 
@@ -358,7 +366,7 @@
       console.error('SignUpForm.handleVerifyOtp: error:', { error });
       updateFormErrors('token', translate(AppUiMessage.systemError));
     } finally {
-      isLoading = false;
+      formState.isLoading = false;
     }
   };
 
@@ -370,7 +378,7 @@
     }
 
     try {
-      isLoading = true;
+      formState.isLoading = true;
 
       const response = await userContext.sendMultiStepActionNotification(msaId, $formData.email);
 
@@ -385,7 +393,7 @@
       console.error('SignUpForm.resendToken: error:', { error });
       updateFormErrors('token', translate(AppUiMessage.systemError));
     } finally {
-      isLoading = false;
+      formState.isLoading = false;
     }
   };
 
@@ -393,7 +401,7 @@
     if (!$formData.email) return;
 
     try {
-      isLoading = true;
+      formState.isLoading = true;
       const result = await userContext.findAvailableUserHandle($formData.email);
 
       if (result && typeof result === 'object' && 'object' in result) {
@@ -404,12 +412,12 @@
     } catch (error) {
       console.error('Error getting suggested handle:', error);
     } finally {
-      isLoading = false;
+      formState.isLoading = false;
     }
   };
 
   const createCredentials = async () => {
-    isLoading = true;
+    formState.isLoading = true;
 
     if (!$formData.password) return;
 
@@ -429,13 +437,13 @@
       console.error('SignUpForm.createCredentials: error:', { error });
       updateFormErrors('password', translate(AppUiMessage.systemError));
     } finally {
-      isLoading = false;
+      formState.isLoading = false;
     }
   };
 
   $effect(() => {
     if (!$formData) {
-      isLoading = false;
+      formState.isLoading = false;
       return;
     }
 
@@ -457,7 +465,8 @@
       if (!isNaN(targetStep) && targetStep > 1 && targetStep <= steps.length) {
         setStep(targetStep);
 
-        identifier = step === 2 ? userContext.myEmail || '' : userContext.myUserHandle || '';
+        identifier =
+          formState.step === 2 ? userContext.myEmail || '' : userContext.myUserHandle || '';
         $formData = {
           email: userContext.myEmail || '',
           token: '',
@@ -490,12 +499,17 @@
     // Cancel the debounced function
     debouncedFormValidation.cancel();
   });
+
+  const buttonState = $derived.by(() => ({
+    isDisabled: !isFormValid || formState.isLoading || formState.hasStepError,
+    isLoading: ($delayed || formState.isLoading) && !formState.hasStepError,
+  }));
 </script>
 
 <form method="POST" id="sign-up-form" use:enhance>
   <AuthCard title={m['signup.title']()} description={getCurrentStepDescription()}>
     <div class="space-y-4">
-      {#if step === 1}
+      {#if formState.step === 1}
         <IdentFormInput
           {form}
           fieldName="email"
@@ -512,7 +526,7 @@
           turnstile-response-field
           onturnstile={(e) => (cloudflareToken = e.detail.token)}
         ></div>
-      {:else if step === 2}
+      {:else if formState.step === 2}
         <OTPFormInput
           {form}
           fieldName="token"
@@ -523,7 +537,7 @@
           {resendTimer}
           onResendClick={resendToken}
         />
-      {:else if step === 3}
+      {:else if formState.step === 3}
         <IdentFormInput
           {form}
           fieldName="username"
@@ -531,7 +545,6 @@
           label={m['signup.username']()}
           {identType}
           suggestUsername={getSuggestedUsername}
-          {isLoading}
         />
         <PasswordFormInput
           {form}
@@ -541,10 +554,10 @@
         />
       {/if}
       <FormButton
-        disabled={!isFormValid || isLoading || hasStepError}
-        isLoading={$delayed || isLoading}
-        buttonText={steps[step - 1].buttonLabel}
-        loadingText={steps[step - 1].loadingLabel}
+        disabled={buttonState.isDisabled}
+        isLoading={buttonState.isLoading}
+        buttonText={steps[formState.step - 1].buttonLabel}
+        loadingText={steps[formState.step - 1].loadingLabel}
       />
       <div class="mt-4 text-center text-sm">
         {m['signup.buttons.have_account']()}

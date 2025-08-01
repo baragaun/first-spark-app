@@ -39,11 +39,15 @@
         (participant) => participant.userId !== currentUserId,
       );
 
+      console.log('jahanvi, recipientUser', recipientUser);
+
       if (!recipientUser) return null;
 
       const receipientName = recipientUser.userInfo?.firstName
         ? `${recipientUser.userInfo?.firstName} ${recipientUser.userInfo?.lastName}`
         : recipientUser.userInfo?.userHandle;
+
+      console.log('jahanvi, receipientName', receipientName);
 
       channelDetails = {
         id: recipientUser.id,
@@ -66,10 +70,14 @@
   };
 
   onMount(async () => {
+    console.log('jahanvi, onMount');
     if (channelContext.selectedChannel) {
+      console.log('jahanvi, selectedChannel is there');
+      console.log('jahanvi, selectedChannel', channelContext.selectedChannel);
       setContactInfo(channelContext.selectedChannel);
       initializeChannel();
     } else {
+      console.log('jahanvi, findChannelById');
       const response = await channelContext.findChannelById(channelId);
       console.log('FindChannelById: response:', response);
       if (response && typeof response !== 'string') {
