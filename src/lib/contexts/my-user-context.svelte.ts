@@ -37,7 +37,7 @@ export class MyUserContext {
     this._isInitializing = true;
 
     const config: BgNodeClientConfig = {
-      enableGroupChannels: false,
+      //enableGroupChannels: false,
       inBrowser: true,
       fsdata: {
         url: env.PUBLIC_FSDATA_URL || 'http://localhost:8092/fsdata/api/graphql',
@@ -454,7 +454,7 @@ export class MyUserContext {
         newPassword,
       );
 
-      if (response.error || !response.object) {
+      if (response.error || !response.object || response.object?.result !== 'ok') {
         console.error(
           'MyUserContext.verifyMultiStepActionToken: failed calling client.verifyMultiStepActionToken',
           { response },

@@ -4,12 +4,6 @@
   import type { PageData } from './$types';
 
   let { data }: { data: PageData } = $props();
-  let submitted = false;
-
-  function handleSubmit() {
-    submitted = true;
-    // Add your submit logic here
-  }
 </script>
 
 <div
@@ -22,6 +16,6 @@
 </div>
 <div class="flex h-full w-full items-center justify-center px-4">
   <div class="w-full max-w-md">
-    <SendGiftCardForm {data} />
+    <SendGiftCardForm data={{ form: data.form, walletItemId: data.walletItemId ?? '' }} />
   </div>
 </div>

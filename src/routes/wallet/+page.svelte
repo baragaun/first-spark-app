@@ -14,6 +14,7 @@
   import { m } from '@/paraglide/messages';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
   import { giftCardImageDomain } from '@/constants';
+  import type { WalletItem } from '@baragaun/bg-node-client';
 
   // Tabs and wallet items
   let activeTab = $state<string>('Active');
@@ -21,18 +22,23 @@
   let fileInputRef: HTMLInputElement;
   let isLoading = false;
 
-  // Load demo data on mount
   onMount(async () => {
-    // const res = await fetch('/wallet-data.json');
-    // walletItemsStore.set(await res.json());
     loadWalletItems();
+    // loadWalletItemTransfers();
   });
 
   let displayedItems = $derived.by(() => {
     if (activeTab === 'Active') {
       return $walletItemsStore.filter(
         (item) =>
-          item.archivedAt == null && item.name.toLowerCase().includes(searchQuery.toLowerCase()),
+          item.archivedAt == null &&
+          item.transferredAt == null &&
+          item.name.toLowerCase().includes(searchQuery.toLowerCase()),
+      );
+    } else if (activeTab === 'Transferred') {
+      return $walletItemsStore.filter(
+        (item) =>
+          item.transferredAt != null && item.name.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     } else {
       return $walletItemsStore.filter(
@@ -55,9 +61,22 @@
     isLoading = false;
   }
 
-  function navigateToGiftCardDetail(walletItemId: string | null | undefined) {
-    if (!walletItemId) return;
-    goto(`/wallet/${walletItemId}`);
+  //todo test function
+  async function loadWalletItemTransfers() {
+    isLoading = true;
+    const response = await marketplaceContext.findWalletItemTransfers();
+    if (typeof response === 'string') {
+      console.error('Failed to load wallet item transfers:', response);
+      return;
+    }
+    if (!response) return;
+    isLoading = false;
+  }
+
+  function navigateToGiftCardDetail(walletItem: WalletItem) {
+    if (!walletItem.id) return;
+    if (walletItem.transferredAt == null) goto(`/wallet/${walletItem.id}`);
+    else goto(`/wallet/transferred/${walletItem.id}`);
   }
 
   function isMobileDevice() {
@@ -201,6 +220,12 @@
           >
             {m['wallet.archive']()}
           </Tabs.Trigger>
+          <Tabs.Trigger
+            value="Transferred"
+            class="inline-flex flex-1 items-center justify-center whitespace-nowrap rounded-xl px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          >
+            Transferred
+          </Tabs.Trigger>
         </Tabs.List>
       </Tabs.Root>
       <!-- Search -->
@@ -239,14 +264,16 @@
     <!-- Scrollable Wallet Items Section -->
     <div class="flex-1 overflow-y-auto">
       {#if displayedItems.length === 0}
-        <div class="py-8 text-center text-muted-foreground">{m['wallet.empty']()}</div>
+        <div class="py-8 text-center text-muted-foreground">
+          {activeTab === 'Active' ? m['wallet.empty']() : m['wallet.transferred.no_items_found']()}
+        </div>
       {/if}
       {#each displayedItems as item}
         <button
           type="button"
           class="border-borde col-span-2 flex w-full items-start justify-between border-b text-left focus:outline-none md:col-span-3"
-          onclick={() => navigateToGiftCardDetail(item.id)}
-          onkeydown={(e) => e.key === 'Enter' && navigateToGiftCardDetail(item.id)}
+          onclick={() => navigateToGiftCardDetail(item)}
+          onkeydown={(e) => e.key === 'Enter' && navigateToGiftCardDetail(item)}
         >
           <div class="mb-4 flex flex-shrink-0">
             <img

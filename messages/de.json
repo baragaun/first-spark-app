@@ -326,6 +326,17 @@
       "how_to_redeem": "So lösen Sie ein",
       "terms_and_conditions": "Allgemeine Geschäftsbedingungen",
       "visit_online": "ONLINE BESUCHEN"
+    },
+    "transferred": {
+      "recipient_details": "Empfängerdetails",
+      "name": "Name",
+      "email": "E-Mail",
+      "message": "Nachricht",
+      "date_sent": "Gesendet am",
+      "gift_was_accepted": "Geschenk wurde angenommen",
+      "active": "aktiv",
+      "transferred": "übertragen",
+      "no_items_found": "Keine Einträge gefunden"
     }
   },
   "upload_card": {
@@ -363,12 +374,18 @@
   },
   "send_gift_card": {
     "sender_name": "Absendername",
-    "sender_email": "Absender-E-Mail",
-    "message": "Nachricht",
-    "message_placeholder": "Schreiben Sie eine Nachricht (optional)",
+    "sender_name_placeholder": "Name eingeben",
+    "sender_email": "E‑Mail des Empfängers",
+    "sender_email_placeholder": "E‑Mail eingeben",
+    "message": "Ihre Nachricht",
+    "message_placeholder": "Nachricht schreiben",
     "send_gift": "Geschenk senden",
-    "sent_title": "Geschenk gesendet!",
-    "sent_success": "Ihr Geschenk wurde erfolgreich gesendet.",
-    "ok": "OK"
+    "sent_title": "Gutschein gesendet!",
+    "sent_success": "Ihr Geschenk wurde erfolgreich versendet.",
+    "ok": "OK",
+    "error": {
+      "sender_name_max_length": "Der Name des Absenders darf maximal 30 Zeichen enthalten",
+      "message_max_length": "Die Nachricht darf maximal 500 Zeichen enthalten"
+    }
   }
 }

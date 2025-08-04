@@ -317,7 +317,7 @@
       "brand": "Brand",
       "amount": "Amount",
       "print": "Print",
-      "archive": "Archived",
+      "archive": "Archive",
       "unarchive": "Unarchive",
       "use": "Use",
       "info": "Info",
@@ -328,6 +328,17 @@
       "how_to_redeem": "How To Redeem",
       "terms_and_conditions": "Terms And Conditions",
       "visit_online": "VISIT ONLINE"
+    },
+    "transferred": {
+      "recipient_details": "Recipient Details",
+      "name": "Name",
+      "email": "Email",
+      "message": "Message",
+      "date_sent": "Date sent",
+      "gift_was_accepted": "Gift Was Accepted",
+      "active": "active",
+      "transferred": "transferred",
+      "no_items_found": "No items found"
     }
   },
   "upload_card": {
@@ -349,7 +360,7 @@
     "order_placed": "Order Placed: {date}",
     "total": "Total: ${amount}",
     "status": "Status: {status}",
-    "no_orders": "No orders match the filter.",
+    "no_orders": "No orders found.",
     "order": "Order",
     "type": "Type",
     "type_purchase": "Purchase",
@@ -364,15 +375,19 @@
     "not_found": "Order not found."
   },
   "send_gift_card": {
-    "sender_name": "Sender Name",
-    "sender_name_placeholder": "Enter your name",
-    "sender_email": "Sender Email",
-    "sender_email_placeholder": "Enter your email",
-    "message": "Message",
-    "message_placeholder": "Write a message (optional)",
+    "sender_name": "Recipient Name",
+    "sender_name_placeholder": "Enter name",
+    "sender_email": "Recipient Email",
+    "sender_email_placeholder": "Enter email",
+    "message": "Your Message",
+    "message_placeholder": "Write a message",
     "send_gift": "Send Gift",
     "sent_title": "Gift card sent!",
     "sent_success": "Your gift has been sent successfully.",
-    "ok": "OK"
+    "ok": "OK",
+    "error": {
+      "sender_name_max_length": "Sender name must contain at most 30 character(s)",
+      "message_max_length": "Message must contain at most 500 character(s)"
+    }
   }
 }

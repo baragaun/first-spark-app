@@ -328,6 +328,17 @@
       "how_to_redeem": "Cómo canjear",
       "terms_and_conditions": "Términos y condiciones",
       "visit_online": "VISITAR EN LÍNEA"
+    },
+    "transferred": {
+      "recipient_details": "Detalles del destinatario",
+      "name": "Nombre",
+      "email": "Correo electrónico",
+      "message": "Mensaje",
+      "date_sent": "Fecha de envío",
+      "gift_was_accepted": "El regalo fue aceptado",
+      "active": "activo",
+      "transferred": "transferido",
+      "no_items_found": "No se encontraron elementos"
     }
   },
   "upload_card": {
@@ -364,13 +375,19 @@
     "not_found": "Pedido no encontrado."
   },
   "send_gift_card": {
-    "sender_name": "Nombre del remitente",
-    "sender_email": "Correo electrónico del remitente",
-    "message": "Mensaje",
-    "message_placeholder": "Escribe un mensaje (opcional)",
+    "sender_name": "Nombre del destinatario",
+    "sender_name_placeholder": "Ingrese el nombre",
+    "sender_email": "Correo electrónico del destinatario",
+    "sender_email_placeholder": "Ingrese el correo electrónico",
+    "message": "Tu mensaje",
+    "message_placeholder": "Escribe un mensaje",
     "send_gift": "Enviar regalo",
-    "sent_title": "¡Regalo enviado!",
-    "sent_success": "Tu regalo ha sido enviado con éxito.",
-    "ok": "OK"
+    "sent_title": "¡Tarjeta de regalo enviada!",
+    "sent_success": "Tu regalo ha sido enviado exitosamente.",
+    "ok": "OK",
+    "error": {
+      "sender_name_max_length": "El nombre del remitente debe tener como máximo 30 caracteres",
+      "message_max_length": "El mensaje debe tener como máximo 500 caracteres"
+    }
   }
 }

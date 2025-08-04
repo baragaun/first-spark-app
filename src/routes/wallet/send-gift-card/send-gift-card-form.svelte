@@ -9,6 +9,7 @@
   import FormButton from '@/components/forms/form-button.svelte';
   import { onMount } from 'svelte';
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
+  import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
   import {
     AlertDialog,
     AlertDialogAction,
@@ -23,7 +24,8 @@
 
   const DEBOUNCE_DELAY = 350;
 
-  let { data }: { data: { form: SuperValidated<SendGiftCardSchema> } } = $props();
+  let { data }: { data: { form: SuperValidated<SendGiftCardSchema>; walletItemId: string } } =
+    $props();
 
   const form = superForm(data.form, {
     dataType: 'json',
@@ -52,7 +54,7 @@
   }));
 
   const isFormValid = $derived.by(() => {
-    return $formData.senderName && $formData.senderEmail;
+    return $formData.senderName && $formData.senderEmail && $formData.message;
   });
 
   let showDialog = $state(false);
@@ -61,6 +63,17 @@
     const result = await validateForm({ update: true, focusOnError: true });
     if (!result.valid) {
       formState.hasError = true;
+      return;
+    }
+
+    const response = await marketplaceContext.createWalletItemTransfer({
+      walletItemId: data.walletItemId,
+      recipientFullName: $formData.senderName,
+      recipientEmail: $formData.senderEmail,
+      messageText: $formData.message,
+    });
+
+    if (response.error) {
       return;
     }
     showDialog = true;
@@ -96,8 +109,8 @@
   <IdentFormInput
     {form}
     fieldName="senderEmail"
-    label={m['send_gift_card.sender_email_placeholder']()}
-    placeholder={m['send_gift_card.sender_name']()}
+    label={m['send_gift_card.sender_email']()}
+    placeholder={m['send_gift_card.sender_email_placeholder']()}
     identType={UserIdentType.email}
   />
   <div>

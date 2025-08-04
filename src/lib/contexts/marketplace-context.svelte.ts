@@ -11,6 +11,7 @@ import {
   ShoppingCart,
   ShoppingCartItem,
   WalletItem,
+  WalletItemTransfer,
   type QueryResult,
 } from '@baragaun/bg-node-client';
 import { myUserContext } from './my-user-context.svelte';
@@ -302,7 +303,7 @@ export class MarketplaceContext {
 
     const args = {
       filter: {},
-      match: { createdBy: myUserContext.myUserId },
+      match: { walletId: myUserContext.myUserId },
       options: { cachePolicy: CachePolicy.network },
       queryOptions: {},
     };
@@ -331,6 +332,95 @@ export class MarketplaceContext {
     }
   }
 
+  async updateWalletItem(id: string): Promise<QueryResult<WalletItem>> {
+    if (!this.client.isInitialized) {
+      console.error('MarketplaceContext.updateWalletItem: not initialized.');
+      return { error: translate(AppUiMessage.systemError) };
+    }
+    try {
+      isLoading = true;
+      const response = await this.client.operations.walletItem.updateWalletItem({
+        id,
+        transferredAt: null,
+      });
+      if (!response || response.error) {
+        console.error('updateWalletItem: received error.', { response });
+        return { error: response.error || translate(AppUiMessage.systemError) };
+      }
+      return response;
+    } catch (error) {
+      console.error('updateWalletItem: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return { error: translate(AppUiMessage.systemError) };
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  async createWalletItemTransfer(
+    props: Partial<WalletItemTransfer>,
+  ): Promise<QueryResult<WalletItemTransfer>> {
+    if (!this.client.isInitialized) {
+      console.error('MarketplaceContext.createWalletItemTransfer: not initialized.');
+      return { error: translate(AppUiMessage.systemError) };
+    }
+    try {
+      isLoading = true;
+      const response =
+        await this.client.operations.walletItemTransfer.createWalletItemTransfer(props);
+      if (!response || response.error) {
+        console.error('createWalletItemTransfer: received error.', { response });
+        return { error: response.error || translate(AppUiMessage.systemError) };
+      }
+      return response;
+    } catch (error) {
+      console.error('createWalletItemTransfer: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return { error: translate(AppUiMessage.systemError) };
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  async findWalletItemTransfers(): Promise<WalletItemTransfer[] | string | undefined> {
+    if (!this.client.isInitialized) {
+      console.error('MarketplaceContext.findWalletItemTransfers: not initialized.');
+      return translate(AppUiMessage.systemError);
+    }
+    try {
+      isLoading = true;
+      const input = {
+        filter: {},
+        match: { createdBy: myUserContext.myUserId },
+        options: { cachePolicy: CachePolicy.network },
+        queryOptions: {},
+      };
+      const response = await this.client.operations.walletItemTransfer.findWalletItemTransfers(
+        input.filter,
+        input.match,
+        input.options,
+        input.queryOptions,
+      );
+      if (!response || response.error || !response.objects) {
+        console.error('findWalletItemTransfers: received error.', { response });
+        return response.error || translate(AppUiMessage.systemError);
+      }
+      return response.objects;
+    } catch (error) {
+      console.error('findWalletItemTransfers: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return translate(AppUiMessage.systemError);
+    } finally {
+      isLoading = false;
+    }
+  }
+
   async archiveWalletItem(id: string, archived: boolean): Promise<QueryResult<WalletItem>> {
     if (!this.client.isInitialized) {
       console.error('MarketplaceContext.archiveWalletItem: not initialized.');
@@ -342,6 +432,7 @@ export class MarketplaceContext {
         id,
         archivedAt: archived ? new Date().toISOString() : null,
       });
+
       if (!response || response.error) {
         console.error('archiveWalletItem: received error.', { response });
         return { error: response.error || translate(AppUiMessage.systemError) };
