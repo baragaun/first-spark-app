@@ -7,6 +7,7 @@
   import SearchBar from '@/components/ui/search-bar.svelte';
   import type { UserListItem } from '@baragaun/bg-node-client';
   import { selectedUser } from '@/stores/user-store';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
 
   let searchQuery = $state(''); // State for search query
 
@@ -31,8 +32,8 @@
 
   <div class="user-grid">
     {#each channelContext.users.filter((user) => user.userHandle
-        ?.toLowerCase()
-        .includes(searchQuery.toLowerCase())) as user}
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase()) && user.id !== myUserContext.myUser?.id) as user}
       <Card>
         <CardHeader class="flex items-center gap-4">
           <img
