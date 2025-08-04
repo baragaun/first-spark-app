@@ -180,8 +180,10 @@ export class ChannelContext {
     }
     try {
       isChannelLoading = true;
-      const response =
-        await this.client.operations.channelParticipant.deleteChannelParticipant(participantId, true);
+      const response = await this.client.operations.channelParticipant.deleteChannelParticipant(
+        participantId,
+        true,
+      );
       if (!response || response.error) {
         console.error('DeleteChannel: received error.', { response });
         return response.error || translate(AppUiMessage.systemError);

@@ -184,7 +184,6 @@
   };
 
   const setStep = (newStep: number) => {
-    console.log('jahanvi, setStep', newStep);
     formState.step = newStep;
     formState.hasStepError = true; // Disable button initially when step changes
   };
@@ -250,10 +249,7 @@
     msaVerificationResponse: QueryResult<MultiStepActionProgressResult>,
   ) => {
     const msaId = msaVerificationResponse.object?.actionProgress?.actionId || '';
-    console.log('jahanvi, received notification');
-    console.log('jahanvi, msaVerificationResponse', msaVerificationResponse);
     const onNotificationSent = () => {
-      console.log('jahanvi, setstep = 2');
       setStep(2);
       formState.isLoading = false;
     };
@@ -264,7 +260,6 @@
     };
 
     const onSuccess = async () => {
-      console.log('jahanvi, received notification - onSuccess');
       try {
         await userContext.updateMyUser({ isEmailVerified: true });
       } catch (error) {
@@ -301,8 +296,6 @@
 
     try {
       const signUpResponse = await userContext.signUpUser($formData.email);
-      console.log('jahanvi');
-      console.log('signUpResponse', signUpResponse);
       if (signUpResponse !== true) {
         console.error('SignUpForm.registerNewEmail: signUpUser failed.', { signUpResponse });
         updateFormErrors('email', signUpResponse);
@@ -310,8 +303,6 @@
       }
 
       const verificationResponse = await userContext.verifyMyEmail($formData.email);
-      console.log('jahanvi');
-      console.log('verificationResponse', verificationResponse);
       if (
         !verificationResponse ||
         verificationResponse?.error ||
