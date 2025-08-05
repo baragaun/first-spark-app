@@ -11,6 +11,8 @@ import {
   User,
   UserListItem,
   type QueryOptions,
+  ChannelInvitation,
+  ChannelInvitationDirection,
 } from '@baragaun/bg-node-client';
 
 let isChannelLoading = $state(false);
@@ -357,6 +359,37 @@ export class ChannelContext {
         return response.error || translate(AppUiMessage.systemError);
       }
       this.users = response.objects;
+      return response.objects;
+    } catch (error) {
+      console.error('findUsers: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return translate(AppUiMessage.systemError);
+    } finally {
+      isChannelLoading = false;
+    }
+  }
+
+  async findChannelInvitations(searchText: string = ''): Promise<ChannelInvitation[] | string | null | undefined> {
+    if (!this.client.isInitialized) {
+      console.error('ConversationContext.findUsers: not initialized.');
+      return translate(AppUiMessage.systemError);
+    }
+    try {
+      isChannelLoading = true;
+      const response = await this.client.operations.channelInvitation.findChannelInvitationsForUser(
+        '688c6a1e74490ee3da749944',
+        true,
+        true,
+        ChannelInvitationDirection.sent,
+        {},
+        { cachePolicy: CachePolicy.network },
+      );
+      if (!response || response.error || !response.objects) {
+        console.error('findUsers: received error.', { response });
+        return response.error || translate(AppUiMessage.systemError);
+      }
       return response.objects;
     } catch (error) {
       console.error('findUsers: error', {
