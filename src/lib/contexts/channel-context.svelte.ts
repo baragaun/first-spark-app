@@ -5,14 +5,14 @@ import { AppUiMessage } from '@/types/enums';
 import {
   CachePolicy,
   Channel,
+  ChannelInvitation,
+  ChannelInvitationDirection,
   ChannelListItem,
   ChannelMessage,
   SortDirection,
   User,
   UserListItem,
   type QueryOptions,
-  ChannelInvitation,
-  ChannelInvitationDirection,
 } from '@baragaun/bg-node-client';
 
 let isChannelLoading = $state(false);
@@ -371,7 +371,9 @@ export class ChannelContext {
     }
   }
 
-  async findChannelInvitations(searchText: string = ''): Promise<ChannelInvitation[] | string | null | undefined> {
+  async findChannelInvitations(
+    searchText: string = '',
+  ): Promise<ChannelInvitation[] | string | null | undefined> {
     if (!this.client.isInitialized) {
       console.error('ConversationContext.findUsers: not initialized.');
       return translate(AppUiMessage.systemError);

@@ -4,7 +4,7 @@
   import ChatHeader from '../../conversations/components/chat-header.svelte';
   import MessageList from '../../conversations/components/message-list.svelte';
   import MessageInput from '../../conversations/components/message-input.svelte';
-  import { ChannelListItem, ChannelMessage, UserListItem } from '@baragaun/bg-node-client';
+  import { ChannelListItem, ChannelMessage, UserListItem, Channel } from '@baragaun/bg-node-client';
   import { X } from 'lucide-svelte';
   import Button from '@/components/ui/button/button.svelte';
   import { channelContext } from '@/contexts/channel-context.svelte';
@@ -72,17 +72,28 @@
 
   const handleSendMessage = async (messageText: string, replyToMessageId?: string) => {
     if (!user) return;
-    const channel = await channelContext.createChannel({
-      userIds: [user.id],
-    });
 
-    if (!channel || typeof channel === 'string') {
-      console.error('CreateChannel: received error.', { channel });
-      return;
+    let channelId: string;
+    const existingChannel = channelContext.myChannels.find((channel) =>
+      channel.userIds?.includes(user?.id ?? ''),
+    );
+    const isChannelCreated = existingChannel !== undefined;
+    channelId = existingChannel?.id ?? '';
+
+    if (!isChannelCreated) {
+      const channel = await channelContext.createChannel({
+        userIds: [user.id],
+      });
+
+      if (!channel || typeof channel === 'string') {
+        console.error('CreateChannel: received error.', { channel });
+        return;
+      }
+      channelId = channel.id;
     }
 
     const newMessage: Partial<ChannelMessage> = {
-      channelId: channel.id,
+      channelId: channelId,
       messageText,
       replyToMessageId,
     };
