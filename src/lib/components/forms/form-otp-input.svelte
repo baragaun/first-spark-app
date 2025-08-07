@@ -80,7 +80,7 @@
   <div class="flex justify-between text-sm">
     <Form.Button
       variant="link"
-      class="px-0 underline text-muted-foreground"
+      class="px-0 text-muted-foreground underline"
       disabled={!canResend}
       onclick={(e) => {
         e.preventDefault();

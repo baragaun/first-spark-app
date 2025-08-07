@@ -349,7 +349,9 @@
     "barcode": "Barcode",
     "pin": "Pin",
     "submit": "SUBMIT",
-    "loading": "Fetching card details..."
+    "loading": "Fetching card details...",
+    "upload_success_title": "Gift card uploaded",
+    "upload_success_message": "Your gift card has been submitted successfully!"
   },
   "order_history": {
     "title": "Order History",

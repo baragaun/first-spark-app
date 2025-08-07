@@ -3,13 +3,24 @@
   import { uploadedCard } from '@/stores/uploaded-card';
   import { m } from '@/paraglide/messages';
   import { Button } from '@/components/ui/button';
+  import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+  } from '@/components/ui/alert-dialog';
+  import { goto } from '$app/navigation';
 
-  let brand = '';
-  let balance = '';
-  let barcode = '';
-  let pin = '';
-  let imageUrl: string | null = null;
-  let isLoading = false;
+  let brand = $state('');
+  let balance = $state('');
+  let barcode = $state('');
+  let pin = $state('');
+  let imageUrl: string | null = $state(null);
+  let isLoading = $state(false);
+  let showSuccessDialog = $state(false);
 
   onMount(() => {
     uploadedCard.subscribe((data) => {
@@ -29,7 +40,7 @@
       .trim();
   }
 
-  $: formattedBarcode = formatBarcodeInput(barcode);
+  let formattedBarcode = $derived(formatBarcodeInput(barcode));
 
   function handleBarcodeInput(event: Event) {
     const raw = (event.target as HTMLInputElement).value.replace(/\s+/g, '');
@@ -39,7 +50,7 @@
   function handleSubmit(event: Event) {
     event.preventDefault();
     // Handle submit logic here
-    alert('Gift card submitted!');
+    showSuccessDialog = true;
   }
 </script>
 
@@ -99,10 +110,33 @@
       <label for="code" class="mb-1 block text-sm text-gray-500">{m['upload_card.pin']()}</label>
       <input id="code" class="w-full rounded border px-3 py-2" bind:value={pin} placeholder="Pin" />
     </div>
-    <Button variant="default" class="w-full rounded py-3 font-semibold shadow">
+    <Button
+      variant="default"
+      class="w-full rounded py-3 font-semibold shadow"
+      onclick={handleSubmit}
+    >
       {m['upload_card.submit']()}
     </Button>
   </form>
+
+  <AlertDialog open={showSuccessDialog}>
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle>{m['upload_card.upload_success_title']()}</AlertDialogTitle>
+        <AlertDialogDescription>{m['upload_card.upload_success_message']()}</AlertDialogDescription>
+      </AlertDialogHeader>
+      <AlertDialogFooter>
+        <AlertDialogAction
+          onclick={() => {
+            showSuccessDialog = false;
+            goto('/wallet');
+          }}
+        >
+          {m['cart.okay']()}
+        </AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
 </div>
 
 <style>
