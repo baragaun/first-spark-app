@@ -67,7 +67,8 @@
     </SettingsDialog>
   </div>
 
-  <Separator />
+  <!-- <Separator /> -->
+  <br />
   <h4 class="font-lexend text-lg font-bold">{m['setting.danger_zone']()}</h4>
   <div class="flex cursor-pointer items-center justify-between rounded-lg hover:bg-muted/50">
     <SettingsDialog

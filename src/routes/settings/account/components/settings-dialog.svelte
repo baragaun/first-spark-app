@@ -43,7 +43,7 @@
   }}
 >
   <Dialog.Trigger
-    class={`group flex w-full items-center justify-between rounded-lg p-4 hover:${hoverColor} ${textColor}`}
+    class={`group flex w-full items-center justify-between rounded-lg border-b border-muted-foreground/30 p-4 hover:${hoverColor} ${textColor}`}
   >
     <div class="flex flex-col text-left sm:flex-row sm:items-center sm:gap-2">
       <p class="text-sm font-medium">{label}</p>

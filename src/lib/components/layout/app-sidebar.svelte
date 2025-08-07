@@ -114,12 +114,17 @@
       <Sidebar.Menu>
         <Sidebar.MenuItem>
           <div class="justify-horizontal flex items-center pt-2">
-            <div class="flex aspect-square size-8 items-center justify-center rounded-lg">
-              <img src={$headerIcon} alt="First Spark Logo" class="size-8" />
-            </div>
-            <span class="font-lexend truncate ps-2 text-xl font-bold text-foreground">
+            <!-- Commenting first spark logo -->
+            <!-- <div class="flex aspect-square size-8 items-center justify-center rounded-lg">
+            <img src={$headerIcon} alt="First Spark Logo" class="size-8" />
+            </div> -->
+            <!-- <span class="font-lexend truncate ps-2 text-xl font-bold text-foreground">
               {$appTitle}
-            </span>
+            </span> -->
+
+            <div class="flex items-center justify-center">
+              <img src={$headerIcon} alt="First Spark Logo" class="h-10" />
+            </div>
           </div>
         </Sidebar.MenuItem>
       </Sidebar.Menu>
