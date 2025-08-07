@@ -63,7 +63,9 @@
             {#each cells as cell}
               <InputOTP.Slot
                 {cell}
-                class={$errors[fieldName] ? 'border-red-500 focus-visible:ring-red-500' : ''}
+                class={$errors[fieldName]
+                  ? 'border-red-500 focus-visible:ring-red-500'
+                  : 'border-muted-foreground'}
               />
             {/each}
           </InputOTP.Group>
@@ -78,7 +80,7 @@
   <div class="flex justify-between text-sm">
     <Form.Button
       variant="link"
-      class="px-0"
+      class="px-0 underline text-muted-foreground"
       disabled={!canResend}
       onclick={(e) => {
         e.preventDefault();
