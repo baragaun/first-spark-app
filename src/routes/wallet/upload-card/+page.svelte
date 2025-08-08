@@ -14,9 +14,10 @@
   } from '@/components/ui/alert-dialog';
   import { goto } from '$app/navigation';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
-  import { WalletItem, Brand, GiftCardProduct } from '@baragaun/bg-node-client';
+  import { WalletItem, Brand, GiftCardProduct, ProductType } from '@baragaun/bg-node-client';
   import { toast } from 'svelte-sonner';
   import { giftCardImageDomain } from '$lib/constants';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
 
   let brandName = $state('');
   let balance = $state('');
@@ -46,7 +47,7 @@
       product = data;
     });
 
-    if(product !== null) {
+    if (product !== null) {
       imageUrl = giftCardImageDomain + '/giftcards/' + product?.imageSourceFront;
     }
   });
@@ -75,6 +76,8 @@
     newWalletItem.imageSourceFront = imageUrl;
     newWalletItem.brandId = brand?.id ?? '';
     newWalletItem.productId = product?.id ?? '';
+    newWalletItem.walletId = myUserContext.myUserId ?? '';
+    newWalletItem.productType = ProductType.giftCard;
 
     const response = await marketplaceContext.createWalletItem(newWalletItem);
     if (response.error) {
