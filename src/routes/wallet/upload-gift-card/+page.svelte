@@ -7,7 +7,7 @@
   import placeholderImage from '../../../assets/images/placeholder.png';
   import { Search } from 'lucide-svelte';
   import { ArrowLeft } from 'lucide-svelte';
-  import { uploadedCard } from '@/stores/uploaded-card';
+  import { uploadedBrand, uploadedProduct } from '@/stores/uploaded-card';
   import { m } from '@/paraglide/messages';
   import { Input } from '$lib/components/ui/input';
   import { giftCardImageDomain } from '$lib/constants';
@@ -34,15 +34,8 @@
   });
 
   function handleBrandClick(product: GiftCardProduct, brand: Brand) {
-    let imageUrl = giftCardImageDomain + '/giftcards/' + product.imageSourceFront;
-    uploadedCard.set({
-      brand: brand.name,
-      balance: '',
-      barcode: '',
-      pin: '',
-      imageUrl: imageUrl,
-      isLoading: false,
-    });
+    uploadedBrand.set(brand);
+    uploadedProduct.set(product);
 
     goto('/wallet/upload-card');
   }

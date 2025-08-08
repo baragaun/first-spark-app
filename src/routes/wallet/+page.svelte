@@ -102,7 +102,7 @@
 
         // Set loading and navigate instantly
         uploadedCard.set({
-          brand: '',
+          brandName: '',
           balance: '',
           barcode: '',
           pin: '',
@@ -177,7 +177,7 @@
             }
             // Update store with extracted values and set loading false
             uploadedCard.set({
-              brand: company,
+              brandName: company,
               balance: price,
               barcode,
               pin,
