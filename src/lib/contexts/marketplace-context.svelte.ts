@@ -332,6 +332,30 @@ export class MarketplaceContext {
     }
   }
 
+  async createWalletItem(props: Partial<WalletItem>): Promise<QueryResult<WalletItem>> {
+    if (!this.client.isInitialized) {
+      console.error('MarketplaceContext.createWalletItem: not initialized.');
+      return { error: translate(AppUiMessage.systemError) };
+    }
+    try {
+      isLoading = true;
+      const response = await this.client.operations.walletItem.createWalletItem(props);
+      if (!response || response.error) {
+        console.error('createWalletItem: received error.', { response });
+        return { error: response.error || translate(AppUiMessage.systemError) };
+      }
+      return response;
+    } catch (error) {
+      console.error('createWalletItem: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return { error: translate(AppUiMessage.systemError) };
+    } finally {
+      isLoading = false;
+    }
+  }
+
   async updateWalletItem(id: string): Promise<QueryResult<WalletItem>> {
     if (!this.client.isInitialized) {
       console.error('MarketplaceContext.updateWalletItem: not initialized.');

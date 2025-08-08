@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { uploadedCard } from '@/stores/uploaded-card';
+  import { uploadedBrand, uploadedCard, uploadedProduct } from '@/stores/uploaded-card';
   import { m } from '@/paraglide/messages';
   import { Button } from '@/components/ui/button';
   import {
@@ -13,24 +13,42 @@
     AlertDialogTitle,
   } from '@/components/ui/alert-dialog';
   import { goto } from '$app/navigation';
+  import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
+  import { WalletItem, Brand, GiftCardProduct } from '@baragaun/bg-node-client';
+  import { toast } from 'svelte-sonner';
+  import { giftCardImageDomain } from '$lib/constants';
 
-  let brand = $state('');
+  let brandName = $state('');
   let balance = $state('');
   let barcode = $state('');
   let pin = $state('');
   let imageUrl: string | null = $state(null);
-  let isLoading = $state(false);
   let showSuccessDialog = $state(false);
+  let brand: Brand | null = $state(null);
+  let product: GiftCardProduct | null = $state(null);
+  let isLoading = $state(false);
 
   onMount(() => {
     uploadedCard.subscribe((data) => {
-      brand = data.brand;
+      brandName = data.brandName;
       balance = data.balance;
       barcode = data.barcode;
       pin = data.pin;
       imageUrl = data.imageUrl;
       isLoading = data.isLoading ?? false;
     });
+
+    uploadedBrand.subscribe((data) => {
+      brand = data;
+    });
+
+    uploadedProduct.subscribe((data) => {
+      product = data;
+    });
+
+    if(product !== null) {
+      imageUrl = giftCardImageDomain + '/giftcards/' + product?.imageSourceFront;
+    }
   });
 
   function formatBarcodeInput(value: string) {
@@ -47,9 +65,23 @@
     barcode = raw;
   }
 
-  function handleSubmit(event: Event) {
+  async function handleSubmit(event: Event) {
     event.preventDefault();
-    // Handle submit logic here
+    const newWalletItem = new WalletItem();
+    newWalletItem.name = brand?.name ?? '';
+    newWalletItem.price = +balance;
+    newWalletItem.pin = pin;
+    newWalletItem.hasBarcode = true;
+    newWalletItem.imageSourceFront = imageUrl;
+    newWalletItem.brandId = brand?.id ?? '';
+    newWalletItem.productId = product?.id ?? '';
+
+    const response = await marketplaceContext.createWalletItem(newWalletItem);
+    if (response.error) {
+      console.error('Error updating giftcard', response.error);
+      toast.error(`Failed to update giftcard: ${response.error}`);
+      return;
+    }
     showSuccessDialog = true;
   }
 </script>
@@ -70,6 +102,7 @@
         <span class="loader mr-2"></span> <span>{m['upload_card.loading']()}</span>
       </div>
     {/if}
+
     {#if imageUrl}
       <img src={imageUrl} alt="Gift Card" class="mb-6 w-64 rounded-xl shadow" />
     {:else}
@@ -81,7 +114,9 @@
     {/if}
     <div class="mb-4 w-full">
       <label for="brand" class="mb-1 block text-sm text-gray-500">{m['upload_card.brand']()}</label>
-      <label for="brand" class="mb-1 block text-sm text-foreground">{brand}</label>
+      <label for="brand" class="mb-1 block text-sm text-foreground"
+        >{brand?.name ?? brandName}</label
+      >
       <!-- <input id="brand" class="w-full rounded border px-3 py-2" bind:value={brand} placeholder="Amazon.com" /> -->
     </div>
     <div class="mb-4 w-full">
