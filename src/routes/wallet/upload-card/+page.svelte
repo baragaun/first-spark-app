@@ -72,12 +72,17 @@
     newWalletItem.name = brand?.name ?? '';
     newWalletItem.price = +balance;
     newWalletItem.pin = pin;
+    newWalletItem.balance = +balance;
     newWalletItem.hasBarcode = true;
     newWalletItem.imageSourceFront = product?.imageSourceFront;
     newWalletItem.brandId = brand?.id ?? '';
     newWalletItem.productId = product?.id ?? '';
     newWalletItem.walletId = myUserContext.myUserId ?? '';
     newWalletItem.productType = ProductType.giftCard;
+    newWalletItem.instructionsEn = product?.instructionsEn;
+    newWalletItem.instructionsUrl = product?.instructionsUrl;
+    newWalletItem.termsEn = product?.termsEn;
+    newWalletItem.termsUrl = product?.termsUrl;
 
     const response = await marketplaceContext.createWalletItem(newWalletItem);
     if (response.error) {
