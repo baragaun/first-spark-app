@@ -16,7 +16,7 @@
     Zap,
     HistoryIcon,
   } from 'lucide-svelte';
-  import { appTitle, headerIcon } from '$lib/stores/app-store';
+  import { appTitle, headerIcon, headerSmallIcon } from '$lib/stores/app-store';
 
   const items = [
     {
@@ -122,9 +122,15 @@
               {$appTitle}
             </span> -->
 
-            <div class="flex items-center justify-center">
-              <img src={$headerIcon} alt="First Spark Logo" class="h-10" />
-            </div>
+            {#if sidebar?.open}
+              <div class="flex items-center justify-center">
+                <img src={$headerIcon} alt="First Spark Logo" class="h-10" />
+              </div>
+            {:else}
+              <div class="flex items-center justify-center">
+                <img src={$headerSmallIcon} alt="First Spark Logo" class="h-10" />
+              </div>
+            {/if}
           </div>
         </Sidebar.MenuItem>
       </Sidebar.Menu>
