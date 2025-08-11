@@ -150,6 +150,13 @@
       toast.error(m['marketplace.add_to_cart_unexpected_error']());
     }
   }
+
+  function openExternal(url: string | null | undefined) {
+    console.log(url);
+    if (!url) return;
+    const normalized = /^(https?:)?\/\//i.test(url) ? url : `https://${url}`;
+    window.open(normalized, '_blank', 'noopener,noreferrer');
+  }
 </script>
 
 <!-- Header Bar -->
@@ -222,9 +229,8 @@
             <Button
               variant="ghost"
               size="icon"
-              href={walletItem.termsUrl}
-              target="_blank"
-              rel="noopener noreferrer"><ExternalLink aria-label="Brand" /></Button
+              onclick={() => openExternal(walletItem.termsUrl)}
+              ><ExternalLink aria-label="Brand" /></Button
             >
             <span class="text-xs text-gray-500">{m['wallet.gift-card.brand']()}</span>
           </div>
