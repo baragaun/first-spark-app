@@ -219,10 +219,7 @@
             <span class="text-xs text-gray-500">{m['wallet.gift-card.gift']()}</span>
           </div>
           <div class="flex flex-col items-center">
-            <Button
-              variant="ghost"
-              size="icon"
-              onclick={() => openExternal(walletItem.termsUrl)}
+            <Button variant="ghost" size="icon" onclick={() => openExternal(walletItem.termsUrl)}
               ><ExternalLink aria-label="Brand" /></Button
             >
             <span class="text-xs text-gray-500">{m['wallet.gift-card.brand']()}</span>

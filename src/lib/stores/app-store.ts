@@ -48,3 +48,14 @@ export const headerIcon = derived(writable(env.PUBLIC_PROJECTNAME), ($projectNam
       return '/fs-logo.svg';
   }
 });
+
+export const headerSmallIcon = derived(writable(env.PUBLIC_PROJECTNAME), ($projectName) => {
+  switch ($projectName) {
+    case 'FirstSpark':
+      return '/fs-logo.svg';
+    case 'KCU':
+      return '/KCU-Logo-small.png';
+    default:
+      return '/fs-logo.svg';
+  }
+});
