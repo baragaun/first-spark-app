@@ -73,7 +73,7 @@
     newWalletItem.price = +balance;
     newWalletItem.pin = pin;
     newWalletItem.hasBarcode = true;
-    newWalletItem.imageSourceFront = imageUrl;
+    newWalletItem.imageSourceFront = product?.imageSourceFront;
     newWalletItem.brandId = brand?.id ?? '';
     newWalletItem.productId = product?.id ?? '';
     newWalletItem.walletId = myUserContext.myUserId ?? '';
