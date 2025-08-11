@@ -66,13 +66,35 @@
     barcode = raw;
   }
 
+  function sanitizePriceInput(value: string): string {
+    const stripped = value.replace(/[^\d.]/g, '');
+    if (stripped === '') return '';
+    const parts = stripped.split('.');
+    const whole = parts[0];
+    const decimals = parts.slice(1).join('');
+    let result = whole.replace(/^0+(?=\d)/, '');
+    if (result === '') result = '0';
+    if (stripped.includes('.')) {
+      result = result + '.' + decimals.slice(0, 2);
+    }
+    if (result === '.') result = '0.';
+    return result;
+  }
+
+  function handleBalanceInput(event: Event) {
+    const raw = (event.target as HTMLInputElement).value;
+    balance = sanitizePriceInput(raw);
+  }
+
   async function handleSubmit(event: Event) {
     event.preventDefault();
+    const balanceInDollar = +balance * 1000;
     const newWalletItem = new WalletItem();
     newWalletItem.name = brand?.name ?? '';
-    newWalletItem.price = +balance;
     newWalletItem.pin = pin;
-    newWalletItem.balance = +balance;
+    newWalletItem.balance = balanceInDollar;
+    newWalletItem.initialBalance = balanceInDollar;
+    newWalletItem.price = balanceInDollar;
     newWalletItem.hasBarcode = true;
     newWalletItem.imageSourceFront = product?.imageSourceFront;
     newWalletItem.brandId = brand?.id ?? '';
@@ -136,6 +158,8 @@
         class="w-full rounded border px-3 py-2"
         bind:value={balance}
         placeholder="Balance"
+        inputmode="decimal"
+        oninput={handleBalanceInput}
       />
     </div>
     <div class="mb-6 w-full">
