@@ -275,7 +275,7 @@
           onclick={() => navigateToGiftCardDetail(item)}
           onkeydown={(e) => e.key === 'Enter' && navigateToGiftCardDetail(item)}
         >
-          <div class="mb-4 flex flex-shrink-0">
+          <div class="my-2 flex flex-shrink-0">
             <img
               src={giftCardImageDomain + '/giftcards/' + item.imageSourceFront}
               alt={item.imageSourceFront}
