@@ -52,7 +52,7 @@
     </div>
 
     <!-- Right side items -->
-    <div class="ml-auto flex flex-none items-center gap-2">
+    <div class="ml-auto flex flex-none items-center gap-1">
       <ThemeButton class="flex" />
       <LanguageButton class="flex" />
       {#if !isSignedIn}
@@ -60,15 +60,17 @@
           <Tooltip.Provider>
             <Tooltip.Root>
               <Tooltip.Trigger>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onclick={() => goto('/signin')}
-                  aria-label={m['nav.auth.sign_in']()}
-                  class="font-lexend text-nav-foreground hover:text-nav-foreground"
-                >
-                  <LogIn class="mr-2 h-4 w-4" />
-                </Button>
+                <div class="relative inline-flex" aria-label={m['nav.auth.sign_in']()}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onclick={() => goto('/signin')}
+                    class="font-lexend text-nav-foreground hover:text-nav-foreground"
+                  />
+                  <LogIn
+                    class="pointer-events-none absolute inset-0 m-auto h-[1.3rem] w-[1.3rem] text-nav-foreground"
+                  />
+                </div>
               </Tooltip.Trigger>
               <Tooltip.Content>
                 <p>{m['nav.auth.sign_in']()}</p>

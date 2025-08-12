@@ -24,17 +24,18 @@
 </script>
 
 <DropdownMenu.Root>
-  <DropdownMenu.Trigger class="ml-2">
-    <Button
-      variant="ghost"
-      data-testid="avatar-menu-trigger"
-      class="relative h-8 w-8 rounded-full transition-colors hover:text-primary"
-    >
-      <Avatar.Root class="h-9 w-9">
+  <DropdownMenu.Trigger class="ml-1">
+    <div class="relative inline-flex">
+      <Button
+        variant="ghost"
+        data-testid="avatar-menu-trigger"
+        class="h-8 w-8 rounded-full transition-colors hover:text-primary"
+      />
+      <Avatar.Root class="pointer-events-none absolute inset-0 m-auto h-9 w-9">
         <Avatar.Image src="" alt={`@${myUsername}`} />
         <Avatar.Fallback>FS</Avatar.Fallback>
       </Avatar.Root>
-    </Button>
+    </div>
   </DropdownMenu.Trigger>
 
   <DropdownMenu.Content class="mt-2 w-56 bg-background" align="end">
