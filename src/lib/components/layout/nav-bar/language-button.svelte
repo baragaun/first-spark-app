@@ -14,14 +14,19 @@
     <Tooltip.Provider>
       <Tooltip.Root>
         <Tooltip.Trigger>
-          <Button
-            variant="ghost"
-            size="icon"
-            class={`${className} text-nav-foreground hover:bg-transparent hover:text-foreground`}
+          <div
+            class={`relative inline-flex ${className}`}
             aria-label={m['language_button.tooltip']()}
           >
-            <Languages class="h-5 w-5" />
-          </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              class="text-nav-foreground hover:bg-transparent hover:text-foreground"
+            />
+            <Languages
+              class="pointer-events-none absolute inset-0 m-auto h-[1.3rem] w-[1.3rem] text-nav-foreground"
+            />
+          </div>
         </Tooltip.Trigger>
         <Tooltip.Content>
           <p>{m['language_button.tooltip']()}</p>

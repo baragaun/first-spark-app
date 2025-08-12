@@ -19,22 +19,23 @@
     <Tooltip.Provider>
       <Tooltip.Root>
         <Tooltip.Trigger>
-          <Button
-            variant="ghost"
-            size={iconButton ? 'icon' : 'sm'}
-            class={`${className} text-nav-foreground hover:bg-transparent hover:text-foreground`}
-            aria-label={m['light_switch.tooltip']()}
-          >
+          <div class={`relative inline-flex ${className}`} aria-label={m['light_switch.tooltip']()}>
+            <Button
+              variant="ghost"
+              size={iconButton ? 'icon' : 'sm'}
+              class="text-nav-foreground hover:bg-transparent hover:text-foreground"
+            >
+              {#if !iconButton}
+                <span class="ml-2">{m['light_switch.tooltip']()}</span>
+              {/if}
+            </Button>
             <Sun
-              class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
+              class="pointer-events-none absolute inset-0 m-auto h-[1.3rem] w-[1.3rem] text-nav-foreground transition-all dark:-rotate-90 dark:scale-0 dark:text-nav-foreground"
             />
             <Moon
-              class="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
+              class="pointer-events-none absolute inset-0 m-auto h-[1.3rem] w-[1.3rem] rotate-90 scale-0 text-nav-foreground transition-all dark:rotate-0 dark:scale-100"
             />
-            {#if !iconButton}
-              <span class="ml-2">{m['light_switch.tooltip']()}</span>
-            {/if}
-          </Button>
+          </div>
         </Tooltip.Trigger>
         <Tooltip.Content>
           <p>{m['light_switch.tooltip']()}</p>

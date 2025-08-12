@@ -82,7 +82,7 @@
   <button onclick={() => history.back()} class="flex items-center">
     <ArrowLeft class="h-6 w-6" />
   </button>
-  <span class="flex-1 text-center text-lg font-semibold">{m['order_history.order']()}</span>
+  <span class="flex-1 text-center text-lg font-bold">{m['order_history.order']()}</span>
 </div>
 
 <div class="container mx-auto px-4 py-6">
