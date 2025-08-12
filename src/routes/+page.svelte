@@ -15,7 +15,7 @@
       {m['welcome']({ title: $appTitle })}
     </h1>
 
-    <p class="mx-auto mt-6 max-w-[700px] text-lg text-muted-foreground">
+    <p class="mx-auto mt-6 max-w-[700px] text-lg font-bold text-nav-foreground">
       {m['welcome_subtitle']()}
     </p>
 

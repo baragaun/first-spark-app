@@ -48,7 +48,7 @@
   <button onclick={() => history.back()} class="flex items-center">
     <ArrowLeft class="h-6 w-6" />
   </button>
-  <span class="flex-1 text-center text-lg font-semibold">{m['upload_card.select_brand']()}</span>
+  <span class="flex-1 text-center text-lg font-bold">{m['upload_card.select_brand']()}</span>
 </div>
 
 <!-- Search Bar -->
