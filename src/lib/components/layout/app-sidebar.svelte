@@ -189,11 +189,11 @@
             {#snippet child({ props })}
               <Button {...props} disabled={!isDevEnv} onclick={toggleConnection} variant="ghost">
                 {#if !isOffline}
-                  <Zap class="h-5 w-5" />
+                  <Zap class="h-5 w-5 text-muted-foreground" />
                 {:else}
-                  <PlugZap class="h-5 w-5" />
+                  <PlugZap class="h-5 w-5 text-muted-foreground" />
                 {/if}
-                <span
+                <span class="text-muted-foreground"
                   >{isOffline
                     ? m['connection.offline']()
                     : m['connection.online']({ title: $appTitle })}</span

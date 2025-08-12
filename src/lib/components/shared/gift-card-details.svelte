@@ -170,7 +170,7 @@
       <ArrowLeft class="h-6 w-6" />
     {/if}
   </button>
-  <span class="flex-1 text-center text-lg font-semibold">{m['wallet.gift-card.title']()}</span>
+  <span class="flex-1 text-center text-lg font-bold">{m['wallet.gift-card.title']()}</span>
 </div>
 
 {#if isLoading}

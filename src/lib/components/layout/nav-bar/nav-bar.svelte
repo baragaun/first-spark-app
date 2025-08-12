@@ -61,7 +61,7 @@
             <Tooltip.Root>
               <Tooltip.Trigger>
                 <Button
-                  variant="default"
+                  variant="ghost"
                   size="icon"
                   onclick={() => goto('/signin')}
                   aria-label={m['nav.auth.sign_in']()}
@@ -80,7 +80,7 @@
             variant="default"
             onclick={() => goto('/signup')}
             aria-label={m['nav.auth.sign_up']()}
-            class="font-lexend text-nav-foreground"
+            class="font-lexend text-nav"
           >
             {m['nav.auth.sign_up']()}
           </Button>

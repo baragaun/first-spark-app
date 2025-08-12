@@ -3,6 +3,7 @@
   import { uploadedBrand, uploadedCard, uploadedProduct } from '@/stores/uploaded-card';
   import { m } from '@/paraglide/messages';
   import { Button } from '@/components/ui/button';
+  import { ArrowLeft } from 'lucide-svelte';
   import {
     AlertDialog,
     AlertDialogAction,
@@ -117,11 +118,14 @@
 </script>
 
 <div class="flex min-h-screen flex-col bg-background">
-  <header class="flex items-center justify-between bg-nav px-4 py-3 text-nav-foreground">
-    <button onclick={() => history.back()} class="text-background">←</button>
-    <span class="text-lg font-semibold">{m['upload_card.title']()}</span>
-    <div class="h-8 w-8 rounded-full bg-gray-200"></div>
-  </header>
+  <div
+    class="sticky top-0 z-10 flex items-center justify-between bg-nav px-4 py-3 text-nav-foreground shadow"
+  >
+    <button onclick={() => history.back()} class="flex items-center">
+      <ArrowLeft class="h-6 w-6" />
+    </button>
+    <span class="flex-1 text-center text-lg font-bold">{m['upload_card.title']()}</span>
+  </div>
 
   <form
     class="mx-auto flex w-full max-w-md flex-1 flex-col items-center px-4 py-8"
