@@ -21,6 +21,7 @@
   import { goto } from '$app/navigation';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { toast } from 'svelte-sonner';
+  import { page } from '$app/state';
 
   interface Props {
     walletItem: WalletItem | null;
@@ -157,6 +158,8 @@
     const normalized = /^(https?:)?\/\//i.test(url) ? url : `https://${url}`;
     window.open(normalized, '_blank', 'noopener,noreferrer');
   }
+
+  let isMarketPlace: boolean = $derived(page.url.pathname.startsWith('/marketplace/'));
 </script>
 
 <!-- Header Bar -->
@@ -170,7 +173,9 @@
       <ArrowLeft class="h-6 w-6" />
     {/if}
   </button>
-  <span class="flex-1 text-center text-lg font-bold">{m['wallet.gift-card.title']()}</span>
+  <span class="flex-1 text-center text-lg font-bold"
+    >{isMarketPlace ? m['marketplace.buy_gift_card']() : m['wallet.gift-card.title']()}</span
+  >
 </div>
 
 {#if isLoading}
@@ -225,12 +230,14 @@
               <span class="text-xs text-gray-500">{m['wallet.gift-card.gift']()}</span>
             </div>
           {/if}
-          <div class="flex flex-col items-center">
-            <Button variant="ghost" size="icon" onclick={() => openExternal(walletItem.termsUrl)}
-              ><ExternalLink aria-label="Brand" /></Button
-            >
-            <span class="text-xs text-gray-500">{m['wallet.gift-card.brand']()}</span>
-          </div>
+          {#if walletItem.termsUrl}
+            <div class="flex flex-col items-center">
+              <Button variant="ghost" size="icon" onclick={() => openExternal(walletItem.termsUrl)}
+                ><ExternalLink aria-label="Brand" /></Button
+              >
+              <span class="text-xs text-gray-500">{m['wallet.gift-card.brand']()}</span>
+            </div>
+          {/if}
           {#if walletItem.transferredAt == null || undefined}
             <div class="flex flex-col items-center">
               <Button variant="ghost" size="icon" onclick={handlePrintPdf}
