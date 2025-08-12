@@ -2,6 +2,7 @@
   import { ArrowLeft } from 'lucide-svelte';
   import SendGiftCardForm from './send-gift-card-form.svelte';
   import type { PageData } from './$types';
+  import { m } from '@/paraglide/messages';
 
   let { data }: { data: PageData } = $props();
 </script>
@@ -12,7 +13,7 @@
   <button onclick={() => history.back()} class="flex items-center">
     <ArrowLeft class="h-6 w-6" />
   </button>
-  <span class="flex-1 text-center text-lg font-semibold">Send Gift</span>
+  <span class="flex-1 text-center text-lg font-bold">{m['send_gift_card.send_gift']()}</span>
 </div>
 <div class="flex h-full w-full items-center justify-center px-4">
   <div class="w-full max-w-md">
