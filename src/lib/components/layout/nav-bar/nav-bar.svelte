@@ -13,6 +13,7 @@
   import type { MyUser } from '@baragaun/bg-node-client';
   import { orderHistoryLoaded, orderHistoryStore } from '@/stores/order-history';
   import { IsMobile } from '$lib/hooks/is-mobile.svelte.js';
+  import { headerSmallIcon } from '@/stores/app-store';
 
   const userContext = getContext<MyUserContext>('myUserContext');
   let isSignedIn: boolean = $derived(userContext.isSignedIn);
@@ -40,7 +41,7 @@
 
     {#if isMobile.current}
       <div class="flex items-center justify-center">
-        <img src={'/KCU-Logo-small.png'} alt="First Spark Logo" class="h-10" />
+        <img src={$headerSmallIcon} alt="First Spark Logo" class="h-10" />
       </div>
     {/if}
 
