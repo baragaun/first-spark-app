@@ -12,10 +12,13 @@
   import { getContext } from 'svelte';
   import type { MyUser } from '@baragaun/bg-node-client';
   import { orderHistoryLoaded, orderHistoryStore } from '@/stores/order-history';
+  import { IsMobile } from '$lib/hooks/is-mobile.svelte.js';
 
   const userContext = getContext<MyUserContext>('myUserContext');
   let isSignedIn: boolean = $derived(userContext.isSignedIn);
   let myUser: MyUser | undefined = $derived(userContext.myUser);
+
+  const isMobile = new IsMobile();
 
   const onSignOut = async () => {
     // TODO: add a confirmation dialog
@@ -34,6 +37,12 @@
     <div class="mr-1 flex-none text-nav-foreground">
       <Sidebar.Trigger />
     </div>
+
+    {#if isMobile.current}
+      <div class="flex items-center justify-center">
+        <img src={'/KCU-Logo-small.png'} alt="First Spark Logo" class="h-10" />
+      </div>
+    {/if}
 
     <!-- Logo and App Name (Mobile Only) -->
     <div class="flex flex-1 justify-start md:justify-center">
