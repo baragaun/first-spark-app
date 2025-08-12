@@ -62,8 +62,8 @@
     --background: var(--kcu-white);
     --foreground: var(--kcu-black);
 
-    --nav: var(--kcu-glacier);
-    --nav-foreground: var(--kcu-white);
+    --nav: var(--kcu-white);
+    --nav-foreground: var(--kcu-glacier);
 
     --muted: 240 4.8% 95.9%;
     --muted-foreground: var(--kcu-juniper);
