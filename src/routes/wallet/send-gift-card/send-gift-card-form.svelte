@@ -21,6 +21,8 @@
   } from '@/components/ui/alert-dialog';
   import { m } from '@/paraglide/messages';
   import { goto } from '$app/navigation';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { env } from '$env/dynamic/public';
 
   const DEBOUNCE_DELAY = 350;
 
@@ -65,19 +67,57 @@
       formState.hasError = true;
       return;
     }
+    // Generate random number
+    const secret = generatePin();
 
     const response = await marketplaceContext.createWalletItemTransfer({
       walletItemId: data.walletItemId,
       recipientFullName: $formData.senderName,
       recipientEmail: $formData.senderEmail,
       messageText: $formData.message,
+      //Todo - pass secret here
+      //secret: secret,
     });
 
     if (response.error) {
       return;
     }
+
+    // Send Email
+    sendEmail(secret);
     showDialog = true;
   };
+
+  function generatePin(length = 4) {
+    return Array.from({ length }, () => Math.floor(Math.random() * 10)).join('');
+  }
+
+  function sendEmail(secret: string) {
+    const attachmentLink = `${env.PUBLIC_SITE_URL}/wallet/gift-card/${data.walletItemId}`;
+    
+    const subject = encodeURIComponent('Receive your gift card');
+    const body = encodeURIComponent(`
+    Hello ${$formData.senderName},
+
+    Surprise! 🎉 We're excited to share this special gift with you.
+    Attached to this email, you'll find your ${data.walletItemId} Gift Card.
+
+    Details:
+    Gift Card Value: [Amount]
+    Expiry Date: [Expiry Date, if applicable]
+    Redeemable Online/In-store: [Instructions]
+
+    ${$formData.message}
+    ${attachmentLink}
+    secret: ${secret}
+    To redeem, simply present this gift card at checkout or enter the gift card code when shopping online.
+    We hope you enjoy your gift — you deserve it! 💝
+
+    Warm regards,
+    ${myUserContext.myUser?.userHandle}
+ `);
+    window.location.href = `mailto:${$formData.senderEmail}?subject=${subject}&body=${body}`;
+  }
 
   const debouncedValidation = debounce(DEBOUNCE_DELAY, async () => {
     try {
