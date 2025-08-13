@@ -472,6 +472,33 @@ export class MarketplaceContext {
       isLoading = false;
     }
   }
+
+  async verifyWalletItemTransfer( walletItemId: string, secretCode: string) : Promise<QueryResult<WalletItem>> {
+    if (!this.client.isInitialized) {
+      console.error('MarketplaceContext.verifyWalletItemTransfer: not initialized.');
+      return { error: translate(AppUiMessage.systemError) };
+    }
+    try {
+      isLoading = true;
+      const response = await this.client.operations.walletItemTransfer.verifyWalletItemTransfer(
+        secretCode,
+        walletItemId,
+      );
+      if (!response || response.error) {
+        console.error('verifyWalletItemTransfer: received error.', { response });
+        return { error: response.error || translate(AppUiMessage.systemError) };
+      }
+      return response;
+    } catch (error) {
+      console.error('verifyWalletItemTransfer: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return { error: translate(AppUiMessage.systemError) };
+    } finally {
+      isLoading = false;
+    }
+  }
 }
 
 // Create a singleton instance

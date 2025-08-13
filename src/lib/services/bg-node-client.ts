@@ -24,7 +24,6 @@ export async function initializeBgNodeClient(listener?: BgBaseListener) {
     },
     clientInfoStoreType: ClientInfoStoreType.db,
     logLevel: 'debug',
-    enableGroupChannels: false,
   };
 
   if (import.meta.env.VITE_APP_ENVIRONMENT) {

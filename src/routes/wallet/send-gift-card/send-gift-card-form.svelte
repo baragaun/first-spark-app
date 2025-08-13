@@ -1,15 +1,12 @@
 <script lang="ts">
   import { zod } from 'sveltekit-superforms/adapters';
   import { sendGiftCardSchema, type SendGiftCardSchema } from './schema';
-  import { z } from 'zod';
   import IdentFormInput from '$lib/components/forms/form-ident-input.svelte';
-  import { Input } from '$lib/components/ui/input';
   import { UserIdentType } from '@baragaun/bg-node-client';
   import { debounce } from 'throttle-debounce';
   import FormButton from '@/components/forms/form-button.svelte';
   import { onMount } from 'svelte';
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
-  import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
   import {
     AlertDialog,
     AlertDialogAction,
@@ -22,7 +19,7 @@
   import { m } from '@/paraglide/messages';
   import { goto } from '$app/navigation';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
-  import { env } from '$env/dynamic/public';
+  import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
 
   const DEBOUNCE_DELAY = 350;
 
@@ -56,10 +53,44 @@
   }));
 
   const isFormValid = $derived.by(() => {
-    return $formData.senderName && $formData.senderEmail && $formData.message;
+    return $formData.recipientFullName && $formData.recipientEmail && $formData.message;
   });
 
   let showDialog = $state(false);
+
+  const sendEmail = async (
+    walletItemId: string,
+    secretCode: string,
+    recipientEmail: string,
+    recipientFullName?: string,
+    message?: string,
+  ) => {
+    const attachmentLink = `http://localhost:5173/wallet/gift-card/${walletItemId}`;
+    const subject = encodeURIComponent('Receive your gift card');
+    const body = encodeURIComponent(`
+    Hello ${recipientFullName},
+
+    Surprise! 🎉 We’re excited to share this special gift with you.
+    Attached to this email, you’ll need to enter the secret code  ${secretCode} to activate your Gift Card.
+
+    Details:
+    Gift Card Value: [Amount]
+    Expiry Date: [Expiry Date, if applicable]
+    Redeemable Online/In-store: [Instructions]
+
+    ${message}
+    ${attachmentLink}
+
+    To redeem, simply present this gift card at checkout or enter the gift card code when shopping online.
+    We hope you enjoy your gift — you deserve it! 💝
+
+    Warm regards,
+    ${myUserContext.myUser?.userHandle}
+    `);
+    // You can append a link to the attachment in the email body
+    const mailto = `mailto:${recipientEmail}?subject=${subject}&body=${body}`;
+    window.location.href = mailto;
+  };
 
   const handleFormSubmit = async () => {
     const result = await validateForm({ update: true, focusOnError: true });
@@ -67,57 +98,30 @@
       formState.hasError = true;
       return;
     }
-    // Generate random number
-    const secret = generatePin();
 
     const response = await marketplaceContext.createWalletItemTransfer({
       walletItemId: data.walletItemId,
-      recipientFullName: $formData.senderName,
-      recipientEmail: $formData.senderEmail,
+      recipientFullName: $formData.recipientFullName,
+      recipientEmail: $formData.recipientEmail,
       messageText: $formData.message,
       //Todo - pass secret here
       //secret: secret,
     });
 
-    if (response.error) {
+    if (response.error || !response.object?.transferSecret) {
       return;
     }
 
-    // Send Email
-    sendEmail(secret);
+    sendEmail(
+      data.walletItemId,
+      response.object.transferSecret,
+      $formData.recipientEmail,
+      $formData.recipientFullName,
+      $formData.message,
+    );
+
     showDialog = true;
   };
-
-  function generatePin(length = 4) {
-    return Array.from({ length }, () => Math.floor(Math.random() * 10)).join('');
-  }
-
-  function sendEmail(secret: string) {
-    const attachmentLink = `${env.PUBLIC_SITE_URL}/wallet/gift-card/${data.walletItemId}`;
-    
-    const subject = encodeURIComponent('Receive your gift card');
-    const body = encodeURIComponent(`
-    Hello ${$formData.senderName},
-
-    Surprise! 🎉 We're excited to share this special gift with you.
-    Attached to this email, you'll find your ${data.walletItemId} Gift Card.
-
-    Details:
-    Gift Card Value: [Amount]
-    Expiry Date: [Expiry Date, if applicable]
-    Redeemable Online/In-store: [Instructions]
-
-    ${$formData.message}
-    ${attachmentLink}
-    secret: ${secret}
-    To redeem, simply present this gift card at checkout or enter the gift card code when shopping online.
-    We hope you enjoy your gift — you deserve it! 💝
-
-    Warm regards,
-    ${myUserContext.myUser?.userHandle}
- `);
-    window.location.href = `mailto:${$formData.senderEmail}?subject=${subject}&body=${body}`;
-  }
 
   const debouncedValidation = debounce(DEBOUNCE_DELAY, async () => {
     try {
@@ -141,14 +145,14 @@
 >
   <IdentFormInput
     {form}
-    fieldName="senderName"
+    fieldName="recipientFullName"
     label={m['send_gift_card.sender_name']()}
     placeholder={m['send_gift_card.sender_name_placeholder']()}
     identType={UserIdentType.userHandle}
   />
   <IdentFormInput
     {form}
-    fieldName="senderEmail"
+    fieldName="recipientEmail"
     label={m['send_gift_card.sender_email']()}
     placeholder={m['send_gift_card.sender_email_placeholder']()}
     identType={UserIdentType.email}
