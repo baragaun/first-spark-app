@@ -5,23 +5,38 @@
   import { walletItemsStore } from '@/stores/wallet-store';
   import { derived } from 'svelte/store';
   import { page } from '$app/state';
+  import GiftCardDetails from '@/components/shared/gift-card-details.svelte';
+  import type { WalletItem } from '@baragaun/bg-node-client';
+  import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
 
   let open = $state(true);
   let pin = $state('');
   let verified = $state(false);
+  let walletItem = $state<WalletItem | null>(null);
 
-  const walletCardId = page.params.id;
+  const walletItemId = page.params.id;
 
-  function handleSubmit(event: SubmitEvent) {
+  async function handleSubmit(event: SubmitEvent) {
     event.preventDefault();
-    // Verify secret
-    verified = true;
-    console.log('PIN submitted:', pin);
+    await verifyWalletItemTransfer();
   }
 
-  const walletItem = derived([walletItemsStore], ([$products]) => {
-    return $products.find((p) => p.id === walletCardId) || null;
-  });
+  async function verifyWalletItemTransfer() {
+    if (!pin) return;
+    const response = await marketplaceContext.verifyWalletItemTransfer(walletItemId, pin);
+    if (response.error) {
+      console.error('Error verifying wallet item transfer:', response.error);
+      return;
+    }
+    if (!response.object) {
+      console.error('Error verifying wallet item transfer: no object');
+      return;
+    }
+
+    walletItem = response.object;
+    verified = true;
+  }
+
 </script>
 
 {#if verified===false}
@@ -40,6 +55,5 @@
   </DialogContent>
 </Dialog>
 {:else}
-<div></div>
+<GiftCardDetails walletItem={walletItem} giftCardItem={null} />
 {/if}
-  
