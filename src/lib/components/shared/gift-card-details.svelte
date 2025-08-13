@@ -420,7 +420,7 @@
             href={brand.url}
             target="_blank"
             rel="noopener noreferrer"
-            class="rounded-lg bg-nav-foreground px-8 py-2 font-semibold tracking-wide text-nav shadow transition hover:bg-nav/90"
+            class="rounded-lg bg-nav-foreground px-8 py-2 font-semibold tracking-wide text-nav shadow transition hover:bg-nav-foreground/90"
             style="text-transform: uppercase; letter-spacing: 1px;"
           >
             {m['marketplace.visit_online']()}
