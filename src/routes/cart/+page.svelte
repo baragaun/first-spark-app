@@ -272,7 +272,7 @@
 
     <!-- Place Order Button -->
     <Button
-      class="w-full rounded-full bg-nav-foreground py-3 text-lg font-bold text-nav hover:bg-nav/90"
+      class="w-full rounded-full bg-nav-foreground py-3 text-lg font-bold text-nav hover:bg-nav-foreground/90"
       onclick={placeOrder}
       disabled={cartItems.length === 0}
     >
