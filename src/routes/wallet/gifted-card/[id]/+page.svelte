@@ -99,12 +99,12 @@
   <DialogContent>
     <DialogHeader>
       <DialogTitle>
-        Hey, You have received a giftcard please enter your pin to accept it.
+        Please enter your pin to accept it.
       </DialogTitle>
     </DialogHeader>
 
     <form class="space-y-4" onsubmit={handleSubmit}>
-      <Input type="password" class="focus-visible:outline-none" placeholder="Enter PIN/secret" bind:value={pin} />
+      <Input type="password" class="focus-visible:outline-none  focus-visible:ring-white" placeholder="Enter PIN/secret" bind:value={pin} />
       <Button type="submit" class="w-full">Submit</Button>
     </form>
   </DialogContent>
