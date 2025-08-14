@@ -59,13 +59,13 @@
   let showDialog = $state(false);
 
   const sendEmail = async (
-    walletItemId: string,
+    transferSlug: string,
     secretCode: string,
     recipientEmail: string,
     recipientFullName?: string,
     message?: string,
   ) => {
-    const attachmentLink = `http://localhost:5173/wallet/gift-card/${walletItemId}`;
+    const attachmentLink = `http://localhost:5173/wallet/gift-card/${transferSlug}`;
     const subject = encodeURIComponent('Receive your gift card');
     const body = encodeURIComponent(`
     Hello ${recipientFullName},
@@ -104,16 +104,14 @@
       recipientFullName: $formData.recipientFullName,
       recipientEmail: $formData.recipientEmail,
       messageText: $formData.message,
-      //Todo - pass secret here
-      //secret: secret,
     });
 
-    if (response.error || !response.object?.transferSecret) {
+    if (response.error || !response.object?.transferSecret || !response.object?.transferSlug) {
       return;
     }
 
     sendEmail(
-      data.walletItemId,
+      response.object.transferSlug,
       response.object.transferSecret,
       $formData.recipientEmail,
       $formData.recipientFullName,

@@ -2,8 +2,6 @@
   import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
   import { Input } from '@/components/ui/input';
   import { Button } from '@/components/ui/button';
-  import { walletItemsStore } from '@/stores/wallet-store';
-  import { derived } from 'svelte/store';
   import { page } from '$app/state';
   import GiftCardDetails from '@/components/shared/gift-card-details.svelte';
   import { GiftCardProduct, type WalletItem } from '@baragaun/bg-node-client';
@@ -12,13 +10,14 @@
   import placeholderImage from '../../../../assets/images/placeholder.png';
   import { m } from '@/paraglide/messages';
   import { ArrowLeft } from 'lucide-svelte';
+  import { onMount } from 'svelte';
 
   let open = $state(true);
   let pin = $state('');
   let verified = $state(false);
-  let walletItem = $state<WalletItem | null>(null);
+  let walletItem = $state<WalletItem | undefined | null>(null);
 
-  const walletItemId = page.params.id;
+  const transferSlug = page.params.id;
 
   const product = new GiftCardProduct();
   product.imageSourceFront = 'landrys-1.jpg';
@@ -26,12 +25,12 @@
 
   async function handleSubmit(event: SubmitEvent) {
     event.preventDefault();
-    await verifyWalletItemTransfer();
+    await acceptWalletItemTransfer();
   }
 
-  async function verifyWalletItemTransfer() {
+  async function acceptWalletItemTransfer() {
     if (!pin) return;
-    const response = await marketplaceContext.verifyWalletItemTransfer(walletItemId, pin);
+    const response = await marketplaceContext.acceptWalletItemTransfer(transferSlug, pin);
     if (response.error) {
       console.error('Error verifying wallet item transfer:', response.error);
       return;
@@ -45,16 +44,31 @@
     verified = true;
   }
 
+  async function loadWalletItem() {
+    const response = await marketplaceContext.findWalletItemByTransferSlug(transferSlug);
+
+    if (typeof response === 'string') {
+      console.error('Failed to load wallet item:', response);
+      return;
+    }
+
+    walletItem = response;
+  }
+
   function backAndClose(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement }) {
     throw new Error('Function not implemented.');
   }
+
+  onMount(async () => {
+    loadWalletItem();
+  });
 </script>
 
 <!-- Header Bar -->
 <div
   class="flex items-center justify-between rounded-b-lg bg-nav px-4 py-3 text-nav-foreground shadow"
 >
-  <span class="text-lg font-bold"> {m['send_gift_card.received_gift_card']()}</span>
+  <span class="text-lg font-bold"> {m['send_gift_card.send_gift']()}</span>
 
   <!-- Accept/Decline Buttons -->
   <div class="flex gap-2">

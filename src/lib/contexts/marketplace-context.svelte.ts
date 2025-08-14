@@ -473,27 +473,51 @@ export class MarketplaceContext {
     }
   }
 
-  async verifyWalletItemTransfer(
-    walletItemId: string,
-    secretCode: string,
-  ): Promise<QueryResult<WalletItem>> {
+  async findWalletItemByTransferSlug(transferSlug: string): Promise<WalletItem | string | undefined> {
     if (!this.client.isInitialized) {
-      console.error('MarketplaceContext.verifyWalletItemTransfer: not initialized.');
+      console.error('MarketplaceContext.findWalletItemByTransferSlug: not initialized.');
+      return translate(AppUiMessage.systemError);
+    }
+    try {
+      isLoading = true;
+      const response = await this.client.operations.walletItem.findWalletItemByTransferSlug(
+        transferSlug,
+        {},
+      );
+      if (!response || response.error || !response.object) {
+        console.error('findWalletItemByTransferSlug: received error.', { response });
+        return response.error || translate(AppUiMessage.systemError);
+      }
+      return response.object;
+    } catch (error) {
+      console.error('findWalletItemByTransferSlug: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return translate(AppUiMessage.systemError);
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  async acceptWalletItemTransfer( transferSlug: string, secretCode: string) : Promise<QueryResult<WalletItem>> {
+    if (!this.client.isInitialized) {
+      console.error('MarketplaceContext.acceptWalletItemTransfer: not initialized.');
       return { error: translate(AppUiMessage.systemError) };
     }
     try {
       isLoading = true;
-      const response = await this.client.operations.walletItemTransfer.verifyWalletItemTransfer(
+      const response = await this.client.operations.walletItemTransfer.acceptWalletItemTransfer(
         secretCode,
-        walletItemId,
+        transferSlug,
       );
       if (!response || response.error) {
-        console.error('verifyWalletItemTransfer: received error.', { response });
+        console.error('acceptWalletItemTransfer: received error.', { response });
         return { error: response.error || translate(AppUiMessage.systemError) };
       }
       return response;
     } catch (error) {
-      console.error('verifyWalletItemTransfer: error', {
+      console.error('acceptWalletItemTransfer: error', {
         error: (error as Error).message,
         stack: (error as Error).stack,
       });
