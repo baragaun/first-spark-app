@@ -473,7 +473,10 @@ export class MarketplaceContext {
     }
   }
 
-  async verifyWalletItemTransfer( walletItemId: string, secretCode: string) : Promise<QueryResult<WalletItem>> {
+  async verifyWalletItemTransfer(
+    walletItemId: string,
+    secretCode: string,
+  ): Promise<QueryResult<WalletItem>> {
     if (!this.client.isInitialized) {
       console.error('MarketplaceContext.verifyWalletItemTransfer: not initialized.');
       return { error: translate(AppUiMessage.systemError) };

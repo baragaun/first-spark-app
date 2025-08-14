@@ -388,6 +388,7 @@
     "error": {
       "sender_name_max_length": "El nombre del remitente debe tener como máximo 30 caracteres",
       "message_max_length": "El mensaje debe tener como máximo 500 caracteres"
-    }
+    },
+    "received_gift_card": "Tarjeta de regalo recibida"
   }
 }

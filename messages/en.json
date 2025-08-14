@@ -390,6 +390,7 @@
     "error": {
       "sender_name_max_length": "Sender name must contain at most 30 character(s)",
       "message_max_length": "Message must contain at most 500 character(s)"
-    }
+    },
+    "received_gift_card": "Received Gift Card"
   }
 }
