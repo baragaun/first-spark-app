@@ -31,7 +31,7 @@
 
   let product = walletItem || giftCardItem;
 
-  let isLoading = $state(true);
+  let isLoading = $state(false);
   let error = $state<string | null>(null);
   let selectedTab = $state(walletItem ? 'use' : 'buy');
   let isBarcodeViewOpen = $state(false);

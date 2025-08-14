@@ -65,7 +65,7 @@
 
   <div class="flex gap-2">
     <Button
-      variant="default"
+      variant="outline"
       size="sm"
       class="rounded-full"
       onclick={() => {
@@ -75,9 +75,9 @@
       Accept
     </Button>
     <Button
-      variant="destructive"
+      variant="outline"
       size="sm"
-      class="rounded-full"
+      class="rounded-full border-red-600 text-red-700"
       onclick={() => {
         // TODO: Implement decline logic
         console.log('Decline clicked');
@@ -104,7 +104,7 @@
     </DialogHeader>
 
     <form class="space-y-4" onsubmit={handleSubmit}>
-      <Input type="password" placeholder="Enter PIN/secret" bind:value={pin} />
+      <Input type="password" class="focus-visible:outline-none" placeholder="Enter PIN/secret" bind:value={pin} />
       <Button type="submit" class="w-full">Submit</Button>
     </form>
   </DialogContent>

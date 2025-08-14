@@ -65,7 +65,7 @@
     recipientFullName?: string,
     message?: string,
   ) => {
-    const attachmentLink = `http://localhost:5173/wallet/gift-card/${transferSlug}`;
+    const attachmentLink = `http://localhost:5173/wallet/gifted-card/${transferSlug}`;
     const subject = encodeURIComponent('Receive your gift card');
     const body = encodeURIComponent(`
     Hello ${recipientFullName},
