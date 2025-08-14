@@ -12,7 +12,7 @@
   } from '@baragaun/bg-node-client';
   import placeholderImage from '../../../assets/images/placeholder.png';
   import { Archive, ArrowLeft, ExternalLink, Gift, Printer, ZoomOut } from 'lucide-svelte';
-  import { brandsStore, giftCardProductsStore } from '$lib/stores/marketplace-store';
+  import { brandsStore, giftCardProductsStore, dataLoaded } from '$lib/stores/marketplace-store';
   import { walletItemsStore } from '@/stores/wallet-store';
   import BarcodeView from './barcode-view.svelte';
   import { downloadPdf } from '@/utils/pdf-utils';
@@ -26,9 +26,11 @@
   interface Props {
     walletItem: WalletItem | null;
     giftCardItem: GiftCardProduct | null;
+    showNavBar?: boolean;
+    hideActions?: boolean;
   }
 
-  let { walletItem, giftCardItem }: Props = $props();
+  let { walletItem, giftCardItem, showNavBar = true, hideActions = false }: Props = $props();
 
   let product = walletItem || giftCardItem;
 
@@ -36,11 +38,14 @@
   let error = $state<string | null>(null);
   let selectedTab = $state(walletItem ? 'use' : 'buy');
   let isBarcodeViewOpen = $state(false);
-
-  const brand =
-    $brandsStore.find((v) => v.id === (walletItem?.brandId || giftCardItem?.brandId)) || null;
+  let brand = $state<Brand | null>(null);
 
   onMount(async () => {
+    if ($dataLoaded) {
+      brand =
+        $brandsStore.find((v) => v.id === (walletItem?.brandId || giftCardItem?.brandId)) || null;
+      return;
+    }
     try {
       isLoading = true;
       const brandsResponse = await marketplaceContext.findBrands();
@@ -49,6 +54,8 @@
         return;
       }
       brandsStore.set(brandsResponse as Brand[]);
+      brand =
+        $brandsStore.find((v) => v.id === (walletItem?.brandId || giftCardItem?.brandId)) || null;
     } catch (err) {
       error = 'Failed to load gift card details';
       console.error(err);
@@ -163,20 +170,22 @@
 </script>
 
 <!-- Header Bar -->
-<div
-  class="flex items-center justify-between rounded-b-lg bg-nav px-4 py-3 text-nav-foreground shadow"
->
-  <button onclick={backAndClose} class="flex items-center">
-    {#if isBarcodeViewOpen}
-      <ZoomOut class="h-6 w-6" />
-    {:else}
-      <ArrowLeft class="h-6 w-6" />
-    {/if}
-  </button>
-  <span class="flex-1 text-center text-lg font-bold"
-    >{isMarketPlace ? m['marketplace.buy_gift_card']() : m['wallet.gift-card.title']()}</span
+{#if showNavBar}
+  <div
+    class="flex items-center justify-between rounded-b-lg bg-nav px-4 py-3 text-nav-foreground shadow"
   >
-</div>
+    <button onclick={backAndClose} class="flex items-center">
+      {#if isBarcodeViewOpen}
+        <ZoomOut class="h-6 w-6" />
+      {:else}
+        <ArrowLeft class="h-6 w-6" />
+      {/if}
+    </button>
+    <span class="flex-1 text-center text-lg font-bold"
+      >{isMarketPlace ? m['marketplace.buy_gift_card']() : m['wallet.gift-card.title']()}</span
+    >
+  </div>
+{/if}
 
 {#if isLoading}
   <div class="flex h-[60vh] items-center justify-center">
@@ -208,7 +217,9 @@
     <!-- Gift Card Image -->
     <div class="my-2 flex justify-center">
       <img
-        src={giftCardImageDomain + '/giftcards/' + product?.imageSourceFront}
+        src={giftCardImageDomain +
+          '/giftcards/' +
+          (product?.imageSourceFront ?? walletItem?.imageSourceFront)}
         alt={product?.name}
         class="aspect-[16/9] w-full max-w-md rounded-2xl object-contain shadow-lg"
         onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
@@ -216,7 +227,7 @@
     </div>
 
     <!-- Actions -->
-    {#if walletItem}
+    {#if walletItem && !hideActions}
       <div class="flex items-center border-b bg-gray-50 px-4 py-2">
         <div class="flex gap-2">
           {#if walletItem.transferredAt == null || undefined}
@@ -378,34 +389,34 @@
 
     {#if selectedTab === 'info'}
       <div class="px-2 py-4">
-        {#if product?.instructionsEn}
+        {#if product?.instructionsEn ?? walletItem?.instructionsEn}
           <div class="mb-6">
             <h2 class="text-400 mb-2 text-lg font-semibold text-secondary-foreground">
               {m['wallet.gift-card.how_to_redeem']()}
             </h2>
-            {#if product?.instructionsEn?.trim().startsWith('<')}
+            {#if (product?.instructionsEn ?? walletItem?.instructionsEn)?.trim().startsWith('<')}
               <p class="mb-2">
-                {@html product?.instructionsEn}
+                {@html product?.instructionsEn ?? walletItem?.instructionsEn}
               </p>
             {:else}
               <p class="mb-2">
-                {product?.instructionsEn}
+                {product?.instructionsEn ?? walletItem?.instructionsEn}
               </p>
             {/if}
           </div>
         {/if}
-        {#if product?.termsEn}
+        {#if product?.termsEn ?? walletItem?.termsEn}
           <div>
             <h2 class="text-400 mb-2 text-lg font-semibold text-secondary-foreground">
               {m['wallet.gift-card.terms_and_conditions']()}
             </h2>
-            {#if product?.instructionsEn?.trim().startsWith('<')}
+            {#if (product?.instructionsEn ?? walletItem?.termsEn)?.trim().startsWith('<')}
               <p class="mb-2">
-                {@html product?.termsEn}
+                {@html product?.termsEn ?? walletItem?.termsEn}
               </p>
             {:else}
               <p class="mb-2">
-                {product?.termsEn}
+                {product?.termsEn ?? walletItem?.termsEn}
               </p>
             {/if}
           </div>
@@ -415,6 +426,7 @@
 
     {#if selectedTab === 'brand'}
       <div class="flex flex-col items-center py-8">
+        <p>{brand?.name ?? 'not found'}</p>
         <!-- Brand Logo -->
         <div
           class="mb-4 flex h-40 w-40 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-lg"

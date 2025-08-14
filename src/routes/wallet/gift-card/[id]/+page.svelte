@@ -6,13 +6,10 @@
   import GiftCardDetails from '@/components/shared/gift-card-details.svelte';
   import { GiftCardProduct, type WalletItem } from '@baragaun/bg-node-client';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
-  import { giftCardImageDomain } from '@/constants';
-  import placeholderImage from '../../../../assets/images/placeholder.png';
   import { m } from '@/paraglide/messages';
-  import { ArrowLeft } from 'lucide-svelte';
   import { onMount } from 'svelte';
 
-  let open = $state(true);
+  let open = $state(false);
   let pin = $state('');
   let verified = $state(false);
   let walletItem = $state<WalletItem | undefined | null>(null);
@@ -55,10 +52,6 @@
     walletItem = response;
   }
 
-  function backAndClose(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement }) {
-    throw new Error('Function not implemented.');
-  }
-
   onMount(async () => {
     loadWalletItem();
   });
@@ -68,17 +61,15 @@
 <div
   class="flex items-center justify-between rounded-b-lg bg-nav px-4 py-3 text-nav-foreground shadow"
 >
-  <span class="text-lg font-bold"> {m['send_gift_card.send_gift']()}</span>
+  <span class="text-lg font-bold"> {m['send_gift_card.received_gift_card']()}</span>
 
-  <!-- Accept/Decline Buttons -->
   <div class="flex gap-2">
     <Button
       variant="default"
       size="sm"
       class="rounded-full"
       onclick={() => {
-        // TODO: Implement accept logic
-        console.log('Accept clicked');
+        open = true;
       }}
     >
       Accept
@@ -97,21 +88,13 @@
   </div>
 </div>
 
-<div>
-  <div class="my-2 flex justify-center">
-    <img
-      src={giftCardImageDomain + '/giftcards/' + product?.imageSourceFront}
-      alt={product?.name}
-      class="aspect-[16/9] w-full max-w-md rounded-2xl object-contain shadow-lg"
-      onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
-    />
-  </div>
-  <header class="mb-6">
-    <h1 class="mt-2 text-center text-2xl font-bold text-muted-foreground">{product?.name}</h1>
-  </header>
-</div>
+<GiftCardDetails
+  walletItem={walletItem ?? null}
+  giftCardItem={null}
+  showNavBar={false}
+  hideActions={true}
+/>
 
-<!-- {#if verified===false}
 <Dialog bind:open>
   <DialogContent>
     <DialogHeader>
@@ -126,6 +109,3 @@
     </form>
   </DialogContent>
 </Dialog>
-{:else}
-<GiftCardDetails walletItem={walletItem} giftCardItem={null} />
-{/if} -->
