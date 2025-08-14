@@ -473,7 +473,9 @@ export class MarketplaceContext {
     }
   }
 
-  async findWalletItemByTransferSlug(transferSlug: string): Promise<WalletItem | string | undefined> {
+  async findWalletItemByTransferSlug(
+    transferSlug: string,
+  ): Promise<WalletItem | string | undefined> {
     if (!this.client.isInitialized) {
       console.error('MarketplaceContext.findWalletItemByTransferSlug: not initialized.');
       return translate(AppUiMessage.systemError);
@@ -500,7 +502,10 @@ export class MarketplaceContext {
     }
   }
 
-  async acceptWalletItemTransfer( transferSlug: string, secretCode: string) : Promise<QueryResult<WalletItem>> {
+  async acceptWalletItemTransfer(
+    transferSlug: string,
+    secretCode: string,
+  ): Promise<QueryResult<WalletItem>> {
     if (!this.client.isInitialized) {
       console.error('MarketplaceContext.acceptWalletItemTransfer: not initialized.');
       return { error: translate(AppUiMessage.systemError) };
