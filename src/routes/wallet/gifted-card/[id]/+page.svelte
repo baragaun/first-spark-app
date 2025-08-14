@@ -16,13 +16,10 @@
 
   const transferSlug = page.params.id;
 
-  const product = new GiftCardProduct();
-  product.imageSourceFront = 'landrys-1.jpg';
-  product.name = '1-800 Baskets';
-
   async function handleSubmit(event: SubmitEvent) {
     event.preventDefault();
     await acceptWalletItemTransfer();
+    open = false;
   }
 
   async function acceptWalletItemTransfer() {
@@ -63,29 +60,31 @@
 >
   <span class="text-lg font-bold"> {m['send_gift_card.received_gift_card']()}</span>
 
-  <div class="flex gap-2">
-    <Button
-      variant="outline"
-      size="sm"
-      class="rounded-full"
-      onclick={() => {
-        open = true;
-      }}
-    >
-      Accept
-    </Button>
-    <Button
-      variant="outline"
-      size="sm"
-      class="rounded-full border-red-600 text-red-700"
-      onclick={() => {
-        // TODO: Implement decline logic
-        console.log('Decline clicked');
-      }}
-    >
-      Decline
-    </Button>
-  </div>
+  {#if !verified}
+    <div class="flex gap-2">
+      <Button
+        variant="outline"
+        size="sm"
+        class="rounded-full"
+        onclick={() => {
+          open = true;
+        }}
+      >
+        Accept
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        class="rounded-full border-red-600 text-red-700"
+        onclick={() => {
+          // TODO: Implement decline logic
+          console.log('Decline clicked');
+        }}
+      >
+        Decline
+      </Button>
+    </div>
+  {/if}
 </div>
 
 <GiftCardDetails
@@ -98,13 +97,16 @@
 <Dialog bind:open>
   <DialogContent>
     <DialogHeader>
-      <DialogTitle>
-        Please enter your pin to accept it.
-      </DialogTitle>
+      <DialogTitle>Please enter your pin to accept it.</DialogTitle>
     </DialogHeader>
 
     <form class="space-y-4" onsubmit={handleSubmit}>
-      <Input type="password" class="focus-visible:outline-none  focus-visible:ring-white" placeholder="Enter PIN/secret" bind:value={pin} />
+      <Input
+        type="password"
+        class="focus-visible:outline-none  focus-visible:ring-white"
+        placeholder="Enter PIN/secret"
+        bind:value={pin}
+      />
       <Button type="submit" class="w-full">Submit</Button>
     </form>
   </DialogContent>
