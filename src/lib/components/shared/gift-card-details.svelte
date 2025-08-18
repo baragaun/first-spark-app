@@ -28,9 +28,16 @@
     giftCardItem: GiftCardProduct | null;
     showNavBar?: boolean;
     hideActions?: boolean;
+    isVerified?: boolean;
   }
 
-  let { walletItem, giftCardItem, showNavBar = true, hideActions = false }: Props = $props();
+  let {
+    walletItem,
+    giftCardItem,
+    showNavBar = true,
+    hideActions = false,
+    isVerified = true,
+  }: Props = $props();
 
   let product = walletItem || giftCardItem;
 
@@ -312,7 +319,7 @@
       >
     </div>
 
-    {#if selectedTab === 'use' && walletItem}
+    {#if selectedTab === 'use' && walletItem && isVerified}
       <!-- Brand and Amounts (Buy Tab) -->
       <div class="flex flex-col items-center justify-center px-2 py-4">
         <div class="flex items-end justify-center">
