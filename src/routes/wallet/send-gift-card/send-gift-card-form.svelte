@@ -74,7 +74,7 @@
     console.log(walletItem);
     const attachmentLink = `http://localhost:5173/wallet/gifted-card/${transferSlug}`;
     const subject = encodeURIComponent(`${myUserContext.myUser?.userHandle} sent you a gift card`);
-    const expiresAt = $walletItem?.expiresAt;
+    const expiresAt = $walletItem?.expiresAt ? `Expiry Date: ${$walletItem?.expiresAt}` : '';
     const body = encodeURIComponent(`
     Hello ${recipientFullName},
 
@@ -83,7 +83,7 @@
 
     Details:
     Gift Card Value: ${$walletItem?.balance}
-    ${expiresAt === null || expiresAt === undefined} ? '' : Expiry Date: ${expiresAt}
+    ${expiresAt}
     Message: ${message}
     ${attachmentLink}
 
