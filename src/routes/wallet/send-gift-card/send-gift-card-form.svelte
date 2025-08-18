@@ -20,6 +20,8 @@
   import { goto } from '$app/navigation';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
+  import { walletItemsStore } from '@/stores/wallet-store';
+  import { derived } from 'svelte/store';
 
   const DEBOUNCE_DELAY = 350;
 
@@ -35,7 +37,7 @@
       debouncedValidation();
     },
     async onSubmit({ cancel }) {
-      cancel(); // Avoid the server-side form action
+      cancel();
       await handleFormSubmit();
     },
   });
@@ -58,6 +60,10 @@
 
   let showDialog = $state(false);
 
+  const walletItem = derived([walletItemsStore], ([$products]) => {
+    return $products.find((p) => p.id === data.walletItemId) || null;
+  });
+
   const sendEmail = async (
     transferSlug: string,
     secretCode: string,
@@ -65,8 +71,10 @@
     recipientFullName?: string,
     message?: string,
   ) => {
+    console.log(walletItem);
     const attachmentLink = `http://localhost:5173/wallet/gifted-card/${transferSlug}`;
-    const subject = encodeURIComponent('Receive your gift card');
+    const subject = encodeURIComponent(`${myUserContext.myUser?.userHandle} sent you a gift card`);
+    const expiresAt = $walletItem?.expiresAt;
     const body = encodeURIComponent(`
     Hello ${recipientFullName},
 
@@ -74,11 +82,9 @@
     Attached to this email, you’ll need to enter the secret code  ${secretCode} to activate your Gift Card.
 
     Details:
-    Gift Card Value: [Amount]
-    Expiry Date: [Expiry Date, if applicable]
-    Redeemable Online/In-store: [Instructions]
-
-    ${message}
+    Gift Card Value: ${$walletItem?.balance}
+    ${expiresAt === null || expiresAt === undefined} ? '' : Expiry Date: ${expiresAt}
+    Message: ${message}
     ${attachmentLink}
 
     To redeem, simply present this gift card at checkout or enter the gift card code when shopping online.

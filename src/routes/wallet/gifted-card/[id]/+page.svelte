@@ -8,6 +8,7 @@
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
   import { m } from '@/paraglide/messages';
   import { onMount } from 'svelte';
+  import { toast } from 'svelte-sonner';
 
   let open = $state(false);
   let pin = $state('');
@@ -38,6 +39,15 @@
     verified = true;
   }
 
+  async function declineWalletItemTransfer() {
+    const response = await marketplaceContext.declineWalletItemTransfer(transferSlug);
+    if (response.error) {
+      console.error('Error verifying wallet item transfer:', response.error);
+      return;
+    }
+    toast.success('You have declined the gift-card!');
+  }
+
   async function loadWalletItem() {
     const response = await marketplaceContext.findWalletItemByTransferSlug(transferSlug);
 
@@ -65,7 +75,7 @@
       <Button
         variant="outline"
         size="sm"
-        class="rounded-full"
+        class="rounded-full hover:bg-background hover:text-nav-foreground/70"
         onclick={() => {
           open = true;
         }}
@@ -75,10 +85,9 @@
       <Button
         variant="outline"
         size="sm"
-        class="rounded-full border-red-600 text-red-700"
+        class="rounded-full border-red-600 text-red-700 hover:bg-background hover:text-red-500"
         onclick={() => {
-          // TODO: Implement decline logic
-          console.log('Decline clicked');
+          declineWalletItemTransfer();
         }}
       >
         Decline
@@ -92,6 +101,7 @@
   giftCardItem={null}
   showNavBar={false}
   hideActions={true}
+  isVerified={verified}
 />
 
 <Dialog bind:open>

@@ -531,6 +531,31 @@ export class MarketplaceContext {
       isLoading = false;
     }
   }
+
+  async declineWalletItemTransfer(transferSlug: string): Promise<QueryResult<ServiceRequest>> {
+    if (!this.client.isInitialized) {
+      console.error('MarketplaceContext.declineWalletItemTransfer: not initialized.');
+      return { error: translate(AppUiMessage.systemError) };
+    }
+    try {
+      isLoading = true;
+      const response =
+        await this.client.operations.walletItemTransfer.declineWalletItemTransfer(transferSlug);
+      if (!response || response.error) {
+        console.error('declineWalletItemTransfer: received error.', { response });
+        return { error: response.error || translate(AppUiMessage.systemError) };
+      }
+      return response;
+    } catch (error) {
+      console.error('declineWalletItemTransfer: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return { error: translate(AppUiMessage.systemError) };
+    } finally {
+      isLoading = false;
+    }
+  }
 }
 
 // Create a singleton instance
