@@ -39,11 +39,16 @@
     isVerified = true,
   }: Props = $props();
 
-  let product = walletItem || giftCardItem;
+  let product = $derived.by(() => walletItem || giftCardItem);
 
   let isLoading = $state(false);
   let error = $state<string | null>(null);
   let selectedTab = $state(walletItem ? 'use' : 'buy');
+  $effect(() => {
+    if (walletItem) {
+      selectedTab = 'use';
+    }
+  });
   let isBarcodeViewOpen = $state(false);
   let brand = $state<Brand | null>(null);
 
@@ -319,52 +324,56 @@
       >
     </div>
 
-    {#if selectedTab === 'use' && walletItem && isVerified}
-      <!-- Brand and Amounts (Buy Tab) -->
-      <div class="flex flex-col items-center justify-center px-2 py-4">
-        <div class="flex items-end justify-center">
-          <p class="mr-2 text-xl text-gray-400">USD</p>
-          <span class="text-400 text-5xl font-semibold text-foreground">
-            {(walletItem.balance / 1000).toFixed(0)}
-          </span>
-          <span class="text-lg font-semibold text-foreground">
-            .{(walletItem.balance / 1000).toFixed(2).split('.')[1]}
-          </span>
-        </div>
-        <p class="text-sm text-gray-400">
-          Balance as of {new Date(walletItem.createdAt).toLocaleDateString()}
-        </p>
-        <a
-          href="https://www.google.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="text-primary underline">{m['wallet.gift-card.look_up_balance']()}</a
-        >
-
-        <!-- Card Code and PIN -->
-        {#if walletItem.code}
-          <div class="mt-4 flex flex-col items-center">
-            <img src={barcodeApiUrl} class="barcode" alt="Barcode" />
+    {#if selectedTab === 'use' && walletItem}
+      {#if isVerified}
+        <!-- Brand and Amounts (Buy Tab) -->
+        <div class="flex flex-col items-center justify-center px-2 py-4">
+          <div class="flex items-end justify-center">
+            <p class="mr-2 text-xl text-gray-400">USD</p>
+            <span class="text-400 text-5xl font-semibold text-foreground">
+              {(walletItem.balance / 1000).toFixed(0)}
+            </span>
+            <span class="text-lg font-semibold text-foreground">
+              .{(walletItem.balance / 1000).toFixed(2).split('.')[1]}
+            </span>
           </div>
-        {/if}
-
-        <div class="mt-4 flex items-center gap-2">
-          <Button
-            size="sm"
-            class="h-8 rounded-full bg-primary text-primary-foreground"
-            onclick={() => (isBarcodeViewOpen = true)}>{m['wallet.gift-card.zoom']()}</Button
+          <p class="text-sm text-gray-400">
+            Balance as of {new Date(walletItem.createdAt).toLocaleDateString()}
+          </p>
+          <a
+            href="https://www.google.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-primary underline">{m['wallet.gift-card.look_up_balance']()}</a
           >
-          <Button size="sm" class="h-8 rounded-full bg-primary text-primary-foreground"
-            >{m['wallet.gift-card.copy']()}</Button
+
+          <!-- Card Code and PIN -->
+          {#if walletItem.code}
+            <div class="mt-4 flex flex-col items-center">
+              <img src={barcodeApiUrl} class="barcode" alt="Barcode" />
+            </div>
+          {/if}
+
+          <div class="mt-4 flex items-center gap-2">
+            <Button
+              size="sm"
+              class="h-8 rounded-full bg-primary text-primary-foreground"
+              onclick={() => (isBarcodeViewOpen = true)}>{m['wallet.gift-card.zoom']()}</Button
+            >
+            <Button size="sm" class="h-8 rounded-full bg-primary text-primary-foreground"
+              >{m['wallet.gift-card.copy']()}</Button
+            >
+          </div>
+
+          <h class="mt-4 text-xl text-black">{walletItem.pin}</h>
+          <p class="text-sm text-gray-400">Card PIN</p>
+          <Button size="sm" class="mt-2 h-8 rounded-full bg-primary text-primary-foreground"
+            >{m['wallet.gift-card.copy_pin']()}</Button
           >
         </div>
-
-        <h class="mt-4 text-xl text-black">{walletItem.pin}</h>
-        <p class="text-sm text-gray-400">Card PIN</p>
-        <Button size="sm" class="mt-2 h-8 rounded-full bg-primary text-primary-foreground"
-          >{m['wallet.gift-card.copy_pin']()}</Button
-        >
-      </div>
+      {:else}
+        <div class="text-center text-muted-foreground">Please accept card to see all details</div>
+      {/if}
     {/if}
 
     {#if selectedTab === 'buy' && giftCardItem}
