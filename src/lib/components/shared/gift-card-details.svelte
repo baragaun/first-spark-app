@@ -372,7 +372,9 @@
           >
         </div>
       {:else}
-        <div class="text-center text-muted-foreground">Please accept card to see all details</div>
+        <div class="h-full w-full text-center text-muted-foreground">
+          Please accept card to see all details
+        </div>
       {/if}
     {/if}
 
