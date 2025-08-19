@@ -109,19 +109,23 @@
             : m['wallet.gift-card.archive']()}</span
         >
       </div>
-      <div class="flex flex-col items-center">
-        <Button variant="ghost" size="icon" onclick={cancelWalletItem}>
-          <X aria-label="Close" />
-        </Button>
-        <span class="text-xs text-gray-500">{m['setting.buttons.cancel']()}</span>
-      </div>
+      {#if !$walletItem?.transferAcceptedAt}
+        <div class="flex flex-col items-center">
+          <Button variant="ghost" size="icon" onclick={cancelWalletItem}>
+            <X aria-label="Close" />
+          </Button>
+          <span class="text-xs text-gray-500">{m['setting.buttons.cancel']()}</span>
+        </div>
+      {/if}
 
       <span class="ml-2 flex flex-grow items-center justify-end gap-2">
         <span class="rounded border px-2 py-0.5 text-xs text-gray-600"
           >{m['wallet.transferred.active']()}</span
         >
         <span class="rounded border bg-gray-100 px-2 py-0.5 text-xs text-gray-600"
-          >{m['wallet.transferred.transferred']()}</span
+          >{$walletItem?.transferAcceptedAt
+            ? m['wallet.transferred.transferred']()
+            : m['order_history.processing']()}</span
         >
       </span>
     </div>
