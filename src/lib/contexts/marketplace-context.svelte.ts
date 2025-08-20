@@ -410,6 +410,33 @@ export class MarketplaceContext {
     }
   }
 
+  async updateWalletItemTransfer(id: string): Promise<QueryResult<WalletItemTransfer>> {
+    if (!this.client.isInitialized) {
+      console.error('MarketplaceContext.updateWalletItemTransfer: not initialized.');
+      return { error: translate(AppUiMessage.systemError) };
+    }
+    try {
+      isLoading = true;
+      const response = await this.client.operations.walletItemTransfer.updateWalletItemTransfer({
+        id,
+        canceledAt: new Date().toISOString(),
+      });
+      if (!response || response.error) {
+        console.error('updateWalletItemTransfer: received error.', { response });
+        return { error: response.error || translate(AppUiMessage.systemError) };
+      }
+      return response;
+    } catch (error) {
+      console.error('updateWalletItemTransfer: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return { error: translate(AppUiMessage.systemError) };
+    } finally {
+      isLoading = false;
+    }
+  }
+
   async findWalletItemTransfers(): Promise<WalletItemTransfer[] | string | undefined> {
     if (!this.client.isInitialized) {
       console.error('MarketplaceContext.findWalletItemTransfers: not initialized.');
