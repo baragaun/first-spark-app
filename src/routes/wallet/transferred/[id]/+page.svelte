@@ -57,6 +57,12 @@
 
   async function cancelWalletItem() {
     if (!$walletItem) return;
+    const walletItemTransferResult = await marketplaceContext.updateWalletItemTransfer(
+      walletItemTransfer?.id ?? '',
+    );
+    if (walletItemTransferResult.error) {
+      console.error('Error cancel wallet item transfer:', walletItemTransferResult.error);
+    }
     const result = await marketplaceContext.updateWalletItem($walletItem.id);
     if (result.error) {
       console.error('Error cancel wallet item transfer:', result.error);

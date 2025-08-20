@@ -75,6 +75,7 @@
     const attachmentLink = `http://localhost:5173/wallet/gifted-card/${transferSlug}`;
     const subject = encodeURIComponent(`${myUserContext.myUser?.userHandle} sent you a gift card`);
     const expiresAt = $walletItem?.expiresAt ? `Expiry Date: ${$walletItem?.expiresAt}` : '';
+    const balance = $walletItem?.balance ? ($walletItem?.balance / 1000).toFixed(0) : 0;
     const body = encodeURIComponent(`
     Hello ${recipientFullName},
 
@@ -82,7 +83,7 @@
     Attached to this email, you’ll need to enter the secret code  ${secretCode} to activate your Gift Card.
 
     Details:
-    Gift Card Value: ${$walletItem?.balance}
+    Gift Card Value: ${balance}
     ${expiresAt}
     Message: ${message}
     ${attachmentLink}
