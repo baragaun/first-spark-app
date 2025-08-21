@@ -275,7 +275,7 @@
     "brand_label": "Marca",
     "gift_card_amount_label": "Monto de la tarjeta de regalo",
     "usd": "USD",
-    "add_to_cart_success": "${amount} ${vendor} agregado al carrito!",
+    "add_to_cart_success": "${amount} {vendor} agregado al carrito!",
     "add_to_cart_error": "Error al agregar artículo al carrito: {reason}",
     "add_to_cart_unexpected_error": "Ocurrió un error inesperado al agregar al carrito.",
     "add_to_cart_no_object": "Error al agregar artículo al carrito: No se devolvió ningún objeto.",
