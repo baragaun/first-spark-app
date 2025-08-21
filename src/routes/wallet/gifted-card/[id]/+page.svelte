@@ -4,7 +4,7 @@
   import { Button } from '@/components/ui/button';
   import { page } from '$app/state';
   import GiftCardDetails from '@/components/shared/gift-card-details.svelte';
-  import { GiftCardProduct, type WalletItem } from '@baragaun/bg-node-client';
+  import { type WalletItem } from '@baragaun/bg-node-client';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
   import { m } from '@/paraglide/messages';
   import { onMount } from 'svelte';
@@ -45,7 +45,7 @@
       console.error('Error verifying wallet item transfer:', response.error);
       return;
     }
-    toast.success('You have declined the gift-card!');
+    toast.success(m['gifted_card.decline_success']());
   }
 
   async function loadWalletItem() {
@@ -78,20 +78,16 @@
         class="rounded-full hover:bg-background hover:text-nav-foreground/70"
         onclick={() => {
           open = true;
-        }}
+        }}>{m['gifted_card.accept']()}</Button
       >
-        Accept
-      </Button>
       <Button
         variant="outline"
         size="sm"
         class="rounded-full border-red-600 text-red-700 hover:bg-background hover:text-red-500"
         onclick={() => {
           declineWalletItemTransfer();
-        }}
+        }}>{m['gifted_card.decline']()}</Button
       >
-        Decline
-      </Button>
     </div>
   {/if}
 </div>
@@ -107,17 +103,17 @@
 <Dialog bind:open>
   <DialogContent>
     <DialogHeader>
-      <DialogTitle>Please enter your pin to accept it.</DialogTitle>
+      <DialogTitle>{m['gifted_card.modal_title']()}</DialogTitle>
     </DialogHeader>
 
     <form class="space-y-4" onsubmit={handleSubmit}>
       <Input
         type="password"
         class="focus-visible:outline-none  focus-visible:ring-white"
-        placeholder="Enter PIN/secret"
+        placeholder={m['gifted_card.pin_placeholder']()}
         bind:value={pin}
       />
-      <Button type="submit" class="w-full">Submit</Button>
+      <Button type="submit" class="w-full">{m['gifted_card.submit']()}</Button>
     </form>
   </DialogContent>
 </Dialog>
