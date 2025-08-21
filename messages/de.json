@@ -387,7 +387,7 @@
       "sender_name_max_length": "Der Name des Absenders darf maximal 30 Zeichen enthalten",
       "message_max_length": "Die Nachricht darf maximal 500 Zeichen enthalten"
     },
-    "received_gift_card": "Ontvangen cadeaubon"
+    "received_gift_card": "Geschenkkarte erhalten"
   },
   "gifted_card": {
     "accept": "Akzeptieren",
