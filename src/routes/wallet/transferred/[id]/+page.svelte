@@ -152,7 +152,9 @@
       <div class="text-sm text-muted-foreground">{m['wallet.transferred.message']()}</div>
       <div class="mb-2 break-all font-bold">{walletItemTransfer?.messageText}</div>
       <div class="text-sm text-muted-foreground">{m['wallet.transferred.date_sent']()}</div>
-      <div class="mb-2 break-all font-bold">{formatDateTime($walletItem.transferredAt ?? '')}</div>
+      <div class="mb-2 break-all font-bold">
+        {formatDateTime($walletItem.transferStartedAt ?? '')}
+      </div>
     </div>
 
     <!-- How To Redeem -->

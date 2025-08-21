@@ -156,7 +156,7 @@
         console.log('Item added to cart:', result.object);
         toast.success(
           m['marketplace.add_to_cart_success']({
-            amount: `$${denomination.amount / 1000}`,
+            amount: `${denomination.amount / 1000}`,
             vendor: brand?.name || m['marketplace.buy_gift_card'](),
           }),
         );
@@ -242,7 +242,7 @@
     {#if walletItem && !hideActions}
       <div class="flex items-center border-b bg-gray-50 px-4 py-2">
         <div class="flex gap-2">
-          {#if walletItem.transferredAt == null || undefined}
+          {#if walletItem.transferStartedAt == null || undefined}
             <div class="flex flex-col items-center">
               <Button
                 variant="ghost"
@@ -261,7 +261,7 @@
               <span class="text-xs text-gray-500">{m['wallet.gift-card.brand']()}</span>
             </div>
           {/if}
-          {#if walletItem.transferredAt == null || undefined}
+          {#if walletItem.transferStartedAt == null || undefined}
             <div class="flex flex-col items-center">
               <Button variant="ghost" size="icon" onclick={handlePrintPdf}
                 ><Printer aria-label="Print" /></Button

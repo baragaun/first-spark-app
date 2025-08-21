@@ -32,13 +32,14 @@
       return $walletItemsStore.filter(
         (item) =>
           item.archivedAt == null &&
-          item.transferredAt == null &&
+          item.transferStartedAt == null &&
           item.name.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     } else if (activeTab === 'Transferred') {
       return $walletItemsStore.filter(
         (item) =>
-          item.transferredAt != null && item.name.toLowerCase().includes(searchQuery.toLowerCase()),
+          item.transferStartedAt != null &&
+          item.name.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     } else {
       return $walletItemsStore.filter(
@@ -75,7 +76,7 @@
 
   function navigateToGiftCardDetail(walletItem: WalletItem) {
     if (!walletItem.id) return;
-    if (walletItem.transferredAt == null) goto(`/wallet/${walletItem.id}`);
+    if (walletItem.transferStartedAt == null) goto(`/wallet/${walletItem.id}`);
     else goto(`/wallet/transferred/${walletItem.id}`);
   }
 

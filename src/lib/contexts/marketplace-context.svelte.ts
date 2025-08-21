@@ -365,7 +365,7 @@ export class MarketplaceContext {
       isLoading = true;
       const response = await this.client.operations.walletItem.updateWalletItem({
         id,
-        transferredAt: null,
+        transferStartedAt: null,
       });
       if (!response || response.error) {
         console.error('updateWalletItem: received error.', { response });
