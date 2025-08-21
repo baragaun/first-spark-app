@@ -22,6 +22,7 @@
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
   import { walletItemsStore } from '@/stores/wallet-store';
   import { derived } from 'svelte/store';
+  import { page } from '$app/stores';
 
   const DEBOUNCE_DELAY = 350;
 
@@ -72,7 +73,7 @@
     message?: string,
   ) => {
     console.log(walletItem);
-    const attachmentLink = `http://localhost:5173/wallet/gifted-card/${transferSlug}`;
+    const attachmentLink = `${$page.url.origin}/wallet/gifted-card/${transferSlug}`;
     const subject = encodeURIComponent(`${myUserContext.myUser?.userHandle} sent you a gift card`);
     const expiresAt = $walletItem?.expiresAt ? `Expiry Date: ${$walletItem?.expiresAt}` : '';
     const balance = $walletItem?.balance ? ($walletItem?.balance / 1000).toFixed(0) : 0;

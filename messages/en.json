@@ -392,5 +392,13 @@
       "message_max_length": "Message must contain at most 500 character(s)"
     },
     "received_gift_card": "Received Gift Card"
+  },
+  "gifted_card": {
+    "accept": "Accept",
+    "decline": "Decline",
+    "decline_success": "You have declined the gift-card!",
+    "modal_title": "Please enter your pin to accept it.",
+    "pin_placeholder": "Enter PIN/secret",
+    "submit": "Submit"
   }
 }

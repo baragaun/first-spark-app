@@ -388,5 +388,13 @@
       "message_max_length": "Die Nachricht darf maximal 500 Zeichen enthalten"
     },
     "received_gift_card": "Ontvangen cadeaubon"
+  },
+  "gifted_card": {
+    "accept": "Akzeptieren",
+    "decline": "Ablehnen",
+    "decline_success": "Du hast die Geschenkkarte abgelehnt!",
+    "modal_title": "Bitte gib deine PIN ein, um sie anzunehmen.",
+    "pin_placeholder": "PIN/Geheimcode eingeben",
+    "submit": "Absenden"
   }
 }
