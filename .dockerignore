@@ -1,0 +1,34 @@
+node_modules
+npm-debug.log*
+.npm
+.env
+.env.local
+.svelte-kit
+.output
+.vercel
+.netlify
+dist
+build
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+README.md
+
+# Docker
+Dockerfile
+.dockerignore
+
+# IDE
+.vscode
+.idea
+
+# Testing
+coverage
+.nyc_output
+
+# Logs
+logs
+*.log
