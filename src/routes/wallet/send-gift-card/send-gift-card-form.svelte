@@ -100,6 +100,12 @@
     window.location.href = mailto;
   };
 
+  function getSecureCode() {
+    const array = new Uint32Array(1);
+    crypto.getRandomValues(array);
+    return (array[0] % 1000000).toString().padStart(6, "0");
+  }
+
   const handleFormSubmit = async () => {
     const result = await validateForm({ update: true, focusOnError: true });
     if (!result.valid) {
@@ -107,20 +113,25 @@
       return;
     }
 
+    const transferSecret = getSecureCode();
+
     const response = await marketplaceContext.createWalletItemTransfer({
+      transferSecret,
       walletItemId: data.walletItemId,
       recipientFullName: $formData.recipientFullName,
       recipientEmail: $formData.recipientEmail,
       messageText: $formData.message,
     });
 
-    if (response.error || !response.object?.transferSecret || !response.object?.transferSlug) {
+    console.log('createWalletItemTransfer response:', response);
+
+    if (response.error || !response.object?.transferSlug) {
       return;
     }
 
     sendEmail(
       response.object.transferSlug,
-      response.object.transferSecret,
+      transferSecret,
       $formData.recipientEmail,
       $formData.recipientFullName,
       $formData.message,

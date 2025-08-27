@@ -559,7 +559,7 @@ export class MarketplaceContext {
     }
   }
 
-  async declineWalletItemTransfer(transferSlug: string): Promise<QueryResult<ServiceRequest>> {
+  async declineWalletItemTransfer(transferSlug: string): Promise<QueryResult<WalletItem>> {
     if (!this.client.isInitialized) {
       console.error('MarketplaceContext.declineWalletItemTransfer: not initialized.');
       return { error: translate(AppUiMessage.systemError) };
