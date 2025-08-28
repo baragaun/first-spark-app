@@ -540,8 +540,8 @@ export class MarketplaceContext {
     try {
       isLoading = true;
       const response = await this.client.operations.walletItemTransfer.acceptWalletItemTransfer(
-        secretCode,
         transferSlug,
+        secretCode,
       );
       if (!response || response.error) {
         console.error('acceptWalletItemTransfer: received error.', { response });
