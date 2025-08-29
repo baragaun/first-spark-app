@@ -9,6 +9,7 @@
   import { m } from '@/paraglide/messages';
   import { onMount } from 'svelte';
   import { toast } from 'svelte-sonner';
+  import { logger } from '@/utils/logger';
 
   let open = $state(false);
   let pin = $state('');
@@ -27,11 +28,11 @@
     if (!pin) return;
     const response = await marketplaceContext.acceptWalletItemTransfer(transferSlug, pin);
     if (response.error) {
-      console.error('Error verifying wallet item transfer:', response.error);
+      logger.error('Error verifying wallet item transfer', response.error);
       return;
     }
     if (!response.object) {
-      console.error('Error verifying wallet item transfer: no object');
+      logger.error('Error verifying wallet item transfer: no object');
       return;
     }
 
@@ -42,7 +43,7 @@
   async function declineWalletItemTransfer() {
     const response = await marketplaceContext.declineWalletItemTransfer(transferSlug);
     if (response.error) {
-      console.error('Error verifying wallet item transfer:', response.error);
+      logger.error('Error verifying wallet item transfer', response.error);
       return;
     }
     toast.success(m['gifted_card.decline_success']());
@@ -52,7 +53,7 @@
     const response = await marketplaceContext.findWalletItemByTransferSlug(transferSlug);
 
     if (typeof response === 'string') {
-      console.error('Failed to load wallet item:', response);
+      logger.error('Failed to load wallet item', response);
       return;
     }
 
