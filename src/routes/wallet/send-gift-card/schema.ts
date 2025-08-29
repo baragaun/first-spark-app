@@ -9,6 +9,4 @@ export const sendGiftCardSchema = z.object({
   message: z.string().max(500, m['send_gift_card.error.message_max_length']()),
 });
 
-//export type SendGiftCardSchema = typeof sendGiftCardSchema;
-
 export type SendGiftCardSchema = z.infer<typeof sendGiftCardSchema>;
