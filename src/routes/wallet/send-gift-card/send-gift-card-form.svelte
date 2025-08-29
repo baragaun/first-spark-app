@@ -103,7 +103,7 @@
   function getSecureCode() {
     const array = new Uint32Array(1);
     crypto.getRandomValues(array);
-    return (array[0] % 1000000).toString().padStart(6, "0");
+    return (array[0] % 1000000).toString().padStart(6, '0');
   }
 
   const handleFormSubmit = async () => {

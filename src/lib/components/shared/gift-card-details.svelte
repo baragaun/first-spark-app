@@ -22,6 +22,7 @@
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { toast } from 'svelte-sonner';
   import { page } from '$app/state';
+  import { image } from '@nextui-org/react';
 
   interface Props {
     walletItem: WalletItem | null;
@@ -54,6 +55,7 @@
 
   let instructions = $derived(product?.instructionsEn ?? walletItem?.instructionsEn);
   let terms = $derived(product?.termsEn ?? walletItem?.termsEn);
+  let imageSourceFront = $derived(product?.imageSourceFront ?? walletItem?.imageSourceFront);
 
   onMount(async () => {
     if ($dataLoaded) {
@@ -232,9 +234,7 @@
     <!-- Gift Card Image -->
     <div class="my-2 flex justify-center">
       <img
-        src={giftCardImageDomain +
-          '/giftcards/' +
-          (product?.imageSourceFront ?? walletItem?.imageSourceFront)}
+        src={giftCardImageDomain + '/giftcards/' + imageSourceFront}
         alt={product?.name}
         class="aspect-[16/9] w-full max-w-md rounded-2xl object-contain shadow-lg"
         onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
