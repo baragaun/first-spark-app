@@ -92,10 +92,7 @@
         $formData.currentPassword,
       );
 
-      if (
-        verifyMyPasswordResponse.object === false ||
-        verifyMyPasswordResponse.object?.toString() === 'false'
-      ) {
+      if (verifyMyPasswordResponse.object?.toString() === 'false') {
         console.error('Incorrect password', { verifyMyPasswordResponse });
         updateFormErrors('currentPassword', m['setting.password.error.incorrect']());
         return false;
