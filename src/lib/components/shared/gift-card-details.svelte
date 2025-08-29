@@ -52,6 +52,9 @@
   let isBarcodeViewOpen = $state(false);
   let brand = $state<Brand | null>(null);
 
+  let instructions = $derived(product?.instructionsEn ?? walletItem?.instructionsEn);
+  let terms = $derived(product?.termsEn ?? walletItem?.termsEn);
+
   onMount(async () => {
     if ($dataLoaded) {
       brand =
@@ -407,34 +410,34 @@
 
     {#if selectedTab === 'info'}
       <div class="px-2 py-4">
-        {#if product?.instructionsEn ?? walletItem?.instructionsEn}
+        {#if instructions}
           <div class="mb-6">
             <h2 class="text-400 mb-2 text-lg font-semibold text-secondary-foreground">
               {m['wallet.gift-card.how_to_redeem']()}
             </h2>
-            {#if (product?.instructionsEn ?? walletItem?.instructionsEn)?.trim().startsWith('<')}
+            {#if instructions?.trim().startsWith('<')}
               <p class="mb-2">
-                {@html product?.instructionsEn ?? walletItem?.instructionsEn}
+                {@html instructions}
               </p>
             {:else}
               <p class="mb-2">
-                {product?.instructionsEn ?? walletItem?.instructionsEn}
+                {instructions}
               </p>
             {/if}
           </div>
         {/if}
-        {#if product?.termsEn ?? walletItem?.termsEn}
+        {#if terms}
           <div>
             <h2 class="text-400 mb-2 text-lg font-semibold text-secondary-foreground">
               {m['wallet.gift-card.terms_and_conditions']()}
             </h2>
-            {#if (product?.instructionsEn ?? walletItem?.termsEn)?.trim().startsWith('<')}
+            {#if terms?.trim().startsWith('<')}
               <p class="mb-2">
-                {@html product?.termsEn ?? walletItem?.termsEn}
+                {@html terms}
               </p>
             {:else}
               <p class="mb-2">
-                {product?.termsEn ?? walletItem?.termsEn}
+                {terms}
               </p>
             {/if}
           </div>
