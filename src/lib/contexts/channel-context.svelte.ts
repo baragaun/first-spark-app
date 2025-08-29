@@ -35,7 +35,7 @@ export class ChannelContext {
         options: {},
       };
       const participantLimit = 2;
-      const response = await this.client.operations.channel.findMyChannels(
+      const response = await this.client.operations.channel.findMyChannelsV2(
         participantLimit,
         true,
         input.options,
@@ -181,7 +181,7 @@ export class ChannelContext {
     try {
       isChannelLoading = true;
       const response =
-        await this.client.operations.channelParticipant.deleteChannelParticipant(participantId);
+        await this.client.operations.channelParticipant.deleteChannelParticipant(participantId, true);
       if (!response || response.error) {
         console.error('DeleteChannel: received error.', { response });
         return response.error || translate(AppUiMessage.systemError);
@@ -295,7 +295,7 @@ export class ChannelContext {
     }
     try {
       isChannelLoading = true;
-      const response = await this.client.operations.channelMessage.deleteChannelMessage(id);
+      const response = await this.client.operations.channelMessage.deleteChannelMessage(id, true);
       if (!response || response.error) {
         console.error('DeleteChannelMessage: received error.', { response });
         return response.error || translate(AppUiMessage.systemError);

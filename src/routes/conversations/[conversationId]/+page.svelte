@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/state';
-  import { onMount } from 'svelte';
+  import { onMount, tick } from 'svelte';
   import ChatHeader from '../components/chat-header.svelte';
   import MessageList from '../components/message-list.svelte';
   import MessageInput from '../components/message-input.svelte';
@@ -10,6 +10,7 @@
   import { channelContext } from '@/contexts/channel-context.svelte';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import type { ContactDetails } from '@/helpers/types';
+  import { subscribeToChannel } from './nats-client';
 
   const channelId = page.params.conversationId;
 
@@ -68,16 +69,16 @@
   onMount(async () => {
     if (channelContext.selectedChannel) {
       setContactInfo(channelContext.selectedChannel);
-      initializeChannel();
     } else {
       const response = await channelContext.findChannelById(channelId);
       console.log('FindChannelById: response:', response);
       if (response && typeof response !== 'string') {
         channelContext.selectChannel(response);
         setContactInfo(response);
-        initializeChannel();
       }
     }
+    initializeChannel();
+    connectChannel(channelId);
   });
 
   const handleScrollToBottomEvent = (event: CustomEvent<() => void>) => {
@@ -97,6 +98,7 @@
     }
     messages = [...messages, response];
     replyingTo = null;
+    await tick();
     scrollToBottomFn?.();
   };
 
@@ -131,6 +133,22 @@
     }
     messages = messages.filter((message) => message.id !== id);
   };
+
+  const connectChannel = async (channelId: string) =>{
+  await subscribeToChannel(channelId, async (msg, opr) => {
+    console.log('Received message:', msg, opr);
+    if (opr === 'created' && msg.createdBy != myUserContext.myUserId) {
+      messages = [...messages, msg];
+      await tick();
+      scrollToBottomFn?.();
+    } else if (opr === 'updated') {
+      messages = messages.map((m) => (m.id === msg.id ? msg : m));
+    } else if (opr === 'deleted') {
+      messages = messages.filter((m) => m.id !== msg.id);
+    }
+  });
+}
+
 </script>
 
 <div class="flex h-full flex-col overflow-hidden">

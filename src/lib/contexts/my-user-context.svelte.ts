@@ -34,6 +34,7 @@ export class MyUserContext {
       },
       onSignedOut: () => {
         isSignedIn = false;
+        client.close();
       },
       onMyUserUpdated: (updatedMyUser) => {
         myUser = updatedMyUser;
@@ -46,6 +47,10 @@ export class MyUserContext {
     } catch (error) {
       console.error('MyUserContext: Error initializing BgNodeClient:', { error });
     } finally {
+      if (isSignedIn) {
+        console.log('Initializing NATS client');
+        client.initNatsClient();
+      }
       isLoading = false;
     }
   }
@@ -536,7 +541,7 @@ export class MyUserContext {
 
     if (!this.myUser.isEmailVerified) {
       return 2;
-    } else if (!this.myUser.passwordUpdatedAt) {
+    } else if (!this.myUser.passwordHash) {
       return 3;
     }
 
