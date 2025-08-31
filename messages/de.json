@@ -305,6 +305,11 @@
     "active": "Aktiv",
     "archive": "Archiv",
     "search": "Brieftasche durchsuchen",
+    "tabs": {
+      "active": "Active",
+      "gifted": "Gifted",
+      "archived": "Archived"
+    },
     "gift-card": {
       "title": "Geschenkkarte",
       "subtitle": "Ihre Geschenkkarten",
@@ -327,7 +332,7 @@
       "terms_and_conditions": "Allgemeine Geschäftsbedingungen",
       "visit_online": "ONLINE BESUCHEN"
     },
-    "transferred": {
+    "gifted": {
       "recipient_details": "Empfängerdetails",
       "name": "Name",
       "email": "E-Mail",

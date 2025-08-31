@@ -2,7 +2,6 @@
   import { Plus, Minus } from 'lucide-svelte';
   import { goto } from '$app/navigation';
   import { Button } from '$lib/components/ui/button';
-  import { onMount } from 'svelte';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
   import {
     type GiftCardProduct,
@@ -11,10 +10,10 @@
     type PurchaseOrder,
     ShoppingCartItem,
   } from '@baragaun/bg-node-client';
-  import { writable, derived } from 'svelte/store';
+  import { writable } from 'svelte/store';
   import { toast } from 'svelte-sonner';
   import placeholderImage from '../../assets/images/placeholder.png';
-  import { giftCardProductsStore, brandsStore, dataLoaded } from '$lib/stores/marketplace-store';
+  import { loadMarketplaceData, getMarketplaceData } from '$lib/stores/marketplace-store';
   import {
     AlertDialog,
     AlertDialogAction,
@@ -27,7 +26,17 @@
   import { m } from '@/paraglide/messages';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { giftCardImageDomain } from '$lib/constants';
-  import { orderHistoryStore, orderHistoryLoaded } from '@/stores/order-history';
+  import { getPurchaseOrdersStore } from '$lib/stores/order-history';
+
+  const purchaseOrdersStore = getPurchaseOrdersStore();
+
+  const {
+    brands,
+    products,
+    // todo: use these:
+    // loading,
+    // userErrorMessage,
+  } = getMarketplaceData();
 
   let cartItems = $state<ShoppingCartItem[]>([]);
   let total = $derived.by(() =>
@@ -128,43 +137,31 @@
         console.error('Error creating purchase order:', result.error);
         toast.error(`Failed to create purchase order: ${result.error}`);
       } else {
-        toast.success('Purchase order created!');
+        // toast.success('Purchase has been placed!');
         // Clear the cart
         cartItems = [];
         showOrderPlacedDialog = true;
-        orderHistoryStore.set(null);
-        orderHistoryLoaded.set(false);
+        purchaseOrdersStore.reset();
       }
     });
   }
 
-  function goBack() {
-    history.back();
-  }
+  // Not used?
+  // function goBack() {
+  //   history.back();
+  // }
 
   function findProductAndBrand(
     productId: string,
   ): [GiftCardProduct | undefined, Brand | undefined] {
-    const product = $giftCardProductsStore.find((product) => product.id === productId);
-    const brand = $brandsStore.find((b) => b.id === product?.brandId);
+    const product = products.find(product => product.id === productId);
+    const brand = brands.find(b => b.id === product?.brandId);
     return [product, brand];
   }
 
   const shoppingCart = writable<ShoppingCart | null | undefined>(undefined);
 
-  onMount(async () => {
-    // fetch product data if not loaded
-    if (!$dataLoaded) {
-      const giftCardsResponse = await marketplaceContext.findGiftCardProducts();
-      giftCardProductsStore.set(giftCardsResponse as GiftCardProduct[]);
-
-      const brandsResponse = await marketplaceContext.findBrands();
-      brandsStore.set(brandsResponse as Brand[]);
-
-      dataLoaded.set(true);
-    }
-
-    // Fetch shopping cart data
+  const loadShoppingCart = async () => {
     const cartResult = await marketplaceContext.findMyShoppingCart();
 
     if (typeof cartResult === 'string') {
@@ -178,6 +175,26 @@
     } else {
       shoppingCart.set(null); // No cart found
     }
+  };
+
+  const handleImageError = (node: HTMLImageElement) => {
+    const onError = (e: Event) => {
+      (e.currentTarget as HTMLImageElement).src = placeholderImage;
+    };
+
+    node.addEventListener('error', onError);
+
+    return {
+      destroy() {
+        node.removeEventListener('error', onError);
+      }
+    };
+  };
+
+  // Load on mount
+  $effect(() => {
+    loadMarketplaceData().catch(console.error);
+    loadShoppingCart().catch(console.error);
   });
 </script>
 
@@ -185,7 +202,7 @@
   <!-- Top Bar -->
   <header class="mb-6 px-3 pt-3">
     <h1 class="text-3xl font-bold text-foreground">{m['cart.title']()}</h1>
-    <p class="mt-2 text-muted-foreground">{m['cart.subtitle']()}</p>
+<!--    <p class="mt-2 text-muted-foreground">{m['cart.subtitle']()}</p>-->
   </header>
 
   <div class="container mx-auto flex-1 px-4 py-6">
@@ -214,7 +231,7 @@
                 src={giftCardImageDomain + '/giftcards/' + product?.imageSourceFront}
                 alt={''}
                 class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
-                onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
+                use:handleImageError
               />
             </div>
             <div class="flex flex-col">

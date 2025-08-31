@@ -11,4 +11,4 @@
   });
 </script>
 
-<GiftCardDetails walletItem={$walletItem} giftCardItem={null} />
+<GiftCardDetails walletItem={$walletItem} product={null} />

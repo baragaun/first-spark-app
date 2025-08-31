@@ -307,6 +307,11 @@
     "active": "Active",
     "archive": "Archive",
     "search": "Search wallet",
+    "tabs": {
+      "active": "Active",
+      "gifted": "Gifted",
+      "archived": "Archived"
+    },
     "gift-card": {
       "title": "Gift Card",
       "subtitle": "Your gift cards",
@@ -329,7 +334,7 @@
       "terms_and_conditions": "Terms And Conditions",
       "visit_online": "VISIT ONLINE"
     },
-    "transferred": {
+    "gifted": {
       "recipient_details": "Recipient Details",
       "name": "Name",
       "email": "Email",
@@ -337,7 +342,7 @@
       "date_sent": "Date sent",
       "gift_was_accepted": "Gift Was Accepted",
       "active": "active",
-      "transferred": "transferred",
+      "gifted": "gifted",
       "no_items_found": "No items found"
     }
   },

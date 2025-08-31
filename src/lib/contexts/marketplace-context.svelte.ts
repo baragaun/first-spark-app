@@ -12,6 +12,7 @@ import {
   ShoppingCartItem,
   WalletItem,
   WalletItemTransfer,
+  WalletItemTransferAcceptInfo,
   type QueryResult,
 } from '@baragaun/bg-node-client';
 import { myUserContext } from './my-user-context.svelte';
@@ -21,109 +22,86 @@ let isLoading = $state(false);
 export class MarketplaceContext {
   private client = client;
 
-  async findGiftCardProducts(): Promise<GiftCardProduct[] | string | undefined> {
+  async acceptWalletItemTransfer(
+    transferSlug: string,
+    secretCode: string,
+  ): Promise<QueryResult<WalletItem>> {
     if (!this.client.isInitialized) {
-      console.error('ConversationContext.findGiftCardProducts: not initialized.');
-      return translate(AppUiMessage.systemError);
+      console.error('MarketplaceContext.acceptWalletItemTransfer: not initialized.');
+      return { error: translate(AppUiMessage.systemError) };
     }
     try {
       isLoading = true;
-      const input = {
-        filter: {},
-        match: {},
-        options: { cachePolicy: CachePolicy.network },
-        queryOptions: {},
-      };
-      const response = await this.client.operations.giftCardProduct.findGiftCardProducts(
-        input.filter,
-        input.match,
-        null,
-        input.queryOptions,
-        input.options,
+      const response = await this.client.operations.walletItemTransfer.acceptWalletItemTransfer(
+        transferSlug,
+        secretCode,
       );
-      if (!response || response.error || !response.objects) {
-        console.error('findGiftCardProducts: received error.', { response });
-        return response.error || translate(AppUiMessage.systemError);
+      if (!response || response.error) {
+        console.error('acceptWalletItemTransfer: received error.', { response });
+        return { error: response.error || translate(AppUiMessage.systemError) };
       }
-      return response.objects;
+      return response;
     } catch (error) {
-      console.error('findGiftCardProducts: error', {
+      console.error('acceptWalletItemTransfer: error', {
         error: (error as Error).message,
         stack: (error as Error).stack,
       });
-      return translate(AppUiMessage.systemError);
+      return { error: translate(AppUiMessage.systemError) };
     } finally {
       isLoading = false;
     }
   }
 
-  async findBrands(): Promise<Brand[] | string | undefined> {
+  async archiveWalletItem(id: string, archived: boolean): Promise<QueryResult<WalletItem>> {
     if (!this.client.isInitialized) {
-      console.error('ConversationContext.findBrands: not initialized.');
-      return translate(AppUiMessage.systemError);
+      console.error('MarketplaceContext.archiveWalletItem: not initialized.');
+      return { error: translate(AppUiMessage.systemError) };
     }
     try {
       isLoading = true;
-      const input = {
-        filter: {},
-        match: {},
-        options: { cachePolicy: CachePolicy.network },
-        queryOptions: {},
-      };
-      const response = await this.client.operations.brand.findBrands(
-        input.filter,
-        input.match,
-        null,
-        input.queryOptions,
-        input.options,
-      );
-      if (!response || response.error || !response.objects) {
-        console.error('findBrands: received error.', { response });
-        return response.error || translate(AppUiMessage.systemError);
+      const response = await this.client.operations.walletItem.updateWalletItem({
+        id,
+        archivedAt: archived ? new Date().toISOString() : null,
+      });
+
+      if (!response || response.error) {
+        console.error('archiveWalletItem: received error.', { response });
+        return { error: response.error || translate(AppUiMessage.systemError) };
       }
-      return response.objects;
+      return response;
     } catch (error) {
-      console.error('findBrands: error', {
+      console.error('archiveWalletItem: error', {
         error: (error as Error).message,
         stack: (error as Error).stack,
       });
-      return translate(AppUiMessage.systemError);
+      return { error: translate(AppUiMessage.systemError) };
     } finally {
       isLoading = false;
     }
   }
 
-  async findProductCategories(): Promise<ProductCategory[] | string | undefined> {
+  async createPurchaseOrder(
+    props: Partial<PurchaseOrder>, // Replace 'any' with the correct type if available
+  ): Promise<QueryResult<PurchaseOrder>> {
+    // Replace 'any' with PurchaseOrder if you have the type
     if (!this.client.isInitialized) {
-      console.error('ConversationContext.findProductCategories: not initialized.');
-      return translate(AppUiMessage.systemError);
+      console.error('MarketplaceContext.createPurchaseOrder: not initialized.');
+      return { error: translate(AppUiMessage.systemError) };
     }
     try {
       isLoading = true;
-      const input = {
-        filter: {},
-        match: {},
-        options: { cachePolicy: CachePolicy.network },
-        queryOptions: {},
-      };
-      const response = await this.client.operations.productCategory.findProductCategories(
-        null,
-        null,
-        null,
-        input.queryOptions,
-        input.options,
-      );
-      if (!response || response.error || !response.objects) {
-        console.error('findProductCategories: received error.', { response });
-        return response.error || translate(AppUiMessage.systemError);
+      const response = await this.client.operations.purchaseOrder.createPurchaseOrder(props);
+      if (!response || response.error) {
+        console.error('createPurchaseOrder: received error.', { response });
+        return { error: response.error || translate(AppUiMessage.systemError) };
       }
-      return response.objects;
+      return response;
     } catch (error) {
-      console.error('findProductCategories: error', {
+      console.error('createPurchaseOrder: error', {
         error: (error as Error).message,
         stack: (error as Error).stack,
       });
-      return translate(AppUiMessage.systemError);
+      return { error: translate(AppUiMessage.systemError) };
     } finally {
       isLoading = false;
     }
@@ -157,21 +135,72 @@ export class MarketplaceContext {
     }
   }
 
-  async updateShoppingCartItem(props: ShoppingCartItem): Promise<QueryResult<ServiceRequest>> {
+  async createWalletItem(props: Partial<WalletItem>): Promise<QueryResult<WalletItem>> {
     if (!this.client.isInitialized) {
-      console.error('MarketplaceContext.updateShoppingCartItem: not initialized.');
+      console.error('MarketplaceContext.createWalletItem: not initialized.');
       return { error: translate(AppUiMessage.systemError) };
     }
     try {
       isLoading = true;
-      const response = await this.client.operations.shoppingCartItem.updateShoppingCartItem(props);
+      const response = await this.client.operations.walletItem.createWalletItem(props);
       if (!response || response.error) {
-        console.error('updateShoppingCartItem: received error.', { response });
+        console.error('createWalletItem: received error.', { response });
         return { error: response.error || translate(AppUiMessage.systemError) };
       }
       return response;
     } catch (error) {
-      console.error('updateShoppingCartItem: error', {
+      console.error('createWalletItem: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return { error: translate(AppUiMessage.systemError) };
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  async createWalletItemTransfer(
+    props: Partial<WalletItemTransfer>,
+  ): Promise<QueryResult<WalletItemTransfer>> {
+    if (!this.client.isInitialized) {
+      console.error('MarketplaceContext.createWalletItemTransfer: not initialized.');
+      return { error: translate(AppUiMessage.systemError) };
+    }
+    try {
+      isLoading = true;
+      const response =
+        await this.client.operations.walletItemTransfer.createWalletItemTransfer(props);
+      if (!response || response.error) {
+        console.error('createWalletItemTransfer: received error.', { response });
+        return { error: response.error || translate(AppUiMessage.systemError) };
+      }
+      return response;
+    } catch (error) {
+      console.error('createWalletItemTransfer: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return { error: translate(AppUiMessage.systemError) };
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  async declineWalletItemTransfer(transferSlug: string): Promise<QueryResult<WalletItem>> {
+    if (!this.client.isInitialized) {
+      console.error('MarketplaceContext.declineWalletItemTransfer: not initialized.');
+      return { error: translate(AppUiMessage.systemError) };
+    }
+    try {
+      isLoading = true;
+      const response = await this.client.operations.walletItemTransfer.declineWalletItemTransfer(transferSlug);
+      if (!response || response.error) {
+        console.error('declineWalletItemTransfer: received error.', { response });
+        return { error: response.error || translate(AppUiMessage.systemError) };
+      }
+      return response;
+    } catch (error) {
+      console.error('declineWalletItemTransfer: error', {
         error: (error as Error).message,
         stack: (error as Error).stack,
       });
@@ -208,6 +237,103 @@ export class MarketplaceContext {
     }
   }
 
+  async findBrand(id: string): Promise<Brand | string | undefined> {
+    if (!this.client.isInitialized) {
+      console.error('MarketplaceContext.findBrand: not initialized.');
+      return translate(AppUiMessage.systemError);
+    }
+
+    try {
+      isLoading = true;
+
+      const response = await this.client.operations.brand.findBrandById(
+        id,
+        {},
+        { cachePolicy: CachePolicy.cacheFirst },
+      );
+
+      if (!response || response.error || !response.object) {
+        console.error('findBrand: received error.', { response });
+        return response.error || translate(AppUiMessage.systemError);
+      }
+
+      return response.object;
+    } catch (error) {
+      console.error('findBrand: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return translate(AppUiMessage.systemError);
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  async findBrands(): Promise<Brand[] | string | undefined> {
+    if (!this.client.isInitialized) {
+      console.error('MarketplaceContext.findBrands: not initialized.');
+      return translate(AppUiMessage.systemError);
+    }
+    try {
+      isLoading = true;
+
+      const response = await this.client.operations.brand.findBrands(
+        undefined,
+        undefined,
+        undefined,
+        { },
+        { cachePolicy: CachePolicy.cacheFirst },
+      );
+
+      if (!response || response.error || !response.objects) {
+        console.error('findBrands: received error.', { response });
+        return response.error || translate(AppUiMessage.systemError);
+      }
+      return response.objects;
+    } catch (error) {
+      console.error('findBrands: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return translate(AppUiMessage.systemError);
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  async findGiftCardProducts(): Promise<GiftCardProduct[] | string | undefined> {
+    if (!this.client.isInitialized) {
+      console.error('MarketplaceContext.findGiftCardProducts: not initialized.');
+      return translate(AppUiMessage.systemError);
+    }
+    try {
+      isLoading = true;
+
+      const response = await this.client.operations.giftCardProduct.findGiftCardProducts(
+        undefined,
+        undefined,
+        undefined,
+        {},
+        { cachePolicy: CachePolicy.network },
+      );
+
+      if (!response || response.error || !response.objects) {
+        console.error('findGiftCardProducts: received error.', { response });
+        return response.error || translate(AppUiMessage.systemError);
+      }
+
+      return response.objects;
+    } catch (error) {
+      console.error('findGiftCardProducts: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return translate(AppUiMessage.systemError);
+    } finally {
+      isLoading = false;
+    }
+  }
+
   async findMyShoppingCart(): Promise<ShoppingCart | null | string | undefined> {
     if (!this.client.isInitialized) {
       console.error('MarketplaceContext.findShoppingCartItems: not initialized.');
@@ -232,28 +358,33 @@ export class MarketplaceContext {
     }
   }
 
-  async createPurchaseOrder(
-    props: Partial<PurchaseOrder>, // Replace 'any' with the correct type if available
-  ): Promise<QueryResult<PurchaseOrder>> {
-    // Replace 'any' with PurchaseOrder if you have the type
+  async findProductCategories(): Promise<ProductCategory[] | string | undefined> {
     if (!this.client.isInitialized) {
-      console.error('MarketplaceContext.createPurchaseOrder: not initialized.');
-      return { error: translate(AppUiMessage.systemError) };
+      console.error('MarketplaceContext.findProductCategories: not initialized.');
+      return translate(AppUiMessage.systemError);
     }
     try {
       isLoading = true;
-      const response = await this.client.operations.purchaseOrder.createPurchaseOrder(props);
-      if (!response || response.error) {
-        console.error('createPurchaseOrder: received error.', { response });
-        return { error: response.error || translate(AppUiMessage.systemError) };
+
+      const response = await this.client.operations.productCategory.findProductCategories(
+        undefined,
+        undefined,
+        undefined,
+        {},
+        { cachePolicy: CachePolicy.network },
+      );
+
+      if (!response || response.error || !response.objects) {
+        console.error('findProductCategories: received error.', { response });
+        return response.error || translate(AppUiMessage.systemError);
       }
-      return response;
+      return response.objects;
     } catch (error) {
-      console.error('createPurchaseOrder: error', {
+      console.error('findProductCategories: error', {
         error: (error as Error).message,
         stack: (error as Error).stack,
       });
-      return { error: translate(AppUiMessage.systemError) };
+      return translate(AppUiMessage.systemError);
     } finally {
       isLoading = false;
     }
@@ -266,26 +397,80 @@ export class MarketplaceContext {
     }
     try {
       isLoading = true;
-      const input = {
-        filter: {},
-        match: { createdBy: myUserContext.myUserId },
-        options: { cachePolicy: CachePolicy.network },
-        queryOptions: {},
-      };
+
       const response = await this.client.operations.purchaseOrder.findPurchaseOrders(
-        input.filter,
-        input.match,
+        undefined,
+        { createdBy: myUserContext.myUserId },
         null,
-        input.queryOptions,
-        input.options,
+        {},
+        { cachePolicy: CachePolicy.network },
       );
+
       if (!response || response.error || !response.objects) {
         console.error('findPurchaseOrders: received error.', { response });
         return response.error || translate(AppUiMessage.systemError);
       }
+
       return response.objects;
     } catch (error) {
       console.error('findPurchaseOrders: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return translate(AppUiMessage.systemError);
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  async findWalletItemByTransferSlug(
+    transferSlug: string,
+  ): Promise<WalletItem | string | undefined> {
+    if (!this.client.isInitialized) {
+      console.error('MarketplaceContext.findWalletItemByTransferSlug: not initialized.');
+      return translate(AppUiMessage.systemError);
+    }
+    try {
+      isLoading = true;
+      const response = await this.client.operations.walletItem.findWalletItemByTransferSlug(
+        transferSlug,
+        {},
+      );
+      if (!response || response.error || !response.object) {
+        console.error('findWalletItemByTransferSlug: received error.', { response });
+        return response.error || translate(AppUiMessage.systemError);
+      }
+      return response.object;
+    } catch (error) {
+      console.error('findWalletItemByTransferSlug: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return translate(AppUiMessage.systemError);
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  async findWalletItemTransferAcceptInfoByTransferSlug(
+    transferSlug: string,
+  ): Promise<WalletItemTransferAcceptInfo | string> {
+    if (!this.client.isInitialized) {
+      console.error('MarketplaceContext.findWalletItemTransferAcceptInfoByTransferSlug: not initialized.');
+      return translate(AppUiMessage.systemError);
+    }
+    try {
+      isLoading = true;
+      const response = await this.client.operations.walletItemTransfer.findWalletItemTransferAcceptInfoByTransferSlug(
+        transferSlug,
+      );
+      if (!response || response.error || !response.object) {
+        console.error('findWalletItemTransferAcceptInfoByTransferSlug: received error.', { response });
+        return response.error || translate(AppUiMessage.systemError);
+      }
+      return response.object;
+    } catch (error) {
+      console.error('findWalletItemTransferAcceptInfoByTransferSlug: error', {
         error: (error as Error).message,
         stack: (error as Error).stack,
       });
@@ -332,102 +517,21 @@ export class MarketplaceContext {
     }
   }
 
-  async createWalletItem(props: Partial<WalletItem>): Promise<QueryResult<WalletItem>> {
+  async updateShoppingCartItem(props: ShoppingCartItem): Promise<QueryResult<ServiceRequest>> {
     if (!this.client.isInitialized) {
-      console.error('MarketplaceContext.createWalletItem: not initialized.');
+      console.error('MarketplaceContext.updateShoppingCartItem: not initialized.');
       return { error: translate(AppUiMessage.systemError) };
     }
     try {
       isLoading = true;
-      const response = await this.client.operations.walletItem.createWalletItem(props);
+      const response = await this.client.operations.shoppingCartItem.updateShoppingCartItem(props);
       if (!response || response.error) {
-        console.error('createWalletItem: received error.', { response });
+        console.error('updateShoppingCartItem: received error.', { response });
         return { error: response.error || translate(AppUiMessage.systemError) };
       }
       return response;
     } catch (error) {
-      console.error('createWalletItem: error', {
-        error: (error as Error).message,
-        stack: (error as Error).stack,
-      });
-      return { error: translate(AppUiMessage.systemError) };
-    } finally {
-      isLoading = false;
-    }
-  }
-
-  async updateWalletItem(id: string): Promise<QueryResult<WalletItem>> {
-    if (!this.client.isInitialized) {
-      console.error('MarketplaceContext.updateWalletItem: not initialized.');
-      return { error: translate(AppUiMessage.systemError) };
-    }
-    try {
-      isLoading = true;
-      const response = await this.client.operations.walletItem.updateWalletItem({
-        id,
-        transferStartedAt: null,
-      });
-      if (!response || response.error) {
-        console.error('updateWalletItem: received error.', { response });
-        return { error: response.error || translate(AppUiMessage.systemError) };
-      }
-      return response;
-    } catch (error) {
-      console.error('updateWalletItem: error', {
-        error: (error as Error).message,
-        stack: (error as Error).stack,
-      });
-      return { error: translate(AppUiMessage.systemError) };
-    } finally {
-      isLoading = false;
-    }
-  }
-
-  async createWalletItemTransfer(
-    props: Partial<WalletItemTransfer>,
-  ): Promise<QueryResult<WalletItemTransfer>> {
-    if (!this.client.isInitialized) {
-      console.error('MarketplaceContext.createWalletItemTransfer: not initialized.');
-      return { error: translate(AppUiMessage.systemError) };
-    }
-    try {
-      isLoading = true;
-      const response =
-        await this.client.operations.walletItemTransfer.createWalletItemTransfer(props);
-      if (!response || response.error) {
-        console.error('createWalletItemTransfer: received error.', { response });
-        return { error: response.error || translate(AppUiMessage.systemError) };
-      }
-      return response;
-    } catch (error) {
-      console.error('createWalletItemTransfer: error', {
-        error: (error as Error).message,
-        stack: (error as Error).stack,
-      });
-      return { error: translate(AppUiMessage.systemError) };
-    } finally {
-      isLoading = false;
-    }
-  }
-
-  async updateWalletItemTransfer(id: string): Promise<QueryResult<WalletItemTransfer>> {
-    if (!this.client.isInitialized) {
-      console.error('MarketplaceContext.updateWalletItemTransfer: not initialized.');
-      return { error: translate(AppUiMessage.systemError) };
-    }
-    try {
-      isLoading = true;
-      const response = await this.client.operations.walletItemTransfer.updateWalletItemTransfer({
-        id,
-        canceledAt: new Date().toISOString(),
-      });
-      if (!response || response.error) {
-        console.error('updateWalletItemTransfer: received error.', { response });
-        return { error: response.error || translate(AppUiMessage.systemError) };
-      }
-      return response;
-    } catch (error) {
-      console.error('updateWalletItemTransfer: error', {
+      console.error('updateShoppingCartItem: error', {
         error: (error as Error).message,
         stack: (error as Error).stack,
       });
@@ -444,22 +548,20 @@ export class MarketplaceContext {
     }
     try {
       isLoading = true;
-      const input = {
-        filter: {},
-        match: { createdBy: myUserContext.myUserId },
-        options: { cachePolicy: CachePolicy.network },
-        queryOptions: {},
-      };
+
       const response = await this.client.operations.walletItemTransfer.findWalletItemTransfers(
-        input.filter,
-        input.match,
-        input.options,
-        input.queryOptions,
+        undefined,
+        { createdBy: myUserContext.myUserId },
+        undefined,
+        {},
+        { cachePolicy: CachePolicy.network },
       );
+
       if (!response || response.error || !response.objects) {
         console.error('findWalletItemTransfers: received error.', { response });
         return response.error || translate(AppUiMessage.systemError);
       }
+
       return response.objects;
     } catch (error) {
       console.error('findWalletItemTransfers: error', {
@@ -467,118 +569,6 @@ export class MarketplaceContext {
         stack: (error as Error).stack,
       });
       return translate(AppUiMessage.systemError);
-    } finally {
-      isLoading = false;
-    }
-  }
-
-  async archiveWalletItem(id: string, archived: boolean): Promise<QueryResult<WalletItem>> {
-    if (!this.client.isInitialized) {
-      console.error('MarketplaceContext.archiveWalletItem: not initialized.');
-      return { error: translate(AppUiMessage.systemError) };
-    }
-    try {
-      isLoading = true;
-      const response = await this.client.operations.walletItem.updateWalletItem({
-        id,
-        archivedAt: archived ? new Date().toISOString() : null,
-      });
-
-      if (!response || response.error) {
-        console.error('archiveWalletItem: received error.', { response });
-        return { error: response.error || translate(AppUiMessage.systemError) };
-      }
-      return response;
-    } catch (error) {
-      console.error('archiveWalletItem: error', {
-        error: (error as Error).message,
-        stack: (error as Error).stack,
-      });
-      return { error: translate(AppUiMessage.systemError) };
-    } finally {
-      isLoading = false;
-    }
-  }
-
-  async findWalletItemByTransferSlug(
-    transferSlug: string,
-  ): Promise<WalletItem | string | undefined> {
-    if (!this.client.isInitialized) {
-      console.error('MarketplaceContext.findWalletItemByTransferSlug: not initialized.');
-      return translate(AppUiMessage.systemError);
-    }
-    try {
-      isLoading = true;
-      const response = await this.client.operations.walletItem.findWalletItemByTransferSlug(
-        transferSlug,
-        {},
-      );
-      if (!response || response.error || !response.object) {
-        console.error('findWalletItemByTransferSlug: received error.', { response });
-        return response.error || translate(AppUiMessage.systemError);
-      }
-      return response.object;
-    } catch (error) {
-      console.error('findWalletItemByTransferSlug: error', {
-        error: (error as Error).message,
-        stack: (error as Error).stack,
-      });
-      return translate(AppUiMessage.systemError);
-    } finally {
-      isLoading = false;
-    }
-  }
-
-  async acceptWalletItemTransfer(
-    transferSlug: string,
-    secretCode: string,
-  ): Promise<QueryResult<WalletItem>> {
-    if (!this.client.isInitialized) {
-      console.error('MarketplaceContext.acceptWalletItemTransfer: not initialized.');
-      return { error: translate(AppUiMessage.systemError) };
-    }
-    try {
-      isLoading = true;
-      const response = await this.client.operations.walletItemTransfer.acceptWalletItemTransfer(
-        transferSlug,
-        secretCode,
-      );
-      if (!response || response.error) {
-        console.error('acceptWalletItemTransfer: received error.', { response });
-        return { error: response.error || translate(AppUiMessage.systemError) };
-      }
-      return response;
-    } catch (error) {
-      console.error('acceptWalletItemTransfer: error', {
-        error: (error as Error).message,
-        stack: (error as Error).stack,
-      });
-      return { error: translate(AppUiMessage.systemError) };
-    } finally {
-      isLoading = false;
-    }
-  }
-
-  async declineWalletItemTransfer(transferSlug: string): Promise<QueryResult<WalletItem>> {
-    if (!this.client.isInitialized) {
-      console.error('MarketplaceContext.declineWalletItemTransfer: not initialized.');
-      return { error: translate(AppUiMessage.systemError) };
-    }
-    try {
-      isLoading = true;
-      const response =
-        await this.client.operations.walletItemTransfer.declineWalletItemTransfer(transferSlug);
-      if (!response || response.error) {
-        console.error('declineWalletItemTransfer: received error.', { response });
-        return { error: response.error || translate(AppUiMessage.systemError) };
-      }
-      return response;
-    } catch (error) {
-      console.error('declineWalletItemTransfer: error', {
-        error: (error as Error).message,
-        stack: (error as Error).stack,
-      });
-      return { error: translate(AppUiMessage.systemError) };
     } finally {
       isLoading = false;
     }
