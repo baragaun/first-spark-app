@@ -3,64 +3,77 @@
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-  import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
-  import { onMount } from 'svelte';
   import type { GiftCardProduct, Brand, ProductCategory } from '@baragaun/bg-node-client';
   import placeholderImage from '../../assets/images/placeholder.png';
   import { goto } from '$app/navigation';
   import { m } from '@/paraglide/messages';
-  import {
-    giftCardProductsStore,
-    brandsStore,
-    productCategoriesStore,
-    dataLoaded,
-  } from '$lib/stores/marketplace-store';
+  import { loadMarketplaceData, getMarketplaceData } from '$lib/stores/marketplace-store';
   import { IsMobile } from '$lib/hooks/is-mobile.svelte';
   import { giftCardImageDomain } from '$lib/constants';
 
-  // Initialize the mobile detector
-  const isMobile = new IsMobile();
+  const {
+    brands,
+    products,
+    productCategories,
+    // todo: use these:
+    // loading,
+    // userErrorMessage,
+  } = getMarketplaceData();
 
-  let searchQuery = $state('');
+  const isMobile = new IsMobile();
+  let searchText = $state('');
   let selectedCategory = $state<ProductCategory | 'All'>('All');
 
-  function navigateToGiftCardDetail(giftCardId: string | null | undefined) {
-    if (!giftCardId) return;
-    goto(`/marketplace/${giftCardId}`);
+  function navigateToGiftCardDetail(productId: string | null | undefined) {
+    if (!productId) return;
+    goto(`/marketplace/${productId}`);
   }
 
-  let filteredGiftCardProducts = $derived(
-    $giftCardProductsStore.filter((giftCardProduct) => {
+  const filteredProducts = $derived(
+    products.filter((product: GiftCardProduct) => {
       // Filter by search query (brand name)
-      const matchesBrand = $brandsStore.some(
-        (brand) =>
-          brand.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-          brand.id === giftCardProduct.brandId,
-      );
-      // Filter by category
-      const matchesCategory =
-        selectedCategory === 'All' ||
-        giftCardProduct.categories?.includes(selectedCategory.importId);
+      if (!brands.some((brand) => brand.id === product.brandId)) {
+        return false; // Exclude products with no matching brand
+      }
 
-      const hasDenominations =
-        (giftCardProduct.denominations?.length ?? 0) > 0 ||
-        giftCardProduct.genericGiftCardId != undefined;
-      return matchesBrand && matchesCategory && hasDenominations;
-    }),
+      // Filter by selected category
+      if (selectedCategory !== 'All' && !product.categories?.includes(selectedCategory.id)) {
+        return false;
+      }
+
+      // Filter by search text
+      if (searchText.trim()) {
+        const cleanSearchText = searchText.trim().toLowerCase();
+        const productBrand = brands.find(brand => brand.id === product.brandId);
+        if (!productBrand || !productBrand.name.toLowerCase().includes(cleanSearchText)) {
+          return false;
+        }
+      }
+
+      return true;
+    })
   );
 
-  function getBrandForGiftCard(giftCardProduct: GiftCardProduct): Brand | undefined {
-    return $brandsStore.find((brand) => brand.id === giftCardProduct.brandId);
-  }
+  const getBrandForGiftCard = (giftCardProduct: GiftCardProduct): Brand | undefined =>
+    brands.find((brand) => brand.id === giftCardProduct.brandId);
 
-  onMount(async () => {
-    const giftCardsresponse = await marketplaceContext.findGiftCardProducts();
-    giftCardProductsStore.set(giftCardsresponse as GiftCardProduct[]);
-    const brandsResponse = await marketplaceContext.findBrands();
-    brandsStore.set(brandsResponse as Brand[]);
-    const productCategoriesResponse = await marketplaceContext.findProductCategories();
-    productCategoriesStore.set(productCategoriesResponse as ProductCategory[]);
-    dataLoaded.set(true);
+  const handleImageError = (node: HTMLImageElement) => {
+    const onError = (e: Event) => {
+      (e.currentTarget as HTMLImageElement).src = placeholderImage;
+    };
+
+    node.addEventListener('error', onError);
+
+    return {
+      destroy() {
+        node.removeEventListener('error', onError);
+      }
+    };
+  };
+
+  // Load on mount
+  $effect(() => {
+    loadMarketplaceData().catch(console.error);
   });
 </script>
 
@@ -81,7 +94,7 @@
           type="search"
           placeholder={m['marketplace.search_placeholder']()}
           class="search-input-override w-full rounded-full border-0 bg-background px-3 py-2 pl-10 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-          bind:value={searchQuery}
+          bind:value={searchText}
         />
       </div>
     </div>
@@ -101,7 +114,7 @@
           {/if}
         </DropdownMenu.Item>
 
-        {#each $productCategoriesStore as category}
+        {#each productCategories as category}
           <DropdownMenu.Item onclick={() => (selectedCategory = category)} class="cursor-pointer">
             {category.labelEn}
             {#if selectedCategory !== 'All' && selectedCategory.name === category.name}
@@ -116,24 +129,24 @@
   <div
     class="grid max-h-[calc(100vh-220px)] grid-cols-2 gap-4 overflow-y-auto md:grid-cols-3 lg:grid-cols-4"
   >
-    {#each filteredGiftCardProducts as giftCardProduct (giftCardProduct.id)}
-      {@const brand = getBrandForGiftCard(giftCardProduct)}
+    {#each filteredProducts as product (product.id)}
+      {@const brand = getBrandForGiftCard(product)}
       {#if brand}
         <button
           type="button"
           class="group flex flex-col items-center border-0 bg-transparent p-0 text-left transition-all duration-300 hover:scale-105 hover:opacity-90"
-          onclick={() => navigateToGiftCardDetail(giftCardProduct.id)}
-          onkeydown={(e) => e.key === 'Enter' && navigateToGiftCardDetail(giftCardProduct.id)}
+          onclick={() => navigateToGiftCardDetail(product.id)}
+          onkeydown={(e) => e.key === 'Enter' && navigateToGiftCardDetail(product.id)}
           aria-label={m['marketplace.view_gift_card_aria']({ vendor: brand.name })}
         >
           <div
             class="mb-2 aspect-[4/3] w-full overflow-hidden rounded-xl bg-card shadow-lg transition-all duration-300 group-hover:shadow-xl"
           >
             <img
-              src={giftCardImageDomain + '/giftcards/' + giftCardProduct.imageSourceFront}
+              src={giftCardImageDomain + '/giftcards/' + product.imageSourceFront}
               alt={brand.name}
               class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
-              onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
+              use:handleImageError
             />
           </div>
           <div
@@ -147,7 +160,7 @@
                   src={giftCardImageDomain + '/vendors/' + brand.logoImageSource}
                   alt=""
                   class="h-full w-full object-cover"
-                  onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
+                  use:handleImageError
                 />
               </div>
             {/if}

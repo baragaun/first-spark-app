@@ -42,32 +42,50 @@
   }
 
   async function archiveWalletItem() {
-    if (!walletItem) return;
-    marketplaceContext.archiveWalletItem(walletCardId, !$walletItem?.archivedAt).then(() => {
-      walletItemsStore.update((items) => {
-        return items.map((item) => {
-          if (item.id === $walletItem?.id) {
-            item.archivedAt = $walletItem?.archivedAt ? null : new Date().toISOString();
-          }
-          return item;
-        });
-      });
-    });
-  }
-
-  async function cancelWalletItem() {
-    if (!$walletItem) return;
-    const walletItemTransferResult = await marketplaceContext.updateWalletItemTransfer(
-      walletItemTransfer?.id ?? '',
-    );
-    if (walletItemTransferResult.error) {
-      console.error('Error cancel wallet item transfer:', walletItemTransferResult.error);
-    }
-    const result = await marketplaceContext.updateWalletItem($walletItem.id);
-    if (result.error) {
-      console.error('Error cancel wallet item transfer:', result.error);
+    if (!walletItem) {
+      console.error('No wallet item found to archive.');
       return;
     }
+
+    try {
+      await marketplaceContext.archiveWalletItem(walletCardId, !$walletItem?.archivedAt);
+
+      walletItemsStore.update((items) => items.map((item) => {
+        if (item.id === $walletItem?.id) {
+          item.archivedAt = $walletItem?.archivedAt ? null : new Date().toISOString()
+        }
+        return item
+      }));
+    } catch (error) {
+      console.error('Error archiving wallet item:', error);
+      // todo: show user error
+    }
+  }
+
+  async function declineWalletItemTransfer() {
+    if (!walletItemTransfer) {
+      console.error('No wallet item found to decline.');
+      return
+    }
+
+    if (!walletItemTransfer.transferSlug) {
+      console.error('The wallet item transfer has no transferSlug.');
+      return
+    }
+
+    try {
+      const walletItemTransferResult = await marketplaceContext.declineWalletItemTransfer(
+        walletItemTransfer.transferSlug,
+      );
+
+      if (walletItemTransferResult.error) {
+        console.error('Error declining wallet item transfer:', walletItemTransferResult.error);
+      }
+    } catch (error) {
+      console.error('Error declining wallet item transfer:', error);
+      // todo: show user error
+    }
+
     history.back();
   }
 </script>
@@ -117,7 +135,7 @@
       </div>
       {#if !$walletItem?.transferAcceptedAt}
         <div class="flex flex-col items-center">
-          <Button variant="ghost" size="icon" onclick={cancelWalletItem}>
+          <Button variant="ghost" size="icon" onclick={declineWalletItemTransfer}>
             <X aria-label="Close" />
           </Button>
           <span class="text-xs text-gray-500">{m['setting.buttons.cancel']()}</span>
@@ -126,11 +144,11 @@
 
       <span class="ml-2 flex flex-grow items-center justify-end gap-2">
         <span class="rounded border px-2 py-0.5 text-xs text-gray-600"
-          >{m['wallet.transferred.active']()}</span
+          >{m['wallet.gifted.active']()}</span
         >
         <span class="rounded border bg-gray-100 px-2 py-0.5 text-xs text-gray-600"
           >{$walletItem?.transferAcceptedAt
-            ? m['wallet.transferred.transferred']()
+            ? m['wallet.gifted.transferred']()
             : m['order_history.processing']()}</span
         >
       </span>
@@ -142,16 +160,16 @@
       <div class="mb-2 flex items-center">
         <User size={24} color="#005f61" />
         <span class="pl-2 text-lg font-semibold text-muted-foreground"
-          >{m['wallet.transferred.recipient_details']()}</span
+          >{m['wallet.gifted.recipient_details']()}</span
         >
       </div>
-      <div class="text-sm text-muted-foreground">{m['wallet.transferred.name']()}</div>
+      <div class="text-sm text-muted-foreground">{m['wallet.gifted.name']()}</div>
       <div class="mb-2 font-bold">{walletItemTransfer?.recipientFullName}</div>
-      <div class="text-sm text-muted-foreground">{m['wallet.transferred.email']()}</div>
+      <div class="text-sm text-muted-foreground">{m['wallet.gifted.email']()}</div>
       <div class="mb-2 break-all font-bold">{walletItemTransfer?.recipientEmail}</div>
-      <div class="text-sm text-muted-foreground">{m['wallet.transferred.message']()}</div>
+      <div class="text-sm text-muted-foreground">{m['wallet.gifted.message']()}</div>
       <div class="mb-2 break-all font-bold">{walletItemTransfer?.messageText}</div>
-      <div class="text-sm text-muted-foreground">{m['wallet.transferred.date_sent']()}</div>
+      <div class="text-sm text-muted-foreground">{m['wallet.gifted.date_sent']()}</div>
       <div class="mb-2 break-all font-bold">
         {formatDateTime($walletItem.transferStartedAt ?? '')}
       </div>
@@ -183,6 +201,6 @@
   </div>
 {:else}
   <div class="py-12 text-center text-muted-foreground">
-    {m['wallet.transferred.no_items_found']()}
+    {m['wallet.gifted.no_items_found']()}
   </div>
 {/if}

@@ -16,8 +16,15 @@
   import { giftCardImageDomain } from '@/constants';
   import type { WalletItem } from '@baragaun/bg-node-client';
 
+  const TabId = {
+    ACTIVE: 'active',
+    GIFTED: 'gifted',
+    ARCHIVED: 'archived',
+  }
+  type TabId = typeof TabId[keyof typeof TabId];
+
   // Tabs and wallet items
-  let activeTab = $state<string>('Active');
+  let currentTab = $state<string>(TabId.ACTIVE);
   let searchQuery = $state<string>('');
   let fileInputRef: HTMLInputElement;
   let isLoading = false;
@@ -28,14 +35,14 @@
   });
 
   let displayedItems = $derived.by(() => {
-    if (activeTab === 'Active') {
+    if (currentTab === TabId.ACTIVE) {
       return $walletItemsStore.filter(
         (item) =>
           item.archivedAt == null &&
           item.transferStartedAt == null &&
           item.name.toLowerCase().includes(searchQuery.toLowerCase()),
       );
-    } else if (activeTab === 'Transferred') {
+    } else if (currentTab === TabId.GIFTED) {
       return $walletItemsStore.filter(
         (item) =>
           item.transferStartedAt != null &&
@@ -197,7 +204,7 @@
   <div class="flex">
     <header class="mb-6">
       <h1 class="text-3xl font-bold text-foreground">{m['wallet.title']()}</h1>
-      <p class="mt-2 text-muted-foreground">{m['wallet.subtitle']()}</p>
+<!--      <p class="mt-2 text-muted-foreground">{m['wallet.subtitle']()}</p>-->
     </header>
   </div>
 
@@ -205,27 +212,27 @@
     <!-- Fixed Header Section -->
     <div class="flex-shrink-0">
       <!-- Tab Navigation -->
-      <Tabs.Root bind:value={activeTab}>
+      <Tabs.Root bind:value={currentTab}>
         <Tabs.List
           class="flex h-10 w-full items-center justify-center rounded-2xl bg-muted p-1 text-muted-foreground "
         >
           <Tabs.Trigger
-            value="Active"
+            value={TabId.ACTIVE}
             class="inline-flex flex-1 items-center justify-center whitespace-nowrap rounded-xl px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
-            {m['wallet.active']()}
+            {m['wallet.tabs.active']()}
           </Tabs.Trigger>
           <Tabs.Trigger
-            value="Archive"
+            value={TabId.GIFTED}
             class="inline-flex flex-1 items-center justify-center whitespace-nowrap rounded-xl px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
-            {m['wallet.archive']()}
+            {m['wallet.tabs.gifted']()}
           </Tabs.Trigger>
           <Tabs.Trigger
-            value="Transferred"
+            value={TabId.ARCHIVED}
             class="inline-flex flex-1 items-center justify-center whitespace-nowrap rounded-xl px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
-            Transferred
+            {m['wallet.tabs.archived']()}
           </Tabs.Trigger>
         </Tabs.List>
       </Tabs.Root>
@@ -266,7 +273,7 @@
     <div class="flex-1 overflow-y-auto">
       {#if displayedItems.length === 0}
         <div class="py-8 text-center text-muted-foreground">
-          {activeTab === 'Active' ? m['wallet.empty']() : m['wallet.transferred.no_items_found']()}
+          {currentTab === TabId.ACTIVE ? m['wallet.empty']() : m['wallet.gifted.no_items_found']()}
         </div>
       {/if}
       {#each displayedItems as item}

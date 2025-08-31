@@ -4,7 +4,7 @@
   import { Button } from '@/components/ui/button';
   import { page } from '$app/state';
   import GiftCardDetails from '@/components/shared/gift-card-details.svelte';
-  import { type WalletItem } from '@baragaun/bg-node-client';
+  import { type WalletItem, WalletItemTransferAcceptInfo } from '@baragaun/bg-node-client'
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
   import { m } from '@/paraglide/messages';
   import { onMount } from 'svelte';
@@ -14,7 +14,8 @@
   let open = $state(false);
   let pin = $state('');
   let verified = $state(false);
-  let walletItem = $state<WalletItem | undefined | null>(null);
+  let walletItem = $state<WalletItem | undefined>(undefined);
+  let walletItemTransferAcceptInfo = $state<WalletItemTransferAcceptInfo | undefined>(undefined);
 
   const transferSlug = page.params.id;
 
@@ -27,10 +28,12 @@
   async function acceptWalletItemTransfer() {
     if (!pin) return;
     const response = await marketplaceContext.acceptWalletItemTransfer(transferSlug, pin);
+
     if (response.error) {
       logger.error('Error verifying wallet item transfer', response.error);
       return;
     }
+
     if (!response.object) {
       logger.error('Error verifying wallet item transfer: no object');
       return;
@@ -49,19 +52,24 @@
     toast.success(m['gifted_card.decline_success']());
   }
 
-  async function loadWalletItem() {
-    const response = await marketplaceContext.findWalletItemByTransferSlug(transferSlug);
+  async function loadData() {
+    try {
+      const response = await marketplaceContext.findWalletItemTransferAcceptInfoByTransferSlug(transferSlug);
 
-    if (typeof response === 'string') {
-      logger.error('Failed to load wallet item', response);
-      return;
+      if (typeof response === 'string') {
+        logger.error('Failed to load wallet item', response);
+        return;
+      }
+
+      walletItemTransferAcceptInfo = response;
+      walletItem = response.walletItem;
+    } catch (error) {
+      logger.error('Error loading wallet items', error);
     }
-
-    walletItem = response;
   }
 
   onMount(async () => {
-    loadWalletItem();
+    await loadData();
   });
 </script>
 
@@ -95,7 +103,7 @@
 
 <GiftCardDetails
   walletItem={walletItem ?? null}
-  giftCardItem={null}
+  product={null}
   showNavBar={false}
   hideActions={true}
   isVerified={verified}

@@ -15,9 +15,9 @@
       {m['welcome']({ title: $appTitle })}
     </h1>
 
-    <p class="mx-auto mt-6 max-w-[700px] text-lg text-muted-foreground">
-      {m['welcome_subtitle']()}
-    </p>
+<!--    <p class="mx-auto mt-6 max-w-[700px] text-lg text-muted-foreground">-->
+<!--      {m['welcome_subtitle']()}-->
+<!--    </p>-->
 
     <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
       {#if !isSignedIn}

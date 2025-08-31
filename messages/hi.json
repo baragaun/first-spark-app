@@ -305,6 +305,11 @@
     "active": "सक्रिय",
     "archive": "आर्काइव",
     "search": "वॉलेट खोजें",
+    "tabs": {
+      "active": "Active",
+      "gifted": "Gifted",
+      "archived": "Archived"
+    },
     "gift-card": {
       "title": "गिफ्ट कार्ड",
       "subtitle": "आपके गिफ्ट कार्ड्स",
@@ -327,7 +332,7 @@
       "terms_and_conditions": "नियम और शर्तें",
       "visit_online": "ऑनलाइन देखें"
     },
-    "transferred": {
+    "gifted": {
       "recipient_details": "प्राप्तकर्ता विवरण",
       "name": "नाम",
       "email": "ईमेल",
@@ -335,7 +340,7 @@
       "date_sent": "भेजने की तिथि",
       "gift_was_accepted": "उपहार स्वीकार किया गया",
       "active": "सक्रिय",
-      "transferred": "स्थानांतरित",
+      "gifted": "स्थानांतरित",
       "no_items_found": "कोई आइटम नहीं मिला"
     }
   },
@@ -347,7 +352,9 @@
     "barcode": "बारकोड",
     "pin": "पिन",
     "submit": "सबमिट करें",
-    "loading": "कार्ड विवरण प्राप्त किए जा रहे हैं..."
+    "loading": "कार्ड विवरण प्राप्त किए जा रहे हैं...",
+    "upload_success_title": "Gift card uploaded",
+    "upload_success_message": "Your gift card has been submitted successfully!"
   },
   "order_history": {
     "title": "ऑर्डर इतिहास",
