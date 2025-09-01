@@ -13,15 +13,15 @@
 
   let purchaseOrders = $state<PurchaseOrder[]>([]);
   let isLoading = $state(true);
-  let filterStatus = $state(m['order_history.all_orders']());
+  // use it later
+  // let filterStatus = $state(m['order_history.all_orders']());
 
-  let filteredOrders = $derived(
-    purchaseOrders.filter((order) => {
-      if (filterStatus === m['order_history.all_orders']()) return true;
-      const o = order as any;
-      return o.status?.toLowerCase() === filterStatus.toLowerCase();
-    }),
-  );
+  // let filteredOrders = $derived(
+  //   purchaseOrders.filter((order) => {
+  //     if (filterStatus === m['order_history.all_orders']()) return true;
+  //     return order.status?.toLowerCase() === filterStatus.toLowerCase();
+  //   }),
+  // );
 
   const loadData = async () => {
     isLoading = true;
@@ -80,8 +80,8 @@
         <div class="flex items-center justify-center py-8">
           <SpinLoadIndicator />
         </div>
-      {:else if filteredOrders.length > 0}
-        {#each filteredOrders as order, i (order.id)}
+      {:else if purchaseOrders.length > 0}
+        {#each purchaseOrders as order, i (order.id)}
           <button
             type="button"
             class="flex w-full cursor-pointer items-center justify-between rounded py-4 text-left transition"
@@ -97,7 +97,7 @@
             </div>
             <ChevronRight class="h-5 w-5 text-gray-400" />
           </button>
-          {#if i < filteredOrders.length - 1}
+          {#if i < purchaseOrders.length - 1}
             <Separator />
           {/if}
         {/each}

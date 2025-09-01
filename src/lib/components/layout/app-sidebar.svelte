@@ -8,7 +8,6 @@
   import { m } from '@/paraglide/messages';
   import {
     GiftIcon,
-    House,
     PlugZap,
     Settings,
     ShoppingCartIcon,
@@ -78,7 +77,6 @@
   let {
     ref = $bindable(null),
     collapsible = 'icon' as ComponentProps<typeof Sidebar.Root>['collapsible'],
-    ...restProps
   } = $props();
 
   const userContext = getContext<MyUserContext>('myUserContext');
@@ -108,7 +106,7 @@
   };
 </script>
 
-<Sidebar.Root bind:ref {collapsible} {...restProps}>
+<Sidebar.Root bind:ref {collapsible}>
   <Sidebar.Content>
     <Sidebar.Header>
       <Sidebar.Menu>

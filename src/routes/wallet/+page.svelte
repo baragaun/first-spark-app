@@ -8,12 +8,19 @@
   import { goto } from '$app/navigation';
   import { walletItemsStore } from '@/stores/wallet-store';
   import { uploadedCard } from '@/stores/uploaded-card';
-  import Quagga from 'quagga';
+  import Quagga, { QuaggaJSResultObject } from 'quagga';
   import Tesseract from 'tesseract.js';
   import { m } from '@/paraglide/messages';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
   import { giftCardImageDomain } from '@/constants';
   import type { WalletItem } from '@baragaun/bg-node-client';
+
+  interface QuaggaResult {
+  codeResult?: {
+    code: string;
+    format: string;
+    };
+  }
 
   const TabId = {
     ACTIVE: 'active',
@@ -149,7 +156,7 @@
               ],
             },
           },
-          async (result: any) => {
+          async (result: QuaggaResult | undefined) => {
             let barcode = '';
             let company = '';
             let price = '';
