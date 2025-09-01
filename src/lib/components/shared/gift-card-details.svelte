@@ -20,8 +20,8 @@
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { toast } from 'svelte-sonner';
   import { page } from '$app/state';
-  import { getMarketplaceData, loadMarketplaceData } from '@/stores/marketplace-store.svelte'
-  import { getGiftCardDenominations } from '@/utils/marketplace-utils'
+  import { getMarketplaceData, loadMarketplaceData } from '@/stores/marketplace-store.svelte';
+  import { getGiftCardDenominations } from '@/utils/marketplace-utils';
 
   interface Props {
     productId?: string;
@@ -39,52 +39,46 @@
     isVerified = true,
   }: Props = $props();
 
-  const {
-    brands,
-    products,
-    loading,
-    userErrorMessage,
-  } = getMarketplaceData();
+  const { brands, products, loading, userErrorMessage } = getMarketplaceData();
 
   const product = $derived(
     (() => {
       if (productId) {
-        return products.find(p => p.id === productId);
+        return products.find((p) => p.id === productId);
       }
 
       if (walletItem?.productId) {
-        return products.find(p => p.id === walletItem.productId);
+        return products.find((p) => p.id === walletItem.productId);
       }
 
       return undefined;
-    })()
+    })(),
   );
 
   const brand = $derived(
     (() => {
       if (product?.brandId) {
-        return brands.find(b => b.id === product.brandId);
+        return brands.find((b) => b.id === product.brandId);
       }
 
       if (walletItem?.brandId) {
-        return brands.find(b => b.id === walletItem.brandId);
+        return brands.find((b) => b.id === walletItem.brandId);
       }
 
       return undefined;
-    })()
-    );
+    })(),
+  );
 
   const item = $derived(
     (() => {
       if (walletItem) {
-        return walletItem
+        return walletItem;
       }
       if (productId) {
         return products.find((p) => p.id === productId);
       }
-    })()
+    })(),
   );
-
 
   let selectedTab = $state(walletItem ? 'use' : 'buy');
 
@@ -97,9 +91,9 @@
   let terms = $derived(product?.termsEn ?? walletItem?.termsEn);
   let imageSourceFront = $derived(product?.imageSourceFront ?? walletItem?.imageSourceFront);
   const barcodeFormat = walletItem?.barcodeFormat || 'CODE39';
-  const barcodeApiUrl = `https://barcodeapi.org/api/${barcodeFormat === 'QR_CODE'
-    ? 'qr'
-    : 'code39'}/${encodeURIComponent(walletItem?.code || '')}`;
+  const barcodeApiUrl = `https://barcodeapi.org/api/${
+    barcodeFormat === 'QR_CODE' ? 'qr' : 'code39'
+  }/${encodeURIComponent(walletItem?.code || '')}`;
 
   // onMount(async () => {
   //   if (!loading) {
@@ -214,7 +208,7 @@
     return {
       destroy() {
         node.removeEventListener('error', onError);
-      }
+      },
     };
   };
 </script>

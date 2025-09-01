@@ -339,8 +339,8 @@
       "message": "Nachricht",
       "date_sent": "Gesendet am",
       "gift_was_accepted": "Geschenk wurde angenommen",
-      "active": "aktiv",
-      "transferred": "übertragen",
+      "active": "actief",
+      "gifted": "übertragen",
       "no_items_found": "Keine Einträge gefunden"
     }
   },

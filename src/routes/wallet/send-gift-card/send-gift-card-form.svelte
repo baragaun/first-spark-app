@@ -21,7 +21,6 @@
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
   import { walletItemsStore } from '@/stores/wallet-store';
-  import { derived } from 'svelte/store';
   import { page } from '$app/stores';
 
   const DEBOUNCE_DELAY = 350;
@@ -61,9 +60,7 @@
 
   let showDialog = $state(false);
 
-  const walletItem = derived([walletItemsStore], ([$products]) => {
-    return $products.find((p) => p.id === data.walletItemId) || null;
-  });
+  let walletItem = $derived($walletItemsStore.find((p) => p.id === data.walletItemId) || null);
 
   const sendEmail = async (
     transferSlug: string,
@@ -77,16 +74,17 @@
     const subject = encodeURIComponent(`${myUserContext.myUser?.userHandle} sent you a gift card`);
     // Not showing expiresAt as it is always null
     // const expiresAt = $walletItem?.expiresAt ? `Expiry Date: ${$walletItem?.expiresAt}` : '';
-    const balance = $walletItem?.balance ? ($walletItem?.balance / 1000).toFixed(0) : 0;
+    const balance = walletItem?.balance ? (walletItem?.balance / 1000).toFixed(0) : 0;
     const body = encodeURIComponent(
-`${message}
+      `${message}
 
 ------------------------------------
 Details:
 Gift Card Value: ${balance}
 Accept gift at: ${attachmentLink}
 Unlock code: ${secretCode}
-------------------------------------`);
+------------------------------------`,
+    );
 
     // You can append a link to the attachment in the email body
     const mailto = `mailto:${recipientEmail}?subject=${subject}&body=${body}`;

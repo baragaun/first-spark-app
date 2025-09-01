@@ -35,7 +35,7 @@
       purchaseOrders = purchaseOrdersStore.purchaseOrders;
     }
     isLoading = false;
-  }
+  };
 
   // Load on mount
   $effect(() => {

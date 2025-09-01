@@ -24,7 +24,7 @@
 
   const purchaseOrdersStore = getPurchaseOrdersStore();
 
-   const purchaseOrderId = $derived(page.params.id);
+  const purchaseOrderId = $derived(page.params.id);
 
   let purchaseOrder = $state<PurchaseOrder | undefined>();
   let isLoading = $state(false);
@@ -69,7 +69,7 @@
     }
     purchaseOrder = purchaseOrdersStore.purchaseOrders.find((o: any) => o.id === purchaseOrderId);
     isLoading = false;
-  }
+  };
 
   const handleImageError = (node: HTMLImageElement) => {
     const onError = (e: Event) => {
@@ -81,7 +81,7 @@
     return {
       destroy() {
         node.removeEventListener('error', onError);
-      }
+      },
     };
   };
 

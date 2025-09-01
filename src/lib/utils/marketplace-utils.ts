@@ -12,8 +12,7 @@ export const getGiftCardDenominations = (
     return [];
   }
 
-  const genericProduct = products.find(
-    (product) => product.id === thisProduct.genericGiftCardId);
+  const genericProduct = products.find((product) => product.id === thisProduct.genericGiftCardId);
 
   if (!Array.isArray(genericProduct?.denominations) || genericProduct.denominations.length < 1) {
     return [];
