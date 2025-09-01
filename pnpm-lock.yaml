@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@baragaun/bg-node-client':
-        specifier: ^0.0.66
-        version: 0.0.66(prettier@3.5.3)(socks@2.8.5)
+        specifier: ^0.0.67
+        version: 0.0.67(prettier@3.5.3)(socks@2.8.5)
       '@sparticuz/chromium':
         specifier: ^137.0.1
         version: 137.0.1
@@ -264,8 +264,8 @@ packages:
     resolution: {integrity: sha512-ETyHEk2VHHvl9b9jZP5IHPavHYk57EhanlRRuae9XCpb/j5bDCbPPMOBfCWhnl/7EDJz0jEMCi/RhccCE8r1+Q==}
     engines: {node: '>=6.9.0'}
 
-  '@baragaun/bg-node-client@0.0.66':
-    resolution: {integrity: sha512-HKYL4iUumEYbW/GKCjjTwZNx7t37wqdpyyHsifrVtk/KL7oc2+5iO0bgdUkrMJiMq1OzW7Ux+RzhtjDxkQpWMA==}
+  '@baragaun/bg-node-client@0.0.67':
+    resolution: {integrity: sha512-tW0aDHkgiB5aR+33mAgpSYIG+4pQCUm/tDbmG829SiyoP0qddMqoGq1ZVo+cv0LAEbpxKSnKZaToCxyMuB1PAQ==}
     engines: {node: '>=20'}
 
   '@bcoe/v8-coverage@1.0.2':
@@ -4583,7 +4583,7 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.27.1
 
-  '@baragaun/bg-node-client@0.0.66(prettier@3.5.3)(socks@2.8.5)':
+  '@baragaun/bg-node-client@0.0.67(prettier@3.5.3)(socks@2.8.5)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
       '@nats-io/jetstream': 3.1.0
