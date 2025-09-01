@@ -132,24 +132,16 @@
       totalPrice: total,
       vat: 0,
     };
-    await marketplaceContext.createPurchaseOrder(order).then(async (result) => {
-      if (result.error) {
-        console.error('Error creating purchase order:', result.error);
-        toast.error(`Failed to create purchase order: ${result.error}`);
-      } else {
-        // toast.success('Purchase has been placed!');
-        // Clear the cart
-        cartItems = [];
-        showOrderPlacedDialog = true;
-        purchaseOrdersStore.reset();
-      }
-    });
+    const response = await marketplaceContext.createPurchaseOrder(order);
+    if (response.error) {
+      console.error('Error creating purchase order:', response.error);
+      toast.error(`Failed to create purchase order: ${response.error}`);
+      return;
+    }
+    cartItems = [];
+    showOrderPlacedDialog = true;
+    purchaseOrdersStore.reset();
   }
-
-  // Not used?
-  // function goBack() {
-  //   history.back();
-  // }
 
   function findProductAndBrand(
     productId: string,

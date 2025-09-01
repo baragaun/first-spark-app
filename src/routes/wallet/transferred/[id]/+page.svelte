@@ -87,6 +87,20 @@
 
     history.back();
   }
+
+  const handleImageError = (node: HTMLImageElement) => {
+    const onError = (e: Event) => {
+      (e.currentTarget as HTMLImageElement).src = placeholderImage;
+    };
+
+    node.addEventListener('error', onError);
+
+    return {
+      destroy() {
+        node.removeEventListener('error', onError);
+      },
+    };
+  };
 </script>
 
 <div
@@ -106,7 +120,7 @@
         src={giftCardImageDomain + '/giftcards/' + walletItem.imageSourceFront}
         alt={walletItem.name}
         class="aspect-[16/9] w-full max-w-md rounded-2xl object-contain shadow-lg"
-        onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
+        use:handleImageError
       />
     </div>
 
