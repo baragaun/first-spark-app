@@ -16,9 +16,9 @@
   import type { WalletItem } from '@baragaun/bg-node-client';
 
   interface QuaggaResult {
-  codeResult?: {
-    code: string;
-    format: string;
+    codeResult?: {
+      code: string;
+      format: string;
     };
   }
 

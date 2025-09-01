@@ -27,7 +27,7 @@
     <ModeWatcher />
     <ConnectionSonner />
     <SidebarProvider>
-      <AppSidebar/>
+      <AppSidebar />
       <div class="flex flex-1 flex-col">
         {#if !hideNavBar}
           <NavBar />
