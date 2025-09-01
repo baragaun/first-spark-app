@@ -42,9 +42,7 @@ export const loadMarketplaceData = async (): Promise<void> => {
       }
       brands = response.objects;
     } catch (error) {
-      const err = error instanceof Error
-        ? error
-        : new Error('Failed to load brands');
+      const err = error instanceof Error ? error : new Error('Failed to load brands');
       userErrorMessage = 'Unable to load brands. Please try again later.';
       throw err;
     } finally {
@@ -78,9 +76,7 @@ export const loadMarketplaceData = async (): Promise<void> => {
       }
       products = response.objects;
     } catch (error) {
-      const err = error instanceof Error
-        ? error
-        : new Error('Failed to load products');
+      const err = error instanceof Error ? error : new Error('Failed to load products');
       userErrorMessage = 'Unable to load products. Please try again later.';
       throw err;
     } finally {
@@ -114,9 +110,7 @@ export const loadMarketplaceData = async (): Promise<void> => {
       }
       productCategories = response.objects;
     } catch (error) {
-      const err = error instanceof Error
-        ? error
-        : new Error('Failed to load productCategories');
+      const err = error instanceof Error ? error : new Error('Failed to load productCategories');
       userErrorMessage = 'Unable to load product categories. Please try again later.';
       throw err;
     } finally {
