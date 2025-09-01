@@ -154,8 +154,8 @@
   function findProductAndBrand(
     productId: string,
   ): [GiftCardProduct | undefined, Brand | undefined] {
-    const product = products.find(product => product.id === productId);
-    const brand = brands.find(b => b.id === product?.brandId);
+    const product = products.find((product) => product.id === productId);
+    const brand = brands.find((b) => b.id === product?.brandId);
     return [product, brand];
   }
 
@@ -187,7 +187,7 @@
     return {
       destroy() {
         node.removeEventListener('error', onError);
-      }
+      },
     };
   };
 
@@ -202,7 +202,7 @@
   <!-- Top Bar -->
   <header class="mb-6 px-3 pt-3">
     <h1 class="text-3xl font-bold text-foreground">{m['cart.title']()}</h1>
-<!--    <p class="mt-2 text-muted-foreground">{m['cart.subtitle']()}</p>-->
+    <!--    <p class="mt-2 text-muted-foreground">{m['cart.subtitle']()}</p>-->
   </header>
 
   <div class="container mx-auto flex-1 px-4 py-6">

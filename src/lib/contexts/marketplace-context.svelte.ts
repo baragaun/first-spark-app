@@ -193,7 +193,8 @@ export class MarketplaceContext {
     }
     try {
       isLoading = true;
-      const response = await this.client.operations.walletItemTransfer.declineWalletItemTransfer(transferSlug);
+      const response =
+        await this.client.operations.walletItemTransfer.declineWalletItemTransfer(transferSlug);
       if (!response || response.error) {
         console.error('declineWalletItemTransfer: received error.', { response });
         return { error: response.error || translate(AppUiMessage.systemError) };
@@ -281,7 +282,7 @@ export class MarketplaceContext {
         undefined,
         undefined,
         undefined,
-        { },
+        {},
         { cachePolicy: CachePolicy.cacheFirst },
       );
 
@@ -456,16 +457,21 @@ export class MarketplaceContext {
     transferSlug: string,
   ): Promise<WalletItemTransferAcceptInfo | string> {
     if (!this.client.isInitialized) {
-      console.error('MarketplaceContext.findWalletItemTransferAcceptInfoByTransferSlug: not initialized.');
+      console.error(
+        'MarketplaceContext.findWalletItemTransferAcceptInfoByTransferSlug: not initialized.',
+      );
       return translate(AppUiMessage.systemError);
     }
     try {
       isLoading = true;
-      const response = await this.client.operations.walletItemTransfer.findWalletItemTransferAcceptInfoByTransferSlug(
-        transferSlug,
-      );
+      const response =
+        await this.client.operations.walletItemTransfer.findWalletItemTransferAcceptInfoByTransferSlug(
+          transferSlug,
+        );
       if (!response || response.error || !response.object) {
-        console.error('findWalletItemTransferAcceptInfoByTransferSlug: received error.', { response });
+        console.error('findWalletItemTransferAcceptInfoByTransferSlug: received error.', {
+          response,
+        });
         return response.error || translate(AppUiMessage.systemError);
       }
       return response.object;

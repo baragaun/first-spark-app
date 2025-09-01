@@ -1,12 +1,12 @@
+import translate from '@/helpers/language/translate';
+import { client } from '@/services/bg-node-client';
+import { AppUiMessage } from '@/types/enums';
 import {
   type Brand,
   CachePolicy,
   type GiftCardProduct,
-  type ProductCategory
-} from '@baragaun/bg-node-client'
-import { client } from '@/services/bg-node-client';
-import translate from '@/helpers/language/translate';
-import { AppUiMessage } from '@/types/enums';
+  type ProductCategory,
+} from '@baragaun/bg-node-client';
 
 let brands = $state<Brand[]>([]);
 let products = $state<GiftCardProduct[]>([]);
@@ -28,10 +28,10 @@ export const loadMarketplaceData = async (): Promise<void> => {
         undefined,
         {},
         { cachePolicy: CachePolicy.cacheFirst },
-      )
+      );
 
       if (!response || response.error || !response.objects) {
-        console.error('loadMarketplaceData: received error.', { response })
+        console.error('loadMarketplaceData: received error.', { response });
         userErrorMessage = response.error || translate(AppUiMessage.systemError);
       }
 
@@ -40,11 +40,9 @@ export const loadMarketplaceData = async (): Promise<void> => {
         brands = [];
         return;
       }
-      brands = response.objects
+      brands = response.objects;
     } catch (error) {
-      error = error instanceof Error
-        ? error
-        : new Error('Failed to load brands');
+      error = error instanceof Error ? error : new Error('Failed to load brands');
       userErrorMessage = 'Unable to load brands. Please try again later.';
       throw error;
     } finally {
@@ -64,10 +62,10 @@ export const loadMarketplaceData = async (): Promise<void> => {
         undefined,
         {},
         { cachePolicy: CachePolicy.cacheFirst },
-      )
+      );
 
       if (!response || response.error || !response.objects) {
-        console.error('loadMarketplaceData: received error.', { response })
+        console.error('loadMarketplaceData: received error.', { response });
         userErrorMessage = response.error || translate(AppUiMessage.systemError);
       }
 
@@ -76,11 +74,9 @@ export const loadMarketplaceData = async (): Promise<void> => {
         products = [];
         return;
       }
-      products = response.objects
+      products = response.objects;
     } catch (error) {
-      error = error instanceof Error
-        ? error
-        : new Error('Failed to load products');
+      error = error instanceof Error ? error : new Error('Failed to load products');
       userErrorMessage = 'Unable to load products. Please try again later.';
       throw error;
     } finally {
@@ -100,10 +96,10 @@ export const loadMarketplaceData = async (): Promise<void> => {
         undefined,
         {},
         { cachePolicy: CachePolicy.cacheFirst },
-      )
+      );
 
       if (!response || response.error || !response.objects) {
-        console.error('loadMarketplaceData: received error.', { response })
+        console.error('loadMarketplaceData: received error.', { response });
         userErrorMessage = response.error || translate(AppUiMessage.systemError);
       }
 
@@ -112,11 +108,9 @@ export const loadMarketplaceData = async (): Promise<void> => {
         productCategories = [];
         return;
       }
-      productCategories = response.objects
+      productCategories = response.objects;
     } catch (error) {
-      error = error instanceof Error
-        ? error
-        : new Error('Failed to load productCategories');
+      error = error instanceof Error ? error : new Error('Failed to load productCategories');
       userErrorMessage = 'Unable to load product categories. Please try again later.';
       throw error;
     } finally {
@@ -127,11 +121,23 @@ export const loadMarketplaceData = async (): Promise<void> => {
 
 export const getMarketplaceData = () => {
   return {
-    get brands(): Brand[] { return brands; },
-    get products(): GiftCardProduct[] { return products; },
-    get productCategories(): ProductCategory[] { return productCategories; },
-    get loading(): boolean { return loading; },
-    get error(): Error | null { return error; },
-    get userErrorMessage(): string | null { return userErrorMessage; }
+    get brands(): Brand[] {
+      return brands;
+    },
+    get products(): GiftCardProduct[] {
+      return products;
+    },
+    get productCategories(): ProductCategory[] {
+      return productCategories;
+    },
+    get loading(): boolean {
+      return loading;
+    },
+    get error(): Error | null {
+      return error;
+    },
+    get userErrorMessage(): string | null {
+      return userErrorMessage;
+    },
   };
 };

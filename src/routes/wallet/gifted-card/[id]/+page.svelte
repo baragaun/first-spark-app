@@ -4,7 +4,7 @@
   import { Button } from '@/components/ui/button';
   import { page } from '$app/state';
   import GiftCardDetails from '@/components/shared/gift-card-details.svelte';
-  import { type WalletItem, WalletItemTransferAcceptInfo } from '@baragaun/bg-node-client'
+  import { type WalletItem, WalletItemTransferAcceptInfo } from '@baragaun/bg-node-client';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
   import { m } from '@/paraglide/messages';
   import { onMount } from 'svelte';
@@ -54,7 +54,8 @@
 
   async function loadData() {
     try {
-      const response = await marketplaceContext.findWalletItemTransferAcceptInfoByTransferSlug(transferSlug);
+      const response =
+        await marketplaceContext.findWalletItemTransferAcceptInfoByTransferSlug(transferSlug);
 
       if (typeof response === 'string') {
         logger.error('Failed to load wallet item', response);
@@ -102,8 +103,7 @@
 </div>
 
 <GiftCardDetails
-  walletItem={walletItem ?? null}
-  product={null}
+  walletItem={walletItem ?? undefined}
   showNavBar={false}
   hideActions={true}
   isVerified={verified}

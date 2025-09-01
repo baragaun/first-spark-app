@@ -30,14 +30,14 @@
       // Filter by search text
       if (searchText.trim()) {
         const cleanSearchText = searchText.trim().toLowerCase();
-        const productBrand = brands.find(brand => brand.id === product.brandId);
+        const productBrand = brands.find((brand) => brand.id === product.brandId);
         if (!productBrand || !productBrand.name.toLowerCase().includes(cleanSearchText)) {
           return false;
         }
       }
 
       return true;
-    })
+    }),
   );
 
   const getBrandForGiftCard = (giftCardProduct: GiftCardProduct): Brand | undefined =>
@@ -53,7 +53,7 @@
     return {
       destroy() {
         node.removeEventListener('error', onError);
-      }
+      },
     };
   };
 

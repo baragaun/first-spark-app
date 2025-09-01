@@ -328,7 +328,7 @@ export class MockMyUserContext {
               actionType: MultiStepActionType.verifyEmail,
               result: MultiStepActionResult.ok,
               attemptCount: 0,
-                createdAt: new Date().toISOString(),
+              createdAt: new Date().toISOString(),
             });
           });
         }
@@ -443,7 +443,7 @@ export class MockMyUserContext {
                     actionType: MultiStepActionType.verifyEmail,
                     result: MultiStepActionResult.ok,
                     attemptCount: 0,
-                            createdAt: new Date().toISOString(),
+                    createdAt: new Date().toISOString(),
                   });
                 });
               }
@@ -635,7 +635,7 @@ export class MockMyUserContext {
                     actionType: MultiStepActionType.resetPassword,
                     result: MultiStepActionResult.ok,
                     attemptCount: 0,
-                            createdAt: new Date().toISOString(),
+                    createdAt: new Date().toISOString(),
                   });
                 });
               }

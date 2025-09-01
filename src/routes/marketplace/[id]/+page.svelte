@@ -3,6 +3,4 @@
   import GiftCardDetails from '@/components/shared/gift-card-details.svelte';
 </script>
 
-<GiftCardDetails
-  productId={page.params.id}
-/>
+<GiftCardDetails productId={page.params.id} />

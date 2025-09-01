@@ -4,8 +4,12 @@ let purchaseOrders = $state<PurchaseOrder[]>([]);
 let isLoaded = $state(false);
 
 export const getPurchaseOrdersStore = () => ({
-  get purchaseOrders() { return purchaseOrders },
-  get isLoaded() { return isLoaded },
+  get purchaseOrders() {
+    return purchaseOrders;
+  },
+  get isLoaded() {
+    return isLoaded;
+  },
   setPurchaseOrders: (orders: PurchaseOrder[]) => {
     purchaseOrders = orders;
     isLoaded = true;
@@ -13,9 +17,8 @@ export const getPurchaseOrdersStore = () => ({
   reset: () => {
     purchaseOrders = [];
     isLoaded = false;
-  }
+  },
 });
-
 
 // Claude Sonnet 4 says to the old, commented out code below:
 // That's not best practice - especially for a new Svelte 5 app.

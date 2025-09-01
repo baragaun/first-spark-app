@@ -2,7 +2,6 @@
   import { Tabs } from 'bits-ui';
   import { onMount } from 'svelte';
   import placeholderImage from '../../assets/images/placeholder.png';
-  import { Wallet } from 'lucide-svelte';
   import { Search, Upload } from 'lucide-svelte';
   import { Input } from '$lib/components/ui/input';
   import { Button } from '$lib/components/ui/button';
@@ -20,14 +19,14 @@
     ACTIVE: 'active',
     GIFTED: 'gifted',
     ARCHIVED: 'archived',
-  }
-  type TabId = typeof TabId[keyof typeof TabId];
+  };
+  type TabId = (typeof TabId)[keyof typeof TabId];
 
   // Tabs and wallet items
   let currentTab = $state<string>(TabId.ACTIVE);
   let searchQuery = $state<string>('');
   let fileInputRef: HTMLInputElement;
-  let isLoading = false;
+  let isLoading = $state(false);
 
   onMount(async () => {
     loadWalletItems();
@@ -99,6 +98,20 @@
     //   fileInputRef.click();
     // }
   }
+
+  const handleImageError = (node: HTMLImageElement) => {
+    const onError = (e: Event) => {
+      (e.currentTarget as HTMLImageElement).src = placeholderImage;
+    };
+
+    node.addEventListener('error', onError);
+
+    return {
+      destroy() {
+        node.removeEventListener('error', onError);
+      },
+    };
+  };
 
   function handleFileChange(event: Event) {
     const files = (event.target as HTMLInputElement).files;
@@ -204,7 +217,7 @@
   <div class="flex">
     <header class="mb-6">
       <h1 class="text-3xl font-bold text-foreground">{m['wallet.title']()}</h1>
-<!--      <p class="mt-2 text-muted-foreground">{m['wallet.subtitle']()}</p>-->
+      <!--      <p class="mt-2 text-muted-foreground">{m['wallet.subtitle']()}</p>-->
     </header>
   </div>
 
@@ -288,7 +301,7 @@
               src={giftCardImageDomain + '/giftcards/' + item.imageSourceFront}
               alt={item.imageSourceFront}
               class="mr-4 w-32 rounded-lg object-cover transition-transform duration-300 group-hover:scale-110"
-              onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
+              use:handleImageError
             />
             <div class="flex flex-col">
               <span class="text-base font-medium text-foreground">{item.name ? item.name : ''}</span
