@@ -10,7 +10,7 @@
   import { giftCardImageDomain } from '$lib/constants';
   import { m } from '@/paraglide/messages';
   import { ShoppingBag, GiftIcon } from 'lucide-svelte';
-  import { walletItemsStore } from '@/stores/wallet-store';
+  import { getWalletItemsStore } from '@/stores/wallet-store.svelte';
   import { page } from '$app/state';
   import { getPurchaseOrdersStore } from '$lib/stores/order-history.svelte';
 
@@ -48,7 +48,7 @@
   }
 
   function navigateToWalletItemDetailScreen(purchaseOrderItemId: string) {
-    const walletItem = $walletItemsStore.find(
+    const walletItem = getWalletItemsStore().find(
       (item) => item.purchaseOrderItemId == purchaseOrderItemId,
     );
     if (walletItem != undefined && walletItem != null) {

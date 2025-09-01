@@ -1,6 +1,5 @@
 <script lang="ts">
   import { page } from '$app/state';
-  import { walletItemsStore } from '@/stores/wallet-store';
   import { m } from '@/paraglide/messages';
   import { Button } from '$lib/components/ui/button';
   import placeholderImage from '../../../../assets/images/placeholder.png';
@@ -8,22 +7,23 @@
   import { giftCardImageDomain } from '@/constants';
   import { onMount } from 'svelte';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
-  import { walletItemTransfersStore } from '@/stores/wallet-store';
+  import {
+    getWalletItemsStore,
+    getWalletItemTransfersStore,
+    loadWalletItemTransfers,
+    getIsLoading,
+    updateWalletItem,
+  } from '@/stores/wallet-store.svelte';
   import type { WalletItemTransfer } from '@baragaun/bg-node-client';
 
   // Get wallet item by id from store
   const walletCardId = page.params.id;
-  let walletItem = $derived($walletItemsStore.find((p) => p.id === walletCardId) || null);
+  let walletItem = $derived(getWalletItemsStore().find((p) => p.id === walletCardId) || null);
   let walletItemTransfer: WalletItemTransfer | undefined | null = $state(null);
 
   onMount(async () => {
-    const response = await marketplaceContext.findWalletItemTransfers();
-    if (typeof response === 'string') {
-      console.error('Failed to load wallet item transfers:', response);
-      return;
-    }
-    walletItemTransfersStore.set(response as WalletItemTransfer[]);
-    walletItemTransfer = $walletItemTransfersStore.find(
+    loadWalletItemTransfers();
+    walletItemTransfer = getWalletItemTransfersStore().find(
       (walletItemTransfer) => walletItemTransfer.walletItemId === walletCardId,
     );
   });
@@ -46,15 +46,7 @@
 
     try {
       await marketplaceContext.archiveWalletItem(walletCardId, !walletItem?.archivedAt);
-
-      walletItemsStore.update((items) =>
-        items.map((item) => {
-          if (item.id === walletItem?.id) {
-            item.archivedAt = walletItem?.archivedAt ? null : new Date().toISOString();
-          }
-          return item;
-        }),
-      );
+      updateWalletItem(walletItem);
     } catch (error) {
       console.error('Error archiving wallet item:', error);
       // todo: show user error

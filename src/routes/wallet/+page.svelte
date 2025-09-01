@@ -6,7 +6,12 @@
   import { Input } from '$lib/components/ui/input';
   import { Button } from '$lib/components/ui/button';
   import { goto } from '$app/navigation';
-  import { walletItemsStore } from '@/stores/wallet-store';
+  import {
+    getWalletItemsStore,
+    loadWalletItems,
+    loadWalletItemTransfers,
+    getIsLoading,
+  } from '@/stores/wallet-store.svelte';
   import { uploadedCard } from '@/stores/uploaded-card';
   import Quagga, { QuaggaJSResultObject } from 'quagga';
   import Tesseract from 'tesseract.js';
@@ -33,7 +38,6 @@
   let currentTab = $state<string>(TabId.ACTIVE);
   let searchQuery = $state<string>('');
   let fileInputRef: HTMLInputElement;
-  let isLoading = $state(false);
 
   onMount(async () => {
     loadWalletItems();
@@ -42,50 +46,25 @@
 
   let displayedItems = $derived.by(() => {
     if (currentTab === TabId.ACTIVE) {
-      return $walletItemsStore.filter(
+      return getWalletItemsStore().filter(
         (item) =>
           item.archivedAt == null &&
           item.transferStartedAt == null &&
           item.name.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     } else if (currentTab === TabId.GIFTED) {
-      return $walletItemsStore.filter(
+      return getWalletItemsStore().filter(
         (item) =>
           item.transferStartedAt != null &&
           item.name.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     } else {
-      return $walletItemsStore.filter(
+      return getWalletItemsStore().filter(
         (item) =>
           item.archivedAt != null && item.name.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     }
   });
-
-  async function loadWalletItems() {
-    isLoading = true;
-    const response = await marketplaceContext.findWalletItems();
-    if (typeof response === 'string') {
-      console.error('Failed to load wallet items:', response);
-      return;
-    }
-    if (!response) return;
-
-    walletItemsStore.set(response);
-    isLoading = false;
-  }
-
-  //todo test function
-  async function loadWalletItemTransfers() {
-    isLoading = true;
-    const response = await marketplaceContext.findWalletItemTransfers();
-    if (typeof response === 'string') {
-      console.error('Failed to load wallet item transfers:', response);
-      return;
-    }
-    if (!response) return;
-    isLoading = false;
-  }
 
   function navigateToGiftCardDetail(walletItem: WalletItem) {
     if (!walletItem.id) return;
