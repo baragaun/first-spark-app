@@ -67,7 +67,7 @@
         purchaseOrdersStore.setPurchaseOrders(purchaseOrders);
       }
     }
-    purchaseOrder = purchaseOrdersStore.purchaseOrders.find((o: any) => o.id === purchaseOrderId);
+    purchaseOrder = purchaseOrdersStore.purchaseOrders.find((o: PurchaseOrder) => o.id === purchaseOrderId);
     isLoading = false;
   };
 
