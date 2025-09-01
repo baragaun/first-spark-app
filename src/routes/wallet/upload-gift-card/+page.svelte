@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { loadMarketplaceData, getMarketplaceData } from '$lib/stores/marketplace-store';
+  import { loadMarketplaceData, getMarketplaceData } from '$lib/stores/marketplace-store.svelte';
   import type { GiftCardProduct, Brand } from '@baragaun/bg-node-client';
   import { goto } from '$app/navigation';
   import placeholderImage from '../../../assets/images/placeholder.png';

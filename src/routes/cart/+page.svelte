@@ -13,7 +13,7 @@
   import { writable } from 'svelte/store';
   import { toast } from 'svelte-sonner';
   import placeholderImage from '../../assets/images/placeholder.png';
-  import { loadMarketplaceData, getMarketplaceData } from '$lib/stores/marketplace-store';
+  import { loadMarketplaceData, getMarketplaceData } from '$lib/stores/marketplace-store.svelte';
   import {
     AlertDialog,
     AlertDialogAction,
@@ -26,7 +26,7 @@
   import { m } from '@/paraglide/messages';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { giftCardImageDomain } from '$lib/constants';
-  import { getPurchaseOrdersStore } from '$lib/stores/order-history';
+  import { getPurchaseOrdersStore } from '$lib/stores/order-history.svelte';
 
   const purchaseOrdersStore = getPurchaseOrdersStore();
 

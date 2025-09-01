@@ -5,7 +5,7 @@
   import { Separator } from '$lib/components/ui/separator';
   import SpinLoadIndicator from '$lib/components/forms/spin-load-indicator.svelte';
   import { goto } from '$app/navigation';
-  import { getPurchaseOrdersStore } from '$lib/stores/order-history';
+  import { getPurchaseOrdersStore } from '$lib/stores/order-history.svelte';
   import { m } from '@/paraglide/messages';
   // import * as Select from '$lib/components/ui/select/index.js';
 

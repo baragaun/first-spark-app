@@ -7,7 +7,7 @@
   import placeholderImage from '../../assets/images/placeholder.png';
   import { goto } from '$app/navigation';
   import { m } from '@/paraglide/messages';
-  import { loadMarketplaceData, getMarketplaceData } from '$lib/stores/marketplace-store';
+  import { loadMarketplaceData, getMarketplaceData } from '$lib/stores/marketplace-store.svelte';
   import { IsMobile } from '$lib/hooks/is-mobile.svelte';
   import { giftCardImageDomain } from '$lib/constants';
 
