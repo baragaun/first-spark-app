@@ -36,7 +36,7 @@
 <nav class="sticky top-0 z-50 border-b bg-nav backdrop-blur supports-[backdrop-filter]:bg-nav">
   <div class="flex h-16 items-center px-4">
     <!-- Sidebar Trigger -->
-    <div class="mr-1 flex-none text-nav-foreground">
+    <div class="mr-1 flex-none text-nav-foreground hidden md:block">
       <Sidebar.Trigger />
     </div>
 
@@ -45,13 +45,6 @@
         <img src={$headerSmallIcon} alt="First Spark Logo" class="h-10" />
       </div>
     {/if}
-
-    <!-- Logo and App Name (Mobile Only) -->
-    <div class="flex flex-1 justify-start md:justify-center">
-      <!-- <a href="/" class="flex items-center gap-2 transition-colors hover:opacity-90 md:hidden">
-        <img src="/fs-logo.svg" alt="App Logo" class="h-8 w-8" />
-      </a> -->
-    </div>
 
     <!-- Right side items -->
     <div class="ml-auto flex flex-none items-center gap-1">
@@ -90,8 +83,8 @@
           </Button>
           <span class="sr-only">{m['nav.auth.sign_up']()}</span>
         </div>
-      {:else}
-        <AvatarMenu {myUser} {onSignOut} />
+      <!-- {:else}
+        <AvatarMenu {myUser} {onSignOut} /> -->
       {/if}
     </div>
   </div>

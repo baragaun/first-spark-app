@@ -5,7 +5,7 @@
   import * as DropdownMenu from '@/components/ui/dropdown-menu';
   import { m } from '@/paraglide/messages.js';
   import type { MyUser } from '@baragaun/bg-node-client';
-  import { ArrowUpRight, LogOut, Settings } from 'lucide-svelte';
+  import { ArrowUpRight, LogOut, Menu, Settings } from 'lucide-svelte';
 
   let {
     myUser,
@@ -45,6 +45,7 @@
           <Avatar.Image src="" alt={`@${myUsername}`} />
           <Avatar.Fallback>🙃</Avatar.Fallback>
         </Avatar.Root>
+        <Menu />
         <div class="flex flex-col space-y-1">
           <p class="text-sm font-medium leading-none">{myUsername}</p>
           <p class="text-xs leading-none text-muted-foreground">{myEmail}</p>
