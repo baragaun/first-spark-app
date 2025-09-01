@@ -125,17 +125,26 @@
   }
 
   async function archiveWalletItem() {
-    if (!walletItem) return;
-    await marketplaceContext.archiveWalletItem(walletItem.id, !walletItem?.archivedAt).then(() => {
-      walletItemsStore.update((items) => {
-        return items.map((item) => {
+    if (!walletItem) {
+      console.error('No wallet item found to archive.');
+      return;
+    }
+
+    try {
+      await marketplaceContext.archiveWalletItem(walletItem.id, !walletItem?.archivedAt);
+
+      walletItemsStore.update((items) =>
+        items.map((item) => {
           if (item.id === walletItem?.id) {
             item.archivedAt = walletItem?.archivedAt ? null : new Date().toISOString();
           }
           return item;
-        });
-      });
-    });
+        }),
+      );
+    } catch (error) {
+      console.error('Error archiving wallet item:', error);
+      // todo: show user error
+    }
   }
 
   function handlePrintPdf() {
