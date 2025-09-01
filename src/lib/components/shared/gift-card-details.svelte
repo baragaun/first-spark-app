@@ -11,7 +11,7 @@
   } from '@baragaun/bg-node-client';
   import placeholderImage from '../../../assets/images/placeholder.png';
   import { Archive, ArrowLeft, ExternalLink, Gift, Printer, ZoomOut } from 'lucide-svelte';
-  import { walletItemsStore } from '@/stores/wallet-store';
+  import { updateWalletItem } from '@/stores/wallet-store.svelte';
   import BarcodeView from './barcode-view.svelte';
   import { downloadPdf } from '@/utils/pdf-utils';
   import { m } from '@/paraglide/messages';
@@ -132,15 +132,7 @@
 
     try {
       await marketplaceContext.archiveWalletItem(walletItem.id, !walletItem?.archivedAt);
-
-      walletItemsStore.update((items) =>
-        items.map((item) => {
-          if (item.id === walletItem?.id) {
-            item.archivedAt = walletItem?.archivedAt ? null : new Date().toISOString();
-          }
-          return item;
-        }),
-      );
+      updateWalletItem(walletItem);
     } catch (error) {
       console.error('Error archiving wallet item:', error);
       // todo: show user error

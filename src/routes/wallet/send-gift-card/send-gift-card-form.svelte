@@ -20,8 +20,8 @@
   import { goto } from '$app/navigation';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
-  import { walletItemsStore } from '@/stores/wallet-store';
-  import { page } from '$app/stores';
+  import { getWalletItemsStore } from '@/stores/wallet-store.svelte';
+  import { page } from '$app/state';
 
   const DEBOUNCE_DELAY = 350;
 
@@ -60,7 +60,7 @@
 
   let showDialog = $state(false);
 
-  let walletItem = $derived($walletItemsStore.find((p) => p.id === data.walletItemId) || null);
+  let walletItem = $derived(getWalletItemsStore().find((p) => p.id === data.walletItemId) || null);
 
   const sendEmail = async (
     transferSlug: string,
@@ -70,7 +70,7 @@
     message?: string,
   ) => {
     console.log(walletItem);
-    const attachmentLink = `${$page.url.origin}/wallet/gifted-card/${transferSlug}`;
+    const attachmentLink = `${page.url.origin}/wallet/gifted-card/${transferSlug}`;
     const subject = encodeURIComponent(`${myUserContext.myUser?.userHandle} sent you a gift card`);
     // Not showing expiresAt as it is always null
     // const expiresAt = $walletItem?.expiresAt ? `Expiry Date: ${$walletItem?.expiresAt}` : '';
