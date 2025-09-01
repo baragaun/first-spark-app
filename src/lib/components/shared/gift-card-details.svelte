@@ -44,27 +44,26 @@
     brand,
   }: Props = $props();
 
-
   const { brands, products, loading, userErrorMessage } = getMarketplaceData();
 
-  if(!product) {
+  if (!product) {
     if (productId) {
-        product = products.find((p) => p.id === productId);
-      } else if (walletItem?.productId) {
+      product = products.find((p) => p.id === productId);
+    } else if (walletItem?.productId) {
       product = products.find((p) => p.id === walletItem.productId);
-      } else {
-        product = undefined;
-      }
+    } else {
+      product = undefined;
+    }
   }
 
-  if(!brand) {
+  if (!brand) {
     if (product?.brandId) {
-        brand = brands.find((b) => b.id === product.brandId);
-      } else if (walletItem?.brandId) {
+      brand = brands.find((b) => b.id === product.brandId);
+    } else if (walletItem?.brandId) {
       brand = brands.find((b) => b.id === walletItem.brandId);
-      } else {
-        brand = undefined;
-      }
+    } else {
+      brand = undefined;
+    }
   }
 
   // const item = $derived(
@@ -81,7 +80,7 @@
   let selectedTab = $state(walletItem ? 'use' : 'buy');
 
   onMount(() => {
-    if(!brand && !product) {
+    if (!brand && !product) {
       console.log('Loading marketplace data 123:', brand, product);
       loadMarketplaceData().catch(console.error);
     }

@@ -4,7 +4,12 @@
   import { Button } from '@/components/ui/button';
   import { page } from '$app/state';
   import GiftCardDetails from '@/components/shared/gift-card-details.svelte';
-  import { Brand, GiftCardProduct, type WalletItem, WalletItemTransferAcceptInfo } from '@baragaun/bg-node-client';
+  import {
+    Brand,
+    GiftCardProduct,
+    type WalletItem,
+    WalletItemTransferAcceptInfo,
+  } from '@baragaun/bg-node-client';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
   import { m } from '@/paraglide/messages';
   import { onMount } from 'svelte';
@@ -81,7 +86,6 @@
   onMount(async () => {
     await loadData();
   });
-
 </script>
 
 <!-- Header Bar -->
@@ -114,23 +118,22 @@
 
 {#if isLoading}
   <div class="flex h-[60vh] items-center justify-center">
-      <div
-        class="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"
-      ></div>
+    <div
+      class="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"
+    ></div>
   </div>
 {/if}
 
 {#if product && brand}
-<GiftCardDetails
-  walletItem={acceptedWalletItem ?? walletItemTransferAcceptInfo?.walletItem}
-  product={product}
-  brand={brand}
-  showNavBar={false}
-  hideActions={true}
-  isVerified={verified}
-/>
+  <GiftCardDetails
+    walletItem={acceptedWalletItem ?? walletItemTransferAcceptInfo?.walletItem}
+    {product}
+    {brand}
+    showNavBar={false}
+    hideActions={true}
+    isVerified={verified}
+  />
 {/if}
-
 
 <Dialog bind:open>
   <DialogContent>
