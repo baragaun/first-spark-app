@@ -4,7 +4,7 @@
   import { Button } from '@/components/ui/button';
   import { page } from '$app/state';
   import GiftCardDetails from '@/components/shared/gift-card-details.svelte';
-  import { type WalletItem, WalletItemTransferAcceptInfo } from '@baragaun/bg-node-client';
+  import { Brand, GiftCardProduct, type WalletItem, WalletItemTransferAcceptInfo } from '@baragaun/bg-node-client';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
   import { m } from '@/paraglide/messages';
   import { onMount } from 'svelte';
@@ -14,7 +14,10 @@
   let open = $state(false);
   let pin = $state('');
   let verified = $state(false);
-  let walletItem = $state<WalletItem | undefined>(undefined);
+  let isLoading = $state(false);
+  let acceptedWalletItem = $state<WalletItem | undefined>(undefined);
+  let product = $state<GiftCardProduct | undefined>(undefined);
+  let brand = $state<Brand | undefined>(undefined);
   let walletItemTransferAcceptInfo = $state<WalletItemTransferAcceptInfo | undefined>(undefined);
 
   const transferSlug = page.params.id;
@@ -27,6 +30,7 @@
 
   async function acceptWalletItemTransfer() {
     if (!pin) return;
+    isLoading = true;
     const response = await marketplaceContext.acceptWalletItemTransfer(transferSlug, pin);
 
     if (response.error) {
@@ -39,8 +43,9 @@
       return;
     }
 
-    walletItem = response.object;
+    acceptedWalletItem = response.object;
     verified = true;
+    isLoading = false;
   }
 
   async function declineWalletItemTransfer() {
@@ -53,6 +58,7 @@
   }
 
   async function loadData() {
+    isLoading = true;
     try {
       const response =
         await marketplaceContext.findWalletItemTransferAcceptInfoByTransferSlug(transferSlug);
@@ -63,7 +69,10 @@
       }
 
       walletItemTransferAcceptInfo = response;
-      walletItem = response.walletItem;
+      product = walletItemTransferAcceptInfo?.product ?? undefined;
+      brand = walletItemTransferAcceptInfo?.brand ?? undefined;
+
+      isLoading = false;
     } catch (error) {
       logger.error('Error loading wallet items', error);
     }
@@ -72,6 +81,7 @@
   onMount(async () => {
     await loadData();
   });
+
 </script>
 
 <!-- Header Bar -->
@@ -102,12 +112,25 @@
   {/if}
 </div>
 
+{#if isLoading}
+  <div class="flex h-[60vh] items-center justify-center">
+      <div
+        class="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"
+      ></div>
+  </div>
+{/if}
+
+{#if product && brand}
 <GiftCardDetails
-  walletItem={walletItem ?? undefined}
+  walletItem={acceptedWalletItem ?? walletItemTransferAcceptInfo?.walletItem}
+  product={product}
+  brand={brand}
   showNavBar={false}
   hideActions={true}
   isVerified={verified}
 />
+{/if}
+
 
 <Dialog bind:open>
   <DialogContent>

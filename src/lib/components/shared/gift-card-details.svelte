@@ -22,6 +22,7 @@
   import { page } from '$app/state';
   import { getMarketplaceData, loadMarketplaceData } from '@/stores/marketplace-store.svelte';
   import { getGiftCardDenominations } from '@/utils/marketplace-utils';
+  import { onMount } from 'svelte';
 
   interface Props {
     productId?: string;
@@ -29,6 +30,8 @@
     showNavBar?: boolean;
     hideActions?: boolean;
     isVerified?: boolean;
+    product?: GiftCardProduct;
+    brand?: Brand;
   }
 
   let {
@@ -37,53 +40,51 @@
     showNavBar = true,
     hideActions = false,
     isVerified = true,
+    product,
+    brand,
   }: Props = $props();
+
 
   const { brands, products, loading, userErrorMessage } = getMarketplaceData();
 
-  const product = $derived(
-    (() => {
-      if (productId) {
-        return products.find((p) => p.id === productId);
+  if(!product) {
+    if (productId) {
+        product = products.find((p) => p.id === productId);
+      } else if (walletItem?.productId) {
+      product = products.find((p) => p.id === walletItem.productId);
+      } else {
+        product = undefined;
       }
+  }
 
-      if (walletItem?.productId) {
-        return products.find((p) => p.id === walletItem.productId);
+  if(!brand) {
+    if (product?.brandId) {
+        brand = brands.find((b) => b.id === product.brandId);
+      } else if (walletItem?.brandId) {
+      brand = brands.find((b) => b.id === walletItem.brandId);
+      } else {
+        brand = undefined;
       }
+  }
 
-      return undefined;
-    })(),
-  );
-
-  const brand = $derived(
-    (() => {
-      if (product?.brandId) {
-        return brands.find((b) => b.id === product.brandId);
-      }
-
-      if (walletItem?.brandId) {
-        return brands.find((b) => b.id === walletItem.brandId);
-      }
-
-      return undefined;
-    })(),
-  );
-
-  const item = $derived(
-    (() => {
-      if (walletItem) {
-        return walletItem;
-      }
-      if (productId) {
-        return products.find((p) => p.id === productId);
-      }
-    })(),
-  );
+  // const item = $derived(
+  //   (() => {
+  //     if (walletItem) {
+  //       return walletItem;
+  //     }
+  //     if (productId) {
+  //       return products.find((p) => p.id === productId);
+  //     }
+  //   })(),
+  // );
 
   let selectedTab = $state(walletItem ? 'use' : 'buy');
 
-  $effect(() => {
-    loadMarketplaceData().catch(console.error);
+  onMount(() => {
+    if(!brand && !product) {
+      console.log('Loading marketplace data 123:', brand, product);
+      loadMarketplaceData().catch(console.error);
+    }
   });
 
   let isBarcodeViewOpen = $state(false);
