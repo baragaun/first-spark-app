@@ -3,6 +3,7 @@
   import { page } from '$app/state';
   import { ModeWatcher } from 'mode-watcher';
   import AppSidebar from '@/components/layout/app-sidebar.svelte';
+  import BottomNavbar from '@/components/layout/bottom-navbar.svelte';
   import ConnectionSonner from '@/components/connection-sonner.svelte';
   import NavBar from '@/components/layout/nav-bar/nav-bar.svelte';
   import Footer from '@/components/layout/footer.svelte';
@@ -37,6 +38,7 @@
         </main>
         <Footer />
       </div>
+      <BottomNavbar />
     </SidebarProvider>
   </div>
 </MyUserProvider>

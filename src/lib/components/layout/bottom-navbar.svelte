@@ -1,0 +1,95 @@
+<script lang="ts">
+  import { getContext } from 'svelte';
+  import { page } from '$app/state';
+  import { Button } from '@/components/ui/button';
+  import type { MyUserContext } from '@/contexts/my-user-context.svelte';
+  import { m } from '@/paraglide/messages';
+  import {
+    GiftIcon,
+    Settings,
+    ShoppingCartIcon,
+    Wallet,
+    HistoryIcon,
+    Home,
+  } from 'lucide-svelte';
+  import { cn } from '$lib/utils';
+
+  // Navigation items - same as sidebar but with Home added for mobile
+  const items = [
+    // {
+    //   title: m['sidebar.menu.home'](),
+    //   url: '/',
+    //   icon: Home,
+    //   requiresAuth: false,
+    // },
+    {
+      title: m['sidebar.menu.wallet'](),
+      url: '/wallet',
+      icon: Wallet,
+      requiresAuth: true,
+    },
+    {
+      title: m['sidebar.menu.marketplace'](),
+      url: '/marketplace',
+      icon: GiftIcon,
+      requiresAuth: true,
+    },
+    {
+      title: m['sidebar.menu.cart'](),
+      url: '/cart',
+      icon: ShoppingCartIcon,
+      requiresAuth: true,
+    },
+    {
+      title: m['sidebar.menu.order_history'](),
+      url: '/order-history',
+      icon: HistoryIcon,
+      requiresAuth: true,
+    },
+    {
+      title: m['sidebar.menu.settings'](),
+      url: '/settings',
+      icon: Settings,
+      requiresAuth: true,
+    },
+  ];
+
+  const userContext = getContext<MyUserContext>('myUserContext');
+  let isSignedIn: boolean = $derived(userContext.isSignedIn);
+
+  const isItemActive = (itemUrl: string, currentPath: string): boolean => {
+    if (itemUrl === '/') {
+      return currentPath === '/';
+    }
+    return itemUrl !== '#' && currentPath.startsWith(itemUrl);
+  };
+
+  let visibleItems = $derived(isSignedIn ? items : items.filter((item) => !item.requiresAuth));
+</script>
+
+<!-- Bottom Navigation Bar - Only visible on mobile -->
+<nav
+  class="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:hidden"
+>
+  <div class="flex h-16 items-center justify-around px-2">
+    {#each visibleItems as item (item.title)}
+      <Button
+        href={item.url}
+        variant="ghost"
+        size="sm"
+        class={cn(
+          'flex h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg px-1 py-1 text-xs',
+          isItemActive(item.url, page.url.pathname)
+            ? 'bg-accent text-accent-foreground'
+            : 'text-muted-foreground hover:text-foreground'
+        )}
+      >
+        <item.icon class="h-5 w-5" />
+        <span class="truncate text-[10px] leading-tight">{item.title}</span>
+      </Button>
+    {/each}
+  </div>
+</nav>
+
+<!-- Spacer to prevent content from being hidden behind the bottom navbar -->
+<div class="h-16 md:hidden"></div>
