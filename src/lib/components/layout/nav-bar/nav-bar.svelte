@@ -11,7 +11,7 @@
   import type { MyUserContext } from '@/contexts/my-user-context.svelte';
   import { getContext } from 'svelte';
   import type { MyUser } from '@baragaun/bg-node-client';
-  import { getPurchaseOrdersStore } from '$lib/stores/order-history';
+  import { getPurchaseOrdersStore } from '$lib/stores/order-history.svelte';
   import { IsMobile } from '$lib/hooks/is-mobile.svelte.js';
   import { headerSmallIcon } from '@/stores/app-store';
 

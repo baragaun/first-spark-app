@@ -20,7 +20,7 @@
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { toast } from 'svelte-sonner';
   import { page } from '$app/state';
-  import { getMarketplaceData, loadMarketplaceData } from '@/stores/marketplace-store'
+  import { getMarketplaceData, loadMarketplaceData } from '@/stores/marketplace-store.svelte'
   import { getGiftCardDenominations } from '@/utils/marketplace-utils'
 
   interface Props {

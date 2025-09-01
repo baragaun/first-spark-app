@@ -6,13 +6,13 @@
   import { marketplaceContext } from '$lib/contexts/marketplace-context.svelte';
   import type { PurchaseOrder, GiftCardProduct, Brand } from '@baragaun/bg-node-client';
   import placeholderImage from '../../../assets/images/placeholder.png';
-  import { loadMarketplaceData, getMarketplaceData } from '$lib/stores/marketplace-store';
+  import { loadMarketplaceData, getMarketplaceData } from '$lib/stores/marketplace-store.svelte';
   import { giftCardImageDomain } from '$lib/constants';
   import { m } from '@/paraglide/messages';
   import { ShoppingBag, GiftIcon } from 'lucide-svelte';
   import { walletItemsStore } from '@/stores/wallet-store';
   import { page } from '$app/state';
-  import { getPurchaseOrdersStore } from '$lib/stores/order-history';
+  import { getPurchaseOrdersStore } from '$lib/stores/order-history.svelte';
 
   const {
     brands,
