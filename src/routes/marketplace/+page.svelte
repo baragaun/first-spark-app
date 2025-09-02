@@ -71,9 +71,11 @@
   });
 </script>
 
-<div class="container mx-auto px-4 py-6">
+<div class="container mx-auto px-4 py-2">
   <header class="mb-6">
-    <h1 class="text-3xl font-bold text-foreground">{m['marketplace.title']()}</h1>
+    {#if !isMobile.current}
+      <h1 class="text-3xl font-bold text-foreground">{m['marketplace.title']()}</h1>
+    {/if}
     <p class="mt-2 text-muted-foreground">{m['marketplace.subtitle']()}</p>
   </header>
 

@@ -13,7 +13,9 @@
   import { m } from '@/paraglide/messages';
   import { giftCardImageDomain } from '@/constants';
   import type { WalletItem } from '@baragaun/bg-node-client';
-  import { isLocale } from '@/paraglide/runtime';
+  import { IsMobile } from '$lib/hooks/is-mobile.svelte.js';
+
+  const isMobile = new IsMobile();
 
   interface QuaggaResult {
     codeResult?: {
@@ -187,13 +189,15 @@
   }
 </script>
 
-<div class="container mx-auto px-4 py-6">
-  <div class="flex">
-    <header class="mb-6">
-      <h1 class="text-3xl font-bold text-foreground">{m['wallet.title']()}</h1>
-      <!--      <p class="mt-2 text-muted-foreground">{m['wallet.subtitle']()}</p>-->
-    </header>
-  </div>
+<div class="container mx-auto px-4 py-2">
+  {#if !isMobile.current}
+    <div class="flex">
+      <header class="mb-6">
+        <h1 class="text-3xl font-bold text-foreground">{m['wallet.title']()}</h1>
+        <!--      <p class="mt-2 text-muted-foreground">{m['wallet.subtitle']()}</p>-->
+      </header>
+    </div>
+  {/if}
 
   <div class="flex h-[calc(100vh-200px)] flex-col">
     <!-- Fixed Header Section -->

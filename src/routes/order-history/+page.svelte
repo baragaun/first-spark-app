@@ -7,7 +7,9 @@
   import { goto } from '$app/navigation';
   import { getPurchaseOrdersStore } from '$lib/stores/order-history.svelte';
   import { m } from '@/paraglide/messages';
-  // import * as Select from '$lib/components/ui/select/index.js';
+  import { IsMobile } from '$lib/hooks/is-mobile.svelte.js';
+
+  const isMobile = new IsMobile();
 
   const purchaseOrdersStore = getPurchaseOrdersStore();
 
@@ -56,10 +58,12 @@
   // ];
 </script>
 
-<div class="container mx-auto px-4 py-6">
-  <header class="mb-6">
-    <h1 class="text-3xl font-bold text-foreground">{m['order_history.title']()}</h1>
-  </header>
+<div class="container mx-auto px-4 py-2">
+  {#if !isMobile.current}
+    <header class="mb-6">
+      <h1 class="text-3xl font-bold text-foreground">{m['order_history.title']()}</h1>
+    </header>
+  {/if}
 
   <main class="flex-1 overflow-y-auto dark:bg-gray-900">
     <!-- <div class="relative mb-3 rounded-xl p-[2px]">
