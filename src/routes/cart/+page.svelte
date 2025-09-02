@@ -27,6 +27,7 @@
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { giftCardImageDomain } from '$lib/constants';
   import { getPurchaseOrdersStore } from '$lib/stores/order-history.svelte';
+  import { IsMobile } from '$lib/hooks/is-mobile.svelte.js';
 
   const purchaseOrdersStore = getPurchaseOrdersStore();
 
@@ -44,6 +45,8 @@
   );
 
   let showOrderPlacedDialog = $state(false);
+
+  const isMobile = new IsMobile();
 
   // Function to combine items with same productId AND same price
   function combineDuplicateItems(items: ShoppingCartItem[]): ShoppingCartItem[] {
@@ -192,10 +195,12 @@
 
 <div class="flex min-h-screen flex-col bg-background font-sans antialiased">
   <!-- Top Bar -->
-  <header class="mb-6 px-3 pt-3">
-    <h1 class="text-3xl font-bold text-foreground">{m['cart.title']()}</h1>
-    <!--    <p class="mt-2 text-muted-foreground">{m['cart.subtitle']()}</p>-->
-  </header>
+  {#if !isMobile.current}
+    <header class="mb-6 px-3 pt-3">
+      <h1 class="text-3xl font-bold text-foreground">{m['cart.title']()}</h1>
+      <!--    <p class="mt-2 text-muted-foreground">{m['cart.subtitle']()}</p>-->
+    </header>
+  {/if}
 
   <div class="container mx-auto flex-1 px-4 py-6">
     {#if cartItems.length > 0}

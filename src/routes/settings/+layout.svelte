@@ -5,6 +5,9 @@
   import * as Tabs from '@/components/ui/tabs';
   import { MyUserContext } from '@/contexts/my-user-context.svelte';
   import { m } from '@/paraglide/messages';
+  import { IsMobile } from '$lib/hooks/is-mobile.svelte.js';
+
+  const isMobile = new IsMobile();
 
   // const userContext = getContext<MyUserContext>('myUserContext');
   const userContext = hasContext('myUserContext')
@@ -46,8 +49,10 @@
   });
 </script>
 
-<div class="container py-8">
-  <h1 class="font-lexend text-3xl font-bold tracking-tight">{m['setting.setting_label']()}</h1>
+<div class="container py-2">
+  {#if !isMobile.current}
+    <h1 class="font-lexend text-3xl font-bold tracking-tight">{m['setting.setting_label']()}</h1>
+  {/if}
 
   <Tabs.Root value={activeTab} class="my-8">
     <Tabs.List class="mx-auto grid w-3/5 grid-cols-2">
