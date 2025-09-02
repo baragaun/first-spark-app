@@ -37,14 +37,14 @@ export function updateWalletItem(walletItem: WalletItem) {
   }
 }
 
-export function getWalletItemsStore() {
+export const getWalletItemsStore = () => {
   return walletItemsStore;
-}
+};
 
-export function getWalletItemTransfersStore() {
+export const getWalletItemTransfersStore = () => {
   return walletItemTransfersStore;
-}
+};
 
-export function getIsLoading() {
+export const getIsLoading = () => {
   return isLoading;
-}
+};

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { uploadedBrand, uploadedCard, uploadedProduct } from '@/stores/uploaded-card';
+  import { uploadedCardGetValues } from '@/stores/uploaded-card.svelte';
   import { m } from '@/paraglide/messages';
   import { Button } from '@/components/ui/button';
   import { ArrowLeft } from 'lucide-svelte';
@@ -20,36 +20,13 @@
   import { giftCardImageDomain } from '$lib/constants';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
 
-  let brandName = $state('');
-  let balance = $state('');
-  let barcode = $state('');
-  let pin = $state('');
-  let imageUrl: string | null = $state(null);
+  let { brandName, balance, barcode, pin, imageUrl, loading, uploadedBrand, uploadedProduct } =
+    $state(uploadedCardGetValues());
   let showSuccessDialog = $state(false);
-  let brand: Brand | null = $state(null);
-  let product: GiftCardProduct | null = $state(null);
-  let isLoading = $state(false);
 
   onMount(() => {
-    uploadedCard.subscribe((data) => {
-      brandName = data.brandName;
-      balance = data.balance;
-      barcode = data.barcode;
-      pin = data.pin;
-      imageUrl = data.imageUrl;
-      isLoading = data.isLoading ?? false;
-    });
-
-    uploadedBrand.subscribe((data) => {
-      brand = data;
-    });
-
-    uploadedProduct.subscribe((data) => {
-      product = data;
-    });
-
-    if (product !== null) {
-      imageUrl = giftCardImageDomain + '/giftcards/' + product?.imageSourceFront;
+    if (uploadedProduct !== null) {
+      imageUrl = giftCardImageDomain + '/giftcards/' + uploadedProduct?.imageSourceFront;
     }
   });
 
@@ -91,21 +68,21 @@
     event.preventDefault();
     const balanceInDollar = +balance * 1000;
     const newWalletItem = new WalletItem();
-    newWalletItem.name = brand?.name ?? '';
+    newWalletItem.name = uploadedBrand?.name ?? '';
     newWalletItem.pin = pin;
     newWalletItem.balance = balanceInDollar;
     newWalletItem.initialBalance = balanceInDollar;
     newWalletItem.price = balanceInDollar;
     newWalletItem.hasBarcode = true;
-    newWalletItem.imageSourceFront = product?.imageSourceFront;
-    newWalletItem.brandId = brand?.id ?? '';
-    newWalletItem.productId = product?.id ?? '';
+    newWalletItem.imageSourceFront = uploadedProduct?.imageSourceFront;
+    newWalletItem.brandId = uploadedBrand?.id ?? '';
+    newWalletItem.productId = uploadedProduct?.id ?? '';
     newWalletItem.walletId = myUserContext.myUserId ?? '';
     newWalletItem.productType = ProductType.giftCard;
-    newWalletItem.instructionsEn = product?.instructionsEn;
-    newWalletItem.instructionsUrl = product?.instructionsUrl;
-    newWalletItem.termsEn = product?.termsEn;
-    newWalletItem.termsUrl = product?.termsUrl;
+    newWalletItem.instructionsEn = uploadedProduct?.instructionsEn;
+    newWalletItem.instructionsUrl = uploadedProduct?.instructionsUrl;
+    newWalletItem.termsEn = uploadedProduct?.termsEn;
+    newWalletItem.termsUrl = uploadedProduct?.termsUrl;
 
     const response = await marketplaceContext.createWalletItem(newWalletItem);
     if (response.error) {
@@ -131,7 +108,7 @@
     class="mx-auto flex w-full max-w-md flex-1 flex-col items-center px-4 py-8"
     onsubmit={handleSubmit}
   >
-    {#if isLoading}
+    {#if loading}
       <div class="mb-6 flex w-full items-center justify-center">
         <span class="loader mr-2"></span> <span>{m['upload_card.loading']()}</span>
       </div>
@@ -149,7 +126,7 @@
     <div class="mb-4 w-full">
       <label for="brand" class="mb-1 block text-sm text-gray-500">{m['upload_card.brand']()}</label>
       <label for="brand" class="mb-1 block text-sm text-foreground"
-        >{brand?.name ?? brandName}</label
+        >{uploadedBrand?.name ?? brandName}</label
       >
       <!-- <input id="brand" class="w-full rounded border px-3 py-2" bind:value={brand} placeholder="Amazon.com" /> -->
     </div>

@@ -6,19 +6,14 @@
   import { Input } from '$lib/components/ui/input';
   import { Button } from '$lib/components/ui/button';
   import { goto } from '$app/navigation';
-  import {
-    getWalletItemsStore,
-    loadWalletItems,
-    loadWalletItemTransfers,
-    getIsLoading,
-  } from '@/stores/wallet-store.svelte';
-  import { uploadedCard } from '@/stores/uploaded-card';
+  import { getWalletItemsStore, loadWalletItems } from '@/stores/wallet-store.svelte';
+  import { uploadedCardSetValues } from '@/stores/uploaded-card.svelte';
   import Quagga, { QuaggaJSResultObject } from 'quagga';
   import Tesseract from 'tesseract.js';
   import { m } from '@/paraglide/messages';
-  import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
   import { giftCardImageDomain } from '@/constants';
   import type { WalletItem } from '@baragaun/bg-node-client';
+  import { isLocale } from '@/paraglide/runtime';
 
   interface QuaggaResult {
     codeResult?: {
@@ -108,14 +103,7 @@
         const imageDataUrl = e.target?.result as string;
 
         // Set loading and navigate instantly
-        uploadedCard.set({
-          brandName: '',
-          balance: '',
-          barcode: '',
-          pin: '',
-          imageUrl: imageDataUrl,
-          isLoading: true,
-        });
+        uploadedCardSetValues({ imageUrlData: imageDataUrl, isLoading: true });
         goto('/wallet/upload-card');
         // Now process extraction in background
         Quagga.decodeSingle(
@@ -183,12 +171,12 @@
               pin = pinMatch[1];
             }
             // Update store with extracted values and set loading false
-            uploadedCard.set({
-              brandName: company,
-              balance: price,
-              barcode,
-              pin,
-              imageUrl: imageDataUrl,
+            uploadedCardSetValues({
+              brandNameValue: company,
+              balanceValue: price,
+              barcodeValue: barcode,
+              pinValue: pin,
+              imageUrlData: imageDataUrl,
               isLoading: false,
             });
           },

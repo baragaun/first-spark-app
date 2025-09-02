@@ -4,14 +4,7 @@
   import { Button } from '@/components/ui/button';
   import type { MyUserContext } from '@/contexts/my-user-context.svelte';
   import { m } from '@/paraglide/messages';
-  import {
-    GiftIcon,
-    Settings,
-    ShoppingCartIcon,
-    Wallet,
-    HistoryIcon,
-    Home,
-  } from 'lucide-svelte';
+  import { GiftIcon, Settings, ShoppingCartIcon, Wallet, HistoryIcon, Home } from 'lucide-svelte';
   import { cn } from '$lib/utils';
 
   // Navigation items - same as sidebar but with Home added for mobile
@@ -81,7 +74,7 @@
           'flex h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg px-1 py-1 text-xs',
           isItemActive(item.url, page.url.pathname)
             ? 'bg-accent text-accent-foreground'
-            : 'text-muted-foreground hover:text-foreground'
+            : 'text-muted-foreground hover:text-foreground',
         )}
       >
         <item.icon class="h-5 w-5" />
