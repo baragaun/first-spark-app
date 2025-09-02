@@ -306,9 +306,9 @@
     "archive": "Archiv",
     "search": "Brieftasche durchsuchen",
     "tabs": {
-      "active": "Active",
-      "gifted": "Gifted",
-      "archived": "Archived"
+      "active": "Aktiv",
+      "gifted": "Geschenkt",
+      "archived": "Archiviert"
     },
     "gift-card": {
       "title": "Geschenkkarte",
