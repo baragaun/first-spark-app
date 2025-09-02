@@ -34,7 +34,7 @@ export async function initializeBgNodeClient(listener?: BgBaseListener) {
       maxReconnectAttempts: 3,
       reconnectTimeWait: 1000,
       pingInterval: 1000,
-    }
+    },
   };
 
   if (env.PUBLIC_APP_ENVIRONMENT) {

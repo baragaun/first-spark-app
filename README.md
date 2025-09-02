@@ -7,11 +7,15 @@ This is the frontend for the [First Spark platform](https://firstspark.social).
 ## Setting Up
 
 ### NATS Server
+
 1. Create a config file (let’s say in your home directory):
+
 ```shell
 nano ~/nats-server.conf
 ```
+
 2. Paste this minimal config:
+
 ```
 # Default NATS TCP listener (for CLI / backend)
 port: 4222
@@ -27,9 +31,11 @@ websocket {
   no_tls: true
 }
 ```
+
 Save and exit (Ctrl+O, Enter, Ctrl+X in nano).
 
 3. Start the server:
+
 ```shell
 nats-server -c ~/nats-server.conf
 ```

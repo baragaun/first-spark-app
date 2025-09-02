@@ -71,10 +71,10 @@
       setContactInfo(channelContext.selectedChannel);
     } else {
       channelContext.findChannelById(channelId).then((channel) => {
-      if (channel && typeof channel !== 'string') {
-        channelContext.selectChannel(channel);
-        setContactInfo(channel);
-      }
+        if (channel && typeof channel !== 'string') {
+          channelContext.selectChannel(channel);
+          setContactInfo(channel);
+        }
       });
     }
     initializeChannel();
@@ -137,25 +137,24 @@
     messages = messages.filter((message) => message.id !== id);
   };
 
-const myChannelListener = {
-  id: `my-channel-message-listener-${channelId}`,
-  topic: BgListenerTopic.channelMessage,
-  onChannelMessageCreated: async ({ object }: { object: ChannelMessage }) => {
-    if (object.channelId !== channelId || object.createdBy === myUserContext.myUserId) return;
-    messages = [...messages, object];
-    await tick();
-    scrollToBottomFn?.();
-  },
-  onChannelMessageUpdated: ({ object }: { object: ChannelMessage }) => {
-    if (object.channelId !== channelId) return;
-    messages = messages.map((m) => (m.id === object.id ? object : m));
-  },
-  onChannelMessageDeleted: ({ object }: { object: ChannelMessage }) => {
-    if (object.channelId !== channelId) return;
-    messages = messages.filter((m) => m.id !== object.id);
-  },
-};
-
+  const myChannelListener = {
+    id: `my-channel-message-listener-${channelId}`,
+    topic: BgListenerTopic.channelMessage,
+    onChannelMessageCreated: async ({ object }: { object: ChannelMessage }) => {
+      if (object.channelId !== channelId || object.createdBy === myUserContext.myUserId) return;
+      messages = [...messages, object];
+      await tick();
+      scrollToBottomFn?.();
+    },
+    onChannelMessageUpdated: ({ object }: { object: ChannelMessage }) => {
+      if (object.channelId !== channelId) return;
+      messages = messages.map((m) => (m.id === object.id ? object : m));
+    },
+    onChannelMessageDeleted: ({ object }: { object: ChannelMessage }) => {
+      if (object.channelId !== channelId) return;
+      messages = messages.filter((m) => m.id !== object.id);
+    },
+  };
 </script>
 
 <div class="flex h-full flex-col overflow-hidden">
