@@ -308,9 +308,9 @@
     "archive": "Archivo",
     "search": "Buscar en billetera",
     "tabs": {
-      "active": "Active",
-      "gifted": "Gifted",
-      "archived": "Archived"
+      "active": "Activo",
+      "gifted": "Regalado",
+      "archived": "Archivado"
     },
     "gift-card": {
       "title": "Tarjeta de regalo",
