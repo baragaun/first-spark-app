@@ -11,14 +11,7 @@
   import { IsMobile } from '$lib/hooks/is-mobile.svelte';
   import { giftCardImageDomain } from '$lib/constants';
 
-  const {
-    brands,
-    products,
-    productCategories,
-    // todo: use these:
-    // loading,
-    // userErrorMessage,
-  } = getMarketplaceData();
+  let marketplaceData = $state(getMarketplaceData());
 
   const isMobile = new IsMobile();
   let searchText = $state('');
@@ -30,9 +23,9 @@
   }
 
   const filteredProducts = $derived(
-    products.filter((product: GiftCardProduct) => {
+    marketplaceData.products.filter((product: GiftCardProduct) => {
       // Filter by search query (brand name)
-      if (!brands.some((brand) => brand.id === product.brandId)) {
+      if (!marketplaceData.brands.some((brand) => brand.id === product.brandId)) {
         return false; // Exclude products with no matching brand
       }
 
@@ -44,7 +37,7 @@
       // Filter by search text
       if (searchText.trim()) {
         const cleanSearchText = searchText.trim().toLowerCase();
-        const productBrand = brands.find((brand) => brand.id === product.brandId);
+        const productBrand = marketplaceData.brands.find((brand) => brand.id === product.brandId);
         if (!productBrand || !productBrand.name.toLowerCase().includes(cleanSearchText)) {
           return false;
         }
@@ -55,7 +48,7 @@
   );
 
   const getBrandForGiftCard = (giftCardProduct: GiftCardProduct): Brand | undefined =>
-    brands.find((brand) => brand.id === giftCardProduct.brandId);
+    marketplaceData.brands.find((brand) => brand.id === giftCardProduct.brandId);
 
   const handleImageError = (node: HTMLImageElement) => {
     const onError = (e: Event) => {
@@ -74,6 +67,7 @@
   // Load on mount
   $effect(() => {
     loadMarketplaceData().catch(console.error);
+    marketplaceData = getMarketplaceData();
   });
 </script>
 
@@ -114,7 +108,7 @@
           {/if}
         </DropdownMenu.Item>
 
-        {#each productCategories as category}
+        {#each marketplaceData.productCategories as category}
           <DropdownMenu.Item onclick={() => (selectedCategory = category)} class="cursor-pointer">
             {category.labelEn}
             {#if selectedCategory !== 'All' && selectedCategory.name === category.name}

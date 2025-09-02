@@ -36,7 +36,7 @@
 <nav class="sticky top-0 z-50 border-b bg-nav backdrop-blur supports-[backdrop-filter]:bg-nav">
   <div class="flex h-16 items-center px-4">
     <!-- Sidebar Trigger -->
-    <div class="mr-1 flex-none text-nav-foreground hidden md:block">
+    <div class="mr-1 hidden flex-none text-nav-foreground md:block">
       <Sidebar.Trigger />
     </div>
 
@@ -83,7 +83,7 @@
           </Button>
           <span class="sr-only">{m['nav.auth.sign_up']()}</span>
         </div>
-      <!-- {:else}
+        <!-- {:else}
         <AvatarMenu {myUser} {onSignOut} /> -->
       {/if}
     </div>
