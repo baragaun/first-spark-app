@@ -353,8 +353,8 @@
     "pin": "पिन",
     "submit": "सबमिट करें",
     "loading": "कार्ड विवरण प्राप्त किए जा रहे हैं...",
-    "upload_success_title": "Gift card uploaded",
-    "upload_success_message": "Your gift card has been submitted successfully!"
+    "upload_success_title": "गिफ्ट कार्ड अपलोड किया गया",
+    "upload_success_message": "आपका गिफ्ट कार्ड सफलतापूर्वक सबमिट हो गया है!"
   },
   "order_history": {
     "title": "ऑर्डर इतिहास",
