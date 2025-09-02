@@ -34,6 +34,11 @@
         return false;
       }
 
+      const hasDenominations =
+        (product?.denominations?.length ?? 0) > 0 || product.genericGiftCardId != undefined;
+
+      if (!hasDenominations) return false;
+
       // Filter by search text
       if (searchText.trim()) {
         const cleanSearchText = searchText.trim().toLowerCase();
