@@ -306,9 +306,9 @@
     "archive": "आर्काइव",
     "search": "वॉलेट खोजें",
     "tabs": {
-      "active": "Active",
-      "gifted": "Gifted",
-      "archived": "Archived"
+      "active": "सक्रिय",
+      "gifted": "उपहारित",
+      "archived": "संग्रहीत"
     },
     "gift-card": {
       "title": "गिफ्ट कार्ड",
