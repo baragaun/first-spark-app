@@ -355,8 +355,8 @@
     "pin": "PIN",
     "submit": "ENVIAR",
     "loading": "Obteniendo detalles de la tarjeta...",
-    "upload_success_title": "Gift card uploaded",
-    "upload_success_message": "Your gift card has been submitted successfully!"
+    "upload_success_title": "Tarjeta de regalo subida",
+    "upload_success_message": "¡Tu tarjeta de regalo ha sido enviada con éxito!"
   },
   "order_history": {
     "title": "Historial de pedidos",
