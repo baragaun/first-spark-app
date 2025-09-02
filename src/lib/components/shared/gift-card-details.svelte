@@ -132,6 +132,7 @@
 
     try {
       await marketplaceContext.archiveWalletItem(walletItem.id, !walletItem?.archivedAt);
+      walletItem.archivedAt = walletItem.archivedAt ? null : new Date().toISOString();
       updateWalletItem(walletItem);
     } catch (error) {
       console.error('Error archiving wallet item:', error);
