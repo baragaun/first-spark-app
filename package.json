@@ -81,7 +81,6 @@
     "date-fns": "^4.1.0",
     "formsnap": "^2.0.0",
     "mode-watcher": "^0.5.1",
-    "nats.ws": "^1.30.3",
     "rxdb": "^16.8.1",
     "sveltekit-superforms": "^2.23.1",
     "tailwindcss-animate": "^1.0.7",

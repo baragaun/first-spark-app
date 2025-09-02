@@ -6,6 +6,36 @@ This is the frontend for the [First Spark platform](https://firstspark.social).
 
 ## Setting Up
 
+### NATS Server
+1. Create a config file (let’s say in your home directory):
+```shell
+nano ~/nats-server.conf
+```
+2. Paste this minimal config:
+```
+# Default NATS TCP listener (for CLI / backend)
+port: 4222
+
+# Enable JetStream (optional but useful)
+jetstream {
+  store_dir: "./jetstream"
+}
+
+# WebSocket support (for browser frontend like Svelte)
+websocket {
+  port: 8080
+  no_tls: true
+}
+```
+Save and exit (Ctrl+O, Enter, Ctrl+X in nano).
+
+3. Start the server:
+```shell
+nats-server -c ~/nats-server.conf
+```
+
+4. Set URL here `src/lib/services/bg-node-client.ts` in nats configuration.
+
 Use [nvm](https://github.com/nvm-sh/nvm) ([install](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating)
 if needed) to switch to the Node version this project uses:
 

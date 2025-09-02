@@ -4,13 +4,13 @@
   import ChatHeader from '../components/chat-header.svelte';
   import MessageList from '../components/message-list.svelte';
   import MessageInput from '../components/message-input.svelte';
-  import { ChannelListItem, ChannelMessage } from '@baragaun/bg-node-client';
+  import { BgListenerTopic, ChannelListItem, ChannelMessage } from '@baragaun/bg-node-client';
   import { X } from 'lucide-svelte';
   import Button from '@/components/ui/button/button.svelte';
   import { channelContext } from '@/contexts/channel-context.svelte';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import type { ContactDetails } from '@/helpers/types';
-  import { subscribeToChannel } from './nats-client';
+  import { client } from '@/services/bg-node-client';
 
   const channelId = page.params.conversationId;
 
@@ -66,19 +66,22 @@
     isLoading = false;
   };
 
-  onMount(async () => {
+  onMount(() => {
     if (channelContext.selectedChannel) {
       setContactInfo(channelContext.selectedChannel);
     } else {
-      const response = await channelContext.findChannelById(channelId);
-      console.log('FindChannelById: response:', response);
-      if (response && typeof response !== 'string') {
-        channelContext.selectChannel(response);
-        setContactInfo(response);
+      channelContext.findChannelById(channelId).then((channel) => {
+      if (channel && typeof channel !== 'string') {
+        channelContext.selectChannel(channel);
+        setContactInfo(channel);
       }
+      });
     }
     initializeChannel();
-    connectChannel(channelId);
+    client.addListener(myChannelListener);
+    return () => {
+      client.removeListener(myChannelListener.id);
+    };
   });
 
   const handleScrollToBottomEvent = (event: CustomEvent<() => void>) => {
@@ -134,20 +137,24 @@
     messages = messages.filter((message) => message.id !== id);
   };
 
-  const connectChannel = async (channelId: string) =>{
-  await subscribeToChannel(channelId, async (msg, opr) => {
-    console.log('Received message:', msg, opr);
-    if (opr === 'created' && msg.createdBy != myUserContext.myUserId) {
-      messages = [...messages, msg];
-      await tick();
-      scrollToBottomFn?.();
-    } else if (opr === 'updated') {
-      messages = messages.map((m) => (m.id === msg.id ? msg : m));
-    } else if (opr === 'deleted') {
-      messages = messages.filter((m) => m.id !== msg.id);
-    }
-  });
-}
+const myChannelListener = {
+  id: `my-channel-message-listener-${channelId}`,
+  topic: BgListenerTopic.channelMessage,
+  onChannelMessageCreated: async ({ object }: { object: ChannelMessage }) => {
+    if (object.channelId !== channelId || object.createdBy === myUserContext.myUserId) return;
+    messages = [...messages, object];
+    await tick();
+    scrollToBottomFn?.();
+  },
+  onChannelMessageUpdated: ({ object }: { object: ChannelMessage }) => {
+    if (object.channelId !== channelId) return;
+    messages = messages.map((m) => (m.id === object.id ? object : m));
+  },
+  onChannelMessageDeleted: ({ object }: { object: ChannelMessage }) => {
+    if (object.channelId !== channelId) return;
+    messages = messages.filter((m) => m.id !== object.id);
+  },
+};
 
 </script>
 
