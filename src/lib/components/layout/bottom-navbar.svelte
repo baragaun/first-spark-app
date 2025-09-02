@@ -68,17 +68,17 @@
     {#each visibleItems as item (item.title)}
       <Button
         href={item.url}
-        variant="ghost"
-        size="sm"
+        variant="link"
+        size="lg"
         class={cn(
-          'flex h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg px-1 py-1 text-xs',
+          'flex h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg bg-background px-1 py-1',
           isItemActive(item.url, page.url.pathname)
-            ? 'bg-accent text-accent-foreground'
-            : 'text-muted-foreground hover:text-foreground',
+            ? 'bg-background text-nav-foreground hover:bg-transparent'
+            : 'text-foreground hover:text-foreground',
         )}
       >
-        <item.icon class="h-5 w-5" />
-        <span class="truncate text-[10px] leading-tight">{item.title}</span>
+        <item.icon class="h-8 w-8" />
+        <span class="truncate text-[11px]">{item.title}</span>
       </Button>
     {/each}
   </div>
