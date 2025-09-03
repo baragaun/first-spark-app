@@ -71,14 +71,14 @@
         variant="link"
         size="lg"
         class={cn(
-          'flex h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg bg-background px-1 py-1',
+          'flex h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg bg-background px-1 py-1 no-underline hover:no-underline',
           isItemActive(item.url, page.url.pathname)
-            ? 'bg-background text-nav-foreground hover:bg-transparent'
+            ? 'bg-background text-nav-foreground hover:bg-background'
             : 'text-foreground hover:text-foreground',
         )}
       >
-        <item.icon class="h-8 w-8" />
-        <span class="truncate text-[11px]">{item.title}</span>
+        <item.icon class="h-[20px] w-[20px]" style="height:20px!important;width:20px!important;" />
+        <span class="font-semi-bold truncate text-[11px]">{item.title}</span>
       </Button>
     {/each}
   </div>
