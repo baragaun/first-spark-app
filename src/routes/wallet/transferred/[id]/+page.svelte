@@ -11,20 +11,19 @@
     getWalletItemsStore,
     getWalletItemTransfersStore,
     loadWalletItemTransfers,
-    getIsLoading,
     updateWalletItem,
   } from '@/stores/wallet-store.svelte';
   import type { WalletItemTransfer } from '@baragaun/bg-node-client';
 
   // Get wallet item by id from store
-  const walletCardId = page.params.id;
-  let walletItem = $derived(getWalletItemsStore().find((p) => p.id === walletCardId) || null);
+  const walletItemId = page.params.id;
+  let walletItem = $derived(getWalletItemsStore().find((p) => p.id === walletItemId) || null);
   let walletItemTransfer: WalletItemTransfer | undefined | null = $state(null);
 
   onMount(async () => {
     loadWalletItemTransfers();
     walletItemTransfer = getWalletItemTransfersStore().find(
-      (walletItemTransfer) => walletItemTransfer.walletItemId === walletCardId,
+      (walletItemTransfer) => walletItemTransfer.walletItemId === walletItemId,
     );
   });
 
@@ -45,7 +44,7 @@
     }
 
     try {
-      await marketplaceContext.archiveWalletItem(walletCardId, !walletItem?.archivedAt);
+      await marketplaceContext.archiveWalletItem(walletItemId, !walletItem?.archivedAt);
       updateWalletItem(walletItem);
     } catch (error) {
       console.error('Error archiving wallet item:', error);

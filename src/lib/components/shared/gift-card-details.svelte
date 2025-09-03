@@ -132,8 +132,12 @@
 
     try {
       await marketplaceContext.archiveWalletItem(walletItem.id, !walletItem?.archivedAt);
-      walletItem.archivedAt = walletItem.archivedAt ? null : new Date().toISOString();
-      updateWalletItem(walletItem);
+      // Create a new object to trigger Svelte reactivity
+      const updatedWalletItem = {
+        ...walletItem,
+        archivedAt: walletItem.archivedAt ? null : new Date().toISOString()
+      };
+      updateWalletItem(updatedWalletItem);
     } catch (error) {
       console.error('Error archiving wallet item:', error);
       // todo: show user error
