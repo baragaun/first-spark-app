@@ -1,42 +1,69 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
-  import { brandsStore, giftCardProductsStore, dataLoaded } from '$lib/stores/marketplace-store';
+  import { loadMarketplaceData, getMarketplaceData } from '$lib/stores/marketplace-store.svelte';
   import type { GiftCardProduct, Brand } from '@baragaun/bg-node-client';
   import { goto } from '$app/navigation';
   import placeholderImage from '../../../assets/images/placeholder.png';
   import { Search } from 'lucide-svelte';
   import { ArrowLeft } from 'lucide-svelte';
-  import { uploadedBrand, uploadedProduct } from '@/stores/uploaded-card';
+  import { uploadedCardSetValues } from '@/stores/uploaded-card.svelte';
   import { m } from '@/paraglide/messages';
   import { Input } from '$lib/components/ui/input';
   import { giftCardImageDomain } from '$lib/constants';
 
-  let search = '';
+  const {
+    brands,
+    products,
+    // todo: use these:
+    // loading,
+    // userErrorMessage,
+  } = getMarketplaceData();
 
-  $: filteredProducts = $giftCardProductsStore.filter((product) => {
-    const vendor = $brandsStore.find((v) => v.id === product.brandId);
-    return vendor && vendor.name.toLowerCase().includes(search.toLowerCase());
-  });
+  let searchText = $state('');
 
-  function getVendorForGiftCard(giftCardProduct: GiftCardProduct): Brand | undefined {
-    return $brandsStore.find((brand) => brand.id === giftCardProduct.brandId);
-  }
+  const filteredProducts = $derived(
+    products.filter((product: GiftCardProduct) => {
+      // Filter by search query (brand name)
+      if (!brands.some((brand) => brand.id === product.brandId)) {
+        return false; // Exclude products with no matching brand
+      }
 
-  onMount(async () => {
-    if (!$dataLoaded) {
-      const products = await marketplaceContext.findGiftCardProducts();
-      if (Array.isArray(products)) giftCardProductsStore.set(products);
-      const vendors = await marketplaceContext.findBrands();
-      if (Array.isArray(vendors)) brandsStore.set(vendors);
-      dataLoaded.set(true);
-    }
+      // Filter by search text
+      if (searchText.trim()) {
+        const cleanSearchText = searchText.trim().toLowerCase();
+        const productBrand = brands.find((brand) => brand.id === product.brandId);
+        if (!productBrand || !productBrand.name.toLowerCase().includes(cleanSearchText)) {
+          return false;
+        }
+      }
+
+      return true;
+    }),
+  );
+
+  const getBrandForGiftCard = (giftCardProduct: GiftCardProduct): Brand | undefined =>
+    brands.find((brand) => brand.id === giftCardProduct.brandId);
+
+  const handleImageError = (node: HTMLImageElement) => {
+    const onError = (e: Event) => {
+      (e.currentTarget as HTMLImageElement).src = placeholderImage;
+    };
+
+    node.addEventListener('error', onError);
+
+    return {
+      destroy() {
+        node.removeEventListener('error', onError);
+      },
+    };
+  };
+
+  // Load on mount
+  $effect(() => {
+    loadMarketplaceData().catch(console.error);
   });
 
   function handleBrandClick(product: GiftCardProduct, brand: Brand) {
-    uploadedBrand.set(brand);
-    uploadedProduct.set(product);
-
+    uploadedCardSetValues({ brand: brand, product: product });
     goto('/wallet/upload-card');
   }
 </script>
@@ -61,7 +88,7 @@
       type="search"
       placeholder={m['marketplace.search_placeholder']()}
       class="search-input-override w-full rounded-full border-0 bg-background px-3 py-2 pl-10 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-      bind:value={search}
+      bind:value={searchText}
     />
   </div>
 </div>
@@ -74,24 +101,24 @@
         class="grid h-full grid-cols-3 items-start gap-x-2 gap-y-6 overflow-y-auto sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7"
       >
         {#each filteredProducts as product (product.id)}
-          {@const vendor = getVendorForGiftCard(product)}
-          {#if vendor}
+          {@const brand = getBrandForGiftCard(product)}
+          {#if brand}
             <button
               class="group flex flex-col items-center justify-center focus:outline-none"
-              onclick={() => handleBrandClick(product, vendor)}
-              onkeydown={(e) => e.key === 'Enter' && handleBrandClick(product, vendor)}
+              onclick={() => handleBrandClick(product, brand)}
+              onkeydown={(e) => e.key === 'Enter' && handleBrandClick(product, brand)}
             >
               <img
-                src={giftCardImageDomain + '/vendors/' + vendor.logoImageSource}
-                alt={vendor.name}
+                src={giftCardImageDomain + '/vendors/' + brand.logoImageSource}
+                alt={brand.name}
                 class="mb-2 h-10 w-16 object-contain transition-transform group-hover:scale-105"
-                onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
+                use:handleImageError
               />
               <span
                 class="max-w-[5.5rem] break-words text-center text-xs leading-tight text-gray-500 group-hover:text-primary"
                 style="word-break:break-word;"
               >
-                {vendor.name}
+                {brand.name}
               </span>
             </button>
           {/if}

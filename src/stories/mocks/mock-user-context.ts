@@ -211,7 +211,6 @@ export class MockMyUserContext {
               actionType: MultiStepActionType.tokenSignIn,
               result: MultiStepActionResult.ok,
               attemptCount: 0,
-              id: 'mock-token-signin-id',
               createdAt: new Date().toISOString(),
             });
           });
@@ -227,7 +226,6 @@ export class MockMyUserContext {
             actionType: MultiStepActionType.tokenSignIn,
             result: MultiStepActionResult.ok,
             attemptCount: 0,
-            id: '',
             createdAt: '',
           },
           run: {
@@ -284,7 +282,6 @@ export class MockMyUserContext {
             actionType: MultiStepActionType.resetPassword,
             result: MultiStepActionResult.ok,
             attemptCount: 0,
-            id: 'mock-progress-id',
             createdAt: new Date().toISOString(),
           });
         });
@@ -316,7 +313,6 @@ export class MockMyUserContext {
               actionType: MultiStepActionType.tokenSignIn,
               result: MultiStepActionResult.ok,
               attemptCount: 0,
-              id: 'mock-token-signin-id',
               createdAt: new Date().toISOString(),
             });
           });
@@ -332,7 +328,6 @@ export class MockMyUserContext {
               actionType: MultiStepActionType.verifyEmail,
               result: MultiStepActionResult.ok,
               attemptCount: 0,
-              id: 'mock-progress-id',
               createdAt: new Date().toISOString(),
             });
           });
@@ -413,7 +408,6 @@ export class MockMyUserContext {
             actionType: MultiStepActionType.verifyEmail,
             result: MultiStepActionResult.ok,
             attemptCount: 0,
-            id: 'mock-progress-id',
             createdAt: new Date().toISOString(),
           });
         });
@@ -429,7 +423,6 @@ export class MockMyUserContext {
           actionType: MultiStepActionType.verifyEmail,
           result: MultiStepActionResult.ok,
           attemptCount: 0,
-          id: 'mock-progress-id',
           createdAt: new Date().toISOString(),
         },
         run: {
@@ -450,7 +443,6 @@ export class MockMyUserContext {
                     actionType: MultiStepActionType.verifyEmail,
                     result: MultiStepActionResult.ok,
                     attemptCount: 0,
-                    id: 'mock-progress-id',
                     createdAt: new Date().toISOString(),
                   });
                 });
@@ -622,7 +614,6 @@ export class MockMyUserContext {
           actionType: MultiStepActionType.resetPassword,
           result: MultiStepActionResult.ok,
           attemptCount: 0,
-          id: 'mock-progress-id',
           createdAt: new Date().toISOString(),
         },
         run: {
@@ -644,7 +635,6 @@ export class MockMyUserContext {
                     actionType: MultiStepActionType.resetPassword,
                     result: MultiStepActionResult.ok,
                     attemptCount: 0,
-                    id: 'mock-progress-id',
                     createdAt: new Date().toISOString(),
                   });
                 });
@@ -689,7 +679,6 @@ export class MockMyUserContext {
             actionType: MultiStepActionType[type as keyof typeof MultiStepActionType],
             result: MultiStepActionResult.ok,
             attemptCount: 0,
-            id: 'mock-progress-id',
             createdAt: new Date().toISOString(),
           });
         });

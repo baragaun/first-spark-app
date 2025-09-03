@@ -8,7 +8,6 @@
   import { m } from '@/paraglide/messages';
   import {
     GiftIcon,
-    House,
     PlugZap,
     Settings,
     ShoppingCartIcon,
@@ -19,11 +18,11 @@
   import { appTitle, headerIcon, headerSmallIcon } from '$lib/stores/app-store';
 
   const items = [
-    {
-      title: m['sidebar.menu.home'](),
-      url: '/',
-      icon: House,
-    },
+    // {
+    //   title: m['sidebar.menu.home'](),
+    //   url: '/',
+    //   icon: House,
+    // },
     /* TODO: Hidding the following sidebar buttons as per the issue: https://github.com/baragaun/first-spark-app/issues/112 */
     /* {
       title: m['sidebar.menu.inbox'](),
@@ -44,9 +43,9 @@
       requiresAuth: true,
     }, */
     {
-      title: m['sidebar.menu.settings'](),
-      url: '/settings',
-      icon: Settings,
+      title: m['sidebar.menu.wallet'](),
+      url: '/wallet',
+      icon: Wallet,
       requiresAuth: true,
     },
     {
@@ -62,15 +61,15 @@
       requiresAuth: true,
     },
     {
-      title: m['sidebar.menu.wallet'](),
-      url: '/wallet',
-      icon: Wallet,
-      requiresAuth: true,
-    },
-    {
       title: m['sidebar.menu.order_history'](),
       url: '/order-history',
       icon: HistoryIcon,
+      requiresAuth: true,
+    },
+    {
+      title: m['sidebar.menu.settings'](),
+      url: '/settings',
+      icon: Settings,
       requiresAuth: true,
     },
   ];
@@ -78,7 +77,6 @@
   let {
     ref = $bindable(null),
     collapsible = 'icon' as ComponentProps<typeof Sidebar.Root>['collapsible'],
-    ...restProps
   } = $props();
 
   const userContext = getContext<MyUserContext>('myUserContext');
@@ -108,7 +106,7 @@
   };
 </script>
 
-<Sidebar.Root bind:ref {collapsible} {...restProps}>
+<Sidebar.Root bind:ref {collapsible}>
   <Sidebar.Content>
     <Sidebar.Header>
       <Sidebar.Menu>

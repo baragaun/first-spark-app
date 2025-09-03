@@ -1,48 +1,47 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import type { PurchaseOrder } from '@baragaun/bg-node-client';
   import { marketplaceContext } from '$lib/contexts/marketplace-context.svelte';
-  import { ArrowLeft, ChevronRight, ChevronDown } from 'lucide-svelte';
-  import { Button } from '$lib/components/ui/button';
-  import { Label } from '$lib/components/ui/label';
+  import { ChevronRight } from 'lucide-svelte';
   import { Separator } from '$lib/components/ui/separator';
   import SpinLoadIndicator from '$lib/components/forms/spin-load-indicator.svelte';
-  import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-  import AvatarMenu from '$lib/components/layout/nav-bar/avatar-menu.svelte';
   import { goto } from '$app/navigation';
-  import { orderHistoryStore, orderHistoryLoaded } from '$lib/stores/order-history';
-  import { get } from 'svelte/store';
+  import { getPurchaseOrdersStore } from '$lib/stores/order-history.svelte';
   import { m } from '@/paraglide/messages';
-  import * as Select from '$lib/components/ui/select/index.js';
+  import { IsMobile } from '$lib/hooks/is-mobile.svelte.js';
+
+  const isMobile = new IsMobile();
+
+  const purchaseOrdersStore = getPurchaseOrdersStore();
 
   let purchaseOrders = $state<PurchaseOrder[]>([]);
   let isLoading = $state(true);
-  let filterStatus = $state(m['order_history.all_orders']());
+  // use it later
+  // let filterStatus = $state(m['order_history.all_orders']());
 
-  let filteredOrders = $derived(
-    purchaseOrders.filter((order) => {
-      if (filterStatus === m['order_history.all_orders']()) return true;
-      const o = order as any;
-      return o.status?.toLowerCase() === filterStatus.toLowerCase();
-    }),
-  );
+  // let filteredOrders = $derived(
+  //   purchaseOrders.filter((order) => {
+  //     if (filterStatus === m['order_history.all_orders']()) return true;
+  //     return order.status?.toLowerCase() === filterStatus.toLowerCase();
+  //   }),
+  // );
 
-  onMount(async () => {
+  const loadData = async () => {
     isLoading = true;
-    if (!get(orderHistoryLoaded)) {
-      const result = await marketplaceContext.findPurchaseOrders();
-      if (result && typeof result !== 'string') {
-        orderHistoryStore.set(result);
-        orderHistoryLoaded.set(true);
-        purchaseOrders = result;
-      } else {
-        console.error('Failed to fetch purchase orders:', result);
+    if (!purchaseOrdersStore.isLoaded) {
+      const orders = await marketplaceContext.findPurchaseOrders();
+      if (orders && typeof orders !== 'string') {
+        purchaseOrdersStore.setPurchaseOrders(orders);
+        purchaseOrders = purchaseOrdersStore.purchaseOrders;
       }
     } else {
-      const storeValue = get(orderHistoryStore);
-      purchaseOrders = storeValue || [];
+      purchaseOrders = purchaseOrdersStore.purchaseOrders;
     }
     isLoading = false;
+  };
+
+  // Load on mount
+  $effect(() => {
+    loadData().catch(console.error);
   });
 
   function formatDate(dateString: string | undefined) {
@@ -51,19 +50,22 @@
     return date.toLocaleDateString('en-US');
   }
 
-  const statusOptions = [
-    m['order_history.all_orders'](),
-    m['order_history.delivered'](),
-    m['order_history.processing'](),
-  ];
+  // Currently not used:
+  // const statusOptions = [
+  //   m['order_history.all_orders'](),
+  //   m['order_history.delivered'](),
+  //   m['order_history.processing'](),
+  // ];
 </script>
 
-<div class="container mx-auto px-4 py-6">
-  <header class="mb-6">
-    <h1 class="text-3xl font-bold text-foreground">{m['order_history.title']()}</h1>
-  </header>
+<div class="container mx-auto px-4 py-2">
+  {#if !isMobile.current}
+    <header class="mb-6">
+      <h1 class="text-3xl font-bold text-foreground">{m['order_history.title']()}</h1>
+    </header>
+  {/if}
 
-  <main class="flex-1 overflow-y-auto bg-gray-100 p-4 dark:bg-gray-900">
+  <main class="flex-1 overflow-y-auto dark:bg-gray-900">
     <!-- <div class="relative mb-3 rounded-xl p-[2px]">
       <Select.Root type="single" bind:value={filterStatus}>
         <Select.Trigger class="w-full rounded-2xl bg-black/5 dark:bg-background">
@@ -82,8 +84,8 @@
         <div class="flex items-center justify-center py-8">
           <SpinLoadIndicator />
         </div>
-      {:else if filteredOrders.length > 0}
-        {#each filteredOrders as order, i (order.id)}
+      {:else if purchaseOrders.length > 0}
+        {#each purchaseOrders as order, i (order.id)}
           <button
             type="button"
             class="flex w-full cursor-pointer items-center justify-between rounded py-4 text-left transition"
@@ -99,7 +101,7 @@
             </div>
             <ChevronRight class="h-5 w-5 text-gray-400" />
           </button>
-          {#if i < filteredOrders.length - 1}
+          {#if i < purchaseOrders.length - 1}
             <Separator />
           {/if}
         {/each}

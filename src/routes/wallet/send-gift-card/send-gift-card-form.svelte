@@ -20,9 +20,8 @@
   import { goto } from '$app/navigation';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
-  import { walletItemsStore } from '@/stores/wallet-store';
-  import { derived } from 'svelte/store';
-  import { page } from '$app/stores';
+  import { getWalletItemsStore } from '@/stores/wallet-store.svelte';
+  import { page } from '$app/state';
 
   const DEBOUNCE_DELAY = 350;
 
@@ -61,9 +60,7 @@
 
   let showDialog = $state(false);
 
-  const walletItem = derived([walletItemsStore], ([$products]) => {
-    return $products.find((p) => p.id === data.walletItemId) || null;
-  });
+  let walletItem = $derived(getWalletItemsStore().find((p) => p.id === data.walletItemId) || null);
 
   const sendEmail = async (
     transferSlug: string,
@@ -73,28 +70,22 @@
     message?: string,
   ) => {
     console.log(walletItem);
-    const attachmentLink = `${$page.url.origin}/wallet/gifted-card/${transferSlug}`;
+    const attachmentLink = `${page.url.origin}/wallet/gifted-card/${transferSlug}`;
     const subject = encodeURIComponent(`${myUserContext.myUser?.userHandle} sent you a gift card`);
     // Not showing expiresAt as it is always null
     // const expiresAt = $walletItem?.expiresAt ? `Expiry Date: ${$walletItem?.expiresAt}` : '';
-    const balance = $walletItem?.balance ? ($walletItem?.balance / 1000).toFixed(0) : 0;
-    const body = encodeURIComponent(`
-    Hello ${recipientFullName},
+    const balance = walletItem?.balance ? (walletItem?.balance / 1000).toFixed(0) : 0;
+    const body = encodeURIComponent(
+      `${message}
 
-    Surprise! 🎉 We’re excited to share this special gift with you.
-    Attached to this email, you’ll need to enter the secret code  ${secretCode} to activate your Gift Card.
+------------------------------------
+Details:
+Gift Card Value: ${balance}
+Accept gift at: ${attachmentLink}
+Unlock code: ${secretCode}
+------------------------------------`,
+    );
 
-    Details:
-    Gift Card Value: ${balance}
-    Message: ${message}
-    ${attachmentLink}
-
-    To redeem, simply present this gift card at checkout or enter the gift card code when shopping online.
-    We hope you enjoy your gift — you deserve it! 💝
-
-    Warm regards,
-    ${myUserContext.myUser?.userHandle}
-    `);
     // You can append a link to the attachment in the email body
     const mailto = `mailto:${recipientEmail}?subject=${subject}&body=${body}`;
     window.location.href = mailto;

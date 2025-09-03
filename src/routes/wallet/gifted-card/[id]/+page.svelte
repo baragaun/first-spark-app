@@ -4,7 +4,12 @@
   import { Button } from '@/components/ui/button';
   import { page } from '$app/state';
   import GiftCardDetails from '@/components/shared/gift-card-details.svelte';
-  import { type WalletItem } from '@baragaun/bg-node-client';
+  import {
+    Brand,
+    GiftCardProduct,
+    type WalletItem,
+    WalletItemTransferAcceptInfo,
+  } from '@baragaun/bg-node-client';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
   import { m } from '@/paraglide/messages';
   import { onMount } from 'svelte';
@@ -14,7 +19,11 @@
   let open = $state(false);
   let pin = $state('');
   let verified = $state(false);
-  let walletItem = $state<WalletItem | undefined | null>(null);
+  let isLoading = $state(false);
+  let acceptedWalletItem = $state<WalletItem | undefined>(undefined);
+  let product = $state<GiftCardProduct | undefined>(undefined);
+  let brand = $state<Brand | undefined>(undefined);
+  let walletItemTransferAcceptInfo = $state<WalletItemTransferAcceptInfo | undefined>(undefined);
 
   const transferSlug = page.params.id;
 
@@ -26,18 +35,22 @@
 
   async function acceptWalletItemTransfer() {
     if (!pin) return;
+    isLoading = true;
     const response = await marketplaceContext.acceptWalletItemTransfer(transferSlug, pin);
+
     if (response.error) {
       logger.error('Error verifying wallet item transfer', response.error);
       return;
     }
+
     if (!response.object) {
       logger.error('Error verifying wallet item transfer: no object');
       return;
     }
 
-    walletItem = response.object;
+    acceptedWalletItem = response.object;
     verified = true;
+    isLoading = false;
   }
 
   async function declineWalletItemTransfer() {
@@ -49,19 +62,29 @@
     toast.success(m['gifted_card.decline_success']());
   }
 
-  async function loadWalletItem() {
-    const response = await marketplaceContext.findWalletItemByTransferSlug(transferSlug);
+  async function loadData() {
+    isLoading = true;
+    try {
+      const response =
+        await marketplaceContext.findWalletItemTransferAcceptInfoByTransferSlug(transferSlug);
 
-    if (typeof response === 'string') {
-      logger.error('Failed to load wallet item', response);
-      return;
+      if (typeof response === 'string') {
+        logger.error('Failed to load wallet item', response);
+        return;
+      }
+
+      walletItemTransferAcceptInfo = response;
+      product = walletItemTransferAcceptInfo?.product ?? undefined;
+      brand = walletItemTransferAcceptInfo?.brand ?? undefined;
+
+      isLoading = false;
+    } catch (error) {
+      logger.error('Error loading wallet items', error);
     }
-
-    walletItem = response;
   }
 
   onMount(async () => {
-    loadWalletItem();
+    await loadData();
   });
 </script>
 
@@ -93,13 +116,24 @@
   {/if}
 </div>
 
-<GiftCardDetails
-  walletItem={walletItem ?? null}
-  giftCardItem={null}
-  showNavBar={false}
-  hideActions={true}
-  isVerified={verified}
-/>
+{#if isLoading}
+  <div class="flex h-[60vh] items-center justify-center">
+    <div
+      class="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"
+    ></div>
+  </div>
+{/if}
+
+{#if product && brand}
+  <GiftCardDetails
+    walletItem={acceptedWalletItem ?? walletItemTransferAcceptInfo?.walletItem}
+    {product}
+    {brand}
+    showNavBar={false}
+    hideActions={true}
+    isVerified={verified}
+  />
+{/if}
 
 <Dialog bind:open>
   <DialogContent>

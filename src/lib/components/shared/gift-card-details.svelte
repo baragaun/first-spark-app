@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import { Button } from '$lib/components/ui/button';
   import * as Card from '$lib/components/ui/card';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
@@ -12,8 +11,7 @@
   } from '@baragaun/bg-node-client';
   import placeholderImage from '../../../assets/images/placeholder.png';
   import { Archive, ArrowLeft, ExternalLink, Gift, Printer, ZoomOut } from 'lucide-svelte';
-  import { brandsStore, giftCardProductsStore, dataLoaded } from '$lib/stores/marketplace-store';
-  import { walletItemsStore } from '@/stores/wallet-store';
+  import { updateWalletItem } from '@/stores/wallet-store.svelte';
   import BarcodeView from './barcode-view.svelte';
   import { downloadPdf } from '@/utils/pdf-utils';
   import { m } from '@/paraglide/messages';
@@ -22,68 +20,69 @@
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { toast } from 'svelte-sonner';
   import { page } from '$app/state';
-  import { image } from '@nextui-org/react';
+  import { getMarketplaceData, loadMarketplaceData } from '@/stores/marketplace-store.svelte';
+  import { getGiftCardDenominations } from '@/utils/marketplace-utils';
+  import { onMount } from 'svelte';
 
   interface Props {
-    walletItem: WalletItem | null;
-    giftCardItem: GiftCardProduct | null;
+    productId?: string;
+    walletItem?: WalletItem;
     showNavBar?: boolean;
     hideActions?: boolean;
     isVerified?: boolean;
+    product?: GiftCardProduct;
+    brand?: Brand;
   }
 
   let {
+    productId,
     walletItem,
-    giftCardItem,
     showNavBar = true,
     hideActions = false,
     isVerified = true,
+    product,
+    brand,
   }: Props = $props();
 
-  let product = $derived.by(() => walletItem || giftCardItem);
+  const { brands, products, loading, userErrorMessage } = getMarketplaceData();
 
-  let isLoading = $state(false);
-  let error = $state<string | null>(null);
+  if (!product) {
+    if (productId) {
+      product = products.find((p) => p.id === productId);
+    } else if (walletItem?.productId) {
+      product = products.find((p) => p.id === walletItem.productId);
+    } else {
+      product = undefined;
+    }
+  }
+
+  if (!brand) {
+    if (product?.brandId) {
+      brand = brands.find((b) => b.id === product.brandId);
+    } else if (walletItem?.brandId) {
+      brand = brands.find((b) => b.id === walletItem.brandId);
+    } else {
+      brand = undefined;
+    }
+  }
+
   let selectedTab = $state(walletItem ? 'use' : 'buy');
-  $effect(() => {
-    if (walletItem) {
-      selectedTab = 'use';
+
+  onMount(() => {
+    if (!brand && !product) {
+      console.log('Loading marketplace data 123:', brand, product);
+      loadMarketplaceData().catch(console.error);
     }
   });
-  let isBarcodeViewOpen = $state(false);
-  let brand = $state<Brand | null>(null);
 
+  let isBarcodeViewOpen = $state(false);
   let instructions = $derived(product?.instructionsEn ?? walletItem?.instructionsEn);
   let terms = $derived(product?.termsEn ?? walletItem?.termsEn);
   let imageSourceFront = $derived(product?.imageSourceFront ?? walletItem?.imageSourceFront);
-
-  onMount(async () => {
-    if ($dataLoaded) {
-      brand =
-        $brandsStore.find((v) => v.id === (walletItem?.brandId || giftCardItem?.brandId)) || null;
-      return;
-    }
-    try {
-      isLoading = true;
-      const brandsResponse = await marketplaceContext.findBrands();
-      if (typeof brandsResponse === 'string') {
-        error = brandsResponse;
-        return;
-      }
-      brandsStore.set(brandsResponse as Brand[]);
-      brand =
-        $brandsStore.find((v) => v.id === (walletItem?.brandId || giftCardItem?.brandId)) || null;
-    } catch (err) {
-      error = 'Failed to load gift card details';
-      console.error(err);
-    } finally {
-      isLoading = false;
-    }
-  });
-
   const barcodeFormat = walletItem?.barcodeFormat || 'CODE39';
-
-  const barcodeApiUrl = `https://barcodeapi.org/api/${barcodeFormat === 'QR_CODE' ? 'qr' : 'code39'}/${encodeURIComponent(walletItem?.code || '')}`;
+  const barcodeApiUrl = `https://barcodeapi.org/api/${
+    barcodeFormat === 'QR_CODE' ? 'qr' : 'code39'
+  }/${encodeURIComponent(walletItem?.code || '')}`;
 
   function backAndClose() {
     if (isBarcodeViewOpen) {
@@ -94,40 +93,28 @@
   }
 
   async function archiveWalletItem() {
-    if (!walletItem) return;
-    await marketplaceContext.archiveWalletItem(walletItem.id, !walletItem?.archivedAt).then(() => {
-      walletItemsStore.update((items) => {
-        return items.map((item) => {
-          if (item.id === walletItem?.id) {
-            item.archivedAt = walletItem?.archivedAt ? null : new Date().toISOString();
-          }
-          return item;
-        });
-      });
-    });
+    if (!walletItem) {
+      console.error('No wallet item found to archive.');
+      return;
+    }
+
+    try {
+      await marketplaceContext.archiveWalletItem(walletItem.id, !walletItem?.archivedAt);
+      // Create a new object to trigger Svelte reactivity
+      const updatedWalletItem = {
+        ...walletItem,
+        archivedAt: walletItem.archivedAt ? null : new Date().toISOString(),
+      };
+      updateWalletItem(updatedWalletItem);
+    } catch (error) {
+      console.error('Error archiving wallet item:', error);
+      // todo: show user error
+    }
   }
 
   function handlePrintPdf() {
     if (!walletItem || !walletItem.code || !walletItem.pin) return;
     downloadPdf(walletItem, walletItem.code, walletItem.pin);
-  }
-
-  function getDenominations(
-    giftCardProduct: GiftCardProduct | null | undefined,
-  ): GiftCardDenomination[] {
-    let denominationsToReturn: GiftCardDenomination[] = [];
-    if (giftCardProduct?.denominations && giftCardProduct.denominations.length > 0) {
-      denominationsToReturn = giftCardProduct.denominations;
-    } else if (giftCardProduct?.genericGiftCardId) {
-      const genericProduct = $giftCardProductsStore.find(
-        (product) => product.id === giftCardProduct.genericGiftCardId,
-      );
-
-      if (genericProduct?.denominations && genericProduct.denominations.length > 0) {
-        denominationsToReturn = genericProduct.denominations;
-      }
-    }
-    return [...denominationsToReturn].sort((a, b) => a.amount - b.amount);
   }
 
   async function addDenominationToCart(
@@ -184,6 +171,20 @@
   }
 
   let isMarketPlace: boolean = $derived(page.url.pathname.startsWith('/marketplace/'));
+
+  const handleImageError = (node: HTMLImageElement) => {
+    const onError = (e: Event) => {
+      (e.currentTarget as HTMLImageElement).src = placeholderImage;
+    };
+
+    node.addEventListener('error', onError);
+
+    return {
+      destroy() {
+        node.removeEventListener('error', onError);
+      },
+    };
+  };
 </script>
 
 <!-- Header Bar -->
@@ -204,7 +205,7 @@
   </div>
 {/if}
 
-{#if isLoading}
+{#if loading}
   <div class="flex h-[60vh] items-center justify-center">
     <div class="text-center">
       <div
@@ -213,13 +214,13 @@
       <p class="mt-2 text-muted-foreground">{m['wallet.gift-card.loading']()}</p>
     </div>
   </div>
-{:else if error}
+{:else if userErrorMessage}
   <Card.Root class="mx-auto mt-8 max-w-md">
     <Card.Header>
       <Card.Title>{m['wallet.gift-card.error']()}</Card.Title>
     </Card.Header>
     <Card.Content>
-      <p>{error}</p>
+      <p>{userErrorMessage}</p>
     </Card.Content>
     <Card.Footer>
       <Button href="/marketplace">{m['wallet.gift-card.return_to_marketplace']()}</Button>
@@ -229,7 +230,7 @@
   <BarcodeView>
     <img src={barcodeApiUrl} class="barcode" alt="Barcode" />
   </BarcodeView>
-{:else if walletItem || giftCardItem}
+{:else if walletItem || product}
   <div class="mx-auto max-w-lg px-4 py-6">
     <!-- Gift Card Image -->
     <div class="my-2 flex justify-center">
@@ -237,7 +238,7 @@
         src={giftCardImageDomain + '/giftcards/' + imageSourceFront}
         alt={product?.name}
         class="aspect-[16/9] w-full max-w-md rounded-2xl object-contain shadow-lg"
-        onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
+        use:handleImageError
       />
     </div>
 
@@ -381,7 +382,7 @@
       {/if}
     {/if}
 
-    {#if selectedTab === 'buy' && giftCardItem}
+    {#if selectedTab === 'buy' && product && brand}
       <!-- Brand and Amounts (Buy Tab) -->
       <div class="text-500 mb-2 text-sm text-secondary-foreground">
         {m['marketplace.brand_label']()}
@@ -391,13 +392,13 @@
         {m['marketplace.gift_card_amount_label']()}
       </div>
       <div class="space-y-4">
-        {#each getDenominations(giftCardItem) as denomination}
+        {#each getGiftCardDenominations(products, product) as denomination}
           <button
             type="button"
             class="flex w-full cursor-pointer flex-col items-center rounded-xl border px-6 py-4 text-2xl font-bold shadow-sm transition-colors hover:bg-gray-100"
-            onclick={() => addDenominationToCart(denomination, giftCardItem, brand)}
+            onclick={() => addDenominationToCart(denomination, product, brand)}
             onkeydown={(e) =>
-              e.key === 'Enter' && addDenominationToCart(denomination, giftCardItem, brand)}
+              e.key === 'Enter' && addDenominationToCart(denomination, product, brand)}
           >
             <span class="flex items-end gap-1">
               <span class="align-bottom text-base text-gray-400">{m['marketplace.usd']()}</span>
@@ -456,7 +457,7 @@
             src={giftCardImageDomain + '/vendors/' + brand?.logoImageSource}
             alt={brand?.name}
             class="h-full w-full object-contain"
-            onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
+            use:handleImageError
           />
         </div>
         <!-- Brand Description -->

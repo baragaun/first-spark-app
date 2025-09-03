@@ -2,25 +2,39 @@
   import { Tabs } from 'bits-ui';
   import { onMount } from 'svelte';
   import placeholderImage from '../../assets/images/placeholder.png';
-  import { Wallet } from 'lucide-svelte';
   import { Search, Upload } from 'lucide-svelte';
   import { Input } from '$lib/components/ui/input';
   import { Button } from '$lib/components/ui/button';
   import { goto } from '$app/navigation';
-  import { walletItemsStore } from '@/stores/wallet-store';
-  import { uploadedCard } from '@/stores/uploaded-card';
-  import Quagga from 'quagga';
+  import { getWalletItemsStore, loadWalletItems } from '@/stores/wallet-store.svelte';
+  import { uploadedCardSetValues } from '@/stores/uploaded-card.svelte';
+  import Quagga, { QuaggaJSResultObject } from 'quagga';
   import Tesseract from 'tesseract.js';
   import { m } from '@/paraglide/messages';
-  import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
   import { giftCardImageDomain } from '@/constants';
   import type { WalletItem } from '@baragaun/bg-node-client';
+  import { IsMobile } from '$lib/hooks/is-mobile.svelte.js';
+
+  const isMobile = new IsMobile();
+
+  interface QuaggaResult {
+    codeResult?: {
+      code: string;
+      format: string;
+    };
+  }
+
+  const TabId = {
+    ACTIVE: 'active',
+    GIFTED: 'gifted',
+    ARCHIVED: 'archived',
+  };
+  type TabId = (typeof TabId)[keyof typeof TabId];
 
   // Tabs and wallet items
-  let activeTab = $state<string>('Active');
+  let currentTab = $state<string>(TabId.ACTIVE);
   let searchQuery = $state<string>('');
   let fileInputRef: HTMLInputElement;
-  let isLoading = false;
 
   onMount(async () => {
     loadWalletItems();
@@ -28,51 +42,26 @@
   });
 
   let displayedItems = $derived.by(() => {
-    if (activeTab === 'Active') {
-      return $walletItemsStore.filter(
+    if (currentTab === TabId.ACTIVE) {
+      return getWalletItemsStore().filter(
         (item) =>
           item.archivedAt == null &&
           item.transferStartedAt == null &&
           item.name.toLowerCase().includes(searchQuery.toLowerCase()),
       );
-    } else if (activeTab === 'Transferred') {
-      return $walletItemsStore.filter(
+    } else if (currentTab === TabId.GIFTED) {
+      return getWalletItemsStore().filter(
         (item) =>
           item.transferStartedAt != null &&
           item.name.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     } else {
-      return $walletItemsStore.filter(
+      return getWalletItemsStore().filter(
         (item) =>
           item.archivedAt != null && item.name.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     }
   });
-
-  async function loadWalletItems() {
-    isLoading = true;
-    const response = await marketplaceContext.findWalletItems();
-    if (typeof response === 'string') {
-      console.error('Failed to load wallet items:', response);
-      return;
-    }
-    if (!response) return;
-
-    walletItemsStore.set(response);
-    isLoading = false;
-  }
-
-  //todo test function
-  async function loadWalletItemTransfers() {
-    isLoading = true;
-    const response = await marketplaceContext.findWalletItemTransfers();
-    if (typeof response === 'string') {
-      console.error('Failed to load wallet item transfers:', response);
-      return;
-    }
-    if (!response) return;
-    isLoading = false;
-  }
 
   function navigateToGiftCardDetail(walletItem: WalletItem) {
     if (!walletItem.id) return;
@@ -93,6 +82,20 @@
     // }
   }
 
+  const handleImageError = (node: HTMLImageElement) => {
+    const onError = (e: Event) => {
+      (e.currentTarget as HTMLImageElement).src = placeholderImage;
+    };
+
+    node.addEventListener('error', onError);
+
+    return {
+      destroy() {
+        node.removeEventListener('error', onError);
+      },
+    };
+  };
+
   function handleFileChange(event: Event) {
     const files = (event.target as HTMLInputElement).files;
     if (files && files.length > 0) {
@@ -102,14 +105,7 @@
         const imageDataUrl = e.target?.result as string;
 
         // Set loading and navigate instantly
-        uploadedCard.set({
-          brandName: '',
-          balance: '',
-          barcode: '',
-          pin: '',
-          imageUrl: imageDataUrl,
-          isLoading: true,
-        });
+        uploadedCardSetValues({ imageUrlData: imageDataUrl, isLoading: true });
         goto('/wallet/upload-card');
         // Now process extraction in background
         Quagga.decodeSingle(
@@ -129,7 +125,7 @@
               ],
             },
           },
-          async (result: any) => {
+          async (result: QuaggaResult | undefined) => {
             let barcode = '';
             let company = '';
             let price = '';
@@ -177,12 +173,12 @@
               pin = pinMatch[1];
             }
             // Update store with extracted values and set loading false
-            uploadedCard.set({
-              brandName: company,
-              balance: price,
-              barcode,
-              pin,
-              imageUrl: imageDataUrl,
+            uploadedCardSetValues({
+              brandNameValue: company,
+              balanceValue: price,
+              barcodeValue: barcode,
+              pinValue: pin,
+              imageUrlData: imageDataUrl,
               isLoading: false,
             });
           },
@@ -193,39 +189,41 @@
   }
 </script>
 
-<div class="container mx-auto px-4 py-6">
-  <div class="flex">
-    <header class="mb-6">
-      <h1 class="text-3xl font-bold text-foreground">{m['wallet.title']()}</h1>
-      <p class="mt-2 text-muted-foreground">{m['wallet.subtitle']()}</p>
-    </header>
-  </div>
+<div class="container mx-auto px-4 py-2">
+  {#if !isMobile.current}
+    <div class="flex">
+      <header class="mb-6">
+        <h1 class="text-3xl font-bold text-foreground">{m['wallet.title']()}</h1>
+        <!--      <p class="mt-2 text-muted-foreground">{m['wallet.subtitle']()}</p>-->
+      </header>
+    </div>
+  {/if}
 
   <div class="flex h-[calc(100vh-200px)] flex-col">
     <!-- Fixed Header Section -->
     <div class="flex-shrink-0">
       <!-- Tab Navigation -->
-      <Tabs.Root bind:value={activeTab}>
+      <Tabs.Root bind:value={currentTab}>
         <Tabs.List
           class="flex h-10 w-full items-center justify-center rounded-2xl bg-muted p-1 text-muted-foreground "
         >
           <Tabs.Trigger
-            value="Active"
+            value={TabId.ACTIVE}
             class="inline-flex flex-1 items-center justify-center whitespace-nowrap rounded-xl px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
-            {m['wallet.active']()}
+            {m['wallet.tabs.active']()}
           </Tabs.Trigger>
           <Tabs.Trigger
-            value="Archive"
+            value={TabId.GIFTED}
             class="inline-flex flex-1 items-center justify-center whitespace-nowrap rounded-xl px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
-            {m['wallet.archive']()}
+            {m['wallet.tabs.gifted']()}
           </Tabs.Trigger>
           <Tabs.Trigger
-            value="Transferred"
+            value={TabId.ARCHIVED}
             class="inline-flex flex-1 items-center justify-center whitespace-nowrap rounded-xl px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
-            Transferred
+            {m['wallet.tabs.archived']()}
           </Tabs.Trigger>
         </Tabs.List>
       </Tabs.Root>
@@ -266,7 +264,7 @@
     <div class="flex-1 overflow-y-auto">
       {#if displayedItems.length === 0}
         <div class="py-8 text-center text-muted-foreground">
-          {activeTab === 'Active' ? m['wallet.empty']() : m['wallet.transferred.no_items_found']()}
+          {currentTab === TabId.ACTIVE ? m['wallet.empty']() : m['wallet.gifted.no_items_found']()}
         </div>
       {/if}
       {#each displayedItems as item}
@@ -281,7 +279,7 @@
               src={giftCardImageDomain + '/giftcards/' + item.imageSourceFront}
               alt={item.imageSourceFront}
               class="mr-4 w-32 rounded-lg object-cover transition-transform duration-300 group-hover:scale-110"
-              onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
+              use:handleImageError
             />
             <div class="flex flex-col">
               <span class="text-base font-medium text-foreground">{item.name ? item.name : ''}</span
