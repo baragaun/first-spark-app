@@ -10,17 +10,11 @@
   import { giftCardImageDomain } from '$lib/constants';
   import { m } from '@/paraglide/messages';
   import { ShoppingBag, GiftIcon } from 'lucide-svelte';
-  import { getWalletItemsStore } from '@/stores/wallet-store.svelte';
+  import { getWalletItemsStore, loadWalletItems } from '@/stores/wallet-store.svelte';
   import { page } from '$app/state';
   import { getPurchaseOrdersStore } from '$lib/stores/order-history.svelte';
 
-  const {
-    brands,
-    products,
-    // todo: use these:
-    // loading,
-    // userErrorMessage,
-  } = getMarketplaceData();
+  let marketplaceData = getMarketplaceData();
 
   const purchaseOrdersStore = getPurchaseOrdersStore();
 
@@ -42,12 +36,13 @@
   function findProductAndBrand(
     productId: string,
   ): [GiftCardProduct | undefined, Brand | undefined] {
-    const product = products.find((product) => product.id === productId);
-    const brand = brands.find((b) => b.id === product?.brandId);
+    const product = marketplaceData.products.find((product) => product.id === productId);
+    const brand = marketplaceData.brands.find((b) => b.id === product?.brandId);
     return [product, brand];
   }
 
-  function navigateToWalletItemDetailScreen(purchaseOrderItemId: string) {
+  async function navigateToWalletItemDetailScreen(purchaseOrderItemId: string) {
+    if (getWalletItemsStore().length == 0) await loadWalletItems();
     const walletItem = getWalletItemsStore().find(
       (item) => item.purchaseOrderItemId == purchaseOrderItemId,
     );
@@ -58,7 +53,8 @@
 
   const loadData = async () => {
     isLoading = true;
-    loadMarketplaceData().catch(console.error);
+    await loadMarketplaceData().catch(console.error);
+    marketplaceData = getMarketplaceData();
 
     // fetch product data if not loaded
     if (!purchaseOrdersStore.isLoaded) {
