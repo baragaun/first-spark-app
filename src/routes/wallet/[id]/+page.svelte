@@ -3,9 +3,9 @@
   import GiftCardDetails from '@/components/shared/gift-card-details.svelte';
   import { getWalletItemsStore } from '@/stores/wallet-store.svelte';
 
-  const walletCardId = page.params.id;
+  const walletItemId = page.params.id;
 
-  let walletItem = $derived(getWalletItemsStore().find((p) => p.id === walletCardId) || undefined);
+  let walletItem = $derived(getWalletItemsStore().find((p) => p.id === walletItemId) || undefined);
 </script>
 
 <GiftCardDetails {walletItem} />
