@@ -28,16 +28,11 @@
   import { giftCardImageDomain } from '$lib/constants';
   import { getPurchaseOrdersStore } from '$lib/stores/order-history.svelte';
   import { IsMobile } from '$lib/hooks/is-mobile.svelte.js';
+  import { loadWalletItems } from '@/stores/wallet-store.svelte';
 
   const purchaseOrdersStore = getPurchaseOrdersStore();
 
-  const {
-    brands,
-    products,
-    // todo: use these:
-    // loading,
-    // userErrorMessage,
-  } = getMarketplaceData();
+  let marketplaceData = getMarketplaceData();
 
   let cartItems = $state<ShoppingCartItem[]>([]);
   let total = $derived.by(() =>
@@ -144,13 +139,14 @@
     cartItems = [];
     showOrderPlacedDialog = true;
     purchaseOrdersStore.reset();
+    await loadWalletItems();
   }
 
   function findProductAndBrand(
     productId: string,
   ): [GiftCardProduct | undefined, Brand | undefined] {
-    const product = products.find((product) => product.id === productId);
-    const brand = brands.find((b) => b.id === product?.brandId);
+    const product = marketplaceData.products.find((product) => product.id === productId);
+    const brand = marketplaceData.brands.find((b) => b.id === product?.brandId);
     return [product, brand];
   }
 
@@ -188,9 +184,14 @@
 
   // Load on mount
   $effect(() => {
-    loadMarketplaceData().catch(console.error);
-    loadShoppingCart().catch(console.error);
+    loadData().catch(console.error);
   });
+
+  const loadData = async () => {
+    await loadMarketplaceData().catch(console.error);
+    marketplaceData = getMarketplaceData();
+    await loadShoppingCart().catch(console.error);
+  };
 </script>
 
 <div class="flex min-h-screen flex-col bg-background font-sans antialiased">
