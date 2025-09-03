@@ -66,17 +66,6 @@
     }
   }
 
-  // const item = $derived(
-  //   (() => {
-  //     if (walletItem) {
-  //       return walletItem;
-  //     }
-  //     if (productId) {
-  //       return products.find((p) => p.id === productId);
-  //     }
-  //   })(),
-  // );
-
   let selectedTab = $state(walletItem ? 'use' : 'buy');
 
   onMount(() => {
@@ -94,27 +83,6 @@
   const barcodeApiUrl = `https://barcodeapi.org/api/${
     barcodeFormat === 'QR_CODE' ? 'qr' : 'code39'
   }/${encodeURIComponent(walletItem?.code || '')}`;
-
-  // onMount(async () => {
-  //   if (!loading) {
-  //     try {
-  //       if (walletItem?.brandId) {
-  //         loading = true;
-  //         const brandsResponse = await marketplaceContext.findBrand(walletItem?.brandId);
-  //         if (typeof brandsResponse === 'string') {
-  //           userErrorMessage = brandsResponse;
-  //           return;
-  //         }
-  //         brand = brandsResponse || null;
-  //       }
-  //     } catch (err) {
-  //       error = 'Failed to load gift card details';
-  //       console.error(err);
-  //     } finally {
-  //       loading = false;
-  //     }
-  //   }
-  // });
 
   function backAndClose() {
     if (isBarcodeViewOpen) {
