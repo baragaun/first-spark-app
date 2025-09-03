@@ -76,7 +76,7 @@
     --card-foreground: var(--kcu-black);
 
     --border: var(--kcu-juniper);
-    --input: var(--kcu-white); /* Updated from a darker value to be more visible */
+    --input: var(--kcu-glacier); /* Updated from a darker value to be more visible */
 
     --primary: var(--kcu-black);
     --primary-foreground: var(--kcu-white);

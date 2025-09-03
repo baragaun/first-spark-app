@@ -1,52 +1,27 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import { ArrowLeft } from 'lucide-svelte';
   import { Button } from '$lib/components/ui/button';
   import SpinLoadIndicator from '$lib/components/forms/spin-load-indicator.svelte';
   import { marketplaceContext } from '$lib/contexts/marketplace-context.svelte';
   import type { PurchaseOrder, GiftCardProduct, Brand } from '@baragaun/bg-node-client';
-  import { orderHistoryStore, orderHistoryLoaded } from '$lib/stores/order-history';
   import placeholderImage from '../../../assets/images/placeholder.png';
-  import { get } from 'svelte/store';
-  import { giftCardProductsStore, brandsStore, dataLoaded } from '@/stores/marketplace-store';
+  import { loadMarketplaceData, getMarketplaceData } from '$lib/stores/marketplace-store.svelte';
   import { giftCardImageDomain } from '$lib/constants';
   import { m } from '@/paraglide/messages';
   import { ShoppingBag, GiftIcon } from 'lucide-svelte';
-  import { walletItemsStore } from '@/stores/wallet-store';
+  import { getWalletItemsStore, loadWalletItems } from '@/stores/wallet-store.svelte';
+  import { page } from '$app/state';
+  import { getPurchaseOrdersStore } from '$lib/stores/order-history.svelte';
 
-  let order: PurchaseOrder | undefined;
-  let isLoading = true;
+  let marketplaceData = getMarketplaceData();
 
-  onMount(async () => {
-    isLoading = true;
+  const purchaseOrdersStore = getPurchaseOrdersStore();
 
-    // fetch product data if not loaded
-    if (!$dataLoaded) {
-      const giftCardsResponse = await marketplaceContext.findGiftCardProducts();
-      giftCardProductsStore.set(giftCardsResponse as GiftCardProduct[]);
+  const purchaseOrderId = $derived(page.params.id);
 
-      const brandsResponse = await marketplaceContext.findBrands();
-      brandsStore.set(brandsResponse as Brand[]);
-
-      dataLoaded.set(true);
-    }
-
-    const id = $page.params.id;
-    if (!get(orderHistoryLoaded)) {
-      const orders = await marketplaceContext.findPurchaseOrders();
-      if (orders && typeof orders !== 'string') {
-        orderHistoryStore.set(orders);
-        orderHistoryLoaded.set(true);
-        order = orders.find((o: any) => o.id === id);
-      }
-    } else {
-      const storeValue = get(orderHistoryStore);
-      order = storeValue?.find((o: any) => o.id === id);
-    }
-    isLoading = false;
-  });
+  let purchaseOrder = $state<PurchaseOrder | undefined>();
+  let isLoading = $state(false);
 
   function formatDateTime(dateString: string | undefined) {
     if (!dateString) return '';
@@ -61,19 +36,57 @@
   function findProductAndBrand(
     productId: string,
   ): [GiftCardProduct | undefined, Brand | undefined] {
-    const product = $giftCardProductsStore.find((product) => product.id === productId);
-    const brand = $brandsStore.find((b) => b.id === product?.brandId);
+    const product = marketplaceData.products.find((product) => product.id === productId);
+    const brand = marketplaceData.brands.find((b) => b.id === product?.brandId);
     return [product, brand];
   }
 
-  function navigateToWalletItemDetailScreen(purchaseOrderItemId: string) {
-    const walletItem = $walletItemsStore.find(
+  async function navigateToWalletItemDetailScreen(purchaseOrderItemId: string) {
+    if (getWalletItemsStore().length == 0) await loadWalletItems();
+    const walletItem = getWalletItemsStore().find(
       (item) => item.purchaseOrderItemId == purchaseOrderItemId,
     );
     if (walletItem != undefined && walletItem != null) {
       goto(`/wallet/${walletItem?.id}`);
     }
   }
+
+  const loadData = async () => {
+    isLoading = true;
+    await loadMarketplaceData().catch(console.error);
+    marketplaceData = getMarketplaceData();
+
+    // fetch product data if not loaded
+    if (!purchaseOrdersStore.isLoaded) {
+      const purchaseOrders = await marketplaceContext.findPurchaseOrders();
+      if (purchaseOrders && typeof purchaseOrders !== 'string') {
+        purchaseOrdersStore.setPurchaseOrders(purchaseOrders);
+      }
+    }
+    purchaseOrder = purchaseOrdersStore.purchaseOrders.find(
+      (o: PurchaseOrder) => o.id === purchaseOrderId,
+    );
+    isLoading = false;
+  };
+
+  const handleImageError = (node: HTMLImageElement) => {
+    const onError = (e: Event) => {
+      (e.currentTarget as HTMLImageElement).src = placeholderImage;
+    };
+
+    node.addEventListener('error', onError);
+
+    return {
+      destroy() {
+        node.removeEventListener('error', onError);
+      },
+    };
+  };
+
+  // Load on mount
+  $effect(() => {
+    loadData().catch(console.error);
+  });
 </script>
 
 <div
@@ -90,7 +103,7 @@
     <div class="flex items-center justify-center py-8">
       <SpinLoadIndicator />
     </div>
-  {:else if order}
+  {:else if purchaseOrder}
     <div class="mb-2 flex items-center">
       <ShoppingBag size={24} color="#005f61" />
       <span class="pl-2 text-lg font-semibold text-muted-foreground"
@@ -98,14 +111,14 @@
       >
     </div>
     <div class="mb-8">
-      <div class="mb-1 text-lg font-semibold">{order?.shoppingCartId}</div>
+      <div class="mb-1 text-lg font-semibold">{purchaseOrder?.shoppingCartId}</div>
       <div class="text-sm text-muted-foreground">{m['order_history.purchase_date']()}</div>
-      <div class="mb-2 font-bold">{formatDateTime(order.createdAt)}</div>
+      <div class="mb-2 font-bold">{formatDateTime(purchaseOrder.createdAt)}</div>
       <div class="text-sm text-muted-foreground">{m['order_history.reference_id']()}</div>
-      <div class="mb-2 break-all font-bold">{order.id}</div>
+      <div class="mb-2 break-all font-bold">{purchaseOrder.id}</div>
     </div>
 
-    {#each order.items as item}
+    {#each purchaseOrder.items as item}
       {@const [product, brand] = findProductAndBrand(item.productId)}
       <div class="mb-8">
         <div class="mb-2 flex items-center">
@@ -118,7 +131,7 @@
           src={giftCardImageDomain + '/giftcards/' + product?.imageSourceFront}
           alt="Gift Card"
           class="mb-2 h-24 w-40 rounded object-cover shadow"
-          onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
+          use:handleImageError
         />
         <div class="text-sm text-muted-foreground">{m['order_history.id']()}</div>
         <div class="mb-2 break-all font-bold">{item.id}</div>

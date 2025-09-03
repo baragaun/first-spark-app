@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import { Button } from '$lib/components/ui/button';
   import * as Card from '$lib/components/ui/card';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
@@ -12,8 +11,7 @@
   } from '@baragaun/bg-node-client';
   import placeholderImage from '../../../assets/images/placeholder.png';
   import { Archive, ArrowLeft, ExternalLink, Gift, Printer, ZoomOut } from 'lucide-svelte';
-  import { brandsStore, giftCardProductsStore } from '$lib/stores/marketplace-store';
-  import { walletItemsStore } from '@/stores/wallet-store';
+  import { updateWalletItem } from '@/stores/wallet-store.svelte';
   import BarcodeView from './barcode-view.svelte';
   import { downloadPdf } from '@/utils/pdf-utils';
   import { m } from '@/paraglide/messages';
@@ -22,44 +20,69 @@
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { toast } from 'svelte-sonner';
   import { page } from '$app/state';
+  import { getMarketplaceData, loadMarketplaceData } from '@/stores/marketplace-store.svelte';
+  import { getGiftCardDenominations } from '@/utils/marketplace-utils';
+  import { onMount } from 'svelte';
 
   interface Props {
-    walletItem: WalletItem | null;
-    giftCardItem: GiftCardProduct | null;
+    productId?: string;
+    walletItem?: WalletItem;
+    showNavBar?: boolean;
+    hideActions?: boolean;
+    isVerified?: boolean;
+    product?: GiftCardProduct;
+    brand?: Brand;
   }
 
-  let { walletItem, giftCardItem }: Props = $props();
+  let {
+    productId,
+    walletItem,
+    showNavBar = true,
+    hideActions = false,
+    isVerified = true,
+    product,
+    brand,
+  }: Props = $props();
 
-  let product = walletItem || giftCardItem;
+  const { brands, products, loading, userErrorMessage } = getMarketplaceData();
 
-  let isLoading = $state(true);
-  let error = $state<string | null>(null);
+  if (!product) {
+    if (productId) {
+      product = products.find((p) => p.id === productId);
+    } else if (walletItem?.productId) {
+      product = products.find((p) => p.id === walletItem.productId);
+    } else {
+      product = undefined;
+    }
+  }
+
+  if (!brand) {
+    if (product?.brandId) {
+      brand = brands.find((b) => b.id === product.brandId);
+    } else if (walletItem?.brandId) {
+      brand = brands.find((b) => b.id === walletItem.brandId);
+    } else {
+      brand = undefined;
+    }
+  }
+
   let selectedTab = $state(walletItem ? 'use' : 'buy');
-  let isBarcodeViewOpen = $state(false);
 
-  const brand =
-    $brandsStore.find((v) => v.id === (walletItem?.brandId || giftCardItem?.brandId)) || null;
-
-  onMount(async () => {
-    try {
-      isLoading = true;
-      const brandsResponse = await marketplaceContext.findBrands();
-      if (typeof brandsResponse === 'string') {
-        error = brandsResponse;
-        return;
-      }
-      brandsStore.set(brandsResponse as Brand[]);
-    } catch (err) {
-      error = 'Failed to load gift card details';
-      console.error(err);
-    } finally {
-      isLoading = false;
+  onMount(() => {
+    if (!brand && !product) {
+      console.log('Loading marketplace data 123:', brand, product);
+      loadMarketplaceData().catch(console.error);
     }
   });
 
+  let isBarcodeViewOpen = $state(false);
+  let instructions = $derived(product?.instructionsEn ?? walletItem?.instructionsEn);
+  let terms = $derived(product?.termsEn ?? walletItem?.termsEn);
+  let imageSourceFront = $derived(product?.imageSourceFront ?? walletItem?.imageSourceFront);
   const barcodeFormat = walletItem?.barcodeFormat || 'CODE39';
-
-  const barcodeApiUrl = `https://barcodeapi.org/api/${barcodeFormat === 'QR_CODE' ? 'qr' : 'code39'}/${encodeURIComponent(walletItem?.code || '')}`;
+  const barcodeApiUrl = `https://barcodeapi.org/api/${
+    barcodeFormat === 'QR_CODE' ? 'qr' : 'code39'
+  }/${encodeURIComponent(walletItem?.code || '')}`;
 
   function backAndClose() {
     if (isBarcodeViewOpen) {
@@ -70,40 +93,28 @@
   }
 
   async function archiveWalletItem() {
-    if (!walletItem) return;
-    await marketplaceContext.archiveWalletItem(walletItem.id, !walletItem?.archivedAt).then(() => {
-      walletItemsStore.update((items) => {
-        return items.map((item) => {
-          if (item.id === walletItem?.id) {
-            item.archivedAt = walletItem?.archivedAt ? null : new Date().toISOString();
-          }
-          return item;
-        });
-      });
-    });
+    if (!walletItem) {
+      console.error('No wallet item found to archive.');
+      return;
+    }
+
+    try {
+      await marketplaceContext.archiveWalletItem(walletItem.id, !walletItem?.archivedAt);
+      // Create a new object to trigger Svelte reactivity
+      const updatedWalletItem = {
+        ...walletItem,
+        archivedAt: walletItem.archivedAt ? null : new Date().toISOString(),
+      };
+      updateWalletItem(updatedWalletItem);
+    } catch (error) {
+      console.error('Error archiving wallet item:', error);
+      // todo: show user error
+    }
   }
 
   function handlePrintPdf() {
     if (!walletItem || !walletItem.code || !walletItem.pin) return;
     downloadPdf(walletItem, walletItem.code, walletItem.pin);
-  }
-
-  function getDenominations(
-    giftCardProduct: GiftCardProduct | null | undefined,
-  ): GiftCardDenomination[] {
-    let denominationsToReturn: GiftCardDenomination[] = [];
-    if (giftCardProduct?.denominations && giftCardProduct.denominations.length > 0) {
-      denominationsToReturn = giftCardProduct.denominations;
-    } else if (giftCardProduct?.genericGiftCardId) {
-      const genericProduct = $giftCardProductsStore.find(
-        (product) => product.id === giftCardProduct.genericGiftCardId,
-      );
-
-      if (genericProduct?.denominations && genericProduct.denominations.length > 0) {
-        denominationsToReturn = genericProduct.denominations;
-      }
-    }
-    return [...denominationsToReturn].sort((a, b) => a.amount - b.amount);
   }
 
   async function addDenominationToCart(
@@ -137,7 +148,7 @@
         console.log('Item added to cart:', result.object);
         toast.success(
           m['marketplace.add_to_cart_success']({
-            amount: `$${denomination.amount / 1000}`,
+            amount: `${denomination.amount / 1000}`,
             vendor: brand?.name || m['marketplace.buy_gift_card'](),
           }),
         );
@@ -160,25 +171,41 @@
   }
 
   let isMarketPlace: boolean = $derived(page.url.pathname.startsWith('/marketplace/'));
+
+  const handleImageError = (node: HTMLImageElement) => {
+    const onError = (e: Event) => {
+      (e.currentTarget as HTMLImageElement).src = placeholderImage;
+    };
+
+    node.addEventListener('error', onError);
+
+    return {
+      destroy() {
+        node.removeEventListener('error', onError);
+      },
+    };
+  };
 </script>
 
 <!-- Header Bar -->
-<div
-  class="flex items-center justify-between rounded-b-lg bg-nav px-4 py-3 text-nav-foreground shadow"
->
-  <button onclick={backAndClose} class="flex items-center">
-    {#if isBarcodeViewOpen}
-      <ZoomOut class="h-6 w-6" />
-    {:else}
-      <ArrowLeft class="h-6 w-6" />
-    {/if}
-  </button>
-  <span class="flex-1 text-center text-lg font-bold"
-    >{isMarketPlace ? m['marketplace.buy_gift_card']() : m['wallet.gift-card.title']()}</span
+{#if showNavBar}
+  <div
+    class="flex items-center justify-between rounded-b-lg bg-nav px-4 py-3 text-nav-foreground shadow"
   >
-</div>
+    <button onclick={backAndClose} class="flex items-center">
+      {#if isBarcodeViewOpen}
+        <ZoomOut class="h-6 w-6" />
+      {:else}
+        <ArrowLeft class="h-6 w-6" />
+      {/if}
+    </button>
+    <span class="flex-1 text-center text-lg font-bold"
+      >{isMarketPlace ? m['marketplace.buy_gift_card']() : m['wallet.gift-card.title']()}</span
+    >
+  </div>
+{/if}
 
-{#if isLoading}
+{#if loading}
   <div class="flex h-[60vh] items-center justify-center">
     <div class="text-center">
       <div
@@ -187,13 +214,13 @@
       <p class="mt-2 text-muted-foreground">{m['wallet.gift-card.loading']()}</p>
     </div>
   </div>
-{:else if error}
+{:else if userErrorMessage}
   <Card.Root class="mx-auto mt-8 max-w-md">
     <Card.Header>
       <Card.Title>{m['wallet.gift-card.error']()}</Card.Title>
     </Card.Header>
     <Card.Content>
-      <p>{error}</p>
+      <p>{userErrorMessage}</p>
     </Card.Content>
     <Card.Footer>
       <Button href="/marketplace">{m['wallet.gift-card.return_to_marketplace']()}</Button>
@@ -203,23 +230,23 @@
   <BarcodeView>
     <img src={barcodeApiUrl} class="barcode" alt="Barcode" />
   </BarcodeView>
-{:else if walletItem || giftCardItem}
+{:else if walletItem || product}
   <div class="mx-auto max-w-lg px-4 py-6">
     <!-- Gift Card Image -->
     <div class="my-2 flex justify-center">
       <img
-        src={giftCardImageDomain + '/giftcards/' + product?.imageSourceFront}
+        src={giftCardImageDomain + '/giftcards/' + imageSourceFront}
         alt={product?.name}
         class="aspect-[16/9] w-full max-w-md rounded-2xl object-contain shadow-lg"
-        onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
+        use:handleImageError
       />
     </div>
 
     <!-- Actions -->
-    {#if walletItem}
+    {#if walletItem && !hideActions}
       <div class="flex items-center border-b bg-gray-50 px-4 py-2">
         <div class="flex gap-2">
-          {#if walletItem.transferredAt == null || undefined}
+          {#if walletItem.transferStartedAt == null || undefined}
             <div class="flex flex-col items-center">
               <Button
                 variant="ghost"
@@ -238,7 +265,7 @@
               <span class="text-xs text-gray-500">{m['wallet.gift-card.brand']()}</span>
             </div>
           {/if}
-          {#if walletItem.transferredAt == null || undefined}
+          {#if walletItem.transferStartedAt == null || undefined}
             <div class="flex flex-col items-center">
               <Button variant="ghost" size="icon" onclick={handlePrintPdf}
                 ><Printer aria-label="Print" /></Button
@@ -302,54 +329,60 @@
     </div>
 
     {#if selectedTab === 'use' && walletItem}
-      <!-- Brand and Amounts (Buy Tab) -->
-      <div class="flex flex-col items-center justify-center px-2 py-4">
-        <div class="flex items-end justify-center">
-          <p class="mr-2 text-xl text-gray-400">USD</p>
-          <span class="text-400 text-5xl font-semibold text-foreground">
-            {(walletItem.balance / 1000).toFixed(0)}
-          </span>
-          <span class="text-lg font-semibold text-foreground">
-            .{(walletItem.balance / 1000).toFixed(2).split('.')[1]}
-          </span>
-        </div>
-        <p class="text-sm text-gray-400">
-          Balance as of {new Date(walletItem.createdAt).toLocaleDateString()}
-        </p>
-        <a
-          href="https://www.google.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="text-primary underline">{m['wallet.gift-card.look_up_balance']()}</a
-        >
-
-        <!-- Card Code and PIN -->
-        {#if walletItem.code}
-          <div class="mt-4 flex flex-col items-center">
-            <img src={barcodeApiUrl} class="barcode" alt="Barcode" />
+      {#if isVerified}
+        <!-- Brand and Amounts (Buy Tab) -->
+        <div class="flex flex-col items-center justify-center px-2 py-4">
+          <div class="flex items-end justify-center">
+            <p class="mr-2 text-xl text-gray-400">USD</p>
+            <span class="text-400 text-5xl font-semibold text-foreground">
+              {(walletItem.balance / 1000).toFixed(0)}
+            </span>
+            <span class="text-lg font-semibold text-foreground">
+              .{(walletItem.balance / 1000).toFixed(2).split('.')[1]}
+            </span>
           </div>
-        {/if}
-
-        <div class="mt-4 flex items-center gap-2">
-          <Button
-            size="sm"
-            class="h-8 rounded-full bg-primary text-primary-foreground"
-            onclick={() => (isBarcodeViewOpen = true)}>{m['wallet.gift-card.zoom']()}</Button
+          <p class="text-sm text-gray-400">
+            Balance as of {new Date(walletItem.createdAt).toLocaleDateString()}
+          </p>
+          <a
+            href="https://www.google.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-primary underline">{m['wallet.gift-card.look_up_balance']()}</a
           >
-          <Button size="sm" class="h-8 rounded-full bg-primary text-primary-foreground"
-            >{m['wallet.gift-card.copy']()}</Button
+
+          <!-- Card Code and PIN -->
+          {#if walletItem.code}
+            <div class="mt-4 flex flex-col items-center">
+              <img src={barcodeApiUrl} class="barcode" alt="Barcode" />
+            </div>
+          {/if}
+
+          <div class="mt-4 flex items-center gap-2">
+            <Button
+              size="sm"
+              class="h-8 rounded-full bg-primary text-primary-foreground"
+              onclick={() => (isBarcodeViewOpen = true)}>{m['wallet.gift-card.zoom']()}</Button
+            >
+            <Button size="sm" class="h-8 rounded-full bg-primary text-primary-foreground"
+              >{m['wallet.gift-card.copy']()}</Button
+            >
+          </div>
+
+          <h class="mt-4 text-xl text-black">{walletItem.pin}</h>
+          <p class="text-sm text-gray-400">Card PIN</p>
+          <Button size="sm" class="mt-2 h-8 rounded-full bg-primary text-primary-foreground"
+            >{m['wallet.gift-card.copy_pin']()}</Button
           >
         </div>
-
-        <h class="mt-4 text-xl text-black">{walletItem.pin}</h>
-        <p class="text-sm text-gray-400">Card PIN</p>
-        <Button size="sm" class="mt-2 h-8 rounded-full bg-primary text-primary-foreground"
-          >{m['wallet.gift-card.copy_pin']()}</Button
-        >
-      </div>
+      {:else}
+        <div class="h-full w-full text-center text-muted-foreground">
+          Please accept card to see all details
+        </div>
+      {/if}
     {/if}
 
-    {#if selectedTab === 'buy' && giftCardItem}
+    {#if selectedTab === 'buy' && product && brand}
       <!-- Brand and Amounts (Buy Tab) -->
       <div class="text-500 mb-2 text-sm text-secondary-foreground">
         {m['marketplace.brand_label']()}
@@ -359,13 +392,13 @@
         {m['marketplace.gift_card_amount_label']()}
       </div>
       <div class="space-y-4">
-        {#each getDenominations(giftCardItem) as denomination}
+        {#each getGiftCardDenominations(products, product) as denomination}
           <button
             type="button"
             class="flex w-full cursor-pointer flex-col items-center rounded-xl border px-6 py-4 text-2xl font-bold shadow-sm transition-colors hover:bg-gray-100"
-            onclick={() => addDenominationToCart(denomination, giftCardItem, brand)}
+            onclick={() => addDenominationToCart(denomination, product, brand)}
             onkeydown={(e) =>
-              e.key === 'Enter' && addDenominationToCart(denomination, giftCardItem, brand)}
+              e.key === 'Enter' && addDenominationToCart(denomination, product, brand)}
           >
             <span class="flex items-end gap-1">
               <span class="align-bottom text-base text-gray-400">{m['marketplace.usd']()}</span>
@@ -378,34 +411,34 @@
 
     {#if selectedTab === 'info'}
       <div class="px-2 py-4">
-        {#if product?.instructionsEn}
+        {#if instructions}
           <div class="mb-6">
             <h2 class="text-400 mb-2 text-lg font-semibold text-secondary-foreground">
               {m['wallet.gift-card.how_to_redeem']()}
             </h2>
-            {#if product?.instructionsEn?.trim().startsWith('<')}
+            {#if instructions?.trim().startsWith('<')}
               <p class="mb-2">
-                {@html product?.instructionsEn}
+                {@html instructions}
               </p>
             {:else}
               <p class="mb-2">
-                {product?.instructionsEn}
+                {instructions}
               </p>
             {/if}
           </div>
         {/if}
-        {#if product?.termsEn}
+        {#if terms}
           <div>
             <h2 class="text-400 mb-2 text-lg font-semibold text-secondary-foreground">
               {m['wallet.gift-card.terms_and_conditions']()}
             </h2>
-            {#if product?.instructionsEn?.trim().startsWith('<')}
+            {#if terms?.trim().startsWith('<')}
               <p class="mb-2">
-                {@html product?.termsEn}
+                {@html terms}
               </p>
             {:else}
               <p class="mb-2">
-                {product?.termsEn}
+                {terms}
               </p>
             {/if}
           </div>
@@ -415,6 +448,7 @@
 
     {#if selectedTab === 'brand'}
       <div class="flex flex-col items-center py-8">
+        <p>{brand?.name ?? 'not found'}</p>
         <!-- Brand Logo -->
         <div
           class="mb-4 flex h-40 w-40 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-lg"
@@ -423,7 +457,7 @@
             src={giftCardImageDomain + '/vendors/' + brand?.logoImageSource}
             alt={brand?.name}
             class="h-full w-full object-contain"
-            onerror={(e) => ((e.currentTarget as HTMLImageElement).src = placeholderImage)}
+            use:handleImageError
           />
         </div>
         <!-- Brand Description -->

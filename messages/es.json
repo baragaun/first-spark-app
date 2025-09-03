@@ -275,7 +275,7 @@
     "brand_label": "Marca",
     "gift_card_amount_label": "Monto de la tarjeta de regalo",
     "usd": "USD",
-    "add_to_cart_success": "${amount} ${vendor} agregado al carrito!",
+    "add_to_cart_success": "${amount} {vendor} agregado al carrito!",
     "add_to_cart_error": "Error al agregar artículo al carrito: {reason}",
     "add_to_cart_unexpected_error": "Ocurrió un error inesperado al agregar al carrito.",
     "add_to_cart_no_object": "Error al agregar artículo al carrito: No se devolvió ningún objeto.",
@@ -307,6 +307,11 @@
     "active": "Activo",
     "archive": "Archivo",
     "search": "Buscar en billetera",
+    "tabs": {
+      "active": "Activo",
+      "gifted": "Regalado",
+      "archived": "Archivado"
+    },
     "gift-card": {
       "title": "Tarjeta de regalo",
       "subtitle": "Tus tarjetas de regalo",
@@ -329,7 +334,7 @@
       "terms_and_conditions": "Términos y condiciones",
       "visit_online": "VISITAR EN LÍNEA"
     },
-    "transferred": {
+    "gifted": {
       "recipient_details": "Detalles del destinatario",
       "name": "Nombre",
       "email": "Correo electrónico",
@@ -337,7 +342,7 @@
       "date_sent": "Fecha de envío",
       "gift_was_accepted": "El regalo fue aceptado",
       "active": "activo",
-      "transferred": "transferido",
+      "gifted": "dotada",
       "no_items_found": "No se encontraron elementos"
     }
   },
@@ -349,7 +354,9 @@
     "barcode": "Código de barras",
     "pin": "PIN",
     "submit": "ENVIAR",
-    "loading": "Obteniendo detalles de la tarjeta..."
+    "loading": "Obteniendo detalles de la tarjeta...",
+    "upload_success_title": "Tarjeta de regalo subida",
+    "upload_success_message": "¡Tu tarjeta de regalo ha sido enviada con éxito!"
   },
   "order_history": {
     "title": "Historial de pedidos",
@@ -388,6 +395,15 @@
     "error": {
       "sender_name_max_length": "El nombre del remitente debe tener como máximo 30 caracteres",
       "message_max_length": "El mensaje debe tener como máximo 500 caracteres"
-    }
+    },
+    "received_gift_card": "Tarjeta de regalo recibida"
+  },
+  "gifted_card": {
+    "accept": "Aceptar",
+    "decline": "Rechazar",
+    "decline_success": "¡Has rechazado la tarjeta de regalo!",
+    "modal_title": "Ingresa tu PIN para aceptarla.",
+    "pin_placeholder": "Ingresa PIN/código secreto",
+    "submit": "Enviar"
   }
 }

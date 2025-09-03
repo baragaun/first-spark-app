@@ -275,7 +275,7 @@
     "brand_label": "Brand",
     "gift_card_amount_label": "Gift Card Amount",
     "usd": "USD",
-    "add_to_cart_success": "${amount} ${vendor} added to cart!",
+    "add_to_cart_success": "${amount} {vendor} added to cart!",
     "add_to_cart_error": "Failed to add item to cart: {reason}",
     "add_to_cart_unexpected_error": "An unexpected error occurred while adding to cart.",
     "add_to_cart_no_object": "Failed to add item to cart: No object returned.",
@@ -307,6 +307,11 @@
     "active": "Active",
     "archive": "Archive",
     "search": "Search wallet",
+    "tabs": {
+      "active": "Active",
+      "gifted": "Gifted",
+      "archived": "Archived"
+    },
     "gift-card": {
       "title": "Gift Card",
       "subtitle": "Your gift cards",
@@ -329,7 +334,7 @@
       "terms_and_conditions": "Terms And Conditions",
       "visit_online": "VISIT ONLINE"
     },
-    "transferred": {
+    "gifted": {
       "recipient_details": "Recipient Details",
       "name": "Name",
       "email": "Email",
@@ -337,7 +342,7 @@
       "date_sent": "Date sent",
       "gift_was_accepted": "Gift Was Accepted",
       "active": "active",
-      "transferred": "transferred",
+      "gifted": "gifted",
       "no_items_found": "No items found"
     }
   },
@@ -390,6 +395,15 @@
     "error": {
       "sender_name_max_length": "Sender name must contain at most 30 character(s)",
       "message_max_length": "Message must contain at most 500 character(s)"
-    }
+    },
+    "received_gift_card": "Received Gift Card"
+  },
+  "gifted_card": {
+    "accept": "Accept",
+    "decline": "Decline",
+    "decline_success": "You have declined the gift-card!",
+    "modal_title": "Please enter your pin to accept it.",
+    "pin_placeholder": "Enter PIN/secret",
+    "submit": "Submit"
   }
 }

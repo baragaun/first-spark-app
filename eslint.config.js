@@ -11,7 +11,10 @@ const gitignorePath = fileURLToPath(new URL('./.gitignore', import.meta.url));
 
 export default ts.config(
   includeIgnoreFile(gitignorePath),
-  globalIgnores(['src/lib/paraglide/*']),
+  globalIgnores([
+    'src/lib/paraglide/*',
+    'src/lib/components/ui/**', // ignore this folder, because is genrated code by shadcn-svelte
+  ]),
   js.configs.recommended,
   ...ts.configs.recommended,
   ...svelte.configs['flat/recommended'],
@@ -29,6 +32,7 @@ export default ts.config(
       'quotes': ['error', 'single'],
       'semi': ['error', 'always'],
       '@typescript-eslint/no-unused-vars': 'off',
+      'svelte/no-at-html-tags': 'off',
     },
   },
   {

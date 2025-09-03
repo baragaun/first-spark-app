@@ -8,11 +8,15 @@
   import UpdatePasswordForm from './components/update-password-form.svelte';
   import UpdateUsernameForm from './components/update-username-form.svelte';
   import { getContext } from 'svelte';
+  import { goto } from '$app/navigation';
+  import { LogOut } from 'lucide-svelte';
+  import { getPurchaseOrdersStore } from '$lib/stores/order-history.svelte';
 
   let { data } = $props();
 
   const userContext = getContext<MyUserContext>('myUserContext');
   const myUser = $derived(userContext.myUser);
+  const purchaseOrdersStore = getPurchaseOrdersStore();
 
   let showUpdateUsernameDialog = $state(false);
   let showUpdateEmailDialog = $state(false);
@@ -24,6 +28,12 @@
     showUpdateEmailDialog = false;
     showUpdatePasswordDialog = false;
     showDeleteAccountDialog = false;
+  };
+
+  const handleSignOut = async () => {
+    purchaseOrdersStore.reset();
+    await userContext.signMeOut();
+    await goto('/signin');
   };
 </script>
 
@@ -85,4 +95,13 @@
       />
     </SettingsDialog>
   </div>
+
+  <button
+    class="flex items-center gap-2 rounded bg-red-500 px-4 py-2 font-semibold text-white hover:bg-red-600"
+    onclick={handleSignOut}
+    aria-label="Logout"
+  >
+    <LogOut class="h-5 w-5" />
+    <span>{m['nav.auth.sign_out']()}</span>
+  </button>
 </div>

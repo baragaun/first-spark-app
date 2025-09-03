@@ -274,7 +274,7 @@
     "brand_label": "Merk",
     "gift_card_amount_label": "Cadeaukaart bedrag",
     "usd": "USD",
-    "add_to_cart_success": "${amount} ${vendor} toegevoegd aan winkelwagen!",
+    "add_to_cart_success": "${amount} {vendor} toegevoegd aan winkelwagen!",
     "add_to_cart_error": "Toevoegen aan winkelwagen mislukt: {reason}",
     "add_to_cart_unexpected_error": "Er is een onverwachte fout opgetreden bij het toevoegen aan winkelwagen.",
     "add_to_cart_no_object": "Toevoegen aan winkelwagen mislukt: Geen object geretourneerd.",
@@ -305,6 +305,11 @@
     "active": "Aktiv",
     "archive": "Archiv",
     "search": "Brieftasche durchsuchen",
+    "tabs": {
+      "active": "Aktiv",
+      "gifted": "Geschenkt",
+      "archived": "Archiviert"
+    },
     "gift-card": {
       "title": "Geschenkkarte",
       "subtitle": "Ihre Geschenkkarten",
@@ -327,15 +332,15 @@
       "terms_and_conditions": "Allgemeine Geschäftsbedingungen",
       "visit_online": "ONLINE BESUCHEN"
     },
-    "transferred": {
+    "gifted": {
       "recipient_details": "Empfängerdetails",
       "name": "Name",
       "email": "E-Mail",
       "message": "Nachricht",
       "date_sent": "Gesendet am",
       "gift_was_accepted": "Geschenk wurde angenommen",
-      "active": "aktiv",
-      "transferred": "übertragen",
+      "active": "actief",
+      "gifted": "übertragen",
       "no_items_found": "Keine Einträge gefunden"
     }
   },
@@ -386,6 +391,15 @@
     "error": {
       "sender_name_max_length": "Der Name des Absenders darf maximal 30 Zeichen enthalten",
       "message_max_length": "Die Nachricht darf maximal 500 Zeichen enthalten"
-    }
+    },
+    "received_gift_card": "Geschenkkarte erhalten"
+  },
+  "gifted_card": {
+    "accept": "Akzeptieren",
+    "decline": "Ablehnen",
+    "decline_success": "Du hast die Geschenkkarte abgelehnt!",
+    "modal_title": "Bitte gib deine PIN ein, um sie anzunehmen.",
+    "pin_placeholder": "PIN/Geheimcode eingeben",
+    "submit": "Absenden"
   }
 }

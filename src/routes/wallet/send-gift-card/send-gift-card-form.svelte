@@ -1,15 +1,12 @@
 <script lang="ts">
   import { zod } from 'sveltekit-superforms/adapters';
   import { sendGiftCardSchema, type SendGiftCardSchema } from './schema';
-  import { z } from 'zod';
   import IdentFormInput from '$lib/components/forms/form-ident-input.svelte';
-  import { Input } from '$lib/components/ui/input';
   import { UserIdentType } from '@baragaun/bg-node-client';
   import { debounce } from 'throttle-debounce';
   import FormButton from '@/components/forms/form-button.svelte';
   import { onMount } from 'svelte';
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
-  import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
   import {
     AlertDialog,
     AlertDialogAction,
@@ -21,6 +18,10 @@
   } from '@/components/ui/alert-dialog';
   import { m } from '@/paraglide/messages';
   import { goto } from '$app/navigation';
+  import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
+  import { getWalletItemsStore } from '@/stores/wallet-store.svelte';
+  import { page } from '$app/state';
 
   const DEBOUNCE_DELAY = 350;
 
@@ -36,7 +37,7 @@
       debouncedValidation();
     },
     async onSubmit({ cancel }) {
-      cancel(); // Avoid the server-side form action
+      cancel();
       await handleFormSubmit();
     },
   });
@@ -54,10 +55,47 @@
   }));
 
   const isFormValid = $derived.by(() => {
-    return $formData.senderName && $formData.senderEmail && $formData.message;
+    return $formData.recipientFullName && $formData.recipientEmail && $formData.message;
   });
 
   let showDialog = $state(false);
+
+  let walletItem = $derived(getWalletItemsStore().find((p) => p.id === data.walletItemId) || null);
+
+  const sendEmail = async (
+    transferSlug: string,
+    secretCode: string,
+    recipientEmail: string,
+    recipientFullName?: string,
+    message?: string,
+  ) => {
+    console.log(walletItem);
+    const attachmentLink = `${page.url.origin}/wallet/gifted-card/${transferSlug}`;
+    const subject = encodeURIComponent(`${myUserContext.myUser?.userHandle} sent you a gift card`);
+    // Not showing expiresAt as it is always null
+    // const expiresAt = $walletItem?.expiresAt ? `Expiry Date: ${$walletItem?.expiresAt}` : '';
+    const balance = walletItem?.balance ? (walletItem?.balance / 1000).toFixed(0) : 0;
+    const body = encodeURIComponent(
+      `${message}
+
+------------------------------------
+Details:
+Gift Card Value: ${balance}
+Accept gift at: ${attachmentLink}
+Unlock code: ${secretCode}
+------------------------------------`,
+    );
+
+    // You can append a link to the attachment in the email body
+    const mailto = `mailto:${recipientEmail}?subject=${subject}&body=${body}`;
+    window.location.href = mailto;
+  };
+
+  function getSecureCode() {
+    const array = new Uint32Array(1);
+    crypto.getRandomValues(array);
+    return (array[0] % 1000000).toString().padStart(6, '0');
+  }
 
   const handleFormSubmit = async () => {
     const result = await validateForm({ update: true, focusOnError: true });
@@ -66,16 +104,30 @@
       return;
     }
 
+    const transferSecret = getSecureCode();
+
     const response = await marketplaceContext.createWalletItemTransfer({
+      transferSecret,
       walletItemId: data.walletItemId,
-      recipientFullName: $formData.senderName,
-      recipientEmail: $formData.senderEmail,
+      recipientFullName: $formData.recipientFullName,
+      recipientEmail: $formData.recipientEmail,
       messageText: $formData.message,
     });
 
-    if (response.error) {
+    console.log('createWalletItemTransfer response:', response);
+
+    if (response.error || !response.object?.transferSlug) {
       return;
     }
+
+    sendEmail(
+      response.object.transferSlug,
+      transferSecret,
+      $formData.recipientEmail,
+      $formData.recipientFullName,
+      $formData.message,
+    );
+
     showDialog = true;
   };
 
@@ -101,14 +153,14 @@
 >
   <IdentFormInput
     {form}
-    fieldName="senderName"
+    fieldName="recipientFullName"
     label={m['send_gift_card.sender_name']()}
     placeholder={m['send_gift_card.sender_name_placeholder']()}
     identType={UserIdentType.userHandle}
   />
   <IdentFormInput
     {form}
-    fieldName="senderEmail"
+    fieldName="recipientEmail"
     label={m['send_gift_card.sender_email']()}
     placeholder={m['send_gift_card.sender_email_placeholder']()}
     identType={UserIdentType.email}

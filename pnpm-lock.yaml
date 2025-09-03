@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@baragaun/bg-node-client':
-        specifier: ^0.0.58
-        version: 0.0.58(prettier@3.5.3)(socks@2.8.5)
+        specifier: ^0.0.67
+        version: 0.0.67(prettier@3.5.3)(socks@2.8.5)
       '@sparticuz/chromium':
         specifier: ^137.0.1
         version: 137.0.1
@@ -264,8 +264,8 @@ packages:
     resolution: {integrity: sha512-ETyHEk2VHHvl9b9jZP5IHPavHYk57EhanlRRuae9XCpb/j5bDCbPPMOBfCWhnl/7EDJz0jEMCi/RhccCE8r1+Q==}
     engines: {node: '>=6.9.0'}
 
-  '@baragaun/bg-node-client@0.0.58':
-    resolution: {integrity: sha512-ZkpjMQSegrOdh+214Y6W/JeC8Fm843FZ5Bs/H8RMR0NwAiVgdcdIh5f8Lx8q23PwwOhMQ+uFFskJNCIhylsTOw==}
+  '@baragaun/bg-node-client@0.0.67':
+    resolution: {integrity: sha512-tW0aDHkgiB5aR+33mAgpSYIG+4pQCUm/tDbmG829SiyoP0qddMqoGq1ZVo+cv0LAEbpxKSnKZaToCxyMuB1PAQ==}
     engines: {node: '>=20'}
 
   '@bcoe/v8-coverage@1.0.2':
@@ -1907,8 +1907,8 @@ packages:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
     engines: {node: '>=10'}
 
-  chalk@5.5.0:
-    resolution: {integrity: sha512-1tm8DTaJhPBG3bIkVeZt1iZM9GfSX2lzOeDVZH9R9ffRHpmHvxZ/QhgQH/aDTkswQVt+YHdXAdS/In/30OjCbg==}
+  chalk@5.6.0:
+    resolution: {integrity: sha512-46QrSQFyVSEyYAgQ22hQ+zDa60YHA4fBstHmtSApj1Y5vKtG27fWowW03jCk5KcbXEWPZUIR894aARCA/G1kfQ==}
     engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
 
   chance@1.1.13:
@@ -4583,7 +4583,7 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.27.1
 
-  '@baragaun/bg-node-client@0.0.58(prettier@3.5.3)(socks@2.8.5)':
+  '@baragaun/bg-node-client@0.0.67(prettier@3.5.3)(socks@2.8.5)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
       '@nats-io/jetstream': 3.1.0
@@ -5268,7 +5268,7 @@ snapshots:
     dependencies:
       '@molt/types': 0.2.0
       alge: 0.8.1
-      chalk: 5.5.0
+      chalk: 5.6.0
       lodash.camelcase: 4.3.0
       lodash.snakecase: 4.1.1
       readline-sync: 1.4.10
@@ -6488,7 +6488,7 @@ snapshots:
       ansi-styles: 4.3.0
       supports-color: 7.2.0
 
-  chalk@5.5.0: {}
+  chalk@5.6.0: {}
 
   chance@1.1.13: {}
 
