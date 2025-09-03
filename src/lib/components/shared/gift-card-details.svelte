@@ -135,7 +135,7 @@
       // Create a new object to trigger Svelte reactivity
       const updatedWalletItem = {
         ...walletItem,
-        archivedAt: walletItem.archivedAt ? null : new Date().toISOString()
+        archivedAt: walletItem.archivedAt ? null : new Date().toISOString(),
       };
       updateWalletItem(updatedWalletItem);
     } catch (error) {
