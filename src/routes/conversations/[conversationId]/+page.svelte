@@ -78,9 +78,9 @@
       });
     }
     initializeChannel();
-    client.addListener(myChannelListener);
+    client.addListener(myChannelMessageListener);
     return () => {
-      client.removeListener(myChannelListener.id);
+      client.removeListener(myChannelMessageListener.id);
     };
   });
 
@@ -137,7 +137,7 @@
     messages = messages.filter((message) => message.id !== id);
   };
 
-  const myChannelListener = {
+  const myChannelMessageListener = {
     id: `my-channel-message-listener-${channelId}`,
     topic: BgListenerTopic.channelMessage,
     onChannelMessageCreated: async ({ object }: { object: ChannelMessage }) => {

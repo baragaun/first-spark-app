@@ -3,6 +3,7 @@ import { client } from '@/services/bg-node-client';
 // import { isChannelLoading, myChannels } from '@/stores/channel-store';
 import { AppUiMessage } from '@/types/enums';
 import {
+  BgListenerTopic,
   CachePolicy,
   Channel,
   ChannelListItem,
@@ -20,6 +21,29 @@ let selectedChannel = $state<ChannelListItem | null>(null);
 export class ChannelContext {
   public users = $state<UserListItem[]>([]);
   private client = client;
+
+  private myChannelListener = {
+    id: 'my-channel-listener',
+    topic: BgListenerTopic.channel,
+    onChannelCreated: async ({ object }: { object: ChannelListItem }) => {
+      console.log('Channel created: ', object);
+      myChannels = [object, ...myChannels];
+      // todo may be need to fetch full channel details from server before adding to list
+    },
+    onChannelUpdated: ({ object }: { object: ChannelListItem }) => {
+      myChannels = myChannels.map((c) => (c.id === object.id ? object : c));
+      // todo may be need to fetch full channel details from server before adding to list
+    },
+    onChannelDeleted: ({ object }: { object: ChannelListItem }) => {
+      myChannels = myChannels.filter((c) => c.id !== object.id);
+      // todo may be need to fetch full channel details from server before adding to list
+    },
+  };
+
+  constructor() {
+    // Register background listener for real-time updates
+    this.client.addListener(this.myChannelListener);
+  }
 
   async findMyChannels(): Promise<ChannelListItem[] | string | undefined> {
     if (!this.client.isInitialized) {
