@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { MyUserContext } from '@/contexts/my-user-context.svelte.js';
-  import { getContext, onMount } from 'svelte';
+  import { getContext } from 'svelte';
   import { type PageData } from './$types.js';
   import ResetPasswordForm from './reset-password-form.svelte';
 
@@ -11,8 +11,8 @@
   const isOffline: boolean = $derived(userContext.isOffline);
   const isSignedIn = $derived(userContext.isSignedIn);
 
-  onMount(async () => {
-    if (isSignedIn) await goto('/');
+  $effect(() => {
+    if (isSignedIn) goto('/');
   });
 </script>
 
