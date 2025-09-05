@@ -10,7 +10,6 @@
     type PurchaseOrder,
     ShoppingCartItem,
   } from '@baragaun/bg-node-client';
-  import { writable } from 'svelte/store';
   import { toast } from 'svelte-sonner';
   import placeholderImage from '../../assets/images/placeholder.png';
   import { loadMarketplaceData, getMarketplaceData } from '$lib/stores/marketplace-store.svelte';
@@ -73,7 +72,7 @@
 
     try {
       // First remove the all other existing items
-      for (const cartItem of $shoppingCart?.items ?? []) {
+      for (const cartItem of shoppingCart?.items ?? []) {
         if (
           cartItem.id != item.id &&
           cartItem.productId === item.productId &&
@@ -115,7 +114,7 @@
   }
 
   async function removeAllItems(item: ShoppingCartItem) {
-    for (const cartItem of $shoppingCart?.items ?? []) {
+    for (const cartItem of shoppingCart?.items ?? []) {
       if (cartItem.productId === item.productId && cartItem.price === item.price) {
         await removeItem(cartItem.id);
       }
@@ -150,21 +149,19 @@
     return [product, brand];
   }
 
-  const shoppingCart = writable<ShoppingCart | null | undefined>(undefined);
+  let shoppingCart = $state<ShoppingCart | null | undefined>(undefined);
 
   const loadShoppingCart = async () => {
     const cartResult = await marketplaceContext.findMyShoppingCart();
 
     if (typeof cartResult === 'string') {
-      // Handle error case, e.g., show a toast or log
       console.error('Failed to load shopping cart:', cartResult);
-      shoppingCart.set(undefined); // Set to undefined on error
+      shoppingCart = undefined;
     } else if (cartResult) {
-      shoppingCart.set(cartResult);
-      // Combine duplicate items before setting cartItems
+      shoppingCart = cartResult;
       cartItems = combineDuplicateItems(cartResult.items);
     } else {
-      shoppingCart.set(null); // No cart found
+      shoppingCart = null;
     }
   };
 

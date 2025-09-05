@@ -5,7 +5,6 @@
   import { Button } from '@/components/ui/button';
   import { m } from '@/paraglide/messages.js';
   import { LogIn } from 'lucide-svelte';
-  import AvatarMenu from './avatar-menu.svelte';
   import LanguageButton from './language-button.svelte';
   import ThemeButton from './light-switch.svelte';
   import type { MyUserContext } from '@/contexts/my-user-context.svelte';
@@ -13,7 +12,7 @@
   import type { MyUser } from '@baragaun/bg-node-client';
   import { getPurchaseOrdersStore } from '$lib/stores/order-history.svelte';
   import { IsMobile } from '$lib/hooks/is-mobile.svelte.js';
-  import { headerSmallIcon } from '@/stores/app-store';
+  import { headerSmallIcon } from '@/stores/app-store.svelte';
 
   const purchaseOrdersStore = getPurchaseOrdersStore();
 
@@ -42,7 +41,7 @@
 
     {#if isMobile.current}
       <div class="flex items-center justify-center">
-        <img src={$headerSmallIcon} alt="First Spark Logo" class="h-10" />
+        <img src={headerSmallIcon()} alt="First Spark Logo" class="h-10" />
       </div>
     {/if}
 

@@ -19,7 +19,7 @@
   import { getLocale } from '@/paraglide/runtime';
   import { turnstile } from '@svelte-put/cloudflare-turnstile';
   import { env } from '$env/dynamic/public';
-  import { appTitle } from '$lib/stores/app-store';
+  import { appTitle } from '@/stores/app-store.svelte';
   import {
     determineIdentifierType,
     getOtpMessage,
@@ -458,7 +458,7 @@
         </div>
       {/if}
       <div class="mt-4 break-words text-center text-sm">
-        {m['signin.have_account']({ title: $appTitle })}
+        {m['signin.have_account']({ title: appTitle() })}
         <a href="/signup" class="underline"> {m['signin.buttons.signup']()} </a>
       </div>
     </div>

@@ -5,7 +5,7 @@
   import { m } from '$lib/paraglide/messages.js';
   import { getContext, onMount } from 'svelte';
   import type { MyUserContext } from '@/contexts/my-user-context.svelte';
-  import { appTitle } from '@/stores/app-store';
+  import { appTitle } from '@/stores/app-store.svelte';
 
   const userContext = getContext<MyUserContext>('myUserContext');
   let isOffline = $derived(userContext.isOffline);
@@ -27,7 +27,7 @@
     toast.dismiss('connection-offline');
 
     toast.success(m['connection.reconnected'](), {
-      description: m['connection.reconnected.description']({ title: $appTitle }),
+      description: m['connection.reconnected.description']({ title: appTitle() }),
       icon: PartyPopper,
       duration: 5000,
       id: 'connection-online',
