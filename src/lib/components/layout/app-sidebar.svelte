@@ -15,7 +15,7 @@
     Zap,
     HistoryIcon,
   } from 'lucide-svelte';
-  import { appTitle, headerIcon, headerSmallIcon } from '$lib/stores/app-store';
+  import { appTitle, headerIcon, headerSmallIcon } from '@/stores/app-store.svelte';
 
   const items = [
     // {
@@ -117,16 +117,16 @@
             <img src={$headerIcon} alt="First Spark Logo" class="size-8" />
             </div> -->
             <!-- <span class="font-lexend truncate ps-2 text-xl font-bold text-foreground">
-              {$appTitle}
+              {appTitle()}
             </span> -->
 
             {#if sidebar?.open}
               <div class="flex items-center justify-center">
-                <img src={$headerIcon} alt="First Spark Logo" class="h-10" />
+                <img src={headerIcon()} alt="First Spark Logo" class="h-10" />
               </div>
             {:else}
               <div class="flex items-center justify-center">
-                <img src={$headerSmallIcon} alt="First Spark Logo" class="h-10" />
+                <img src={headerSmallIcon()} alt="First Spark Logo" class="h-10" />
               </div>
             {/if}
           </div>
@@ -153,7 +153,7 @@
     {#if !isSignedIn}
       <Sidebar.Group class="mb-2 mt-auto px-3 group-data-[collapsible=icon]:hidden">
         <div class="rounded-lg border border-border bg-card p-4 shadow-sm">
-          <h2 class="mb-3 text-sm font-bold">{m['join_first_spark']({ title: $appTitle })}</h2>
+          <h2 class="mb-3 text-sm font-bold">{m['join_first_spark']({ title: appTitle() })}</h2>
           <h3 class="mb-3 text-sm font-medium">{m['welcome_subtitle']()}</h3>
           <div class="flex flex-col gap-2">
             <Button
@@ -194,7 +194,7 @@
                 <span class="text-muted-foreground"
                   >{isOffline
                     ? m['connection.offline']()
-                    : m['connection.online']({ title: $appTitle })}</span
+                    : m['connection.online']({ title: appTitle() })}</span
                 >
               </Button>
             {/snippet}

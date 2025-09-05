@@ -10,7 +10,7 @@
   import { SidebarProvider } from '@/components/ui/sidebar';
   import MyUserProvider from '@/contexts/my-user-provider.svelte';
   import { locales, localizeHref } from '@/paraglide/runtime';
-  import { appTitle, appDescription, appCanonicalUrl } from '$lib/stores/app-store';
+  import { appTitle, appDescription, appCanonicalUrl } from '@/stores/app-store.svelte';
   import MetaTags from '@/components/shared/meta-tags.svelte';
 
   let { children } = $props();
@@ -21,7 +21,7 @@
   );
 </script>
 
-<MetaTags title={$appTitle} description={$appDescription} canonicalUrl={$appCanonicalUrl} />
+<MetaTags title={appTitle()} description={appDescription()} canonicalUrl={appCanonicalUrl()} />
 
 <MyUserProvider>
   <div class="flex min-h-screen flex-col bg-background font-sans antialiased">

@@ -1,10 +1,10 @@
 import { env } from '$env/dynamic/public';
 import { FirstSparkApp, KCUApp } from '@/types/enums';
-import { derived, writable } from 'svelte/store';
 
-// Create a derived store for the app title
-export const appTitle = derived(writable(env.PUBLIC_PROJECTNAME), ($projectName) => {
-  switch ($projectName) {
+let projectName = $state(env.PUBLIC_PROJECTNAME);
+
+export const appTitle = () => {
+  switch (projectName) {
     case 'FirstSpark':
       return FirstSparkApp.title;
     case 'KCU':
@@ -12,11 +12,10 @@ export const appTitle = derived(writable(env.PUBLIC_PROJECTNAME), ($projectName)
     default:
       return 'First Spark';
   }
-});
+};
 
-// Create a derived store for the app description
-export const appDescription = derived(writable(env.PUBLIC_PROJECTNAME), ($projectName) => {
-  switch ($projectName) {
+export let appDescription = () => {
+  switch (projectName) {
     case 'FirstSpark':
       return FirstSparkApp.description;
     case 'KCU':
@@ -24,11 +23,10 @@ export const appDescription = derived(writable(env.PUBLIC_PROJECTNAME), ($projec
     default:
       return '';
   }
-});
+};
 
-// Create a derived store for the canonical URL
-export const appCanonicalUrl = derived(writable(env.PUBLIC_PROJECTNAME), ($projectName) => {
-  switch ($projectName) {
+export let appCanonicalUrl = () => {
+  switch (projectName) {
     case 'FirstSpark':
       return FirstSparkApp.canonicalUrl;
     case 'KCU':
@@ -36,10 +34,10 @@ export const appCanonicalUrl = derived(writable(env.PUBLIC_PROJECTNAME), ($proje
     default:
       return '';
   }
-});
+};
 
-export const headerIcon = derived(writable(env.PUBLIC_PROJECTNAME), ($projectName) => {
-  switch ($projectName) {
+export let headerIcon = () => {
+  switch (projectName) {
     case 'FirstSpark':
       return '/fs-logo.svg';
     case 'KCU':
@@ -47,10 +45,10 @@ export const headerIcon = derived(writable(env.PUBLIC_PROJECTNAME), ($projectNam
     default:
       return '/fs-logo.svg';
   }
-});
+};
 
-export const headerSmallIcon = derived(writable(env.PUBLIC_PROJECTNAME), ($projectName) => {
-  switch ($projectName) {
+export let headerSmallIcon = () => {
+  switch (projectName) {
     case 'FirstSpark':
       return '/fs-logo.svg';
     case 'KCU':
@@ -58,4 +56,4 @@ export const headerSmallIcon = derived(writable(env.PUBLIC_PROJECTNAME), ($proje
     default:
       return '/fs-logo.svg';
   }
-});
+};

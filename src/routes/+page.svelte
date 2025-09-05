@@ -2,7 +2,7 @@
   import { Button } from '$lib/components/ui/button';
   import { m } from '$lib/paraglide/messages.js';
   import { MyUserContext } from '@/contexts/my-user-context.svelte';
-  import { appTitle } from '@/stores/app-store';
+  import { appTitle } from '@/stores/app-store.svelte';
   import { getContext } from 'svelte';
 
   const userContext = getContext<MyUserContext>('myUserContext');
@@ -12,7 +12,7 @@
 <div class="grid flex-1 place-items-center">
   <div class="flex flex-col items-center px-4 text-center">
     <h1 class="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl">
-      {m['welcome']({ title: $appTitle })}
+      {m['welcome']({ title: appTitle() })}
     </h1>
 
     <!--    <p class="mx-auto mt-6 max-w-[700px] text-lg text-muted-foreground">-->
