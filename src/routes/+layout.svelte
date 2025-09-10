@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { setMode } from 'mode-watcher';
   import '../app.css';
   import { page } from '$app/state';
   import { ModeWatcher } from 'mode-watcher';
@@ -19,6 +20,10 @@
       page.url.pathname.startsWith('/wallet/') ||
       page.url.pathname.startsWith('/order-history/'),
   );
+
+  $effect(() => {
+    setMode('light');
+  });
 </script>
 
 <MetaTags title={appTitle()} description={appDescription()} canonicalUrl={appCanonicalUrl()} />
