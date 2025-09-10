@@ -41,7 +41,7 @@ export let headerIcon = () => {
     case 'FirstSpark':
       return '/fs-logo.svg';
     case 'KCU':
-      return '/favicon-kcu.png';
+      return '/fs-logo-kcu-large.png';
     default:
       return '/fs-logo.svg';
   }
@@ -52,7 +52,7 @@ export let headerSmallIcon = () => {
     case 'FirstSpark':
       return '/fs-logo.svg';
     case 'KCU':
-      return '/KCU-Logo-small.png';
+      return '/fs-logo-kcu-small.png';
     default:
       return '/fs-logo.svg';
   }

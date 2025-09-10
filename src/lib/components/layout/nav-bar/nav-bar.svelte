@@ -47,7 +47,8 @@
 
     <!-- Right side items -->
     <div class="ml-auto flex flex-none items-center gap-1">
-      <ThemeButton class="flex" />
+      <!-- Hiding Theme button for mimble app -->
+      <!-- <ThemeButton class="flex" /> -->
       <LanguageButton class="flex" />
       {#if !isSignedIn}
         <div class="flex flex-none items-center gap-2">
