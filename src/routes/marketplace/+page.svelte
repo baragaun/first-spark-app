@@ -10,8 +10,10 @@
   import { loadMarketplaceData, getMarketplaceData } from '$lib/stores/marketplace-store.svelte';
   import { IsMobile } from '$lib/hooks/is-mobile.svelte';
   import { giftCardImageDomain } from '$lib/constants';
+  import SpinLoadIndicator from '@/components/forms/spin-load-indicator.svelte';
 
   let marketplaceData = $state(getMarketplaceData());
+  let isLoading = $state(true);
 
   const isMobile = new IsMobile();
   let searchText = $state('');
@@ -71,8 +73,13 @@
 
   // Load on mount
   $effect(() => {
-    loadMarketplaceData().catch(console.error);
-    marketplaceData = getMarketplaceData();
+    isLoading = true;
+    loadMarketplaceData()
+      .catch(console.error)
+      .finally(() => {
+        marketplaceData = getMarketplaceData();
+        isLoading = false;
+      });
   });
 </script>
 
@@ -127,48 +134,58 @@
     </DropdownMenu.Root>
   </div>
 
-  <div
-    class="grid max-h-[calc(100vh-220px)] grid-cols-2 gap-4 overflow-y-auto md:grid-cols-3 lg:grid-cols-4"
-  >
-    {#each filteredProducts as product (product.id)}
-      {@const brand = getBrandForGiftCard(product)}
-      {#if brand}
-        <button
-          type="button"
-          class="group flex flex-col items-center border-0 bg-transparent p-0 text-left transition-all duration-300 hover:scale-105 hover:opacity-90"
-          onclick={() => navigateToGiftCardDetail(product.id)}
-          onkeydown={(e) => e.key === 'Enter' && navigateToGiftCardDetail(product.id)}
-          aria-label={m['marketplace.view_gift_card_aria']({ vendor: brand.name })}
-        >
-          <div
-            class="mb-2 aspect-[4/3] w-full overflow-hidden rounded-xl bg-card shadow-lg transition-all duration-300 group-hover:shadow-xl"
+  {#if isLoading}
+    <div class="flex items-center justify-center">
+      <SpinLoadIndicator />
+    </div>
+  {:else if filteredProducts.length === 0}
+    <div class="py-8 text-center text-lg text-muted-foreground">
+      {m['marketplace.no_results']()}
+    </div>
+  {:else}
+    <div
+      class="grid max-h-[calc(100vh-220px)] grid-cols-2 gap-4 overflow-y-auto pb-8 md:grid-cols-3 lg:grid-cols-4"
+    >
+      {#each filteredProducts as product (product.id)}
+        {@const brand = getBrandForGiftCard(product)}
+        {#if brand}
+          <button
+            type="button"
+            class="group flex flex-col items-center border-0 bg-transparent p-0 text-left transition-all duration-300 hover:scale-105 hover:opacity-90"
+            onclick={() => navigateToGiftCardDetail(product.id)}
+            onkeydown={(e) => e.key === 'Enter' && navigateToGiftCardDetail(product.id)}
+            aria-label={m['marketplace.view_gift_card_aria']({ vendor: brand.name })}
           >
-            <img
-              src={giftCardImageDomain + '/giftcards/' + product.imageSourceFront}
-              alt={brand.name}
-              class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
-              use:handleImageError
-            />
-          </div>
-          <div
-            class="flex items-center gap-2 transition-colors duration-300 group-hover:text-primary"
-          >
-            {#if !isMobile.current}
-              <div
-                class="h-6 w-6 overflow-hidden rounded-full transition-transform duration-300 group-hover:scale-110"
-              >
-                <img
-                  src={giftCardImageDomain + '/vendors/' + brand.logoImageSource}
-                  alt=""
-                  class="h-full w-full object-cover"
-                  use:handleImageError
-                />
-              </div>
-            {/if}
-            <span class="text-sm font-medium">{brand.name}</span>
-          </div>
-        </button>
-      {/if}
-    {/each}
-  </div>
+            <div
+              class="mb-2 aspect-[4/3] w-full overflow-hidden rounded-xl bg-card shadow-lg transition-all duration-300 group-hover:shadow-xl"
+            >
+              <img
+                src={giftCardImageDomain + '/giftcards/' + product.imageSourceFront}
+                alt={brand.name}
+                class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                use:handleImageError
+              />
+            </div>
+            <div
+              class="flex items-center gap-2 transition-colors duration-300 group-hover:text-primary"
+            >
+              {#if !isMobile.current}
+                <div
+                  class="h-6 w-6 overflow-hidden rounded-full transition-transform duration-300 group-hover:scale-110"
+                >
+                  <img
+                    src={giftCardImageDomain + '/vendors/' + brand.logoImageSource}
+                    alt=""
+                    class="h-full w-full object-cover"
+                    use:handleImageError
+                  />
+                </div>
+              {/if}
+              <span class="text-sm font-medium">{brand.name}</span>
+            </div>
+          </button>
+        {/if}
+      {/each}
+    </div>
+  {/if}
 </div>

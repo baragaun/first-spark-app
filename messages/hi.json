@@ -280,7 +280,8 @@
     "add_to_cart_no_object": "आइटम कार्ट में जोड़ने में विफल: कोई ऑब्जेक्ट नहीं मिला।",
     "how_to_redeem": "कैसे रिडीम करें",
     "terms_and_conditions": "नियम और शर्तें",
-    "visit_online": "ऑनलाइन देखें"
+    "visit_online": "ऑनलाइन देखें",
+    "no_results": "कोई परिणाम नहीं मिला"
   },
   "cart": {
     "title": "शॉपिंग कार्ट",
