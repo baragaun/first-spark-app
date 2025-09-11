@@ -281,7 +281,8 @@
     "add_to_cart_no_object": "Error al agregar artículo al carrito: No se devolvió ningún objeto.",
     "how_to_redeem": "Cómo canjear",
     "terms_and_conditions": "Términos y condiciones",
-    "visit_online": "VISITAR EN LÍNEA"
+    "visit_online": "VISITAR EN LÍNEA",
+    "no_results": "No se encontraron resultados"
   },
   "cart": {
     "title": "Carrito de compras",

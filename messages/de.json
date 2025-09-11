@@ -280,7 +280,8 @@
     "add_to_cart_no_object": "Toevoegen aan winkelwagen mislukt: Geen object geretourneerd.",
     "how_to_redeem": "Hoe te verzilveren",
     "terms_and_conditions": "Algemene voorwaarden",
-    "visit_online": "BEZOEK ONLINE"
+    "visit_online": "BEZOEK ONLINE",
+    "no_results": "Geen resultaten gevonden"
   },
   "cart": {
     "title": "Einkaufswagen",

@@ -281,7 +281,8 @@
     "add_to_cart_no_object": "Failed to add item to cart: No object returned.",
     "how_to_redeem": "How To Redeem",
     "terms_and_conditions": "Terms And Conditions",
-    "visit_online": "VISIT ONLINE"
+    "visit_online": "VISIT ONLINE",
+    "no_results": "No results found"
   },
   "cart": {
     "title": "Shopping Cart",
