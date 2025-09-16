@@ -70,7 +70,6 @@
 
   onMount(() => {
     if (!brand && !product) {
-      console.log('Loading marketplace data 123:', brand, product);
       loadMarketplaceData().catch(console.error);
     }
   });
@@ -145,7 +144,6 @@
         console.error('Error adding item to cart:', result.error);
         toast.error(m['marketplace.add_to_cart_error']({ reason: result.error }));
       } else if (result.object) {
-        console.log('Item added to cart:', result.object);
         toast.success(
           m['marketplace.add_to_cart_success']({
             amount: `${denomination.amount / 1000}`,
@@ -164,7 +162,6 @@
   }
 
   function openExternal(url: string | null | undefined) {
-    console.log(url);
     if (!url) return;
     const normalized = /^(https?:)?\/\//i.test(url) ? url : `https://${url}`;
     window.open(normalized, '_blank', 'noopener,noreferrer');

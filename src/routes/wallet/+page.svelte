@@ -136,7 +136,6 @@
             const {
               data: { text },
             } = await Tesseract.recognize(imageDataUrl, 'eng');
-            console.log(text);
             const priceMatch = text.match(/\$\s?\d+[.,]?\d*/);
             price = priceMatch ? priceMatch[0] : '';
             const lines = text

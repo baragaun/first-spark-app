@@ -5,7 +5,6 @@
   import { UserIdentType } from '@baragaun/bg-node-client';
   import { debounce } from 'throttle-debounce';
   import FormButton from '@/components/forms/form-button.svelte';
-  import { onMount } from 'svelte';
   import { superForm, type SuperValidated } from 'sveltekit-superforms';
   import {
     AlertDialog,
@@ -69,7 +68,6 @@
     recipientFullName?: string,
     message?: string,
   ) => {
-    console.log(walletItem);
     const attachmentLink = `${page.url.origin}/wallet/gifted-card/${transferSlug}`;
     const subject = encodeURIComponent(`${myUserContext.myUser?.userHandle} sent you a gift card`);
     // Not showing expiresAt as it is always null
@@ -114,8 +112,6 @@ Unlock code: ${secretCode}
       messageText: $formData.message,
     });
 
-    console.log('createWalletItemTransfer response:', response);
-
     if (response.error || !response.object?.transferSlug) {
       return;
     }
@@ -142,13 +138,11 @@ Unlock code: ${secretCode}
     }
   });
 
-  onMount(async () => {});
 </script>
 
 <form
   method="POST"
   use:enhance
-  onsubmit={handleFormSubmit}
   class="mx-auto max-w-md space-y-4 rounded-xl bg-white p-6 shadow dark:bg-background"
 >
   <IdentFormInput
