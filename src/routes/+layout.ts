@@ -1,6 +1,6 @@
 import { myUserContext } from '@/contexts/my-user-context.svelte';
-import type { LayoutLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
+import type { LayoutLoad } from './$types';
 
 // Only initialize in browser environment
 export const ssr = false;
@@ -8,8 +8,8 @@ export const ssr = false;
 export const load: LayoutLoad = async ({ url }) => {
   // Define public routes that don't require authentication
   const publicRoutes = ['/signin', '/signup', '/', '/about', '/contact'];
-  const isPublicRoute = publicRoutes.some(route =>
-    url.pathname === route || url.pathname.startsWith(route + '/')
+  const isPublicRoute = publicRoutes.some(
+    (route) => url.pathname === route || url.pathname.startsWith(route + '/'),
   );
 
   // Initialize user context in the browser

@@ -137,7 +137,6 @@ Unlock code: ${secretCode}
       formState.isLoading = false;
     }
   });
-
 </script>
 
 <form
