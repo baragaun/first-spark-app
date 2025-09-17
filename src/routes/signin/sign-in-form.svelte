@@ -427,7 +427,7 @@
           <Button variant="link" disabled={!$formData.ident} onclick={() => toggleAuthType()}>
             {m['signin.buttons.signin_with_token']()}
           </Button>
-          <Button variant="link" onclick={async () => await goto('reset-password')}>
+          <Button variant="link" onclick={async () => await goto('/reset-password')}>
             {m['signin.buttons.forgot_password']()}
           </Button>
         </div>
@@ -452,7 +452,7 @@
           <Button variant="link" onclick={async () => await toggleAuthType()}>
             {m['signin.buttons.signin_with_password']()}
           </Button>
-          <Button variant="link" onclick={async () => await goto('reset-password')}>
+          <Button variant="link" onclick={async () => await goto('/reset-password')}>
             {m['signin.buttons.forgot_password']()}
           </Button>
         </div>
