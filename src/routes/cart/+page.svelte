@@ -138,7 +138,6 @@
     cartItems = [];
     showOrderPlacedDialog = true;
     purchaseOrdersStore.reset();
-    await loadWalletItems();
   }
 
   function findProductAndBrand(
@@ -283,13 +282,14 @@
     </div>
 
     <!-- Place Order Button -->
-    <Button
-      class="w-full rounded-full bg-nav-foreground py-3 text-lg font-bold text-nav hover:bg-nav-foreground/90"
-      onclick={placeOrder}
-      disabled={cartItems.length === 0}
-    >
-      {m['cart.place_order']()}
-    </Button>
+    {#if cartItems.length > 0}
+      <Button
+        class="w-full rounded-full bg-nav-foreground py-3 text-lg font-bold text-nav hover:bg-nav-foreground/90"
+        onclick={placeOrder}
+      >
+        {m['cart.place_order']()}
+      </Button>
+    {/if}
     <AlertDialog open={showOrderPlacedDialog}>
       <AlertDialogContent>
         <AlertDialogHeader>
@@ -300,6 +300,7 @@
           <AlertDialogAction
             onclick={() => {
               showOrderPlacedDialog = false;
+              goto('/wallet');
             }}
           >
             {m['cart.okay']()}
