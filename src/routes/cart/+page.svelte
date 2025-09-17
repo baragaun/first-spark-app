@@ -286,7 +286,6 @@
       <Button
         class="w-full rounded-full bg-nav-foreground py-3 text-lg font-bold text-nav hover:bg-nav-foreground/90"
         onclick={placeOrder}
-        disabled={cartItems.length === 0}
       >
         {m['cart.place_order']()}
       </Button>
