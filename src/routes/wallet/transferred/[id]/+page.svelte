@@ -10,6 +10,7 @@
   import {
     getWalletItemsStore,
     getWalletItemTransfersStore,
+    loadWalletItems,
     loadWalletItemTransfers,
     updateWalletItem,
   } from '@/stores/wallet-store.svelte';
@@ -17,14 +18,23 @@
 
   // Get wallet item by id from store
   const walletItemId = page.params.id;
-  let walletItem = $derived(getWalletItemsStore().find((p) => p.id === walletItemId) || null);
+  let loading = $state(false);
+  let walletItem = $state(getWalletItemsStore().find((p) => p.id === walletItemId));
   let walletItemTransfer: WalletItemTransfer | undefined | null = $state(null);
 
   onMount(async () => {
-    loadWalletItemTransfers();
-    walletItemTransfer = getWalletItemTransfersStore().find(
+    if (!walletItem) {
+      loading = true;
+      loadWalletItems().then(() => {
+        walletItem = getWalletItemsStore().find((p) => p.id === walletItemId);
+        loading = false;
+      });
+    }
+    loadWalletItemTransfers().then(() => {
+      walletItemTransfer = getWalletItemTransfersStore().find(
       (walletItemTransfer) => walletItemTransfer.walletItemId === walletItemId,
     );
+    });
   });
 
   function formatDateTime(dateString: string | undefined) {
@@ -102,8 +112,13 @@
   </button>
   <span class="flex-1 text-center text-lg font-semibold">{m['wallet.gift-card.title']()}</span>
 </div>
-
-{#if walletItem}
+{#if loading || !walletItem}
+  <div class="flex h-[60vh] items-center justify-center">
+    <div
+      class="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"
+    ></div>
+  </div>
+{:else if walletItem}
   <div class="mx-auto max-w-2xl px-4 py-6">
     <!-- Gift Card Image -->
     <div class="my-2 flex justify-center">
@@ -203,6 +218,7 @@
       <div class="mb-2 break-all font-bold">{walletItem.id}</div>
     </div>
   </div>
+
 {:else}
   <div class="py-12 text-center text-muted-foreground">
     {m['wallet.gifted.no_items_found']()}

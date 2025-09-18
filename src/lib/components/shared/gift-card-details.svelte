@@ -36,7 +36,7 @@
 
   let {
     productId,
-    walletItem,
+    walletItem = $bindable(),
     showNavBar = true,
     hideActions = false,
     isVerified = true,
@@ -44,9 +44,9 @@
     brand,
   }: Props = $props();
 
-  const { brands, products, loading, userErrorMessage } = getMarketplaceData();
+  const { brands, products, loading, userErrorMessage } = $derived(getMarketplaceData());
 
-  if (!product) {
+  function getProductById() {
     if (productId) {
       product = products.find((p) => p.id === productId);
     } else if (walletItem?.productId) {
@@ -56,9 +56,9 @@
     }
   }
 
-  if (!brand) {
+  function getBrandById() {
     if (product?.brandId) {
-      brand = brands.find((b) => b.id === product.brandId);
+      brand = brands.find((b) => b.id === product?.brandId);
     } else if (walletItem?.brandId) {
       brand = brands.find((b) => b.id === walletItem.brandId);
     } else {
@@ -70,7 +70,13 @@
 
   onMount(() => {
     if (!brand && !product) {
-      loadMarketplaceData().catch(console.error);
+      loadMarketplaceData().then(() => {
+        getProductById();
+        getBrandById();
+      }).catch(console.error);
+    }
+    if (!walletItem) {
+      console.warn('No wallet item provided to GiftCardDetails component');
     }
   });
 
@@ -118,10 +124,10 @@
 
   async function addDenominationToCart(
     denomination: GiftCardDenomination,
-    giftCardProduct: GiftCardProduct,
-    brand: Brand | null,
+    giftCardProduct?: GiftCardProduct,
+    brand?: Brand | null,
   ) {
-    if (!giftCardProduct.id) {
+    if (!giftCardProduct?.id) {
       console.error('GiftCardProduct ID is missing, cannot add to cart.');
       toast.error(m['marketplace.add_to_cart_error']({ reason: 'Gift card details missing.' }));
       return;
