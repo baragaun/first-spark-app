@@ -8,7 +8,7 @@
   import { goto } from '$app/navigation';
   import { getWalletItemsStore, loadWalletItems } from '@/stores/wallet-store.svelte';
   import { uploadedCardSetValues } from '@/stores/uploaded-card.svelte';
-  import Quagga, { QuaggaJSResultObject } from 'quagga';
+  import Quagga from 'quagga';
   import Tesseract from 'tesseract.js';
   import { m } from '@/paraglide/messages';
   import { giftCardImageDomain } from '@/constants';
