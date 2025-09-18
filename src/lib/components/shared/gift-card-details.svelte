@@ -341,13 +341,6 @@
           <p class="text-sm text-gray-400">
             Balance as of {new Date(walletItem.createdAt).toLocaleDateString()}
           </p>
-          <a
-            href="https://www.google.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="text-primary underline">{m['wallet.gift-card.look_up_balance']()}</a
-          >
-
           <!-- Card Code and PIN -->
           {#if walletItem.code}
             <div class="mt-4 flex flex-col items-center">
