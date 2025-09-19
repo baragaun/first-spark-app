@@ -70,10 +70,12 @@
 
   onMount(() => {
     if (!brand && !product) {
-      loadMarketplaceData().then(() => {
-        getProductById();
-        getBrandById();
-      }).catch(console.error);
+      loadMarketplaceData()
+        .then(() => {
+          getProductById();
+          getBrandById();
+        })
+        .catch(console.error);
     }
     if (!walletItem) {
       console.warn('No wallet item provided to GiftCardDetails component');
@@ -347,6 +349,14 @@
           <p class="text-sm text-gray-400">
             Balance as of {new Date(walletItem.createdAt).toLocaleDateString()}
           </p>
+          {#if brand?.balanceLookupUri}
+            <a
+              href={brand.balanceLookupUri}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-primary underline">{m['wallet.gift-card.look_up_balance']()}</a
+            >
+          {/if}
           <!-- Card Code and PIN -->
           {#if walletItem.code}
             <div class="mt-4 flex flex-col items-center">

@@ -26,5 +26,5 @@
     ></div>
   </div>
 {:else}
-  <GiftCardDetails bind:walletItem={walletItem} />
+  <GiftCardDetails bind:walletItem />
 {/if}
