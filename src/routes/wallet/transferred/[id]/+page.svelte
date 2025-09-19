@@ -32,8 +32,8 @@
     }
     loadWalletItemTransfers().then(() => {
       walletItemTransfer = getWalletItemTransfersStore().find(
-      (walletItemTransfer) => walletItemTransfer.walletItemId === walletItemId,
-    );
+        (walletItemTransfer) => walletItemTransfer.walletItemId === walletItemId,
+      );
     });
   });
 
@@ -218,7 +218,6 @@
       <div class="mb-2 break-all font-bold">{walletItem.id}</div>
     </div>
   </div>
-
 {:else}
   <div class="py-12 text-center text-muted-foreground">
     {m['wallet.gifted.no_items_found']()}
