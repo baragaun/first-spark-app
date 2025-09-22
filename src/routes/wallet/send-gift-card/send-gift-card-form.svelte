@@ -68,7 +68,7 @@
     recipientFullName?: string,
     message?: string,
   ) => {
-    const attachmentLink = `${page.url.origin}/wallet/gifted-card/${transferSlug}`;
+    const attachmentLink = `${page.url.origin}/gifted-card/${transferSlug}`;
     const subject = encodeURIComponent(`${myUserContext.myUser?.userHandle} sent you a gift card`);
     // Not showing expiresAt as it is always null
     // const expiresAt = $walletItem?.expiresAt ? `Expiry Date: ${$walletItem?.expiresAt}` : '';

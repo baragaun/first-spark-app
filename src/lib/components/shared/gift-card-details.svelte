@@ -87,7 +87,6 @@
       );
     } catch (error) {
       console.error('Error archiving wallet item:', error);
-      // todo: show user error
     }
   }
 
