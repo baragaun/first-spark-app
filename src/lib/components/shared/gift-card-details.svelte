@@ -50,7 +50,7 @@
     if (productId) {
       product = products.find((p) => p.id === productId);
     } else if (walletItem?.productId) {
-      product = products.find((p) => p.id === walletItem.productId);
+      product = products.find((p) => p.id === walletItem?.productId);
     } else {
       product = undefined;
     }
@@ -60,7 +60,7 @@
     if (product?.brandId) {
       brand = brands.find((b) => b.id === product?.brandId);
     } else if (walletItem?.brandId) {
-      brand = brands.find((b) => b.id === walletItem.brandId);
+      brand = brands.find((b) => b.id === walletItem?.brandId);
     } else {
       brand = undefined;
     }
@@ -113,6 +113,7 @@
         archivedAt: walletItem.archivedAt ? null : new Date().toISOString(),
       };
       updateWalletItem(updatedWalletItem);
+      walletItem = { ...updatedWalletItem }; // Reassign to trigger Svelte reactivity
     } catch (error) {
       console.error('Error archiving wallet item:', error);
     }
@@ -255,7 +256,7 @@
               <Button
                 variant="ghost"
                 size="icon"
-                onclick={() => goto(`/wallet/send-gift-card?id=${walletItem.id}`)}
+                onclick={() => goto(`/wallet/send-gift-card?id=${walletItem?.id}`)}
                 ><Gift aria-label="Gift" /></Button
               >
               <span class="text-xs text-gray-500">{m['wallet.gift-card.gift']()}</span>
@@ -263,7 +264,7 @@
           {/if}
           {#if walletItem.termsUrl}
             <div class="flex flex-col items-center">
-              <Button variant="ghost" size="icon" onclick={() => openExternal(walletItem.termsUrl)}
+              <Button variant="ghost" size="icon" onclick={() => openExternal(walletItem?.termsUrl)}
                 ><ExternalLink aria-label="Brand" /></Button
               >
               <span class="text-xs text-gray-500">{m['wallet.gift-card.brand']()}</span>
