@@ -17,6 +17,10 @@
       });
     }
   });
+
+  $effect(() => {
+    walletItem = getWalletItemsStore().find((p) => p.id === walletItemId);
+  });
 </script>
 
 {#if loading || !walletItem}
