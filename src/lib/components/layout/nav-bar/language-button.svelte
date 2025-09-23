@@ -5,6 +5,7 @@
   import * as Tooltip from '@/components/ui/tooltip';
   import { getLocale, setLocale, locales } from '$lib/paraglide/runtime.js';
   import { m } from '$lib/paraglide/messages.js';
+  import { titleCase } from '$lib/utils.js';
 
   const { class: className = '' } = $props();
 </script>
@@ -38,7 +39,9 @@
     {#each locales as locale}
       <DropdownMenu.Item class="cursor-pointer" onclick={() => setLocale(locale)}>
         <span class:font-bold={getLocale() === locale}>
-          {new Intl.DisplayNames([locale], { type: 'language' }).of(locale)}
+          {new Intl.DisplayNames([locale], { type: 'language' }).of(locale)
+            ? titleCase(new Intl.DisplayNames([locale], { type: 'language' }).of(locale) || locale)
+            : locale}
         </span>
         {#if getLocale() === locale}
           <DropdownMenu.Shortcut>✓</DropdownMenu.Shortcut>
