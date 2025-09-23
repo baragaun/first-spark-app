@@ -176,7 +176,7 @@
                   <img
                     src={giftCardImageDomain + '/vendors/' + brand.logoImageSource}
                     alt=""
-                    class="h-full w-full object-cover"
+                    class="h-full w-full object-contain"
                     use:handleImageError
                   />
                 </div>
