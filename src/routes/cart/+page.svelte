@@ -34,6 +34,7 @@
   let marketplaceData = getMarketplaceData();
 
   let cartItems = $state<ShoppingCartItem[]>([]);
+  let loadingItemId = $state<string | null>(null);
   let total = $derived.by(() =>
     cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
   );
@@ -64,12 +65,18 @@
 
   async function updateItemQuantity(item: ShoppingCartItem, newQuantity: number) {
     if (item == null || item == undefined) return;
-
+    loadingItemId = item.id;
+    const minSpinnerTime = 500;
+    const startTime = Date.now();
     if (newQuantity < 1) {
       await removeItem(item.id || '');
+      const elapsed = Date.now() - startTime;
+      if (elapsed < minSpinnerTime) {
+        await new Promise((resolve) => setTimeout(resolve, minSpinnerTime - elapsed));
+      }
+      loadingItemId = null;
       return;
     }
-
     try {
       // First remove the all other existing items
       for (const cartItem of shoppingCart?.items ?? []) {
@@ -81,10 +88,8 @@
           await removeItem(cartItem.id);
         }
       }
-
       item.quantity = newQuantity;
       const result = await marketplaceContext.updateShoppingCartItem(item);
-
       if (result.error) {
         console.error('Error updating item quantity:', result.error);
         toast.error(`Failed to update quantity: ${result.error}`);
@@ -94,6 +99,12 @@
     } catch (error) {
       console.error('Unexpected error updating quantity:', error);
       toast.error('An unexpected error occurred while updating quantity.');
+    } finally {
+      const elapsed = Date.now() - startTime;
+      if (elapsed < minSpinnerTime) {
+        await new Promise((resolve) => setTimeout(resolve, minSpinnerTime - elapsed));
+      }
+      loadingItemId = null;
     }
   }
 
@@ -248,15 +259,30 @@
               size="icon"
               class="h-8 w-8"
               onclick={() => updateItemQuantity(item, (item.quantity || 0) - 1)}
+              disabled={loadingItemId === item.id}
             >
               <Minus class="h-4 w-4" />
             </Button>
-            <span class="text-foreground">{item.quantity || 0}</span>
+            <span
+              class="flex items-center justify-center text-foreground"
+              style="min-width: 1.5em; min-height: 1.5em;"
+            >
+              {#if loadingItemId === item.id}
+                <span
+                  class="inline-block h-[1.5em] w-[1.5em] animate-spin rounded-full border-2 border-primary border-t-transparent"
+                ></span>
+              {:else}
+                <span style="display:inline-block; width:1.5em; height:1.5em; text-align:center;"
+                  >{item.quantity || 0}</span
+                >
+              {/if}
+            </span>
             <Button
               variant="outline"
               size="icon"
               class="h-8 w-8"
               onclick={() => updateItemQuantity(item, (item.quantity || 0) + 1)}
+              disabled={loadingItemId === item.id}
             >
               <Plus class="h-4 w-4" />
             </Button>
