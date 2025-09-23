@@ -125,8 +125,12 @@
                 <img src={headerIcon()} alt="First Spark Logo" class="h-10" />
               </div>
             {:else}
-              <div class="flex items-center justify-center">
-                <img src={headerSmallIcon()} alt="First Spark Logo" class="h-10" />
+              <div class="flex min-h-[2.5rem] min-w-[2rem] items-center justify-center">
+                <img
+                  src={headerSmallIcon()}
+                  alt="First Spark Logo"
+                  class="h-10 w-10 object-contain"
+                />
               </div>
             {/if}
           </div>
