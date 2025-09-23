@@ -3,6 +3,12 @@ import { cubicOut } from 'svelte/easing';
 import type { TransitionConfig } from 'svelte/transition';
 import { twMerge } from 'tailwind-merge';
 
+// Converts a string to Title Case (first letter uppercase)
+export function titleCase(str: string) {
+  if (!str) return str;
+  return str[0].toUpperCase() + str.slice(1);
+}
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
