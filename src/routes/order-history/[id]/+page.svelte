@@ -139,6 +139,8 @@
         <div class="mb-2 font-bold">{brand?.name}</div>
         <div class="text-sm text-muted-foreground">{m['order_history.purchase_date']()}</div>
         <div class="mb-2 font-bold">{formatDateTime(item.createdAt)}</div>
+        <div class="text-sm text-muted-foreground">{m['cart.quantity']()}</div>
+        <div class="mb-2 font-bold">{item.quantity}</div>
         <div class="text-sm text-muted-foreground">{m['order_history.amount']()}</div>
         <div class="mb-2 font-bold">${(item.price / 1000).toFixed(0)}</div>
         <Button
