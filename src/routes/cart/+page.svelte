@@ -27,7 +27,6 @@
   import { giftCardImageDomain } from '$lib/constants';
   import { getPurchaseOrdersStore } from '$lib/stores/order-history.svelte';
   import { IsMobile } from '$lib/hooks/is-mobile.svelte.js';
-  import { loadWalletItems } from '@/stores/wallet-store.svelte';
 
   const purchaseOrdersStore = getPurchaseOrdersStore();
 
