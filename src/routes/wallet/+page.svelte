@@ -198,7 +198,7 @@
     </div>
   {/if}
 
-  <div class="flex h-[calc(100vh-200px)] flex-col">
+  <div class="flex flex-col">
     <!-- Fixed Header Section -->
     <div class="flex-shrink-0">
       <!-- Tab Navigation -->
