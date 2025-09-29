@@ -405,6 +405,7 @@
     "decline_success": "¡Has rechazado la tarjeta de regalo!",
     "modal_title": "Ingresa tu PIN para aceptarla.",
     "pin_placeholder": "Ingresa PIN/código secreto",
-    "submit": "Enviar"
+    "submit": "Enviar",
+    "already_accepted_message": "Ocurrió un error al obtener esta tarjeta de regalo, o ya la has aceptado."
   }
 }
