@@ -13,6 +13,9 @@
   import { locales, localizeHref } from '@/paraglide/runtime';
   import { appTitle, appDescription, appCanonicalUrl } from '@/stores/app-store.svelte';
   import MetaTags from '@/components/shared/meta-tags.svelte';
+  import { IsMobile } from '$lib/hooks/is-mobile.svelte.js';
+
+  const isMobile = new IsMobile();
 
   let { children } = $props();
   let hideNavBar: boolean = $derived(
@@ -41,7 +44,9 @@
         <main class="flex flex-1 flex-col">
           {@render children?.()}
         </main>
-        <Footer />
+        {#if !isMobile.current}
+          <Footer />
+        {/if}
       </div>
       <BottomNavbar />
     </SidebarProvider>
