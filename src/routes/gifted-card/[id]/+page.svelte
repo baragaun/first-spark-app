@@ -75,7 +75,7 @@
         return;
       }
 
-      if (response?.walletItem === null || response?.product === null) {
+      if (response?.product === null || response?.product === undefined) {
         isGiftCardAlreadyAccepted = true;
         isLoading = false;
         return;

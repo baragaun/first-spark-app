@@ -86,10 +86,12 @@
   let instructions = $derived(product?.instructionsEn ?? walletItem?.instructionsEn);
   let terms = $derived(product?.termsEn ?? walletItem?.termsEn);
   let imageSourceFront = $derived(product?.imageSourceFront ?? walletItem?.imageSourceFront);
-  const barcodeFormat = walletItem?.barcodeFormat || 'CODE39';
-  const barcodeApiUrl = `https://barcodeapi.org/api/${
-    barcodeFormat === 'QR_CODE' ? 'qr' : 'code39'
-  }/${encodeURIComponent(walletItem?.code || '')}`;
+
+  function getBarcodeApiUrl() {
+    return `https://barcodeapi.org/api/${
+      (walletItem?.barcodeFormat || 'CODE39') === 'QR_CODE' ? 'qr' : 'code39'
+    }/${encodeURIComponent(walletItem?.code || '')}`;
+  }
 
   function backAndClose() {
     if (isBarcodeViewOpen) {
@@ -233,7 +235,7 @@
   </Card.Root>
 {:else if isBarcodeViewOpen}
   <BarcodeView>
-    <img src={barcodeApiUrl} class="barcode" alt="Barcode" />
+    <img src={getBarcodeApiUrl()} class="barcode" alt="Barcode" />
   </BarcodeView>
 {:else if walletItem || product}
   <div class="mx-auto max-w-lg px-4 py-6">
@@ -360,7 +362,7 @@
           <!-- Card Code and PIN -->
           {#if walletItem.code}
             <div class="mt-4 flex flex-col items-center">
-              <img src={barcodeApiUrl} class="barcode" alt="Barcode" />
+              <img src={getBarcodeApiUrl()} class="barcode" alt="Barcode" />
             </div>
           {/if}
 
