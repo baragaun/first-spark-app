@@ -46,6 +46,8 @@
         </main>
         {#if !isMobile.current}
           <Footer />
+        {:else}
+          <div class="h-16 md:hidden"></div>
         {/if}
       </div>
       <BottomNavbar />

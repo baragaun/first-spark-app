@@ -2,7 +2,7 @@ import { m } from '@/paraglide/messages';
 import { z } from 'zod';
 
 const isValidUsername = (username: string): boolean => {
-  const usernameRegex = /^[a-zA-Z0-9]+$/;
+  const usernameRegex = /^[a-zA-Z0-9-]+$/;
   return usernameRegex.test(username);
 };
 
