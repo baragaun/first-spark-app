@@ -295,6 +295,12 @@
       <div class="mr-4 py-4 text-right text-foreground">
         <span class="text-lg font-bold">{m['cart.total']()}: USD {(total / 1000).toFixed(2)}</span>
       </div>
+    {:else if shoppingCart === undefined}
+      <div class="flex h-[60vh] items-center justify-center">
+        <div
+          class="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"
+        ></div>
+      </div>
     {:else}
       <div class="py-8 text-center text-muted-foreground">{m['cart.empty']()}</div>
     {/if}
