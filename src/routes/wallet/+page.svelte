@@ -228,26 +228,52 @@
       </Tabs.Root>
       <!-- Search -->
       <div class="mb-3 mt-3 flex items-center gap-3">
-        <div
-          class="relative flex-1 rounded-full bg-gradient-to-r from-kcu-lime via-kcu-glacier to-kcu-juniper p-[2px]"
-        >
-          <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="search"
-            class="search-input-override w-full rounded-full border-0 bg-background px-3 py-2 pl-10 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-            bind:value={searchQuery}
-          />
-        </div>
-        <Button
-          class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-kcu-lime via-kcu-glacier to-kcu-juniper p-[2px]"
-          onclick={uploadAction}
-          aria-label="Upload"
-        >
-          <div class="flex h-full w-full items-center justify-center rounded-full bg-background">
-            <Upload class="h-5 w-5 text-primary" />
+        {#if displayedItems.length > 10}
+          <div
+            class="relative flex-1 rounded-full bg-gradient-to-r from-kcu-lime via-kcu-glacier to-kcu-juniper p-[2px]"
+          >
+            <Search
+              class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+            />
+            <Input
+              type="search"
+              placeholder="search"
+              class="search-input-override w-full rounded-full border-0 bg-background px-3 py-2 pl-10 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+              bind:value={searchQuery}
+            />
           </div>
-        </Button>
+          <div class="mt-3 flex flex-col items-center justify-center">
+            <Button
+              class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-kcu-lime via-kcu-glacier to-kcu-juniper p-[2px]"
+              onclick={uploadAction}
+              aria-label="Upload"
+            >
+              <div
+                class="flex h-full w-full items-center justify-center rounded-full bg-background"
+              >
+                <Upload class="h-5 w-5 text-primary" />
+              </div>
+            </Button>
+            <span class="ml-2 text-sm font-medium text-primary">{m['wallet.upload_card']()}</span>
+          </div>
+        {:else}
+          <div class="mt-3 flex w-full flex-row items-center justify-end">
+            <div class="flex-1"></div>
+            <Button
+              class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-kcu-lime via-kcu-glacier to-kcu-juniper p-[2px]"
+              onclick={uploadAction}
+              aria-label="Upload"
+            >
+              <div
+                class="flex h-full w-full items-center justify-center rounded-full bg-background"
+              >
+                <Upload class="h-5 w-5 text-primary" />
+              </div>
+            </Button>
+            <span class="mx-2 text-sm font-medium text-primary">{m['wallet.upload_card']()}</span>
+          </div>
+        {/if}
+
         <input
           type="file"
           bind:this={fileInputRef}
