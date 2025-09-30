@@ -244,7 +244,7 @@
       <img
         src={giftCardImageDomain + '/giftcards/' + imageSourceFront}
         alt={product?.name}
-        class="aspect-[16/9] w-full max-w-md rounded-2xl object-contain shadow-lg"
+        class="object-scale aspect-[16/9] w-full max-w-md rounded-2xl shadow-lg"
         use:handleImageError
       />
     </div>

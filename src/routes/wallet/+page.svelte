@@ -277,7 +277,7 @@
             <img
               src={giftCardImageDomain + '/giftcards/' + item.imageSourceFront}
               alt={item.imageSourceFront}
-              class="mr-4 w-32 rounded-lg object-cover transition-transform duration-300 group-hover:scale-110"
+              class="mr-4 w-32 rounded-xl object-cover shadow-lg"
               use:handleImageError
             />
             <div class="flex flex-col">

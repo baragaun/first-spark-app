@@ -144,7 +144,7 @@
     </div>
   {:else}
     <div
-      class="grid max-h-[calc(100vh-220px)] grid-cols-2 gap-4 overflow-y-auto pb-8 md:grid-cols-3 lg:grid-cols-4"
+      class="grid max-h-[calc(100vh-220px)] grid-cols-2 gap-4 overflow-y-auto px-4 py-4 md:grid-cols-3 lg:grid-cols-4"
     >
       {#each filteredProducts as product (product.id)}
         {@const brand = getBrandForGiftCard(product)}
@@ -157,12 +157,12 @@
             aria-label={m['marketplace.view_gift_card_aria']({ vendor: brand.name })}
           >
             <div
-              class="mb-2 aspect-[4/3] w-full overflow-hidden rounded-xl bg-card shadow-lg transition-all duration-300 group-hover:shadow-xl"
+              class="mb-2 aspect-[5/3] w-full overflow-hidden rounded-xl bg-card shadow-lg transition-all duration-300 group-hover:shadow-xl"
             >
               <img
                 src={giftCardImageDomain + '/giftcards/' + product.imageSourceFront}
                 alt={brand.name}
-                class="h-full w-full object-contain transition-transform duration-300 group-hover:scale-110"
+                class="object-scale h-full w-full rounded-xl transition-transform duration-300 group-hover:scale-110"
                 use:handleImageError
               />
             </div>
