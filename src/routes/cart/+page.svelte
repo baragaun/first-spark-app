@@ -230,11 +230,11 @@
         {@const [product, brand] = findProductAndBrand(item.productId)}
         <div class="grid grid-cols-4 items-center gap-4 border-b border-border py-4 md:grid-cols-6">
           <div class="col-span-2 flex items-center md:col-span-3">
-            <div class="mr-4 h-12 w-16 flex-shrink-0">
+            <div class="mr-4 h-10 w-16 flex-shrink-0 md:h-20 md:w-32">
               <img
                 src={giftCardImageDomain + '/giftcards/' + product?.imageSourceFront}
                 alt={''}
-                class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                class="h-full w-full rounded-[5px] object-contain"
                 use:handleImageError
               />
             </div>
