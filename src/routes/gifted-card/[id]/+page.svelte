@@ -15,8 +15,13 @@
   import { onMount } from 'svelte';
   import { toast } from 'svelte-sonner';
   import { logger } from '@/utils/logger';
+  import { downloadPdf } from '@/utils/pdf-utils';
 
   let open = $state(false);
+  let showPasswordModal = $state(false);
+  let password = $state('');
+  let showCongratsModal = $state(false);
+  let showDeleteWarning = $state(false);
   let pin = $state('');
   let verified = $state(false);
   let isLoading = $state(false);
@@ -52,6 +57,7 @@
     acceptedWalletItem = response.object;
     verified = true;
     isLoading = false;
+    showCongratsModal = true;
   }
 
   async function declineWalletItemTransfer() {
@@ -94,6 +100,19 @@
   onMount(async () => {
     await loadData();
   });
+
+  function handlePrintPdf() {
+    if (!acceptedWalletItem || !acceptedWalletItem.code || !acceptedWalletItem.pin) return;
+    downloadPdf(acceptedWalletItem, acceptedWalletItem.code, acceptedWalletItem.pin);
+  }
+
+  function setPassword() {
+    showPasswordModal = false;
+  }
+
+  function deletePage() {
+    showDeleteWarning = false;
+  }
 </script>
 
 {#if isGiftCardAlreadyAccepted}
@@ -165,6 +184,77 @@
         />
         <Button type="submit" class="w-full">{m['gifted_card.submit']()}</Button>
       </form>
+    </DialogContent>
+  </Dialog>
+
+  <!-- Congratulations Modal -->
+  <Dialog open={showCongratsModal} onOpenChange={(e) => (showCongratsModal = e)}>
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Congratulations!</DialogTitle>
+      </DialogHeader>
+      <div class="space-y-2">
+        <div class="text-lg font-semibold">
+          This is your card now. You can print it out, or you can come back here to use it.
+        </div>
+        <div class="mt-4 text-base font-bold">Secure Your Card!</div>
+        <div class="text-sm text-muted-foreground">
+          This card is now like cash at the store and anyone with this link can use it. You can
+          protect this page with a password, or first print the card, then delete this page.
+        </div>
+      </div>
+      <div class="mt-6 flex flex-col gap-2">
+        <Button class="w-full" onclick={handlePrintPdf}>Print Card</Button>
+        <Button
+          class="w-full"
+          variant="outline"
+          onclick={() => {
+            showPasswordModal = true;
+          }}>Enter Password</Button
+        >
+        <Button class="w-full" variant="destructive" onclick={() => (showDeleteWarning = true)}
+          >Delete Page</Button
+        >
+      </div>
+    </DialogContent>
+  </Dialog>
+
+  <!-- Password Modal -->
+  <Dialog open={showPasswordModal} onOpenChange={(e) => (showPasswordModal = e)}>
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Protect Your Card</DialogTitle>
+      </DialogHeader>
+      <form class="space-y-4" onsubmit={setPassword}>
+        <Input
+          type="password"
+          class="focus-visible:outline-none focus-visible:ring-white"
+          placeholder="Enter a password to protect this page"
+          bind:value={password}
+        />
+        <Button type="submit" class="w-full">Set Password</Button>
+      </form>
+    </DialogContent>
+  </Dialog>
+
+  <!-- Delete Warning Modal -->
+  <Dialog open={showDeleteWarning} onOpenChange={(e) => (showDeleteWarning = e)}>
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Delete Page?</DialogTitle>
+      </DialogHeader>
+      <div class="space-y-2">
+        <div class="text-base">
+          Did you already print out or copy this card? Once you delete this page, the card will no
+          longer be available at this location.
+        </div>
+      </div>
+      <div class="mt-6 flex flex-col gap-2">
+        <Button class="w-full" variant="outline" onclick={() => (showDeleteWarning = false)}
+          >Cancel</Button
+        >
+        <Button class="w-full" variant="destructive" onclick={deletePage}>Delete Page</Button>
+      </div>
     </DialogContent>
   </Dialog>
 {/if}
