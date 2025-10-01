@@ -286,7 +286,7 @@
     </div>
 
     <!-- Scrollable Wallet Items Section -->
-    <div class="flex-1 overflow-y-auto">
+    <div class="relative flex-1 overflow-y-auto">
       {#if displayedItems.length === 0}
         <div class="py-8 text-center text-muted-foreground">
           {currentTab === TabId.ACTIVE ? m['wallet.empty']() : m['wallet.gifted.no_items_found']()}
@@ -319,6 +319,19 @@
           </div>
         </button>
       {/each}
+
+      <!-- Floating Upload Button -->
+      <!-- <div class="fixed bottom-16 right-4 z-50 pb-4">
+        <Button
+          class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-kcu-lime via-kcu-glacier to-kcu-juniper p-[2px]"
+          onclick={uploadAction}
+          aria-label="Upload"
+        >
+          <div class="flex h-full w-full items-center justify-center rounded-full bg-background">
+            <Upload class="h-5 w-5 text-primary" />
+          </div>
+        </Button>
+      </div> -->
     </div>
   </div>
 </div>
