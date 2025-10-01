@@ -1,6 +1,6 @@
 <script lang="ts">
   import { loadMarketplaceData, getMarketplaceData } from '$lib/stores/marketplace-store.svelte';
-  import type { GiftCardProduct, Brand } from '@baragaun/bg-node-client';
+  import { type GiftCardProduct, Brand } from '@baragaun/bg-node-client';
   import { goto } from '$app/navigation';
   import placeholderImage from '../../../assets/images/placeholder.png';
   import { Search } from 'lucide-svelte';
@@ -10,13 +10,8 @@
   import { Input } from '$lib/components/ui/input';
   import { giftCardImageDomain } from '$lib/constants';
 
-  const {
-    brands,
-    products,
-    // todo: use these:
-    // loading,
-    // userErrorMessage,
-  } = getMarketplaceData();
+  let brands = $state<Brand[]>([]);
+  let products = $state<GiftCardProduct[]>([]);
 
   let searchText = $state('');
 
@@ -57,10 +52,23 @@
     };
   };
 
-  // Load on mount
+  // Load on mount and update brands/products after data is loaded
   $effect(() => {
-    loadMarketplaceData().catch(console.error);
+    loadData().catch(console.error);
   });
+
+  const loadData = async () => {
+    if (getMarketplaceData().products.length > 0) {
+      const data = getMarketplaceData();
+      brands = data.brands;
+      products = data.products;
+      return;
+    }
+    await loadMarketplaceData().catch(console.error);
+    const data = getMarketplaceData();
+    brands = data.brands;
+    products = data.products;
+  };
 
   function handleBrandClick(product: GiftCardProduct, brand: Brand) {
     uploadedCardSetValues({ brand: brand, product: product });
