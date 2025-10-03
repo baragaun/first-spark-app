@@ -59,7 +59,7 @@ export async function downloadPdf(
     positionY = positionY + 120 + topPadding;
     doc.setFontSize(14);
     doc.text(
-      `Balance: $${(walletItemProduct.balance / 100).toFixed(2)}`,
+      `Balance: $${(walletItemProduct.balance / 1000).toFixed(2)}`,
       pageWidth / 2,
       positionY,
       { align: 'center' },
