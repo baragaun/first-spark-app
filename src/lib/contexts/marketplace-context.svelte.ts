@@ -12,7 +12,7 @@ import {
   ShoppingCartItem,
   WalletItem,
   WalletItemTransfer,
-  WalletItemTransferAcceptInfo,
+  WalletItemTransferRecipientInfo,
   type QueryResult,
 } from '@baragaun/bg-node-client';
 import { myUserContext } from './my-user-context.svelte';
@@ -453,30 +453,30 @@ export class MarketplaceContext {
     }
   }
 
-  async findWalletItemTransferAcceptInfoByTransferSlug(
+  async findWalletItemTransferRecipientInfoByTransferSlug(
     transferSlug: string,
-  ): Promise<WalletItemTransferAcceptInfo | string> {
+  ): Promise<WalletItemTransferRecipientInfo | string> {
     if (!this.client.isInitialized) {
       console.error(
-        'MarketplaceContext.findWalletItemTransferAcceptInfoByTransferSlug: not initialized.',
+        'MarketplaceContext.findWalletItemTransferRecipientInfoByTransferSlug: not initialized.',
       );
       return translate(AppUiMessage.systemError);
     }
     try {
       isLoading = true;
       const response =
-        await this.client.operations.walletItemTransfer.findWalletItemTransferAcceptInfoByTransferSlug(
+        await this.client.operations.walletItemTransfer.findWalletItemTransferRecipientInfoByTransferSlug(
           transferSlug,
         );
       if (!response || response.error || !response.object) {
-        console.error('findWalletItemTransferAcceptInfoByTransferSlug: received error.', {
+        console.error('findWalletItemTransferRecipientInfoByTransferSlug: received error.', {
           response,
         });
         return response.error || translate(AppUiMessage.systemError);
       }
       return response.object;
     } catch (error) {
-      console.error('findWalletItemTransferAcceptInfoByTransferSlug: error', {
+      console.error('findWalletItemTransferRecipientInfoByTransferSlug: error', {
         error: (error as Error).message,
         stack: (error as Error).stack,
       });
@@ -575,6 +575,97 @@ export class MarketplaceContext {
         stack: (error as Error).stack,
       });
       return translate(AppUiMessage.systemError);
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  async updateWalletItemTransfer(
+    props: Partial<WalletItemTransfer>,
+  ): Promise<QueryResult<WalletItemTransfer>> {
+    if (!this.client.isInitialized) {
+      console.error('MarketplaceContext.updateWalletItemTransfer: not initialized.');
+      return { error: translate(AppUiMessage.systemError) };
+    }
+    try {
+      isLoading = true;
+      const response =
+        await this.client.operations.walletItemTransfer.updateWalletItemTransfer(props);
+      if (!response || response.error) {
+        console.error('updateWalletItemTransfer: received error.', { response });
+        return { error: response.error || translate(AppUiMessage.systemError) };
+      }
+      return response;
+    } catch (error) {
+      console.error('updateWalletItemTransfer: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return { error: translate(AppUiMessage.systemError) };
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  async updateWalletItemTransferPassword(
+    transferSlug: string,
+    transferSecret: string,
+    password: string,
+  ): Promise<QueryResult<void>> {
+    if (!this.client.isInitialized) {
+      console.error('MarketplaceContext.UpdateWalletItemTransferPassword: not initialized.');
+      return { error: translate(AppUiMessage.systemError) };
+    }
+    try {
+      isLoading = true;
+      const response =
+        await this.client.operations.walletItemTransfer.updateWalletItemTransferPassword(
+          transferSlug,
+          transferSecret,
+          password,
+        );
+      if (!response || response.error) {
+        console.error('UpdateWalletItemTransferPassword: received error.', { response });
+        return { error: response.error || translate(AppUiMessage.systemError) };
+      }
+      return response;
+    } catch (error) {
+      console.error('UpdateWalletItemTransferPassword: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return { error: translate(AppUiMessage.systemError) };
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  async verifyWalletItemTransferPassword(
+    transferSlug: string,
+    password: string,
+  ): Promise<QueryResult<boolean>> {
+    if (!this.client.isInitialized) {
+      console.error('MarketplaceContext.verifyWalletItemTransferPassword: not initialized.');
+      return { error: translate(AppUiMessage.systemError) };
+    }
+    try {
+      isLoading = true;
+      const response =
+        await this.client.operations.walletItemTransfer.verifyWalletItemTransferPassword(
+          transferSlug,
+          password,
+        );
+      if (!response || response.error) {
+        console.error('verifyWalletItemTransferPassword: received error.', { response });
+        return { error: response.error || translate(AppUiMessage.systemError) };
+      }
+      return response;
+    } catch (error) {
+      console.error('verifyWalletItemTransferPassword: error', {
+        error: (error as Error).message,
+        stack: (error as Error).stack,
+      });
+      return { error: translate(AppUiMessage.systemError) };
     } finally {
       isLoading = false;
     }

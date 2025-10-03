@@ -8,7 +8,7 @@
     Brand,
     GiftCardProduct,
     type WalletItem,
-    WalletItemTransferAcceptInfo,
+    WalletItemTransferRecipientInfo,
   } from '@baragaun/bg-node-client';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
   import { m } from '@/paraglide/messages';
@@ -28,7 +28,9 @@
   let acceptedWalletItem = $state<WalletItem | undefined>(undefined);
   let product = $state<GiftCardProduct | undefined>(undefined);
   let brand = $state<Brand | undefined>(undefined);
-  let walletItemTransferAcceptInfo = $state<WalletItemTransferAcceptInfo | undefined>(undefined);
+  let walletItemTransferRecipientInfo = $state<WalletItemTransferRecipientInfo | undefined>(
+    undefined,
+  );
   let isGiftCardAlreadyAccepted = $state(false);
 
   const transferSlug = page.params.id;
@@ -73,7 +75,7 @@
     isLoading = true;
     try {
       const response =
-        await marketplaceContext.findWalletItemTransferAcceptInfoByTransferSlug(transferSlug);
+        await marketplaceContext.findWalletItemTransferRecipientInfoByTransferSlug(transferSlug);
       if (typeof response === 'string' || response === null) {
         isLoading = false;
         isGiftCardAlreadyAccepted = true;
@@ -87,9 +89,9 @@
         return;
       }
 
-      walletItemTransferAcceptInfo = response;
-      product = walletItemTransferAcceptInfo?.product ?? undefined;
-      brand = walletItemTransferAcceptInfo?.brand ?? undefined;
+      walletItemTransferRecipientInfo = response;
+      product = walletItemTransferRecipientInfo?.product ?? undefined;
+      brand = walletItemTransferRecipientInfo?.brand ?? undefined;
 
       isLoading = false;
     } catch (error) {
@@ -106,11 +108,27 @@
     downloadPdf(acceptedWalletItem, acceptedWalletItem.code, acceptedWalletItem.pin);
   }
 
-  function setPassword() {
+  async function setPassword() {
+    if (!password) return;
+    const response = await marketplaceContext.updateWalletItemTransferPassword(
+      transferSlug,
+      pin,
+      password,
+    );
+    if (response.error) {
+      logger.error('Error updating wallet item transfer password', response.error);
+      return;
+    }
+    toast.success('Password set successfully');
     showPasswordModal = false;
   }
 
-  function deletePage() {
+  async function deletePage() {
+    // const response = await marketplaceContext.updateWalletItemTransfer({showOnline: false});
+    // if (response.error) {
+    //   logger.error('Error updating wallet item transfer password', response.error);
+    //   return;
+    // }
     showDeleteWarning = false;
   }
 </script>
@@ -169,7 +187,7 @@
 
   {#if product && brand}
     <GiftCardDetails
-      walletItem={acceptedWalletItem ?? walletItemTransferAcceptInfo?.walletItem}
+      walletItem={acceptedWalletItem ?? walletItemTransferRecipientInfo?.walletItem}
       {product}
       {brand}
       showNavBar={false}
