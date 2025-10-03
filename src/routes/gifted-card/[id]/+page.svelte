@@ -147,6 +147,15 @@
           }}>{m['gifted_card.decline']()}</Button
         >
       </div>
+    {:else}
+      <Button
+        variant="outline"
+        size="sm"
+        class="rounded-full hover:bg-background hover:text-nav-foreground/70"
+        onclick={() => {
+          showCongratsModal = true;
+        }}>Secure your card</Button
+      >
     {/if}
   </div>
 
