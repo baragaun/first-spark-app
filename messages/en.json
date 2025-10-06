@@ -206,6 +206,12 @@
         "existing": "Please provide a different email address."
       }
     },
+    "phone": {
+      "error": {
+        "min_length": "Phone number must be at least 10 digits",
+        "invalid": "Please enter a valid phone number"
+      }
+    },
     "password": {
       "label": "My password",
       "change_password": "Change your password",
@@ -384,10 +390,13 @@
     "not_found": "Order not found."
   },
   "send_gift_card": {
+    "note": "Send this gift card to a loved one with a few clicks. The recipient will be invited to view your card and accept it as a gift. Once it has been accepted, you will no longer be able to use it yourself. If the recipient does not want the card you can send it to someone else. We will let you know how the recipient responds.",
     "sender_name": "Recipient Name",
     "sender_name_placeholder": "Enter name",
     "sender_email": "Recipient Email",
     "sender_email_placeholder": "Enter email",
+    "sender_phone": "Recipient Phone",
+    "sender_phone_placeholder": "Enter phone",
     "message": "Your Message",
     "message_placeholder": "Write a message",
     "send_gift": "Send Gift",

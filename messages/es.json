@@ -206,6 +206,12 @@
         "existing": "Por favor, proporciona una dirección de correo electrónico diferente."
       }
     },
+    "phone": {
+      "error": {
+        "min_length": "El número de teléfono debe tener al menos 10 dígitos",
+        "invalid": "Por favor, ingresa un número de teléfono válido"
+      }
+    },
     "password": {
       "label": "Mi contraseña",
       "change_password": "Cambiar tu contraseña",
@@ -384,10 +390,13 @@
     "not_found": "Pedido no encontrado."
   },
   "send_gift_card": {
+    "note": "Envía esta tarjeta de regalo a un ser querido con unos pocos clics. El destinatario será invitado a ver tu tarjeta y aceptarla como regalo. Una vez que haya sido aceptada, ya no podrás usarla tú mismo. Si el destinatario no quiere la tarjeta, puedes enviarla a otra persona. Te informaremos cómo responde el destinatario.",
     "sender_name": "Nombre del destinatario",
     "sender_name_placeholder": "Ingrese el nombre",
     "sender_email": "Correo electrónico del destinatario",
     "sender_email_placeholder": "Ingrese el correo electrónico",
+    "sender_phone": "Número de teléfono del destinatario",
+    "sender_phone_placeholder": "Ingrese el número de teléfono",
     "message": "Tu mensaje",
     "message_placeholder": "Escribe un mensaje",
     "send_gift": "Enviar regalo",
