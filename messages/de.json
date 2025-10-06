@@ -205,6 +205,12 @@
         "existing": "Bitte geben Sie eine andere E-Mail-Adresse an."
       }
     },
+    "phone": {
+      "error": {
+        "min_length": "Telefonnummer muss mindestens 10 Ziffern haben",
+        "invalid": "Bitte gib eine gültige Telefonnummer ein"
+      }
+    },
     "password": {
       "label": "Mein Passwort",
       "change_password": "Passwort ändern",
@@ -380,10 +386,13 @@
     "not_found": "Bestellung nicht gefunden."
   },
   "send_gift_card": {
+    "note": "Senden Sie diese Geschenkkarte mit wenigen Klicks an einen geliebten Menschen. Der Empfänger wird eingeladen, Ihre Karte anzusehen und sie als Geschenk zu akzeptieren. Sobald sie akzeptiert wurde, können Sie sie nicht mehr selbst verwenden. Wenn der Empfänger die Karte nicht möchte, können Sie sie jemand anderem senden. Wir informieren Sie über die Antwort des Empfängers.",
     "sender_name": "Absendername",
     "sender_name_placeholder": "Name eingeben",
     "sender_email": "E‑Mail des Empfängers",
     "sender_email_placeholder": "E‑Mail eingeben",
+    "sender_phone": "Empfänger Telefonnummer",
+    "sender_phone_placeholder": "Telefonnummer eingeben",
     "message": "Ihre Nachricht",
     "message_placeholder": "Nachricht schreiben",
     "send_gift": "Geschenk senden",
