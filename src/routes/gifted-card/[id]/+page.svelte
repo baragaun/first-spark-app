@@ -32,11 +32,18 @@
     undefined,
   );
   let isGiftCardAlreadyAccepted = $state(false);
+  let isRememberPin = $state(true);
 
   const transferSlug = page.params.id;
 
   async function handleSubmit(event: SubmitEvent) {
     event.preventDefault();
+
+    // Save PIN locally if "Remember pin" is checked
+    if (isRememberPin && pin) {
+      localStorage.setItem(`gifted_card_pin_${transferSlug}`, pin);
+    }
+
     await acceptWalletItemTransfer();
     open = false;
   }
@@ -73,14 +80,27 @@
 
   async function loadData() {
     isLoading = true;
+
+    // Check if PIN is saved locally and auto-fill it
+    const savedPin = localStorage.getItem(`gifted_card_pin_${transferSlug}`);
+    if (savedPin) {
+      pin = savedPin;
+    }
+
     try {
-      const response =
-        await marketplaceContext.findWalletItemTransferRecipientInfoByTransferSlug(transferSlug);
+      const response = await marketplaceContext.findWalletItemTransferRecipientInfoByTransferSlug(
+        transferSlug,
+        pin,
+      );
       if (typeof response === 'string' || response === null) {
         isLoading = false;
         isGiftCardAlreadyAccepted = true;
         logger.error('Failed to load wallet item', response);
         return;
+      }
+
+      if (response.walletItem.pin) {
+        verified = true;
       }
 
       if (response?.product === null || response?.product === undefined) {
@@ -209,6 +229,12 @@
           placeholder={m['gifted_card.pin_placeholder']()}
           bind:value={pin}
         />
+        <div class="flex items-center gap-2"></div>
+        <!-- Add checkbox to remember pin -->
+        <label class="flex items-center gap-2">
+          <input type="checkbox" bind:checked={isRememberPin} />
+          Remember pin
+        </label>
         <Button type="submit" class="w-full">{m['gifted_card.submit']()}</Button>
       </form>
     </DialogContent>
@@ -232,13 +258,15 @@
       </div>
       <div class="mt-6 flex flex-col gap-2">
         <Button class="w-full" onclick={handlePrintPdf}>Print Card</Button>
-        <Button
-          class="w-full"
-          variant="outline"
-          onclick={() => {
-            showPasswordModal = true;
-          }}>Enter Password</Button
-        >
+        {#if pin === ''}
+          <Button
+            class="w-full"
+            variant="outline"
+            onclick={() => {
+              showPasswordModal = true;
+            }}>Enter Password</Button
+          >
+        {/if}
         <Button class="w-full" variant="destructive" onclick={() => (showDeleteWarning = true)}
           >Delete Page</Button
         >
