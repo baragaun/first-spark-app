@@ -1,1 +1,0 @@
-import{g as r}from"./DHOVcdmf.js";const c=()=>"Select a brand",n=()=>"Selecciona una marca",o=(t={},a={})=>{const e=a.locale??r();return e==="en"?c():e==="es"?n():"upload_card.select_brand"};export{o as u};

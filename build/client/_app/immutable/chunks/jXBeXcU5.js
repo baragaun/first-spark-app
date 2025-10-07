@@ -1,1 +1,0 @@
-import{g as n}from"./DHOVcdmf.js";const o=()=>"No items found",s=()=>"No se encontraron elementos",l=(_={},t={})=>{const e=t.locale??n();return e==="en"?o():e==="es"?s():"wallet.gifted.no_items_found"};export{l as w};
