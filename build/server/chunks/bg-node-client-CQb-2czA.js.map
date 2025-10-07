@@ -1,0 +1,1 @@
+{"version":3,"file":"bg-node-client-CQb-2czA.js","sources":["../../../.svelte-kit/adapter-node/chunks/bg-node-client.js"],"sourcesContent":["import { BgNodeClient } from \"@baragaun/bg-node-client\";\nconst client = new BgNodeClient();\nexport {\n  client as c\n};\n"],"names":[],"mappings":";;AACK,MAAC,MAAM,GAAG,IAAI,YAAY;;;;"}

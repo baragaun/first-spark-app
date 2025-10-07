@@ -1,0 +1,1 @@
+import{l as a,A as e}from"../chunks/DUtR_A5y.js";import"../chunks/CWj6FrbW.js";const n=async()=>({accountForms:await a()}),s=Object.freeze(Object.defineProperty({__proto__:null,load:n},Symbol.toStringTag,{value:"Module"}));function u(t,o){e(t,{get data(){return o.data}})}export{u as component,s as universal};
