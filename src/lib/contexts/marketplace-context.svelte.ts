@@ -455,6 +455,7 @@ export class MarketplaceContext {
 
   async findWalletItemTransferRecipientInfoByTransferSlug(
     transferSlug: string,
+    transferSecret?: string,
   ): Promise<WalletItemTransferRecipientInfo | string> {
     if (!this.client.isInitialized) {
       console.error(
@@ -467,6 +468,7 @@ export class MarketplaceContext {
       const response =
         await this.client.operations.walletItemTransfer.findWalletItemTransferRecipientInfoByTransferSlug(
           transferSlug,
+          transferSecret,
         );
       if (!response || response.error || !response.object) {
         console.error('findWalletItemTransferRecipientInfoByTransferSlug: received error.', {
