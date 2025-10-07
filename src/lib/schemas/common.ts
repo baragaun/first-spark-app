@@ -24,7 +24,7 @@ export const emailSchema = z.string().email({
 export const phoneSchema = z
   .string()
   .min(10, m['setting.phone.error.min_length']())
-  .regex(/^[\+]?[1-9][\d]{0,15}$/, m['setting.phone.error.invalid']());
+  .regex(/^\+?[1-9][\d]{0,14}$/, m['setting.phone.error.invalid']());
 
 // Password schemas
 export const passwordSchema = z.string().min(8, {
