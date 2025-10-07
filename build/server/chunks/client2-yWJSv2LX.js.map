@@ -1,1 +1,0 @@
-{"version":3,"file":"client2-yWJSv2LX.js","sources":["../../../.svelte-kit/adapter-node/chunks/client2.js"],"sourcesContent":["import { s as stores } from \"./client.js\";\n({\n  check: stores.updated.check\n});\n"],"names":[],"mappings":";;AACA,CAAC;AACD,EAAE,KAAK,EAAE,MAAM,CAAC,OAAO,CAAC;AACxB,CAAC"}

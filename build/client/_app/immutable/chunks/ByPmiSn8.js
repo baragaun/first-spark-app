@@ -1,1 +1,0 @@
-import{h as a,i as d,k as e,b as t}from"./BNVOO-lP.js";let r=a(d([])),s=a(!1);const c=()=>({get purchaseOrders(){return t(r)},get isLoaded(){return t(s)},setPurchaseOrders:u=>{e(r,u,!0),e(s,!0)},reset:()=>{e(r,[],!0),e(s,!1)}});export{c as g};

@@ -1,1 +1,0 @@
-import{g as e}from"./DHOVcdmf.js";const s=()=>"Settings",o=()=>"Configuración",l=(i={},n={})=>{const t=n.locale??e();return t==="en"?s():t==="es"?o():"setting.setting_label"},r=()=>"Notification",c=()=>"Notificación",g=(i={},n={})=>{const t=n.locale??e();return t==="en"?r():t==="es"?c():"setting.notification"};export{l as a,g as s};

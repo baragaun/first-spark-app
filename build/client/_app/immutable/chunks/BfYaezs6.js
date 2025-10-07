@@ -1,1 +1,0 @@
-import{g as n}from"./DHOVcdmf.js";const o=e=>`Welcome to ${e.title}`,s=e=>`Bienvenido a ${e.title}`,u=(e,r={})=>{const t=r.locale??n();return t==="en"?o(e):t==="es"?s(e):"welcome"},c=()=>"Get started",l=()=>"Comenzar",i=(e={},r={})=>{const t=r.locale??n();return t==="en"?c():t==="es"?l():"get_started"};export{i as g,u as w};
