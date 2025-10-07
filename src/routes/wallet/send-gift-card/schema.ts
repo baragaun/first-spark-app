@@ -4,7 +4,7 @@ import { emailSchema, phoneSchema, usernameSchema } from '../../../lib/schemas/c
 export { emailSchema, phoneSchema, usernameSchema };
 
 const baseSendGiftSchema = z.object({
-  recipientFullName: z.string().max(30, m['send_gift_card.error.sender_name_max_length']()),
+  recipientFullName: z.string().trim().min(1).max(30, m['send_gift_card.error.sender_name_max_length']()),
   message: z.string().max(500, m['send_gift_card.error.message_max_length']()),
 });
 
