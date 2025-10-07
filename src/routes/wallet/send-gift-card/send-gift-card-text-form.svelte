@@ -17,7 +17,6 @@
   } from '@/components/ui/alert-dialog';
   import { m } from '@/paraglide/messages';
   import { goto } from '$app/navigation';
-  import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
   import { getWalletItemsStore } from '@/stores/wallet-store.svelte';
   import { page } from '$app/state';
@@ -107,7 +106,7 @@
       transferSecret,
       walletItemId: data.walletItemId,
       recipientFullName: $formData.recipientFullName,
-      recipientEmail: $formData.recipientPhone,
+      recipientPhoneNumber: $formData.recipientPhone,
       messageText: $formData.message,
     });
 
