@@ -1,6 +1,5 @@
 <script lang="ts">
   import { zod } from 'sveltekit-superforms/adapters';
-  import { sendGiftCardSchema, type SendGiftCardSchema } from './schema';
   import { sendGiftLinkSchema, type SendGiftLinkSchema } from './schema';
   import IdentFormInput from '$lib/components/forms/form-ident-input.svelte';
   import { UserIdentType } from '@baragaun/bg-node-client';
