@@ -19,6 +19,7 @@
 
   let open = $state(false);
   let showPasswordModal = $state(false);
+  let showVerifyPasswordModal = $state(false);
   let password = $state('');
   let showCongratsModal = $state(false);
   let showDeleteWarning = $state(false);
@@ -67,6 +68,7 @@
     verified = true;
     isLoading = false;
     showCongratsModal = true;
+    pin = '';
   }
 
   async function declineWalletItemTransfer() {
@@ -104,8 +106,10 @@
       }
 
       if (response?.product === null || response?.product === undefined) {
+        console.log('jahanvi');
         isGiftCardAlreadyAccepted = true;
         isLoading = false;
+        showVerifyPasswordModal = true;
         return;
       }
 
@@ -141,6 +145,26 @@
     }
     toast.success('Password set successfully');
     showPasswordModal = false;
+  }
+
+  async function verifyPassword() {
+    if (!password) return;
+    try {
+      const response = await marketplaceContext.verifyWalletItemTransferPassword(
+        transferSlug,
+        password,
+      );
+      if (response.object === false) {
+        toast.error('Invalid Password');
+        logger.error('Error verifying wallet item transfer password', response.error);
+        return;
+      }
+      toast.success('Password verified successfully');
+      showVerifyPasswordModal = false;
+    } catch (error) {
+      logger.error('Error verifying wallet item transfer password', error);
+      return;
+    }
   }
 
   async function deletePage() {
@@ -313,3 +337,21 @@
     </DialogContent>
   </Dialog>
 {/if}
+
+<!-- Verify password Modal -->
+<Dialog open={showVerifyPasswordModal} onOpenChange={(e) => (showVerifyPasswordModal = e)}>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Verify Your Password</DialogTitle>
+    </DialogHeader>
+    <form class="space-y-4" onsubmit={verifyPassword}>
+      <Input
+        type="password"
+        class="focus-visible:outline-none focus-visible:ring-white"
+        placeholder="Enter a password to protect this page"
+        bind:value={password}
+      />
+      <Button type="submit" class="w-full">Verify Password</Button>
+    </form>
+  </DialogContent>
+</Dialog>
