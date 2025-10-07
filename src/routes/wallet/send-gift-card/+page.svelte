@@ -9,8 +9,7 @@
 
   let { data }: { data: PageData } = $props();
 
-  let sendGiftCardType = $state('');
-  // <'email' | 'sms' | 'share'>
+  let sendGiftCardType: 'email' | 'sms' | 'share' | '' = $state('');
 </script>
 
 <div
@@ -48,13 +47,13 @@
 <div class="flex h-full w-full items-center justify-center px-4">
   <div class="w-full max-w-md">
     {#if sendGiftCardType === 'email'}
-      <SendGiftCardEmailForm data={{ form: data.form, walletItemId: data.walletItemId ?? '' }} />
+      <SendGiftCardEmailForm data={{ form: data.emailForm, walletItemId: data.walletItemId ?? '' }} />
     {:else if sendGiftCardType === 'sms'}
       <SendGiftCardTextForm
-        data={{ form: data.form as any, walletItemId: data.walletItemId ?? '' }}
+        data={{ form: data.smsForm, walletItemId: data.walletItemId ?? '' }}
       />
     {:else if sendGiftCardType === 'share'}
-      <ShareGiftLinkForm data={{ form: data.form as any, walletItemId: data.walletItemId ?? '' }} />
+      <ShareGiftLinkForm data={{ form: data.linkForm, walletItemId: data.walletItemId ?? '' }} />
     {/if}
   </div>
 </div>

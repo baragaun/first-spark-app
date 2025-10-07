@@ -82,7 +82,9 @@
 
     // Create SMS link - format: sms:phonenumber?body=message
     // Remove any non-digit characters from phone number for SMS link
-    const cleanPhone = recipientPhone.replace(/\D/g, '');
+    const cleanPhone = recipientPhone.startsWith('+')
+      ? '+' + recipientPhone.slice(1).replace(/\D/g, '')
+      : recipientPhone.replace(/\D/g, '');
     const smsLink = `sms:${cleanPhone}?body=${smsBody}`;
     window.location.href = smsLink;
   };
