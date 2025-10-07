@@ -1,0 +1,1 @@
+import{g as a}from"./DHOVcdmf.js";const c=()=>"Search marketplace",l=()=>"Buscar en el mercado",s=(t={},r={})=>{const e=r.locale??a();return e==="en"?c():e==="es"?l():"marketplace.search_placeholder"};export{s as m};
