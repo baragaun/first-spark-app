@@ -88,6 +88,9 @@
     if (savedPin) {
       pin = savedPin;
     }
+    if (password) {
+      pin = password;
+    }
 
     try {
       const response = await marketplaceContext.findWalletItemTransferRecipientInfoByTransferSlug(
@@ -106,7 +109,6 @@
       }
 
       if (response?.product === null || response?.product === undefined) {
-        console.log('jahanvi');
         isGiftCardAlreadyAccepted = true;
         isLoading = false;
         showVerifyPasswordModal = true;
@@ -161,7 +163,7 @@
       }
       toast.success('Password verified successfully');
       showVerifyPasswordModal = false;
-      verified = true;
+      await loadData();
     } catch (error) {
       logger.error('Error verifying wallet item transfer password', error);
       return;
@@ -178,7 +180,7 @@
   }
 </script>
 
-{#if isGiftCardAlreadyAccepted}
+{#if isGiftCardAlreadyAccepted && !verified}
   <div class="flex h-[60vh] flex-col items-center justify-center">
     <span class="px-8 text-center text-lg font-bold text-primary">
       {m['gifted_card.already_accepted_message']()}
