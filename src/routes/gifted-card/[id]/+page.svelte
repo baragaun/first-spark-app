@@ -161,6 +161,7 @@
       }
       toast.success('Password verified successfully');
       showVerifyPasswordModal = false;
+      verified = true;
     } catch (error) {
       logger.error('Error verifying wallet item transfer password', error);
       return;
@@ -305,6 +306,12 @@
         <DialogTitle>Protect Your Card</DialogTitle>
       </DialogHeader>
       <form class="space-y-4" onsubmit={setPassword}>
+        <Input
+          type="password"
+          class="focus-visible:outline-none focus-visible:ring-white"
+          placeholder="Enter a secret code to save the password"
+          bind:value={pin}
+        />
         <Input
           type="password"
           class="focus-visible:outline-none focus-visible:ring-white"
