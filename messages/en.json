@@ -416,6 +416,6 @@
     "modal_title": "Please enter your pin to accept it.",
     "pin_placeholder": "Enter PIN/secret",
     "submit": "Submit",
-    "already_accepted_message": "Something went wrong fetching this gift card, or you have already accepted it."
+    "already_accepted_message": "Seems you have already accepted the gift card, or something went wrong fetching the details."
   }
 }
