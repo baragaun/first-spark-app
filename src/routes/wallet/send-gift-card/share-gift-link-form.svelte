@@ -76,8 +76,9 @@
       transferSecret,
       walletItemId: data.walletItemId,
       recipientFullName: $formData.recipientFullName,
-      recipientEmail: '', // Not needed for share link
+      recipientEmail: 'test@test.com', // dummy url
       messageText: 'Gift for you!',
+      showOnline: true,
     });
 
     if (response.error || !response.object?.transferSlug) {

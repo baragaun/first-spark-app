@@ -8,6 +8,7 @@
     Brand,
     GiftCardProduct,
     type WalletItem,
+    WalletItemTransfer,
     WalletItemTransferRecipientInfo,
   } from '@baragaun/bg-node-client';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
@@ -23,6 +24,7 @@
   let password = $state('');
   let showCongratsModal = $state(false);
   let showDeleteWarning = $state(false);
+  let showDeleteDialog = $state(false);
   let pin = $state('');
   let verified = $state(false);
   let isLoading = $state(false);
@@ -175,12 +177,22 @@
   }
 
   async function deletePage() {
-    // const response = await marketplaceContext.updateWalletItemTransfer({showOnline: false});
-    // if (response.error) {
-    //   logger.error('Error updating wallet item transfer password', response.error);
-    //   return;
-    // }
+    if (!pin) return;
+    console.log('jahanvi');
+    console.log(walletItemTransferRecipientInfo?.walletItemTransfer.id);
+    const response = await marketplaceContext.updateWalletItemTransfer({
+      id: walletItemTransferRecipientInfo?.walletItemTransfer.id,
+      transferSlug: transferSlug,
+      showOnline: false,
+      transferSecret: pin,
+    });
+
+    if (response.error) {
+      logger.error('Error updating wallet item transfer', response.error);
+      return;
+    }
     showDeleteWarning = false;
+    showDeleteDialog = false;
   }
 </script>
 
@@ -380,7 +392,27 @@
       <Button class="w-full" variant="outline" onclick={() => (showDeleteWarning = false)}
         >Cancel</Button
       >
-      <Button class="w-full" variant="destructive" onclick={deletePage}>Delete Page</Button>
+      <Button class="w-full" variant="destructive" onclick={() => (showDeleteDialog = true)}
+        >Delete Page</Button
+      >
     </div>
+  </DialogContent>
+</Dialog>
+
+<!-- Delete Dialog -->
+<Dialog open={showDeleteDialog} onOpenChange={(e) => (showDeleteDialog = e)}>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Delete Your Page</DialogTitle>
+    </DialogHeader>
+    <form class="space-y-4" onsubmit={setPassword}>
+      <Input
+        type="password"
+        class="focus-visible:outline-none focus-visible:ring-white"
+        placeholder="Enter a secret code to delete the page"
+        bind:value={pin}
+      />
+      <Button variant="destructive" class="w-full" onclick={deletePage}>Delete</Button>
+    </form>
   </DialogContent>
 </Dialog>
