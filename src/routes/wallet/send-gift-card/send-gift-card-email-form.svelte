@@ -110,6 +110,7 @@ Unlock code: ${secretCode}
       recipientFullName: $formData.recipientFullName,
       recipientEmail: $formData.recipientEmail,
       messageText: $formData.message,
+      showOnline: true,
     });
 
     if (response.error || !response.object?.transferSlug) {

@@ -110,6 +110,7 @@
       recipientFullName: $formData.recipientFullName,
       recipientPhoneNumber: $formData.recipientPhone,
       messageText: $formData.message,
+      showOnline: true,
     });
 
     if (response.error || !response.object?.transferSlug) {
