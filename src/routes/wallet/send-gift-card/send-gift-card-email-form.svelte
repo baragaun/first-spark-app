@@ -21,6 +21,7 @@
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
   import { getWalletItemsStore } from '@/stores/wallet-store.svelte';
   import { page } from '$app/state';
+  import { handleGiftCardTransfer } from '$lib/utils/gift-card-transfer';
 
   const DEBOUNCE_DELAY = 350;
 
@@ -89,12 +90,6 @@ Unlock code: ${secretCode}
     window.location.href = mailto;
   };
 
-  function getSecureCode() {
-    const array = new Uint32Array(1);
-    crypto.getRandomValues(array);
-    return (array[0] % 1000000).toString().padStart(6, '0');
-  }
-
   const handleFormSubmit = async () => {
     const result = await validateForm({ update: true, focusOnError: true });
     if (!result.valid) {
@@ -102,29 +97,27 @@ Unlock code: ${secretCode}
       return;
     }
 
-    const transferSecret = getSecureCode();
-
-    const response = await marketplaceContext.createWalletItemTransfer({
-      transferSecret,
+    const success = await handleGiftCardTransfer({
       walletItemId: data.walletItemId,
-      recipientFullName: $formData.recipientFullName,
-      recipientEmail: $formData.recipientEmail,
-      messageText: $formData.message,
+      formData: {
+        recipientFullName: $formData.recipientFullName,
+        recipientEmail: $formData.recipientEmail,
+        messageText: $formData.message,
+      },
+      onSuccess: (transferSlug: string, transferSecret: string) => {
+        sendEmail(
+          transferSlug,
+          transferSecret,
+          $formData.recipientEmail,
+          $formData.recipientFullName,
+          $formData.message,
+        );
+        showDialog = true;
+      },
+      onError: (error: any) => {
+        console.error('Transfer creation failed:', error);
+      },
     });
-
-    if (response.error || !response.object?.transferSlug) {
-      return;
-    }
-
-    sendEmail(
-      response.object.transferSlug,
-      transferSecret,
-      $formData.recipientEmail,
-      $formData.recipientFullName,
-      $formData.message,
-    );
-
-    showDialog = true;
   };
 
   const debouncedValidation = debounce(DEBOUNCE_DELAY, async () => {
