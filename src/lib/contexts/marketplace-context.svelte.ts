@@ -582,24 +582,30 @@ export class MarketplaceContext {
     }
   }
 
-  async updateWalletItemTransfer(
-    props: Partial<WalletItemTransfer>,
-  ): Promise<QueryResult<WalletItemTransfer>> {
+  async updateWalletItemTransferShowOnlineFlag(
+    transferSlug: string,
+    transferSecret: string,
+    showOnline: boolean,
+  ): Promise<QueryResult<void>> {
     if (!this.client.isInitialized) {
-      console.error('MarketplaceContext.updateWalletItemTransfer: not initialized.');
+      console.error('MarketplaceContext.updateWalletItemTransferShowOnlineFlag: not initialized.');
       return { error: translate(AppUiMessage.systemError) };
     }
     try {
       isLoading = true;
       const response =
-        await this.client.operations.walletItemTransfer.updateWalletItemTransfer(props);
+        await this.client.operations.walletItemTransfer.updateWalletItemTransferShowOnlineFlag(
+          transferSlug,
+          transferSecret,
+          showOnline,
+        );
       if (!response || response.error) {
-        console.error('updateWalletItemTransfer: received error.', { response });
+        console.error('updateWalletItemTransferShowOnlineFlag: received error.', { response });
         return { error: response.error || translate(AppUiMessage.systemError) };
       }
       return response;
     } catch (error) {
-      console.error('updateWalletItemTransfer: error', {
+      console.error('updateWalletItemTransferShowOnlineFlag: error', {
         error: (error as Error).message,
         stack: (error as Error).stack,
       });
