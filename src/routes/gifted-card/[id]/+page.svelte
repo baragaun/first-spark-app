@@ -8,7 +8,6 @@
     Brand,
     GiftCardProduct,
     type WalletItem,
-    WalletItemTransfer,
     WalletItemTransferRecipientInfo,
   } from '@baragaun/bg-node-client';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
@@ -178,14 +177,11 @@
 
   async function deletePage() {
     if (!pin) return;
-    console.log('jahanvi');
-    console.log(walletItemTransferRecipientInfo?.walletItemTransfer.id);
-    const response = await marketplaceContext.updateWalletItemTransfer({
-      id: walletItemTransferRecipientInfo?.walletItemTransfer.id,
-      transferSlug: transferSlug,
-      showOnline: false,
-      transferSecret: pin,
-    });
+    const response = await marketplaceContext.updateWalletItemTransferShowOnlineFlag(
+      transferSlug,
+      pin,
+      false,
+    );
 
     if (response.error) {
       logger.error('Error updating wallet item transfer', response.error);
