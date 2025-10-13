@@ -412,6 +412,7 @@
     "modal_title": "Bitte gib deine PIN ein, um sie anzunehmen.",
     "pin_placeholder": "PIN/Geheimcode eingeben",
     "submit": "Absenden",
-    "already_accepted_message": "Etwas ist beim Abrufen dieser Geschenkkarte schief gelaufen oder Sie haben sie bereits akzeptiert."
+    "already_accepted_message": "Etwas ist beim Abrufen dieser Geschenkkarte schief gelaufen oder Sie haben sie bereits akzeptiert.",
+    "gift_card_declined_message": "Es scheint, als hätten Sie die Geschenkkarte abgelehnt."
   }
 }
