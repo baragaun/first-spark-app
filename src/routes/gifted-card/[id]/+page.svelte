@@ -16,6 +16,7 @@
   import { toast } from 'svelte-sonner';
   import { logger } from '@/utils/logger';
   import { downloadPdf } from '@/utils/pdf-utils';
+  import { goto } from '$app/navigation';
 
   let open = $state(false);
   let showPasswordModal = $state(false);
@@ -99,6 +100,7 @@
         transferSlug,
         pin,
       );
+      console.log('Response:', response);
       if (typeof response === 'string' || response === null) {
         isLoading = false;
         isGiftCardAlreadyAccepted = true;
@@ -195,6 +197,8 @@
     showDeleteWarning = false;
     showDeleteDialog = false;
     showCongratsModal = false;
+    await loadData();
+    toast.success('Page deleted successfully');
   }
 </script>
 
