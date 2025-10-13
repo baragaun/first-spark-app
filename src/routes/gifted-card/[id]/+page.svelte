@@ -35,6 +35,7 @@
   );
   let isGiftCardAlreadyAccepted = $state(false);
   let isRememberPin = $state(true);
+  let isGiftCardDeclined = $state(false);
 
   const transferSlug = page.params.id;
 
@@ -120,6 +121,10 @@
         isGiftCardAlreadyAccepted = true;
       }
 
+      if (response.walletItemTransfer.declinedAt) {
+        isGiftCardDeclined = true;
+      }
+
       walletItemTransferRecipientInfo = response;
       product = walletItemTransferRecipientInfo?.product ?? undefined;
       brand = walletItemTransferRecipientInfo?.brand ?? undefined;
@@ -189,10 +194,17 @@
     }
     showDeleteWarning = false;
     showDeleteDialog = false;
+    showCongratsModal = false;
   }
 </script>
 
-{#if isGiftCardAlreadyAccepted && !verified}
+{#if isGiftCardDeclined} 
+<div class="flex h-[60vh] flex-col items-center justify-center">
+  <span class="px-8 text-center text-lg font-bold text-primary">
+    {m['gifted_card.gift_card_declined_message']()}
+  </span>
+</div>
+{:else if isGiftCardAlreadyAccepted && !verified}
   <div class="mt-2 flex justify-end gap-2 px-2">
     <Button
       variant="outline"
