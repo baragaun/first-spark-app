@@ -104,6 +104,7 @@
         recipientPhoneNumber: $formData.recipientPhone,
         messageText: $formData.message,
         showOnline: true,
+        sendMethod: 'phoneNumber',
       },
       onSuccess: (transferSlug: string, transferSecret: string) => {
         sendSms(
