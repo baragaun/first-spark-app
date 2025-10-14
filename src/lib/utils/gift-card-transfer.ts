@@ -5,6 +5,7 @@ export interface TransferFormData {
   recipientEmail?: string;
   recipientPhoneNumber?: string;
   messageText: string;
+  showOnline: boolean;
 }
 
 export interface TransferOptions {
