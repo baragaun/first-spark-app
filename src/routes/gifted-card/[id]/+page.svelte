@@ -197,17 +197,17 @@
     showDeleteWarning = false;
     showDeleteDialog = false;
     showCongratsModal = false;
-    await loadData();
+    goto('/');
     toast.success('Page deleted successfully');
   }
 </script>
 
-{#if isGiftCardDeclined} 
-<div class="flex h-[60vh] flex-col items-center justify-center">
-  <span class="px-8 text-center text-lg font-bold text-primary">
-    {m['gifted_card.gift_card_declined_message']()}
-  </span>
-</div>
+{#if isGiftCardDeclined}
+  <div class="flex h-[60vh] flex-col items-center justify-center">
+    <span class="px-8 text-center text-lg font-bold text-primary">
+      {m['gifted_card.gift_card_declined_message']()}
+    </span>
+  </div>
 {:else if isGiftCardAlreadyAccepted && !verified}
   <div class="mt-2 flex justify-end gap-2 px-2">
     <Button
