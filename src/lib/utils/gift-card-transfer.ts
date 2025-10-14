@@ -38,6 +38,7 @@ export async function handleGiftCardTransfer(options: TransferOptions): Promise<
       walletItemId,
       recipientFullName: formData.recipientFullName,
       messageText: formData.messageText,
+      showOnline: formData.showOnline,
     };
 
     // Add recipient contact info based on what's provided
