@@ -15,6 +15,7 @@
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
   import { getWalletItemsStore } from '@/stores/wallet-store.svelte';
   import { page } from '$app/state';
+  import { handleGiftCardTransfer } from '$lib/utils/gift-card-transfer';
 
   const DEBOUNCE_DELAY = 350;
 
@@ -57,12 +58,6 @@
 
   let walletItem = $derived(getWalletItemsStore().find((p) => p.id === data.walletItemId) || null);
 
-  function getSecureCode() {
-    const array = new Uint32Array(1);
-    crypto.getRandomValues(array);
-    return (array[0] % 1000000).toString().padStart(6, '0');
-  }
-
   const handleFormSubmit = async () => {
     const result = await validateForm({ update: true, focusOnError: true });
     if (!result.valid) {
@@ -70,24 +65,23 @@
       return;
     }
 
-    transferSecret = getSecureCode();
-
-    const response = await marketplaceContext.createWalletItemTransfer({
-      transferSecret,
+    const success = await handleGiftCardTransfer({
       walletItemId: data.walletItemId,
-      recipientFullName: $formData.recipientFullName,
-      recipientEmail: 'test@test.com', // dummy url
-      messageText: 'Gift for you!',
-      showOnline: true,
+      formData: {
+        recipientFullName: $formData.recipientFullName,
+        messageText: 'Gift for you!',
+        showOnline: true,
+      },
+      onSuccess: (transferSlug: string, secret: string) => {
+        transferSecret = secret;
+        giftLink = `${page.url.origin}/gifted-card/${transferSlug}`;
+        giftLinkCreated = true;
+      },
+      onError: (error: any) => {
+        formState.hasError = true;
+        console.error('Transfer creation failed:', error);
+      },
     });
-
-    if (response.error || !response.object?.transferSlug) {
-      formState.hasError = true;
-      return;
-    }
-
-    giftLink = `${page.url.origin}/gifted-card/${response.object.transferSlug}`;
-    giftLinkCreated = true;
   };
 
   const debouncedValidation = debounce(DEBOUNCE_DELAY, async () => {
