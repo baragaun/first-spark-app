@@ -100,7 +100,7 @@
         transferSlug,
         pin,
       );
-      console.log('Response:', response);
+
       if (typeof response === 'string' || response === null) {
         isLoading = false;
         isGiftCardAlreadyAccepted = true;
@@ -298,7 +298,7 @@
 
     <form class="space-y-4" onsubmit={handleSubmit}>
       <Input
-        type="password"
+        type="text"
         class="focus-visible:outline-none  focus-visible:ring-white"
         placeholder={m['gifted_card.pin_placeholder']()}
         bind:value={pin}
@@ -417,9 +417,9 @@
     <DialogHeader>
       <DialogTitle>Delete Your Page</DialogTitle>
     </DialogHeader>
-    <form class="space-y-4" onsubmit={setPassword}>
+    <form class="space-y-4" onsubmit={deletePage}>
       <Input
-        type="password"
+        type="text"
         class="focus-visible:outline-none focus-visible:ring-white"
         placeholder="Enter a secret code to delete the page"
         bind:value={pin}
