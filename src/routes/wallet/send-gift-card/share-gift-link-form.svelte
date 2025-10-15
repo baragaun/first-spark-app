@@ -117,7 +117,6 @@ Unlock code: ${transferSecret}`;
         await navigator.share({
           title: 'Gift Card from ' + myUserContext.myUser?.userHandle,
           text: shareText,
-          url: giftLink,
         });
       } catch (err) {
         console.error('Error sharing:', err);
