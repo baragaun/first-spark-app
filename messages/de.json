@@ -349,7 +349,8 @@
       "gift_was_accepted": "Geschenk wurde angenommen",
       "active": "actief",
       "gifted": "übertragen",
-      "no_items_found": "Keine Einträge gefunden"
+      "no_items_found": "Keine Einträge gefunden",
+      "phone": "Telefonnummer"
     }
   },
   "upload_card": {
