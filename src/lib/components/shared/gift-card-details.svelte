@@ -214,7 +214,7 @@
 
 {#if loading}
   <div class="flex h-[60vh] items-center justify-center">
-    <div class="text-center">
+    <div class="flex flex-col items-center">
       <div
         class="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"
       ></div>
