@@ -184,8 +184,14 @@
       </div>
       <div class="text-sm text-muted-foreground">{m['wallet.gifted.name']()}</div>
       <div class="mb-2 font-bold">{walletItemTransfer?.recipientFullName}</div>
-      <div class="text-sm text-muted-foreground">{m['wallet.gifted.email']()}</div>
-      <div class="mb-2 break-all font-bold">{walletItemTransfer?.recipientEmail}</div>
+      {#if walletItemTransfer?.recipientPhoneNumber}
+        <div class="text-sm text-muted-foreground">{m['wallet.gifted.phone']()}</div>
+        <div class="mb-2 break-all font-bold">{walletItemTransfer?.recipientPhoneNumber}</div>
+      {/if}
+      {#if walletItemTransfer?.recipientEmail}
+        <div class="text-sm text-muted-foreground">{m['wallet.gifted.email']()}</div>
+        <div class="mb-2 break-all font-bold">{walletItemTransfer?.recipientEmail}</div>
+      {/if}
       <div class="text-sm text-muted-foreground">{m['wallet.gifted.message']()}</div>
       <div class="mb-2 break-all font-bold">{walletItemTransfer?.messageText}</div>
       <div class="text-sm text-muted-foreground">{m['wallet.gifted.date_sent']()}</div>

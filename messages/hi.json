@@ -349,7 +349,8 @@
       "gift_was_accepted": "उपहार स्वीकार किया गया",
       "active": "सक्रिय",
       "gifted": "स्थानांतरित",
-      "no_items_found": "कोई आइटम नहीं मिला"
+      "no_items_found": "कोई आइटम नहीं मिला",
+      "phone": "फोन नंबर"
     }
   },
   "upload_card": {
