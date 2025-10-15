@@ -5,6 +5,8 @@ export interface TransferFormData {
   recipientEmail?: string;
   recipientPhoneNumber?: string;
   messageText: string;
+  showOnline: boolean;
+  sendMethod: string;
 }
 
 export interface TransferOptions {
@@ -37,6 +39,8 @@ export async function handleGiftCardTransfer(options: TransferOptions): Promise<
       walletItemId,
       recipientFullName: formData.recipientFullName,
       messageText: formData.messageText,
+      showOnline: formData.showOnline,
+      sendMethod: formData.sendMethod,
     };
 
     // Add recipient contact info based on what's provided

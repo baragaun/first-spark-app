@@ -70,6 +70,8 @@
       formData: {
         recipientFullName: $formData.recipientFullName,
         messageText: 'Gift for you!',
+        showOnline: true,
+        sendMethod: 'link',
       },
       onSuccess: (transferSlug: string, secret: string) => {
         transferSecret = secret;
@@ -166,7 +168,7 @@ Unlock code: ${transferSecret}`;
 {:else}
   <div class="mx-auto max-w-md space-y-4 rounded-xl bg-white p-6 shadow dark:bg-background">
     <div class="text-center">
-      <h2 class="mb-2 text-xl font-semibold text-green-600">Gift Link Created!</h2>
+      <h2 class="mb-2 text-xl font-semibold text-muted-foreground">Gift Link Created!</h2>
       <p class="text-sm text-gray-600">Share this link with {$formData.recipientFullName}</p>
     </div>
 
@@ -174,7 +176,13 @@ Unlock code: ${transferSecret}`;
       <div>
         <label for="giftLink" class="mb-1 block text-sm font-medium">Gift Link</label>
         <div class="flex gap-2">
-          <Input id="giftLink" value={giftLink} readonly class="flex-1 bg-gray-50" />
+          <Input
+            type="text"
+            id="giftLink"
+            value={giftLink}
+            readonly
+            class="flex-1 bg-gray-50 focus-visible:ring-transparent"
+          />
           <Button type="button" variant="outline" size="icon" onclick={copyLink} title="Copy Link">
             <Copy class="h-4 w-4" />
           </Button>
@@ -183,7 +191,12 @@ Unlock code: ${transferSecret}`;
 
       <div>
         <label for="unlockCode" class="mb-1 block text-sm font-medium">Unlock Code</label>
-        <Input id="unlockCode" value={transferSecret} readonly class="bg-gray-50 font-mono" />
+        <Input
+          id="unlockCode"
+          value={transferSecret}
+          readonly
+          class="bg-gray-50 font-mono focus-visible:ring-transparent"
+        />
         <p class="mt-1 text-xs text-gray-500">Share this code with the recipient</p>
       </div>
     </div>
@@ -193,7 +206,11 @@ Unlock code: ${transferSecret}`;
         <Copy class="mr-2 h-4 w-4" />
         Copy Link
       </Button>
-      <Button type="button" onclick={shareLink} class="flex-1 bg-green-600 hover:bg-green-700">
+      <Button
+        type="button"
+        onclick={shareLink}
+        class="flex-1 bg-nav-foreground hover:bg-nav-foreground/90"
+      >
         <Share class="mr-2 h-4 w-4" />
         Share Gift Link
       </Button>

@@ -103,6 +103,8 @@ Unlock code: ${secretCode}
         recipientFullName: $formData.recipientFullName,
         recipientEmail: $formData.recipientEmail,
         messageText: $formData.message,
+        showOnline: true,
+        sendMethod: 'email',
       },
       onSuccess: (transferSlug: string, transferSecret: string) => {
         sendEmail(

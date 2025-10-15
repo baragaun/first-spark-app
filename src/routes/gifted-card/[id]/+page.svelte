@@ -16,6 +16,7 @@
   import { toast } from 'svelte-sonner';
   import { logger } from '@/utils/logger';
   import { downloadPdf } from '@/utils/pdf-utils';
+  import { goto } from '$app/navigation';
 
   let open = $state(false);
   let showPasswordModal = $state(false);
@@ -23,6 +24,7 @@
   let password = $state('');
   let showCongratsModal = $state(false);
   let showDeleteWarning = $state(false);
+  let showDeleteDialog = $state(false);
   let pin = $state('');
   let verified = $state(false);
   let isLoading = $state(false);
@@ -34,6 +36,8 @@
   );
   let isGiftCardAlreadyAccepted = $state(false);
   let isRememberPin = $state(true);
+  let isGiftCardDeclined = $state(false);
+  let isGiftPageDeleted = $state(false);
 
   const transferSlug = page.params.id;
 
@@ -97,9 +101,10 @@
         transferSlug,
         pin,
       );
+
       if (typeof response === 'string' || response === null) {
         isLoading = false;
-        isGiftCardAlreadyAccepted = true;
+        isGiftPageDeleted = true;
         logger.error('Failed to load wallet item', response);
         return;
       }
@@ -109,14 +114,17 @@
       }
 
       if (response?.product === null || response?.product === undefined) {
-        isGiftCardAlreadyAccepted = true;
+        isGiftPageDeleted = true;
         isLoading = false;
-        showVerifyPasswordModal = true;
         return;
       }
 
       if (response.walletItem.transferAcceptedAt) {
         isGiftCardAlreadyAccepted = true;
+      }
+
+      if (response.walletItemTransfer.declinedAt) {
+        isGiftCardDeclined = true;
       }
 
       walletItemTransferRecipientInfo = response;
@@ -175,37 +183,31 @@
   }
 
   async function deletePage() {
-    // const response = await marketplaceContext.updateWalletItemTransfer({showOnline: false});
-    // if (response.error) {
-    //   logger.error('Error updating wallet item transfer password', response.error);
-    //   return;
-    // }
+    if (!pin) return;
+    const response = await marketplaceContext.updateWalletItemTransferShowOnlineFlag(
+      transferSlug,
+      pin,
+      false,
+    );
+
+    if (response.error) {
+      logger.error('Error updating wallet item transfer', response.error);
+      return;
+    }
     showDeleteWarning = false;
+    showDeleteDialog = false;
+    showCongratsModal = false;
+    goto('/');
+    toast.success('Page deleted successfully');
   }
 </script>
 
-{#if isGiftCardAlreadyAccepted && !verified}
-  <div class="mt-2 flex justify-end gap-2 px-2">
-    <Button
-      variant="outline"
-      size="sm"
-      class="rounded-full hover:bg-background hover:text-nav-foreground/70"
-      onclick={() => {
-        showCongratsModal = true;
-      }}>Secure your card</Button
-    >
-    <Button
-      variant="outline"
-      size="sm"
-      class="rounded-full hover:bg-background hover:text-nav-foreground/70"
-      onclick={() => {
-        showVerifyPasswordModal = true;
-      }}>Access your card</Button
-    >
-  </div>
+{#if isGiftCardDeclined || isGiftPageDeleted}
   <div class="flex h-[60vh] flex-col items-center justify-center">
     <span class="px-8 text-center text-lg font-bold text-primary">
-      {m['gifted_card.already_accepted_message']()}
+      {isGiftCardDeclined
+        ? m['gifted_card.gift_card_declined_message']()
+        : m['gifted_card.gift_card_deleted_message']()}
     </span>
   </div>
 {:else}
@@ -215,7 +217,26 @@
   >
     <span class="text-lg font-bold"> {m['send_gift_card.received_gift_card']()}</span>
 
-    {#if !verified}
+    {#if isGiftCardAlreadyAccepted && !verified}
+      <div class="mt-2 flex justify-end gap-2 px-2">
+        <Button
+          variant="outline"
+          size="sm"
+          class="rounded-full hover:bg-background hover:text-nav-foreground/70"
+          onclick={() => {
+            showCongratsModal = true;
+          }}>Secure your card</Button
+        >
+        <Button
+          variant="outline"
+          size="sm"
+          class="rounded-full hover:bg-background hover:text-nav-foreground/70"
+          onclick={() => {
+            showVerifyPasswordModal = true;
+          }}>Access your card</Button
+        >
+      </div>
+    {:else if !isGiftCardAlreadyAccepted && !verified}
       <div class="flex gap-2">
         <Button
           variant="outline"
@@ -274,7 +295,7 @@
 
     <form class="space-y-4" onsubmit={handleSubmit}>
       <Input
-        type="password"
+        type="text"
         class="focus-visible:outline-none  focus-visible:ring-white"
         placeholder={m['gifted_card.pin_placeholder']()}
         bind:value={pin}
@@ -307,7 +328,9 @@
       </div>
     </div>
     <div class="mt-6 flex flex-col gap-2">
-      <Button class="w-full" onclick={handlePrintPdf}>Print Card</Button>
+      {#if verified}
+        <Button class="w-full" onclick={handlePrintPdf}>Print Card</Button>
+      {/if}
       <Button
         class="w-full"
         variant="outline"
@@ -380,7 +403,27 @@
       <Button class="w-full" variant="outline" onclick={() => (showDeleteWarning = false)}
         >Cancel</Button
       >
-      <Button class="w-full" variant="destructive" onclick={deletePage}>Delete Page</Button>
+      <Button class="w-full" variant="destructive" onclick={() => (showDeleteDialog = true)}
+        >Delete Page</Button
+      >
     </div>
+  </DialogContent>
+</Dialog>
+
+<!-- Delete Dialog -->
+<Dialog open={showDeleteDialog} onOpenChange={(e) => (showDeleteDialog = e)}>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Delete Your Page</DialogTitle>
+    </DialogHeader>
+    <form class="space-y-4" onsubmit={deletePage}>
+      <Input
+        type="text"
+        class="focus-visible:outline-none focus-visible:ring-white"
+        placeholder="Enter a secret code to delete the page"
+        bind:value={pin}
+      />
+      <Button variant="destructive" class="w-full" onclick={deletePage}>Delete</Button>
+    </form>
   </DialogContent>
 </Dialog>
