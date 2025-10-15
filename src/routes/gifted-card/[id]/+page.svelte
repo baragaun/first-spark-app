@@ -37,6 +37,7 @@
   let isGiftCardAlreadyAccepted = $state(false);
   let isRememberPin = $state(true);
   let isGiftCardDeclined = $state(false);
+  let isGiftPageDeleted = $state(false);
 
   const transferSlug = page.params.id;
 
@@ -103,7 +104,7 @@
 
       if (typeof response === 'string' || response === null) {
         isLoading = false;
-        isGiftCardAlreadyAccepted = true;
+        isGiftPageDeleted = true;
         logger.error('Failed to load wallet item', response);
         return;
       }
@@ -113,9 +114,8 @@
       }
 
       if (response?.product === null || response?.product === undefined) {
-        isGiftCardAlreadyAccepted = true;
+        isGiftPageDeleted = true;
         isLoading = false;
-        showVerifyPasswordModal = true;
         return;
       }
 
@@ -202,34 +202,12 @@
   }
 </script>
 
-{#if isGiftCardDeclined}
+{#if isGiftCardDeclined || isGiftPageDeleted}
   <div class="flex h-[60vh] flex-col items-center justify-center">
     <span class="px-8 text-center text-lg font-bold text-primary">
-      {m['gifted_card.gift_card_declined_message']()}
-    </span>
-  </div>
-{:else if isGiftCardAlreadyAccepted && !verified}
-  <div class="mt-2 flex justify-end gap-2 px-2">
-    <Button
-      variant="outline"
-      size="sm"
-      class="rounded-full hover:bg-background hover:text-nav-foreground/70"
-      onclick={() => {
-        showCongratsModal = true;
-      }}>Secure your card</Button
-    >
-    <Button
-      variant="outline"
-      size="sm"
-      class="rounded-full hover:bg-background hover:text-nav-foreground/70"
-      onclick={() => {
-        showVerifyPasswordModal = true;
-      }}>Access your card</Button
-    >
-  </div>
-  <div class="flex h-[60vh] flex-col items-center justify-center">
-    <span class="px-8 text-center text-lg font-bold text-primary">
-      {m['gifted_card.already_accepted_message']()}
+      {isGiftCardDeclined
+        ? m['gifted_card.gift_card_declined_message']()
+        : m['gifted_card.gift_card_deleted_message']()}
     </span>
   </div>
 {:else}
@@ -239,7 +217,26 @@
   >
     <span class="text-lg font-bold"> {m['send_gift_card.received_gift_card']()}</span>
 
-    {#if !verified}
+    {#if isGiftCardAlreadyAccepted && !verified}
+      <div class="mt-2 flex justify-end gap-2 px-2">
+        <Button
+          variant="outline"
+          size="sm"
+          class="rounded-full hover:bg-background hover:text-nav-foreground/70"
+          onclick={() => {
+            showCongratsModal = true;
+          }}>Secure your card</Button
+        >
+        <Button
+          variant="outline"
+          size="sm"
+          class="rounded-full hover:bg-background hover:text-nav-foreground/70"
+          onclick={() => {
+            showVerifyPasswordModal = true;
+          }}>Access your card</Button
+        >
+      </div>
+    {:else if !isGiftCardAlreadyAccepted && !verified}
       <div class="flex gap-2">
         <Button
           variant="outline"
@@ -331,7 +328,9 @@
       </div>
     </div>
     <div class="mt-6 flex flex-col gap-2">
-      <Button class="w-full" onclick={handlePrintPdf}>Print Card</Button>
+      {#if verified}
+        <Button class="w-full" onclick={handlePrintPdf}>Print Card</Button>
+      {/if}
       <Button
         class="w-full"
         variant="outline"
