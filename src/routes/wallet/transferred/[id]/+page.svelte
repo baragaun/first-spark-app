@@ -132,6 +132,7 @@
 
     <!-- Actions -->
     <div class="flex items-center gap-2 border-b bg-gray-50 px-4 py-1">
+      {#if walletItem.termsUrl}
       <div class="flex flex-col items-center">
         <Button
           variant="ghost"
@@ -142,6 +143,7 @@
         >
         <span class="text-xs text-gray-500">{m['wallet.gift-card.brand']()}</span>
       </div>
+      {/if}
       <div class="flex flex-col items-center">
         <Button variant="ghost" size="icon" onclick={archiveWalletItem}
           ><Archive aria-label="Archive" /></Button
