@@ -11,6 +11,7 @@ import {
   SortDirection,
   User,
   UserListItem,
+  type ChannelEventListener,
   type QueryOptions,
 } from '@baragaun/bg-node-client';
 
@@ -22,26 +23,26 @@ export class ChannelContext {
   public users = $state<UserListItem[]>([]);
   private client = client;
 
-  private myChannelListener = {
-    id: 'my-channel-listener',
-    topic: BgListenerTopic.channel,
-    onChannelCreated: async ({ object }: { object: ChannelListItem }) => {
-      console.log('Channel created: ', object);
-      myChannels = [object, ...myChannels];
-      // todo may be need to fetch full channel details from server before adding to list
-    },
-    onChannelUpdated: ({ object }: { object: ChannelListItem }) => {
-      myChannels = myChannels.map((c) => (c.id === object.id ? object : c));
-      // todo may be need to fetch full channel details from server before adding to list
-    },
-    onChannelDeleted: ({ object }: { object: ChannelListItem }) => {
-      myChannels = myChannels.filter((c) => c.id !== object.id);
-      // todo may be need to fetch full channel details from server before adding to list
-    },
-  };
+  private myChannelListener: ChannelEventListener = {
+  id: 'my-channel-listener',
+  topic: BgListenerTopic.channel,
+  // Optional: channelId if you want to scope to a specific channel
+  // channelId: 'some-channel-id',
+  onEvent: async (
+    reason,
+    channelId,
+    data
+  ): Promise<void> => {
+    console.log('ChannelListener Event:', { reason, channelId, data });
+    // You can handle different reasons here, for example:
+    // if (reason === 'created' && data?.channel) { ... }
+    // if (reason === 'updated' && data?.channel) { ... }
+    // if (reason === 'deleted' && data?.channel) { ... }
+    // etc.
+  },
+};
 
   constructor() {
-    // Register background listener for real-time updates
     this.client.addListener(this.myChannelListener);
   }
 
@@ -55,14 +56,15 @@ export class ChannelContext {
       const input = {
         filter: {},
         match: {},
-        queryOptions: { cachePolicy: CachePolicy.network },
         options: {},
+        scope: {},
+        queryOptions: { cachePolicy: CachePolicy.network },
       };
-      const participantLimit = 2;
-      const response = await this.client.operations.channel.findMyChannelsV2(
-        participantLimit,
-        true,
+      const response = await this.client.operations.channel.findMyChannels(
+        input.filter,
+        input.match,
         input.options,
+        input.scope,
         input.queryOptions,
       );
       if (!response || response.error || !response.objects) {
@@ -72,7 +74,7 @@ export class ChannelContext {
 
       myChannels = response.objects;
 
-      return response.objects;
+      return myChannels;
     } catch (error) {
       console.error('FindMyChannels: error', {
         error: (error as Error).message,
