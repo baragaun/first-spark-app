@@ -1,6 +1,5 @@
 import translate from '@/helpers/language/translate';
 import { client } from '@/services/bg-node-client';
-// import { isChannelLoading, myChannels } from '@/stores/channel-store';
 import { AppUiMessage } from '@/types/enums';
 import {
   BgListenerTopic,
@@ -10,8 +9,9 @@ import {
   ChannelMessage,
   SortDirection,
   User,
+  UserEventReason,
   UserListItem,
-  type ChannelEventListener,
+  type MyUserEventListener,
   type QueryOptions,
 } from '@baragaun/bg-node-client';
 
@@ -23,27 +23,24 @@ export class ChannelContext {
   public users = $state<UserListItem[]>([]);
   private client = client;
 
-  private myChannelListener: ChannelEventListener = {
-  id: 'my-channel-listener',
-  topic: BgListenerTopic.channel,
-  // Optional: channelId if you want to scope to a specific channel
-  // channelId: 'some-channel-id',
-  onEvent: async (
-    reason,
-    channelId,
-    data
-  ): Promise<void> => {
-    console.log('ChannelListener Event:', { reason, channelId, data });
-    // You can handle different reasons here, for example:
-    // if (reason === 'created' && data?.channel) { ... }
-    // if (reason === 'updated' && data?.channel) { ... }
-    // if (reason === 'deleted' && data?.channel) { ... }
-    // etc.
-  },
-};
+  private myUserListener: MyUserEventListener = {
+    id: 'my-user-listener',
+    topic: BgListenerTopic.myUser,
+    onEvent: async (reason, data) => {
+      console.log('UserListener Event:', { reason, data });
+      if (reason === UserEventReason.channelCreated && data?.channel) {
+        const channel = data.channel;
+        myChannels = [channel, ...myChannels];
+      }
+      if (reason === UserEventReason.channelDeleted && data?.channel) {
+        const channel = data.channel;
+        myChannels = myChannels.filter((c) => c.id !== channel.id);
+      }
+    },
+  };
 
   constructor() {
-    this.client.addListener(this.myChannelListener);
+    this.client.addListener(this.myUserListener);
   }
 
   async findMyChannels(): Promise<ChannelListItem[] | string | undefined> {

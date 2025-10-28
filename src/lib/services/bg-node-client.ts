@@ -28,7 +28,7 @@ export async function initializeBgNodeClient(listener?: BgBaseListener) {
     logLevel: env.PUBLIC_LOG_LEVEL as 'debug' | 'info' | 'warn' | 'error' | 'silent' | undefined,
     nats: {
       name: 'first-spark-app',
-      servers: ['ws://localhost:8080'],
+      servers: [env.PUBLIC_NATS_SERVER_URL, 'ws://localhost:8080'],
       timeout: 5000,
       reconnect: true,
       maxReconnectAttempts: 3,

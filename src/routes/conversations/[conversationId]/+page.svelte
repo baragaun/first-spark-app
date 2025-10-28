@@ -4,7 +4,7 @@
   import ChatHeader from '../components/chat-header.svelte';
   import MessageList from '../components/message-list.svelte';
   import MessageInput from '../components/message-input.svelte';
-  import { BgListenerTopic, ChannelListItem, ChannelMessage } from '@baragaun/bg-node-client';
+  import { BgListenerTopic, ChannelEventReason, ChannelListItem, ChannelMessage } from '@baragaun/bg-node-client';
   import { X } from 'lucide-svelte';
   import Button from '@/components/ui/button/button.svelte';
   import { channelContext } from '@/contexts/channel-context.svelte';
@@ -139,20 +139,26 @@
 
   const myChannelMessageListener = {
     id: `my-channel-message-listener-${channelId}`,
-    topic: BgListenerTopic.channelMessage,
-    onChannelMessageCreated: async ({ object }: { object: ChannelMessage }) => {
-      if (object.channelId !== channelId || object.createdBy === myUserContext.myUserId) return;
-      messages = [...messages, object];
-      await tick();
-      scrollToBottomFn?.();
-    },
-    onChannelMessageUpdated: ({ object }: { object: ChannelMessage }) => {
-      if (object.channelId !== channelId) return;
-      messages = messages.map((m) => (m.id === object.id ? object : m));
-    },
-    onChannelMessageDeleted: ({ object }: { object: ChannelMessage }) => {
-      if (object.channelId !== channelId) return;
-      messages = messages.filter((m) => m.id !== object.id);
+    topic: BgListenerTopic.channel,
+    onEvent: async (
+      reason: string,
+      channelIdEvent: string,
+      data: any
+    ): Promise<void> => {
+      if (reason === ChannelEventReason.messageCreated && data?.channelMessage) {
+        if (data.channelMessage.channelId !== channelId || data.channelMessage.createdBy === myUserContext.myUserId) return;
+        messages = [...messages, data.channelMessage];
+        await tick();
+        scrollToBottomFn?.();
+      }
+      if (reason === ChannelEventReason.messageUpdated && data?.channelMessage) {
+        if (data.channelMessage.channelId !== channelId) return;
+        messages = messages.map((m) => (m.id === data.channelMessage.id ? data.channelMessage : m));
+      }
+      if (reason === ChannelEventReason.messageDeleted && data?.channelMessage) {
+        if (data.channelMessage.channelId !== channelId) return;
+        messages = messages.filter((m) => m.id !== data.channelMessage.id);
+      }
     },
   };
 </script>
