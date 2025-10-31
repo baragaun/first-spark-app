@@ -1,15 +1,16 @@
 <script lang="ts">
   import { page } from '$app/state';
-  import { onMount } from 'svelte';
+  import { onMount, tick } from 'svelte';
   import ChatHeader from '../components/chat-header.svelte';
   import MessageList from '../components/message-list.svelte';
   import MessageInput from '../components/message-input.svelte';
-  import { ChannelListItem, ChannelMessage } from '@baragaun/bg-node-client';
+  import { BgListenerTopic, ChannelEventReason, ChannelListItem, ChannelMessage } from '@baragaun/bg-node-client';
   import { X } from 'lucide-svelte';
   import Button from '@/components/ui/button/button.svelte';
   import { channelContext } from '@/contexts/channel-context.svelte';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import type { ContactDetails } from '@/helpers/types';
+  import { client } from '@/services/bg-node-client';
 
   const channelId = page.params.conversationId;
 
@@ -65,19 +66,22 @@
     isLoading = false;
   };
 
-  onMount(async () => {
+  onMount(() => {
     if (channelContext.selectedChannel) {
       setContactInfo(channelContext.selectedChannel);
-      initializeChannel();
     } else {
-      const response = await channelContext.findChannelById(channelId);
-      console.log('FindChannelById: response:', response);
-      if (response && typeof response !== 'string') {
-        channelContext.selectChannel(response);
-        setContactInfo(response);
-        initializeChannel();
-      }
+      channelContext.findChannelById(channelId).then((channel) => {
+        if (channel && typeof channel !== 'string') {
+          channelContext.selectChannel(channel);
+          setContactInfo(channel);
+        }
+      });
     }
+    initializeChannel();
+    client.addListener(myChannelMessageListener);
+    return () => {
+      client.removeListener(myChannelMessageListener.id);
+    };
   });
 
   const handleScrollToBottomEvent = (event: CustomEvent<() => void>) => {
@@ -97,6 +101,7 @@
     }
     messages = [...messages, response];
     replyingTo = null;
+    await tick();
     scrollToBottomFn?.();
   };
 
@@ -130,6 +135,31 @@
       return;
     }
     messages = messages.filter((message) => message.id !== id);
+  };
+
+  const myChannelMessageListener = {
+    id: `my-channel-message-listener-${channelId}`,
+    topic: BgListenerTopic.channel,
+    onEvent: async (
+      reason: string,
+      channelIdEvent: string,
+      data: any
+    ): Promise<void> => {
+      if (reason === ChannelEventReason.messageCreated && data?.channelMessage) {
+        if (data.channelMessage.channelId !== channelId || data.channelMessage.createdBy === myUserContext.myUserId) return;
+        messages = [...messages, data.channelMessage];
+        await tick();
+        scrollToBottomFn?.();
+      }
+      if (reason === ChannelEventReason.messageUpdated && data?.channelMessage) {
+        if (data.channelMessage.channelId !== channelId) return;
+        messages = messages.map((m) => (m.id === data.channelMessage.id ? data.channelMessage : m));
+      }
+      if (reason === ChannelEventReason.messageDeleted && data?.channelMessage) {
+        if (data.channelMessage.channelId !== channelId) return;
+        messages = messages.filter((m) => m.id !== data.channelMessage.id);
+      }
+    },
   };
 </script>
 

@@ -1,15 +1,18 @@
 import translate from '@/helpers/language/translate';
 import { client } from '@/services/bg-node-client';
-// import { isChannelLoading, myChannels } from '@/stores/channel-store';
 import { AppUiMessage } from '@/types/enums';
 import {
+  BgListenerTopic,
   CachePolicy,
   Channel,
   ChannelListItem,
   ChannelMessage,
+  ChannelParticipant,
   SortDirection,
   User,
+  UserEventReason,
   UserListItem,
+  type MyUserEventListener,
   type QueryOptions,
 } from '@baragaun/bg-node-client';
 
@@ -21,6 +24,52 @@ export class ChannelContext {
   public users = $state<UserListItem[]>([]);
   private client = client;
 
+  private myUserListener: MyUserEventListener = {
+    id: 'my-user-listener',
+    topic: BgListenerTopic.myUser,
+    onEvent: async (reason, data) => {
+      console.log('UserListener Event:', { reason, data });
+      if (reason === UserEventReason.channelCreated && data?.channel) {
+        const channel = data.channel;
+        const channelParticipants = await this.client.operations.channelParticipant.findChannelParticipants(
+          {},
+          { channelId: channel.id },
+          {},
+          {},
+          { cachePolicy: CachePolicy.network },
+        );
+
+        if (!channelParticipants || channelParticipants.error) {
+          console.error('ChannelParticipant fetch error:', { channelParticipants });
+          return;
+        }
+        channel.participants = channelParticipants.objects || [];
+
+        const channelMessage = await this.client.operations.channelMessage.findChannelMessages(
+          {},
+          { channelId: channel.id },
+          undefined,
+          { skip: 0, limit: 1, sort: [{ field: 'createdAt', direction: SortDirection.desc }] },
+          { cachePolicy: CachePolicy.network },
+        );
+        if (!channelMessage || channelMessage.error) {
+          console.error('ChannelMessage fetch error:', { channelMessage });
+          return;
+        }
+        channel.latestMessage = channelMessage.objects ? channelMessage.objects[0] : undefined;
+        myChannels = [channel, ...myChannels];
+      }
+      if (reason === UserEventReason.channelDeleted && data?.channel) {
+        const channel = data.channel;
+        myChannels = myChannels.filter((c) => c.id !== channel.id);
+      }
+    },
+  };
+
+  constructor() {
+    this.client.addListener(this.myUserListener);
+  }
+
   async findMyChannels(): Promise<ChannelListItem[] | string | undefined> {
     if (!this.client.isInitialized) {
       console.error('ConversationContext.findMyChannels: not initialized.');
@@ -31,14 +80,15 @@ export class ChannelContext {
       const input = {
         filter: {},
         match: {},
-        queryOptions: { cachePolicy: CachePolicy.network },
         options: {},
+        scope: {},
+        queryOptions: { cachePolicy: CachePolicy.network },
       };
-      const participantLimit = 2;
       const response = await this.client.operations.channel.findMyChannels(
-        participantLimit,
-        true,
+        input.filter,
+        input.match,
         input.options,
+        input.scope,
         input.queryOptions,
       );
       if (!response || response.error || !response.objects) {
@@ -48,7 +98,7 @@ export class ChannelContext {
 
       myChannels = response.objects;
 
-      return response.objects;
+      return myChannels;
     } catch (error) {
       console.error('FindMyChannels: error', {
         error: (error as Error).message,
@@ -180,8 +230,10 @@ export class ChannelContext {
     }
     try {
       isChannelLoading = true;
-      const response =
-        await this.client.operations.channelParticipant.deleteChannelParticipant(participantId);
+      const response = await this.client.operations.channelParticipant.deleteChannelParticipant(
+        participantId,
+        true,
+      );
       if (!response || response.error) {
         console.error('DeleteChannel: received error.', { response });
         return response.error || translate(AppUiMessage.systemError);
@@ -295,7 +347,7 @@ export class ChannelContext {
     }
     try {
       isChannelLoading = true;
-      const response = await this.client.operations.channelMessage.deleteChannelMessage(id);
+      const response = await this.client.operations.channelMessage.deleteChannelMessage(id, true);
       if (!response || response.error) {
         console.error('DeleteChannelMessage: received error.', { response });
         return response.error || translate(AppUiMessage.systemError);
