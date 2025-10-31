@@ -7,6 +7,7 @@ import {
   Channel,
   ChannelListItem,
   ChannelMessage,
+  ChannelParticipant,
   SortDirection,
   User,
   UserEventReason,
@@ -30,6 +31,32 @@ export class ChannelContext {
       console.log('UserListener Event:', { reason, data });
       if (reason === UserEventReason.channelCreated && data?.channel) {
         const channel = data.channel;
+        const channelParticipants = await this.client.operations.channelParticipant.findChannelParticipants(
+          {},
+          { channelId: channel.id },
+          {},
+          {},
+          { cachePolicy: CachePolicy.network },
+        );
+
+        if (!channelParticipants || channelParticipants.error) {
+          console.error('ChannelParticipant fetch error:', { channelParticipants });
+          return;
+        }
+        channel.participants = channelParticipants.objects || [];
+
+        const channelMessage = await this.client.operations.channelMessage.findChannelMessages(
+          {},
+          { channelId: channel.id },
+          undefined,
+          { skip: 0, limit: 1, sort: [{ field: 'createdAt', direction: SortDirection.desc }] },
+          { cachePolicy: CachePolicy.network },
+        );
+        if (!channelMessage || channelMessage.error) {
+          console.error('ChannelMessage fetch error:', { channelMessage });
+          return;
+        }
+        channel.latestMessage = channelMessage.objects ? channelMessage.objects[0] : undefined;
         myChannels = [channel, ...myChannels];
       }
       if (reason === UserEventReason.channelDeleted && data?.channel) {
