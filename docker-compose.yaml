@@ -4,10 +4,10 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - '3000:3000'
+      - '3050:3050'
     environment:
       - NODE_ENV=production
-      - PORT=3000
+      - PORT=3050
     restart: unless-stopped
     healthcheck:
       test:
@@ -15,7 +15,7 @@ services:
           'CMD',
           'node',
           '-e',
-          "require('http').get('http://localhost:3000', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })",
+          "require('http').get('http://localhost:3050', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })",
         ]
       interval: 30s
       timeout: 10s

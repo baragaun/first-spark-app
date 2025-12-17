@@ -33,3 +33,9 @@ export enum KCUApp {
   description = 'Discover and connect with our partner services',
   canonicalUrl = '/favicon-kcu.png',
 }
+
+export enum TapcoApp {
+  title = 'Tapco',
+  description = 'Discover and connect with our partner services',
+  canonicalUrl = '/tapco.svg',
+}
