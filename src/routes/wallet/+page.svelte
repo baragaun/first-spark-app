@@ -8,21 +8,15 @@
   import { goto } from '$app/navigation';
   import { getWalletItemsStore, loadWalletItems } from '@/stores/wallet-store.svelte';
   import { uploadedCardSetValues } from '@/stores/uploaded-card.svelte';
-  import Quagga from 'quagga';
   import Tesseract from 'tesseract.js';
   import { m } from '@/paraglide/messages';
   import { giftCardImageDomain } from '@/constants';
   import type { WalletItem } from '@baragaun/bg-node-client';
   import { IsMobile } from '$lib/hooks/is-mobile.svelte.js';
+  import { extractGiftCardWithAI } from '$lib/utils/ai-client';
+  import { toast } from 'svelte-sonner';
 
   const isMobile = new IsMobile();
-
-  interface QuaggaResult {
-    codeResult?: {
-      code: string;
-      format: string;
-    };
-  }
 
   const TabId = {
     ACTIVE: 'active',
@@ -35,10 +29,10 @@
   let currentTab = $state<string>(TabId.ACTIVE);
   let searchQuery = $state<string>('');
   let fileInputRef: HTMLInputElement;
+  let isModelAvailable = $state(true);
 
   onMount(async () => {
     loadWalletItems();
-    // loadWalletItemTransfers();
   });
 
   let displayedItems = $derived.by(() => {
@@ -74,12 +68,12 @@
   }
 
   function uploadAction() {
-    goto(`/wallet/upload-gift-card`);
+    // goto(`/wallet/upload-gift-card`);
     // TODO - below code will allow to browse files
-    // if (fileInputRef) {
-    //   fileInputRef.value = '';
-    //   fileInputRef.click();
-    // }
+    if (fileInputRef) {
+      fileInputRef.value = '';
+      fileInputRef.click();
+    }
   }
 
   const handleImageError = (node: HTMLImageElement) => {
@@ -96,92 +90,76 @@
     };
   };
 
-  function handleFileChange(event: Event) {
+  async function handleFileChange(event: Event) {
     const files = (event.target as HTMLInputElement).files;
     if (files && files.length > 0) {
       const file = files[0];
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         const imageDataUrl = e.target?.result as string;
 
         // Set loading and navigate instantly
         uploadedCardSetValues({ imageUrlData: imageDataUrl, isLoading: true });
         goto('/wallet/upload-card');
         // Now process extraction in background
-        Quagga.decodeSingle(
-          {
-            src: imageDataUrl,
-            numOfWorkers: 0,
-            inputStream: { size: 800 },
-            decoder: {
-              readers: [
-                'code_128_reader',
-                'ean_reader',
-                'ean_8_reader',
-                'code_39_reader',
-                'upc_reader',
-                'upc_e_reader',
-                'codabar_reader',
-              ],
-            },
-          },
-          async (result: QuaggaResult | undefined) => {
-            let barcode = '';
-            let company = '';
-            let price = '';
-            let pin = '';
-            if (result && result.codeResult) {
-              barcode = result.codeResult.code;
+        let barcode = '';
+        try {
+          let detector: any;
+          if (typeof window !== 'undefined' && typeof (window as any).BarcodeDetector !== 'undefined') {
+            detector = new (window as any).BarcodeDetector({ formats: ['code_128', 'ean_13', 'ean_8', 'code_39', 'upc_a', 'upc_e', 'codabar'] });
+          } else {
+            throw new Error('BarcodeDetector is not available');
+          }
+          const img = new window.Image();
+          img.src = imageDataUrl;
+          await new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = reject;
+          });
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0);
+            const barcodes = await detector.detect(canvas);
+            if (barcodes.length > 0) {
+              barcode = barcodes[0].rawValue || barcodes[0].value || '';
             }
-            const {
-              data: { text },
-            } = await Tesseract.recognize(imageDataUrl, 'eng');
-            const priceMatch = text.match(/\$\s?\d+[.,]?\d*/);
-            price = priceMatch ? priceMatch[0] : '';
-            const lines = text
-              .split(/\r?\n/)
-              .map((l) => l.trim())
-              .filter(Boolean);
-            // Improved brand extraction: find a line that looks like a brand (all uppercase, not price/barcode/pin)
-            const brandLine = lines.find(
-              (l) => /^[A-Z0-9 '&.-]{3,}$/.test(l) && !/\$|pin|\d{4,}/i.test(l),
-            );
-            company = brandLine || lines[0] || '';
-            // Improved barcode extraction: look for 16-20 digit numbers (with or without spaces)
-            if (!barcode) {
-              // Try to find a long number (with or without spaces)
-              const joined = text.replace(/\s+/g, '');
-              const barcodeMatch = joined.match(/\d{16,20}/);
-              if (barcodeMatch) {
-                barcode = barcodeMatch[0];
-              } else {
-                // fallback: try spaced numbers
-                const spacedMatch = text.match(/(\d{4,}\s?){4,6}/);
-                if (spacedMatch) {
-                  barcode = spacedMatch[0].replace(/\s+/g, '');
-                }
-              }
-            }
-            // Improved pin extraction: look for Pin: xxxx or pin xxxx
-            let pinMatch = text.match(/pin\s*:?\s*(\d{4,8})/i);
-            if (!pinMatch) {
-              // fallback: try to find a 4-8 digit number after the word Pin
-              pinMatch = text.match(/Pin[^\d]*(\d{4,8})/i);
-            }
-            if (pinMatch) {
-              pin = pinMatch[1];
-            }
-            // Update store with extracted values and set loading false
+          }
+        } catch (e) {
+          console.warn('Barcode detection failed:', e);
+        }
+
+        // Step 1: Extract text with Tesseract OCR
+        const {
+          data: { text },
+        } = await Tesseract.recognize(imageDataUrl, 'eng');
+        console.log('OCR Result Text:', text);
+
+        // Step 2: Try GitHub Models AI extraction if available
+        if (isModelAvailable) {
+          console.log('🤖 Using GitHub Models AI for extraction...');
+          const aiResult = await extractGiftCardWithAI(text);
+
+          console.log('GitHub Models Result:', aiResult);
+
+          if (aiResult.success && aiResult.data) {
+            // Use AI-extracted data
             uploadedCardSetValues({
-              brandNameValue: company,
-              balanceValue: price,
-              barcodeValue: barcode,
-              pinValue: pin,
+              brandNameValue: aiResult.data.brandName,
+              balanceValue: aiResult.data.balance,
+              barcodeValue: aiResult.data.barcode || barcode,
+              pinValue: aiResult.data.pin,
               imageUrlData: imageDataUrl,
               isLoading: false,
             });
-          },
-        );
+            toast.success('Gift card extracted with AI!');
+            return;
+          } else {
+            console.log('⚠️ AI extraction failed, falling back to regex');
+          }
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -319,19 +297,6 @@
           </div>
         </button>
       {/each}
-
-      <!-- Floating Upload Button -->
-      <!-- <div class="fixed bottom-16 right-4 z-50 pb-4">
-        <Button
-          class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-kcu-lime via-kcu-glacier to-kcu-juniper p-[2px]"
-          onclick={uploadAction}
-          aria-label="Upload"
-        >
-          <div class="flex h-full w-full items-center justify-center rounded-full bg-background">
-            <Upload class="h-5 w-5 text-primary" />
-          </div>
-        </Button>
-      </div> -->
     </div>
   </div>
 </div>

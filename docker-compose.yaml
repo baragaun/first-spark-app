@@ -9,6 +9,8 @@ services:
       - NODE_ENV=production
       - PORT=3050
     restart: unless-stopped
+    env_file:
+      - .env
     healthcheck:
       test:
         [
