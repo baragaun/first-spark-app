@@ -112,27 +112,21 @@
       <Sidebar.Menu>
         <Sidebar.MenuItem>
           <div class="justify-horizontal flex items-center pt-2">
-            <!-- Commenting first spark logo -->
-            <!-- <div class="flex aspect-square size-8 items-center justify-center rounded-lg">
-            <img src={$headerIcon} alt="First Spark Logo" class="size-8" />
-            </div> -->
-            <!-- <span class="font-lexend truncate ps-2 text-xl font-bold text-foreground">
-              {appTitle()}
-            </span> -->
-
-            {#if sidebar?.open}
-              <div class="flex items-center justify-center">
-                <img src={headerIcon()} alt="First Spark Logo" class="h-10" />
-              </div>
-            {:else}
-              <div class="flex min-h-[2.5rem] min-w-[2rem] items-center justify-center">
+            <div class="flex min-h-[2.5rem] w-full items-center justify-center">
+              {#if sidebar?.open}
+                <img
+                  src={headerIcon()}
+                  alt="First Spark Logo"
+                  class="h-10 object-contain"
+                />
+              {:else}
                 <img
                   src={headerSmallIcon()}
                   alt="First Spark Logo"
                   class="h-10 w-10 object-contain"
                 />
-              </div>
-            {/if}
+              {/if}
+            </div>
           </div>
         </Sidebar.MenuItem>
       </Sidebar.Menu>

@@ -86,6 +86,7 @@
   let instructions = $derived(product?.instructionsEn ?? walletItem?.instructionsEn);
   let terms = $derived(product?.termsEn ?? walletItem?.termsEn);
   let imageSourceFront = $derived(product?.imageSourceFront ?? walletItem?.imageSourceFront);
+  let isLoading = $derived(false);
 
   function getBarcodeApiUrl() {
     return `https://barcodeapi.org/api/${
@@ -108,6 +109,7 @@
     }
 
     try {
+      isLoading = true;
       await marketplaceContext.archiveWalletItem(walletItem.id, !walletItem?.archivedAt);
       // Create a new object to trigger Svelte reactivity
       const updatedWalletItem = {
@@ -118,6 +120,8 @@
       walletItem = { ...updatedWalletItem }; // Reassign to trigger Svelte reactivity
     } catch (error) {
       console.error('Error archiving wallet item:', error);
+    } finally {
+      isLoading = false;
     }
   }
 
@@ -212,7 +216,7 @@
   </div>
 {/if}
 
-{#if loading}
+{#if loading || isLoading }
   <div class="flex h-[60vh] items-center justify-center">
     <div class="flex flex-col items-center">
       <div

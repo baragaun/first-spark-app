@@ -20,9 +20,32 @@
   import { giftCardImageDomain } from '$lib/constants';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
 
-  let { brandName, balance, barcode, pin, imageUrl, loading, uploadedBrand, uploadedProduct } =
-    $state(uploadedCardGetValues());
+  // Get reactive store values
+  const uploadedCard = uploadedCardGetValues();
+
+  // Create local state for editable fields
+  let brandName = $state('');
+  let balance = $state('');
+  let barcode = $state('');
+  let pin = $state('');
+  let imageUrl = $state('');
+  let loading = $state(false);
+  let uploadedBrand = $state<Brand | null>(null);
+  let uploadedProduct = $state<GiftCardProduct | null>(null);
+
   let showSuccessDialog = $state(false);
+
+  // Sync local state with store values whenever they change
+  $effect(() => {
+    brandName = uploadedCard.brandName;
+    balance = uploadedCard.balance;
+    barcode = uploadedCard.barcode;
+    pin = uploadedCard.pin;
+    imageUrl = uploadedCard.imageUrl;
+    loading = uploadedCard.loading;
+    uploadedBrand = uploadedCard.uploadedBrand;
+    uploadedProduct = uploadedCard.uploadedProduct;
+  });
 
   onMount(() => {
     if (uploadedProduct !== null) {
