@@ -105,8 +105,13 @@
         let barcode = '';
         try {
           let detector: any;
-          if (typeof window !== 'undefined' && typeof (window as any).BarcodeDetector !== 'undefined') {
-            detector = new (window as any).BarcodeDetector({ formats: ['code_128', 'ean_13', 'ean_8', 'code_39', 'upc_a', 'upc_e', 'codabar'] });
+          if (
+            typeof window !== 'undefined' &&
+            typeof (window as any).BarcodeDetector !== 'undefined'
+          ) {
+            detector = new (window as any).BarcodeDetector({
+              formats: ['code_128', 'ean_13', 'ean_8', 'code_39', 'upc_a', 'upc_e', 'codabar'],
+            });
           } else {
             throw new Error('BarcodeDetector is not available');
           }

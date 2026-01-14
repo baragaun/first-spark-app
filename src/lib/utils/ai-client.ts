@@ -8,10 +8,9 @@ export interface AIExtractionResult {
 
 export async function extractGiftCardWithAI(
   ocrText: string,
-  model?: string
+  model?: string,
 ): Promise<AIExtractionResult> {
   try {
-
     const response = await fetch('/api/ai/extract-gift-card', {
       method: 'POST',
       headers: {

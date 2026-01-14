@@ -114,11 +114,7 @@
           <div class="justify-horizontal flex items-center pt-2">
             <div class="flex min-h-[2.5rem] w-full items-center justify-center">
               {#if sidebar?.open}
-                <img
-                  src={headerIcon()}
-                  alt="First Spark Logo"
-                  class="h-10 object-contain"
-                />
+                <img src={headerIcon()} alt="First Spark Logo" class="h-10 object-contain" />
               {:else}
                 <img
                   src={headerSmallIcon()}

@@ -1,7 +1,7 @@
 import { env } from '$env/dynamic/public';
 import { FirstSparkApp, KCUApp, TapcoApp } from '@/types/enums';
 
-let projectName = $state(env.PUBLIC_PROJECTNAME);
+const projectName = $state(env.PUBLIC_PROJECTNAME);
 
 export const appTitle = () => {
   switch (projectName) {
@@ -16,7 +16,7 @@ export const appTitle = () => {
   }
 };
 
-export let appDescription = () => {
+export const appDescription = () => {
   switch (projectName) {
     case 'FirstSpark':
       return FirstSparkApp.description;
@@ -29,7 +29,7 @@ export let appDescription = () => {
   }
 };
 
-export let appCanonicalUrl = () => {
+export const appCanonicalUrl = () => {
   switch (projectName) {
     case 'FirstSpark':
       return FirstSparkApp.canonicalUrl;
@@ -42,7 +42,7 @@ export let appCanonicalUrl = () => {
   }
 };
 
-export let headerIcon = () => {
+export const headerIcon = () => {
   switch (projectName) {
     case 'FirstSpark':
       return '/fs-logo.svg';
@@ -55,7 +55,7 @@ export let headerIcon = () => {
   }
 };
 
-export let headerSmallIcon = () => {
+export const headerSmallIcon = () => {
   switch (projectName) {
     case 'FirstSpark':
       return '/fs-logo.svg';

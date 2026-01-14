@@ -1,6 +1,6 @@
 export interface GiftCardData {
   brandName: string;
-  balance: string;
+  balance: number;
   barcode: string;
   pin: string;
   expiryDate?: string;
@@ -32,12 +32,11 @@ export class GitHubModelsService {
    */
   async isAvailable(): Promise<boolean> {
     try {
-
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
-          'Accept': 'application/vnd.github+json',
-          'Authorization': `Bearer ${this.apiToken}`,
+          Accept: 'application/vnd.github+json',
+          Authorization: `Bearer ${this.apiToken}`,
           'X-GitHub-Api-Version': '2022-11-28',
           'Content-Type': 'application/json',
         },
@@ -69,12 +68,12 @@ export class GitHubModelsService {
   async extractGiftCardData(ocrText: string): Promise<GiftCardData | null> {
     try {
       const prompt = this.buildPrompt(ocrText);
-      console.log('Prompt:', prompt);
+
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
-          'Accept': 'application/vnd.github+json',
-          'Authorization': `Bearer ${this.apiToken}`,
+          Accept: 'application/vnd.github+json',
+          Authorization: `Bearer ${this.apiToken}`,
           'X-GitHub-Api-Version': '2022-11-28',
           'Content-Type': 'application/json',
         },
@@ -83,12 +82,13 @@ export class GitHubModelsService {
           messages: [
             {
               role: 'system',
-              content: 'You are a gift card data extraction assistant. Extract information from OCR text and return ONLY valid JSON. No explanations, no markdown, just pure JSON.'
+              content:
+                'You are a gift card data extraction assistant. Extract information from OCR text and return ONLY valid JSON. No explanations, no markdown, just pure JSON.',
             },
             {
               role: 'user',
-              content: prompt
-            }
+              content: prompt,
+            },
           ],
           temperature: this.temperature,
           response_format: { type: 'json_object' },
@@ -100,12 +100,8 @@ export class GitHubModelsService {
         throw new Error(`GitHub Models API error: ${response.status} - ${error}`);
       }
 
-      console.log('Response:', response);
-
       const result = await response.json();
-      console.log('GitHub Models Result:', result.choices[0]?.message?.content);
       const jsonResponse = result.choices[0]?.message?.content;
-      console.log('JSON Response:', jsonResponse);
 
       if (!jsonResponse) {
         throw new Error('No response from GitHub Models');
@@ -141,7 +137,7 @@ export class GitHubModelsService {
 Rules:
 - Return ONLY valid JSON, no markdown, no code blocks, no explanations
 - If a field is not found, use an empty string ""
-- For balance, include the $ symbol if it's USD
+- For balance, do not include any symbols or text, just the numeric value (e.g., 50.00)
 - For barcode, remove all spaces and format as continuous digits
 - For pin, extract only the numeric digits
 - Be precise and extract exact values from the text
@@ -180,4 +176,3 @@ ${ocrText}`;
     return this.model;
   }
 }
-
