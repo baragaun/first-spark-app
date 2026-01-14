@@ -1,7 +1,7 @@
-import { json } from '@sveltejs/kit';
-import type { RequestHandler } from '@sveltejs/kit';
-import { GitHubModelsService } from '$lib/services/github-models-service';
 import { env } from '$env/dynamic/private';
+import { GitHubModelsService } from '$lib/services/github-models-service';
+import type { RequestHandler } from '@sveltejs/kit';
+import { json } from '@sveltejs/kit';
 
 export const POST: RequestHandler = async ({ request }) => {
   try {
@@ -14,7 +14,7 @@ export const POST: RequestHandler = async ({ request }) => {
     if (!env.GITHUB_PAT) {
       return json(
         { error: 'GitHub PAT is not configured. Please set GITHUB_PAT in .env file.' },
-        { status: 503 }
+        { status: 503 },
       );
     }
 
@@ -30,7 +30,7 @@ export const POST: RequestHandler = async ({ request }) => {
     if (!isAvailable) {
       return json(
         { error: 'GitHub Models API is not available. Please check your GITHUB_PAT.' },
-        { status: 503 }
+        { status: 503 },
       );
     }
 
@@ -45,8 +45,11 @@ export const POST: RequestHandler = async ({ request }) => {
   } catch (error) {
     console.error('Error in GitHub Models API endpoint:', error);
     return json(
-      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
+      {
+        error: 'Internal server error',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 },
     );
   }
 };

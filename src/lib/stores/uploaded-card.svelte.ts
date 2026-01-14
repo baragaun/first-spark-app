@@ -1,7 +1,7 @@
 import type { Brand, GiftCardProduct } from '@baragaun/bg-node-client';
 
 let brandName = $state('');
-let balance = $state('');
+let balance = $state(0.0);
 let barcode = $state('');
 let pin = $state('');
 let imageUrl = $state('');
@@ -11,7 +11,7 @@ let uploadedProduct = $state<GiftCardProduct | null>(null);
 
 export const uploadedCardSetValues = ({
   brandNameValue = '',
-  balanceValue = '',
+  balanceValue = 0.0,
   barcodeValue = '',
   pinValue = '',
   imageUrlData = '',
@@ -20,7 +20,7 @@ export const uploadedCardSetValues = ({
   product = null,
 }: {
   brandNameValue?: string;
-  balanceValue?: string;
+  balanceValue?: number;
   barcodeValue?: string;
   pinValue?: string;
   imageUrlData?: string;
@@ -43,7 +43,7 @@ export const uploadedCardGetValues = () => {
     get brandName(): string {
       return brandName;
     },
-    get balance(): string {
+    get balance(): number {
       return balance;
     },
     get barcode(): string {

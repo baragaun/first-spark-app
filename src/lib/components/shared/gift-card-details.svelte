@@ -216,7 +216,7 @@
   </div>
 {/if}
 
-{#if loading || isLoading }
+{#if loading || isLoading}
   <div class="flex h-[60vh] items-center justify-center">
     <div class="flex flex-col items-center">
       <div
