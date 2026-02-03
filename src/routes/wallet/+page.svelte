@@ -15,6 +15,7 @@
   import { IsMobile } from '$lib/hooks/is-mobile.svelte.js';
   import { extractGiftCardWithAI } from '$lib/utils/ai-client';
   import { toast } from 'svelte-sonner';
+  import { logger } from '@/utils/logger';
 
   const isMobile = new IsMobile();
 
@@ -134,20 +135,19 @@
           }
         } catch (e) {
           console.warn('Barcode detection failed:', e);
+        } finally {
+          logger.info('Detected barcode:', barcode);
+          uploadedCardSetValues({ isLoading: false });
         }
 
         // Step 1: Extract text with Tesseract OCR
         const {
           data: { text },
         } = await Tesseract.recognize(imageDataUrl, 'eng');
-        console.log('OCR Result Text:', text);
 
         // Step 2: Try GitHub Models AI extraction if available
         if (isModelAvailable) {
-          console.log('🤖 Using GitHub Models AI for extraction...');
           const aiResult = await extractGiftCardWithAI(text);
-
-          console.log('GitHub Models Result:', aiResult);
 
           if (aiResult.success && aiResult.data) {
             // Use AI-extracted data
@@ -162,7 +162,8 @@
             toast.success('Gift card extracted with AI!');
             return;
           } else {
-            console.log('⚠️ AI extraction failed, falling back to regex');
+            toast.error('AI extraction failed, please enter details manually.');
+            logger.error('AI extraction failed:', aiResult.error);
           }
         }
       };
