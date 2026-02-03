@@ -1,6 +1,7 @@
 import { env } from '$env/dynamic/public';
 import translate from '@/helpers/language/translate';
 import { AppUiMessage } from '@/types/enums';
+import { handleUnauthorizedError } from '@/utils/auth-error-handler';
 import {
   AppEnvironment,
   BgListenerTopic,
@@ -24,9 +25,24 @@ let isOffline = $state(false); // TODO: The client does not yet support toggling
 let isLoading = $state(false);
 let myUser = $state<MyUser | undefined>(undefined);
 
+/** Reset the user session state */
+const resetUserState = () => {
+  isSignedIn = false;
+  myUser = undefined;
+};
+
 export class MyUserContext {
   private client: BgNodeClient = new BgNodeClient();
   private _isInitializing = false;
+
+  /**
+   * Check if an error indicates an unauthorized/session issue and redirect to signin
+   * @param error The error string to check
+   * @returns true if it was an unauthorized error and redirect was triggered
+   */
+  private checkUnauthorizedError(error: string | undefined): boolean {
+    return handleUnauthorizedError(error, { onUnauthorized: resetUserState });
+  }
 
   public async initialize(): Promise<void> {
     if (this.client.isInitialized || this._isInitializing) {
@@ -245,6 +261,9 @@ export class MyUserContext {
       const response = await this.client.operations.myUser.signMeOut();
       if (response.error) {
         console.error('MyUserContext.signMeOut: received error.', { response });
+        if (this.checkUnauthorizedError(response.error)) {
+          return translate(AppUiMessage.systemError);
+        }
         return translate(response.error, AppUiMessage.systemError);
       }
 
@@ -280,6 +299,9 @@ export class MyUserContext {
 
       if (response.error) {
         console.error('MyUserContext.updateMyUser: received error.', { response });
+        if (this.checkUnauthorizedError(response.error)) {
+          return { error: translate(AppUiMessage.systemError) };
+        }
         return { error: translate(response.error, AppUiMessage.systemError) };
       }
 
@@ -315,6 +337,9 @@ export class MyUserContext {
 
       if (response.error) {
         console.error('MyUserContext.updateMyPassword: received error.', { response });
+        if (this.checkUnauthorizedError(response.error)) {
+          return translate(AppUiMessage.systemError);
+        }
         return translate(response.error, AppUiMessage.systemError);
       }
 
@@ -398,13 +423,17 @@ export class MyUserContext {
 
     try {
       isLoading = true;
-      return this.client.operations.myUser.verifyMyEmail(email, {
+      const response = await this.client.operations.myUser.verifyMyEmail(email, {
         polling: {
           enabled: true,
           interval: 2000, // 2 seconds
           timeout: 15 * 60 * 1000, // 15 minutes
         },
       });
+      if (response.error) {
+        this.checkUnauthorizedError(response.error);
+      }
+      return response;
     } catch (error) {
       console.error('MyUserContext.verifyMyEmail: error', {
         error: (error as Error).message,
@@ -424,7 +453,11 @@ export class MyUserContext {
 
     try {
       isLoading = true;
-      return await this.client.operations.myUser.verifyMyPassword(password);
+      const response = await this.client.operations.myUser.verifyMyPassword(password);
+      if (response.error) {
+        this.checkUnauthorizedError(response.error);
+      }
+      return response;
     } catch (error) {
       console.error('MyUserContext.verifyMyPassword: error', {
         error: (error as Error).message,
@@ -513,6 +546,9 @@ export class MyUserContext {
       const response = await this.client.operations.myUser.deleteMyUser(cause, description);
       if (response.error) {
         console.error('MyUserContext.deleteMyUser: received error.', { response });
+        if (this.checkUnauthorizedError(response.error)) {
+          return translate(AppUiMessage.systemError);
+        }
         return translate(response.error, AppUiMessage.systemError);
       }
 

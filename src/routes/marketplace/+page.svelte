@@ -11,6 +11,7 @@
   import { IsMobile } from '$lib/hooks/is-mobile.svelte';
   import { giftCardImageDomain } from '$lib/constants';
   import SpinLoadIndicator from '@/components/forms/spin-load-indicator.svelte';
+  import { onMount } from 'svelte';
 
   let marketplaceData = $state(getMarketplaceData());
   let isLoading = $state(true);
@@ -71,15 +72,16 @@
     };
   };
 
-  // Load on mount
-  $effect(() => {
+  onMount(async () => {
     isLoading = true;
-    loadMarketplaceData()
-      .catch(console.error)
-      .finally(() => {
-        marketplaceData = getMarketplaceData();
-        isLoading = false;
-      });
+    try {
+      await loadMarketplaceData();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      marketplaceData = getMarketplaceData();
+      isLoading = false;
+    }
   });
 </script>
 
