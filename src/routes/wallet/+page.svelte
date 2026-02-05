@@ -137,7 +137,6 @@
           console.warn('Barcode detection failed:', e);
         } finally {
           logger.info('Detected barcode:', barcode);
-          uploadedCardSetValues({ isLoading: false });
         }
 
         // Step 1: Extract text with Tesseract OCR
