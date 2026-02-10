@@ -40,8 +40,11 @@ export class MyUserContext {
    * @param error The error string to check
    * @returns true if it was an unauthorized error and redirect was triggered
    */
-  private checkUnauthorizedError(error: string | undefined): boolean {
-    return handleUnauthorizedError(error, { onUnauthorized: resetUserState });
+  private async checkUnauthorizedError(error: string | undefined): Promise<boolean> {
+    return handleUnauthorizedError(error, {
+      onUnauthorized: resetUserState,
+      signOut: () => this.client.operations.myUser.signMeOut(),
+    });
   }
 
   public async initialize(): Promise<void> {
@@ -261,7 +264,7 @@ export class MyUserContext {
       const response = await this.client.operations.myUser.signMeOut();
       if (response.error) {
         console.error('MyUserContext.signMeOut: received error.', { response });
-        if (this.checkUnauthorizedError(response.error)) {
+        if (await this.checkUnauthorizedError(response.error)) {
           return translate(AppUiMessage.systemError);
         }
         return translate(response.error, AppUiMessage.systemError);
@@ -299,7 +302,7 @@ export class MyUserContext {
 
       if (response.error) {
         console.error('MyUserContext.updateMyUser: received error.', { response });
-        if (this.checkUnauthorizedError(response.error)) {
+        if (await this.checkUnauthorizedError(response.error)) {
           return { error: translate(AppUiMessage.systemError) };
         }
         return { error: translate(response.error, AppUiMessage.systemError) };
@@ -337,7 +340,7 @@ export class MyUserContext {
 
       if (response.error) {
         console.error('MyUserContext.updateMyPassword: received error.', { response });
-        if (this.checkUnauthorizedError(response.error)) {
+        if (await this.checkUnauthorizedError(response.error)) {
           return translate(AppUiMessage.systemError);
         }
         return translate(response.error, AppUiMessage.systemError);
@@ -431,7 +434,7 @@ export class MyUserContext {
         },
       });
       if (response.error) {
-        this.checkUnauthorizedError(response.error);
+        await this.checkUnauthorizedError(response.error);
       }
       return response;
     } catch (error) {
@@ -455,7 +458,7 @@ export class MyUserContext {
       isLoading = true;
       const response = await this.client.operations.myUser.verifyMyPassword(password);
       if (response.error) {
-        this.checkUnauthorizedError(response.error);
+        await this.checkUnauthorizedError(response.error);
       }
       return response;
     } catch (error) {
@@ -546,7 +549,7 @@ export class MyUserContext {
       const response = await this.client.operations.myUser.deleteMyUser(cause, description);
       if (response.error) {
         console.error('MyUserContext.deleteMyUser: received error.', { response });
-        if (this.checkUnauthorizedError(response.error)) {
+        if (await this.checkUnauthorizedError(response.error)) {
           return translate(AppUiMessage.systemError);
         }
         return translate(response.error, AppUiMessage.systemError);

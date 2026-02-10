@@ -67,7 +67,9 @@ export class MarketplaceContext {
 
       if (!response || response.error) {
         console.error('archiveWalletItem: received error.', { response });
-        handleUnauthorizedError(response.error);
+        await handleUnauthorizedError(response.error, {
+          signOut: () => this.client.operations.myUser.signMeOut(),
+        });
         return { error: response.error || translate(AppUiMessage.systemError) };
       }
       return response;
@@ -95,7 +97,9 @@ export class MarketplaceContext {
       const response = await this.client.operations.purchaseOrder.createPurchaseOrder(props);
       if (!response || response.error) {
         console.error('createPurchaseOrder: received error.', { response });
-        handleUnauthorizedError(response.error);
+        await handleUnauthorizedError(response.error, {
+          signOut: () => this.client.operations.myUser.signMeOut(),
+        });
         return { error: response.error || translate(AppUiMessage.systemError) };
       }
       return response;
@@ -124,7 +128,9 @@ export class MarketplaceContext {
       );
       if (!response || response.error) {
         console.error('createShoppingCartItem: received error.', { response });
-        handleUnauthorizedError(response.error);
+        await handleUnauthorizedError(response.error, {
+          signOut: () => this.client.operations.myUser.signMeOut(),
+        });
         return { error: response.error || translate(AppUiMessage.systemError) };
       }
       return response;
@@ -149,7 +155,9 @@ export class MarketplaceContext {
       const response = await this.client.operations.walletItem.createWalletItem(props);
       if (!response || response.error) {
         console.error('createWalletItem: received error.', { response });
-        handleUnauthorizedError(response.error);
+        await handleUnauthorizedError(response.error, {
+          signOut: () => this.client.operations.myUser.signMeOut(),
+        });
         return { error: response.error || translate(AppUiMessage.systemError) };
       }
       return response;
@@ -177,7 +185,9 @@ export class MarketplaceContext {
         await this.client.operations.walletItemTransfer.createWalletItemTransfer(props);
       if (!response || response.error) {
         console.error('createWalletItemTransfer: received error.', { response });
-        handleUnauthorizedError(response.error);
+        await handleUnauthorizedError(response.error, {
+          signOut: () => this.client.operations.myUser.signMeOut(),
+        });
         return { error: response.error || translate(AppUiMessage.systemError) };
       }
       return response;
@@ -230,7 +240,9 @@ export class MarketplaceContext {
       );
       if (!response || response.error) {
         console.error('deleteShoppingCartItem: received error.', { response });
-        handleUnauthorizedError(response.error);
+        await handleUnauthorizedError(response.error, {
+          signOut: () => this.client.operations.myUser.signMeOut(),
+        });
         return { error: response.error || translate(AppUiMessage.systemError) };
       }
       return response;
@@ -352,7 +364,9 @@ export class MarketplaceContext {
       const response = await this.client.operations.shoppingCart.findMyShoppingCart();
       if (!response || response.error || !response.object) {
         console.error('findShoppingCartItems: received error.', { response });
-        handleUnauthorizedError(response.error);
+        await handleUnauthorizedError(response.error, {
+          signOut: () => this.client.operations.myUser.signMeOut(),
+        });
         return response.error || translate(AppUiMessage.systemError);
       }
       return response.object;
@@ -417,7 +431,9 @@ export class MarketplaceContext {
 
       if (!response || response.error || !response.objects) {
         console.error('findPurchaseOrders: received error.', { response });
-        handleUnauthorizedError(response.error);
+        await handleUnauthorizedError(response.error, {
+          signOut: () => this.client.operations.myUser.signMeOut(),
+        });
         return response.error || translate(AppUiMessage.systemError);
       }
 
@@ -519,10 +535,13 @@ export class MarketplaceContext {
         args.options,
       );
       if (!response || response.error || !response.objects) {
-        console.error('findWalletItems: received error.', { response });
-        handleUnauthorizedError(response.error);
+        console.error('findWalletItems: received error.', { error: response });
+        await handleUnauthorizedError(response.error, {
+          signOut: () => this.client.operations.myUser.signMeOut(),
+        });
         return response.error || translate(AppUiMessage.systemError);
       }
+
       return response.objects;
     } catch (error) {
       console.error('findWalletItems: error', {
@@ -545,7 +564,9 @@ export class MarketplaceContext {
       const response = await this.client.operations.shoppingCartItem.updateShoppingCartItem(props);
       if (!response || response.error) {
         console.error('updateShoppingCartItem: received error.', { response });
-        handleUnauthorizedError(response.error);
+        await handleUnauthorizedError(response.error, {
+          signOut: () => this.client.operations.myUser.signMeOut(),
+        });
         return { error: response.error || translate(AppUiMessage.systemError) };
       }
       return response;
@@ -578,7 +599,9 @@ export class MarketplaceContext {
 
       if (!response || response.error || !response.objects) {
         console.error('findWalletItemTransfers: received error.', { response });
-        handleUnauthorizedError(response.error);
+        await handleUnauthorizedError(response.error, {
+          signOut: () => this.client.operations.myUser.signMeOut(),
+        });
         return response.error || translate(AppUiMessage.systemError);
       }
 

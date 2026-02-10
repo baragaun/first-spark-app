@@ -17,13 +17,14 @@ const UNAUTHORIZED_ERROR_PATTERNS = [
  * @param options Optional configuration
  * @returns true if it was an unauthorized error and redirect was triggered
  */
-export function handleUnauthorizedError(
+export async function handleUnauthorizedError(
   error: string | undefined,
   options?: {
     redirectPath?: string;
     onUnauthorized?: () => void;
+    signOut?: () => Promise<unknown>;
   },
-): boolean {
+): Promise<boolean> {
   if (!error) return false;
 
   const lowerError = error.toLowerCase();
@@ -36,6 +37,15 @@ export function handleUnauthorizedError(
 
     // Call optional callback (e.g., to reset state)
     options?.onUnauthorized?.();
+
+    // Sign out before redirecting
+    if (options?.signOut) {
+      try {
+        await options.signOut();
+      } catch (signOutError) {
+        console.error('Error during sign out:', signOutError);
+      }
+    }
 
     // Redirect to signin page (or custom path)
     goto(options?.redirectPath ?? '/signin');
