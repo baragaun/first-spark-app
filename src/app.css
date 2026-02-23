@@ -4,100 +4,102 @@
 
 @layer base {
   :root {
-    /* Tapco theme */
-    --tapco-blue: 211 54% 42%;       /* #316FA4 */
-    --tapco-green: 76 56% 50%;       /* #A7C539 */
-    --tapco-dark: 300 1% 25%;        /* #414042 */
-    --tapco-light-blue: 211 54% 96%; /* light tint for backgrounds */
-    --tapco-light-green: 76 40% 94%; /* light tint for accents */
+    /* KCU (Kitsap Credit Union) theme */
+    --kcu-orange: 34 100% 46%;     /* #ED8B00 */
+    --kcu-glacier: 181 100% 36%;   /* #00B6B9 */
+    --kcu-plum: 325 66% 32%;       /* #8A1B61 */
+    --kcu-lime: 68 100% 42%;       /* #C4D600 */
+    --kcu-juniper: 181 100% 19%;   /* #005F61 */
+    --kcu-dark: 0 0% 12%;          /* near-black text */
+    --kcu-light-glacier: 181 60% 96%; /* light tint for backgrounds */
 
     --background: 0 0% 100%;
-    --foreground: var(--tapco-dark);
+    --foreground: var(--kcu-dark);
 
     --nav: 0 0% 100%;
-    --nav-foreground: var(--tapco-blue);
+    --nav-foreground: var(--kcu-glacier);
 
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
+    --muted: 210 14% 96%;
+    --muted-foreground: 215 10% 46%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: var(--tapco-dark);
+    --popover-foreground: var(--kcu-dark);
     --popover-background: 0 0% 100%;
 
     --card: 0 0% 100%;
-    --card-foreground: var(--tapco-dark);
+    --card-foreground: var(--kcu-dark);
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
+    --border: 215 14% 91%;
+    --input: 215 14% 91%;
 
-    --primary: var(--tapco-blue);
+    --primary: var(--kcu-glacier);
     --primary-foreground: 0 0% 100%;
 
-    --secondary: var(--tapco-green);
+    --secondary: var(--kcu-orange);
     --secondary-foreground: 0 0% 100%;
 
-    --accent: var(--tapco-light-blue);
-    --accent-foreground: var(--tapco-blue);
+    --accent: var(--kcu-light-glacier);
+    --accent-foreground: var(--kcu-juniper);
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --ring: var(--tapco-blue);
+    --ring: var(--kcu-glacier);
 
     --radius: 0.75rem;
 
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: var(--tapco-dark);
-    --sidebar-primary: var(--tapco-blue);
+    --sidebar-foreground: var(--kcu-dark);
+    --sidebar-primary: var(--kcu-glacier);
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: var(--tapco-light-blue);
-    --sidebar-accent-foreground: var(--tapco-blue);
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: var(--tapco-blue);
+    --sidebar-accent: var(--kcu-light-glacier);
+    --sidebar-accent-foreground: var(--kcu-juniper);
+    --sidebar-border: 215 14% 91%;
+    --sidebar-ring: var(--kcu-glacier);
   }
 
   .dark {
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
+    --background: 200 30% 10%;
+    --foreground: 180 10% 95%;
 
-    --nav: 222 47% 11%;
-    --nav-foreground: 211 54% 62%;
+    --nav: 200 30% 10%;
+    --nav-foreground: 181 80% 50%;
 
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 200 20% 16%;
+    --muted-foreground: 200 12% 60%;
 
-    --popover: 222 47% 11%;
-    --popover-foreground: 210 40% 98%;
-    --popover-background: 222 47% 11%;
+    --popover: 200 30% 10%;
+    --popover-foreground: 180 10% 95%;
+    --popover-background: 200 30% 10%;
 
-    --card: 222 47% 14%;
-    --card-foreground: 210 40% 98%;
+    --card: 200 30% 13%;
+    --card-foreground: 180 10% 95%;
 
-    --border: 217 33% 17%;
-    --input: 217 33% 22%;
+    --border: 200 20% 18%;
+    --input: 200 20% 22%;
 
-    --primary: 211 54% 55%;
+    --primary: 181 80% 42%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 76 46% 45%;
+    --secondary: 34 90% 50%;
     --secondary-foreground: 0 0% 100%;
 
-    --accent: 217 33% 17%;
-    --accent-foreground: 211 54% 62%;
+    --accent: 200 20% 18%;
+    --accent-foreground: 181 80% 55%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --ring: 211 54% 55%;
+    --ring: 181 80% 42%;
 
-    --sidebar-background: 222 47% 11%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 211 54% 55%;
+    --sidebar-background: 200 30% 10%;
+    --sidebar-foreground: 180 10% 95%;
+    --sidebar-primary: 181 80% 42%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 217 33% 17%;
-    --sidebar-accent-foreground: 211 54% 62%;
-    --sidebar-border: 217 33% 17%;
-    --sidebar-ring: 211 54% 55%;
+    --sidebar-accent: 200 20% 18%;
+    --sidebar-accent-foreground: 181 80% 55%;
+    --sidebar-border: 200 20% 18%;
+    --sidebar-ring: 181 80% 42%;
   }
 }
 
