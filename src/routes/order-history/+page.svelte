@@ -1,8 +1,7 @@
 <script lang="ts">
   import type { PurchaseOrder } from '@baragaun/bg-node-client';
   import { marketplaceContext } from '$lib/contexts/marketplace-context.svelte';
-  import { ChevronRight } from 'lucide-svelte';
-  import { Separator } from '$lib/components/ui/separator';
+  import { ChevronRight, HistoryIcon } from 'lucide-svelte';
   import SpinLoadIndicator from '$lib/components/forms/spin-load-indicator.svelte';
   import { goto } from '$app/navigation';
   import { getPurchaseOrdersStore } from '$lib/stores/order-history.svelte';
@@ -15,15 +14,6 @@
 
   let purchaseOrders = $state<PurchaseOrder[]>([]);
   let isLoading = $state(true);
-  // use it later
-  // let filterStatus = $state(m['order_history.all_orders']());
-
-  // let filteredOrders = $derived(
-  //   purchaseOrders.filter((order) => {
-  //     if (filterStatus === m['order_history.all_orders']()) return true;
-  //     return order.status?.toLowerCase() === filterStatus.toLowerCase();
-  //   }),
-  // );
 
   const loadData = async () => {
     isLoading = true;
@@ -47,69 +37,49 @@
   function formatDate(dateString: string | undefined) {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US');
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   }
-
-  // Currently not used:
-  // const statusOptions = [
-  //   m['order_history.all_orders'](),
-  //   m['order_history.delivered'](),
-  //   m['order_history.processing'](),
-  // ];
 </script>
 
-<div class="container mx-auto px-4 py-2">
+<div class="animate-fade-in container mx-auto px-4 py-4 md:px-6">
   {#if !isMobile.current}
-    <header class="mb-6">
-      <h1 class="text-3xl font-bold text-foreground">{m['order_history.title']()}</h1>
+    <header class="mb-5">
+      <h1 class="text-2xl font-bold tracking-tight text-foreground">{m['order_history.title']()}</h1>
     </header>
   {/if}
 
-  <main class="flex-1 overflow-y-auto dark:bg-gray-900">
-    <!-- <div class="relative mb-3 rounded-xl p-[2px]">
-      <Select.Root type="single" bind:value={filterStatus}>
-        <Select.Trigger class="w-full rounded-2xl bg-black/5 dark:bg-background">
-          {filterStatus}
-        </Select.Trigger>
-        <Select.Content class="w-full rounded-2xl bg-white dark:bg-background">
-          {#each statusOptions as option}
-            <Select.Item value={option} class="rounded-xl">{option}</Select.Item>
-          {/each}
-        </Select.Content>
-      </Select.Root>
-    </div> -->
-
-    <div class="space-y-1 bg-white p-4 dark:bg-background">
-      {#if isLoading}
-        <div class="flex items-center justify-center py-8">
-          <SpinLoadIndicator />
-        </div>
-      {:else if purchaseOrders.length > 0}
-        {#each purchaseOrders as order, i (order.id)}
+  <div class="flex-1">
+    {#if isLoading}
+      <div class="flex h-60 items-center justify-center">
+        <SpinLoadIndicator />
+      </div>
+    {:else if purchaseOrders.length > 0}
+      <div class="space-y-3">
+        {#each purchaseOrders as order (order.id)}
           <button
             type="button"
-            class="flex w-full cursor-pointer items-center justify-between rounded py-4 text-left transition"
+            class="group flex w-full items-center justify-between rounded-2xl bg-card p-4 text-left shadow-soft transition-all duration-200 hover:-translate-y-0.5 hover:shadow-soft-lg"
             onclick={() => goto(`/order-history/${order.id}`)}
           >
-            <div>
-              <p class="text-gray-600 dark:text-gray-400">
+            <div class="flex flex-col gap-1">
+              <p class="text-xs text-muted-foreground">
                 {m['order_history.order_placed']({ date: formatDate(order.createdAt) })}
               </p>
-              <p class="text-gray-800 dark:text-gray-200">
+              <p class="text-base font-semibold text-foreground">
                 {m['order_history.total']({ amount: (order.totalPrice / 1000).toFixed(2) })}
               </p>
             </div>
-            <ChevronRight class="h-5 w-5 text-gray-400" />
+            <ChevronRight class="h-5 w-5 text-muted-foreground/40 transition-transform group-hover:translate-x-0.5" />
           </button>
-          {#if i < purchaseOrders.length - 1}
-            <Separator />
-          {/if}
         {/each}
-      {:else}
-        <div class="flex h-40 items-center justify-center">
-          <p class="text-muted-foreground">{m['order_history.no_orders']()}</p>
+      </div>
+    {:else}
+      <div class="flex flex-col items-center justify-center py-20 text-center">
+        <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted/60">
+          <HistoryIcon class="h-7 w-7 text-muted-foreground/50" />
         </div>
-      {/if}
-    </div>
-  </main>
+        <p class="text-sm text-muted-foreground">{m['order_history.no_orders']()}</p>
+      </div>
+    {/if}
+  </div>
 </div>

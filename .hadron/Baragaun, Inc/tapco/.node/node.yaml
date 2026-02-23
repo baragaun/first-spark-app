@@ -1,0 +1,7 @@
+name: tapco
+description: a gift card app
+tags:
+  - frontend
+nodes:
+  - loc: Baragaun, Inc
+    rel: child of parent node
