@@ -16,9 +16,11 @@ const config: Config = {
     },
     extend: {
       colors: {
-        'tapco-blue': '#316FA4',
-        'tapco-green': '#A7C539',
-        'tapco-dark': '#414042',
+        'kcu-orange': '#ED8B00',
+        'kcu-glacier': '#00B6B9',
+        'kcu-plum': '#8A1B61',
+        'kcu-lime': '#C4D600',
+        'kcu-juniper': '#005F61',
         border: 'hsl(var(--border) / <alpha-value>)',
         input: 'hsl(var(--input) / <alpha-value>)',
         ring: 'hsl(var(--ring) / <alpha-value>)',
