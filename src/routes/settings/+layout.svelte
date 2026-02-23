@@ -9,7 +9,6 @@
 
   const isMobile = new IsMobile();
 
-  // const userContext = getContext<MyUserContext>('myUserContext');
   const userContext = hasContext('myUserContext')
     ? getContext<MyUserContext>('myUserContext')
     : null;
@@ -37,7 +36,6 @@
 
   onMount(() => {
     // TODO: This redirection should happen earlier but we are using the client to determine auth.
-    // Maybe we can try to make it less jarring with Skeleton?
     if (!isSignedIn) {
       goto('/signin', { replaceState: true });
     }
@@ -49,21 +47,26 @@
   });
 </script>
 
-<div class="container py-2">
+<div class="animate-fade-in container px-4 py-4 md:px-6">
   {#if !isMobile.current}
-    <h1 class="font-lexend text-3xl font-bold tracking-tight">{m['setting.setting_label']()}</h1>
+    <h1 class="text-2xl font-bold tracking-tight text-foreground">{m['setting.setting_label']()}</h1>
   {/if}
 
-  <Tabs.Root value={activeTab} class="my-8">
-    <Tabs.List class="mx-auto grid w-3/5 grid-cols-2">
+  <Tabs.Root value={activeTab} class="mt-6">
+    <Tabs.List class="mx-auto grid w-full max-w-xs grid-cols-2 rounded-2xl bg-muted/50 p-1">
       {#each tabs as tab}
-        <Tabs.Trigger value={tab.id} disabled={tab.disabled} onclick={() => goto(tab.path)}>
+        <Tabs.Trigger
+          value={tab.id}
+          disabled={tab.disabled}
+          onclick={() => goto(tab.path)}
+          class="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+        >
           {tab.label}
         </Tabs.Trigger>
       {/each}
     </Tabs.List>
     {#each tabs as tab}
-      <Tabs.Content value={tab.id}>
+      <Tabs.Content value={tab.id} class="mt-6">
         {@render children()}
       </Tabs.Content>
     {/each}

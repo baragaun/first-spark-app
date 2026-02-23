@@ -142,3 +142,5 @@ GITHUB_PAT                     # GitHub Models API token (server-side)
 - **Unit Tests**: Vitest with @testing-library/svelte
 - **E2E Tests**: Playwright for full user workflows
 - **Component Tests**: Storybook for visual regression
+
+Read: [.hadron/instructions.md](.hadron/instructions.md)
