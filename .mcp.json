@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "hadron": {
+      "command": "node",
+      "args": [
+        "/Users/raghvindyadav/GitHub/hadron/packages/mcp/dist/index.js"
+      ]
+    }
+  }
+}

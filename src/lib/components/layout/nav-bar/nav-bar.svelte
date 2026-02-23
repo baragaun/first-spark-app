@@ -23,65 +23,48 @@
   const isMobile = new IsMobile();
 
   const onSignOut = async () => {
-    // TODO: add a confirmation dialog
-    // Solution for putting a dialog in a dropdown menu:
-    // https://stackoverflow.com/questions/77185827/shadcn-dialog-inside-of-dropdown-closes-automatically
     purchaseOrdersStore.reset();
     await userContext.signMeOut();
     await goto('/signin');
   };
 </script>
 
-<nav class="sticky top-0 z-50 border-b bg-nav backdrop-blur supports-[backdrop-filter]:bg-nav">
-  <div class="flex h-16 items-center px-4">
+<nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-xl shadow-soft supports-[backdrop-filter]:bg-white/75">
+  <div class="flex h-16 items-center px-4 md:px-6">
     <!-- Sidebar Trigger -->
-    <div class="mr-1 hidden flex-none text-nav-foreground md:block">
+    <div class="mr-2 hidden flex-none text-primary md:block">
       <Sidebar.Trigger />
     </div>
 
     {#if isMobile.current}
-      <div class="flex items-center justify-center">
-        <img src={headerSmallIcon()} alt="First Spark Logo" class="h-10" />
+      <div class="flex items-center">
+        <img src={headerSmallIcon()} alt="Logo" class="h-9 w-auto" />
       </div>
     {/if}
 
     <!-- Right side items -->
-    <div class="ml-auto flex flex-none items-center gap-1">
-      <!-- Hiding Theme button for mimble app -->
-      <!-- <ThemeButton class="flex" /> -->
+    <div class="ml-auto flex flex-none items-center gap-2">
       <LanguageButton class="flex" />
       {#if !isSignedIn}
         <div class="flex flex-none items-center gap-2">
-          <Tooltip.Provider>
-            <Tooltip.Root>
-              <Tooltip.Trigger>
-                <div class="relative inline-flex" aria-label={m['nav.auth.sign_in']()}>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onclick={() => goto('/signin')}
-                    class="font-lexend text-nav-foreground hover:text-nav-foreground"
-                  />
-                  <LogIn
-                    class="pointer-events-none absolute inset-0 m-auto h-[1.3rem] w-[1.3rem] text-nav-foreground"
-                  />
-                </div>
-              </Tooltip.Trigger>
-              <Tooltip.Content>
-                <p>{m['nav.auth.sign_in']()}</p>
-              </Tooltip.Content>
-            </Tooltip.Root>
-          </Tooltip.Provider>
-          <span class="sr-only">{m['nav.auth.sign_in']()}</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onclick={() => goto('/signin')}
+            class="text-primary hover:bg-primary/5 hover:text-primary"
+          >
+            <LogIn class="mr-1.5 h-4 w-4" />
+            {m['nav.auth.sign_in']()}
+          </Button>
           <Button
             variant="default"
+            size="sm"
             onclick={() => goto('/signup')}
             aria-label={m['nav.auth.sign_up']()}
-            class="font-lexend text-nav"
+            class="rounded-full bg-primary px-5 text-primary-foreground shadow-sm hover:bg-primary/90"
           >
             {m['nav.auth.sign_up']()}
           </Button>
-          <span class="sr-only">{m['nav.auth.sign_up']()}</span>
         </div>
         <!-- {:else}
         <AvatarMenu {myUser} {onSignOut} /> -->

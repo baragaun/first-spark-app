@@ -16,9 +16,9 @@ const config: Config = {
     },
     extend: {
       colors: {
-        'kcu-lime': '#c4d600',
-        'kcu-glacier': '#00A3E0',
-        'kcu-juniper': '#005f61',
+        'tapco-blue': '#316FA4',
+        'tapco-green': '#A7C539',
+        'tapco-dark': '#414042',
         border: 'hsl(var(--border) / <alpha-value>)',
         input: 'hsl(var(--input) / <alpha-value>)',
         ring: 'hsl(var(--ring) / <alpha-value>)',
@@ -68,12 +68,13 @@ const config: Config = {
         },
       },
       borderRadius: {
+        xl: 'calc(var(--radius) + 4px)',
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
       fontFamily: {
-        sans: [...fontFamily.sans],
+        sans: ['Inter', ...fontFamily.sans],
       },
       keyframes: {
         'accordion-down': {
@@ -88,11 +89,26 @@ const config: Config = {
           '0%,70%,100%': { opacity: '1' },
           '20%,50%': { opacity: '0' },
         },
+        'fade-in': {
+          from: { opacity: '0', transform: 'translateY(6px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        'slide-up': {
+          from: { opacity: '0', transform: 'translateY(12px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'caret-blink': 'caret-blink 1.25s ease-out infinite',
+        'fade-in': 'fade-in 0.3s ease-out',
+        'slide-up': 'slide-up 0.4s ease-out',
+      },
+      boxShadow: {
+        'soft': '0 1px 3px rgb(0 0 0 / 0.04), 0 4px 12px rgb(0 0 0 / 0.06)',
+        'soft-lg': '0 2px 6px rgb(0 0 0 / 0.04), 0 8px 24px rgb(0 0 0 / 0.08)',
+        'soft-xl': '0 4px 12px rgb(0 0 0 / 0.04), 0 16px 40px rgb(0 0 0 / 0.08)',
       },
     },
   },

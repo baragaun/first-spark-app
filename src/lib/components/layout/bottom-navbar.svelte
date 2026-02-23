@@ -62,27 +62,40 @@
 
 <!-- Bottom Navigation Bar - Only visible on mobile -->
 <nav
-  class="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:hidden"
+  class="fixed bottom-0 left-0 right-0 z-50 rounded-t-2xl bg-white/85 backdrop-blur-xl shadow-[0_-1px_12px_rgb(0_0_0/0.06)] md:hidden"
+  style="padding-bottom: env(safe-area-inset-bottom, 0px);"
 >
-  <div class="flex h-16 items-center justify-around px-2">
+  <div class="flex h-16 items-center justify-around px-1">
     {#each visibleItems as item (item.title)}
-      <Button
+      <a
         href={item.url}
-        variant="link"
-        size="lg"
         class={cn(
-          'flex h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg bg-background px-1 py-1 no-underline hover:no-underline',
+          'flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-2 transition-all duration-200',
           isItemActive(item.url, page.url.pathname)
-            ? 'bg-background text-nav-foreground hover:bg-background'
-            : 'text-foreground hover:text-foreground',
+            ? 'text-primary'
+            : 'text-muted-foreground hover:text-foreground',
         )}
       >
-        <item.icon class="h-[20px] w-[20px]" style="height:20px!important;width:20px!important;" />
-        <span class="font-semi-bold truncate text-[11px]">{item.title}</span>
-      </Button>
+        <div
+          class={cn(
+            'flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200',
+            isItemActive(item.url, page.url.pathname) && 'bg-primary/10',
+          )}
+        >
+          <item.icon class="h-[20px] w-[20px]" />
+        </div>
+        <span
+          class={cn(
+            'truncate text-[10px] font-medium',
+            isItemActive(item.url, page.url.pathname) && 'font-semibold',
+          )}
+        >
+          {item.title}
+        </span>
+      </a>
     {/each}
   </div>
 </nav>
 
 <!-- Spacer to prevent content from being hidden behind the bottom navbar -->
-<div class="h-16 md:hidden"></div>
+<div class="h-20 md:hidden"></div>

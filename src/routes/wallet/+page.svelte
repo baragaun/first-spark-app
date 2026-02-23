@@ -2,7 +2,7 @@
   import { Tabs } from 'bits-ui';
   import { onMount } from 'svelte';
   import placeholderImage from '../../assets/images/placeholder.png';
-  import { Search, Upload } from 'lucide-svelte';
+  import { Search, Upload, ChevronRight, Wallet as WalletIcon } from 'lucide-svelte';
   import { Input } from '$lib/components/ui/input';
   import { Button } from '$lib/components/ui/button';
   import { goto } from '$app/navigation';
@@ -69,8 +69,6 @@
   }
 
   function uploadAction() {
-    // goto(`/wallet/upload-gift-card`);
-    // TODO - below code will allow to browse files
     if (fileInputRef) {
       fileInputRef.value = '';
       fileInputRef.click();
@@ -171,14 +169,11 @@
   }
 </script>
 
-<div class="container mx-auto px-4 py-2">
+<div class="animate-fade-in container mx-auto px-4 py-4 md:px-6">
   {#if !isMobile.current}
-    <div class="flex">
-      <header class="mb-6">
-        <h1 class="text-3xl font-bold text-foreground">{m['wallet.title']()}</h1>
-        <!--      <p class="mt-2 text-muted-foreground">{m['wallet.subtitle']()}</p>-->
-      </header>
-    </div>
+    <header class="mb-5">
+      <h1 class="text-2xl font-bold tracking-tight text-foreground">{m['wallet.title']()}</h1>
+    </header>
   {/if}
 
   <div class="flex flex-col">
@@ -187,75 +182,52 @@
       <!-- Tab Navigation -->
       <Tabs.Root bind:value={currentTab}>
         <Tabs.List
-          class="flex h-10 w-full items-center justify-center rounded-2xl bg-muted p-1 text-muted-foreground "
+          class="flex h-11 w-full items-center justify-center rounded-2xl bg-muted/50 p-1 text-muted-foreground"
         >
           <Tabs.Trigger
             value={TabId.ACTIVE}
-            class="inline-flex flex-1 items-center justify-center whitespace-nowrap rounded-xl px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+            class="inline-flex flex-1 items-center justify-center whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
           >
             {m['wallet.tabs.active']()}
           </Tabs.Trigger>
           <Tabs.Trigger
             value={TabId.GIFTED}
-            class="inline-flex flex-1 items-center justify-center whitespace-nowrap rounded-xl px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+            class="inline-flex flex-1 items-center justify-center whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
           >
             {m['wallet.tabs.gifted']()}
           </Tabs.Trigger>
           <Tabs.Trigger
             value={TabId.ARCHIVED}
-            class="inline-flex flex-1 items-center justify-center whitespace-nowrap rounded-xl px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+            class="inline-flex flex-1 items-center justify-center whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
           >
             {m['wallet.tabs.archived']()}
           </Tabs.Trigger>
         </Tabs.List>
       </Tabs.Root>
-      <!-- Search -->
-      <div class="mb-3 mt-3 flex items-center gap-3">
+
+      <!-- Search & Upload -->
+      <div class="mb-4 mt-4 flex items-center gap-3">
         {#if displayedItems.length > 10}
-          <div
-            class="relative flex-1 rounded-full bg-gradient-to-r from-kcu-lime via-kcu-glacier to-kcu-juniper p-[2px]"
-          >
-            <Search
-              class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-            />
+          <div class="relative flex-1">
+            <Search class="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="search"
-              class="search-input-override w-full rounded-full border-0 bg-background px-3 py-2 pl-10 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+              placeholder="Search cards..."
+              class="h-11 w-full rounded-2xl border-border/60 bg-muted/40 pl-10 shadow-none placeholder:text-muted-foreground/50 focus-visible:bg-background focus-visible:ring-primary/30"
               bind:value={searchQuery}
             />
           </div>
-          <div class="mt-3 flex flex-col items-center justify-center">
-            <Button
-              class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-kcu-lime via-kcu-glacier to-kcu-juniper p-[2px]"
-              onclick={uploadAction}
-              aria-label="Upload"
-            >
-              <div
-                class="flex h-full w-full items-center justify-center rounded-full bg-background"
-              >
-                <Upload class="h-5 w-5 text-primary" />
-              </div>
-            </Button>
-            <span class="ml-2 text-sm font-medium text-primary">{m['wallet.upload_card']()}</span>
-          </div>
         {:else}
-          <div class="mt-3 flex w-full flex-row items-center justify-end">
-            <div class="flex-1"></div>
-            <Button
-              class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-kcu-lime via-kcu-glacier to-kcu-juniper p-[2px]"
-              onclick={uploadAction}
-              aria-label="Upload"
-            >
-              <div
-                class="flex h-full w-full items-center justify-center rounded-full bg-background"
-              >
-                <Upload class="h-5 w-5 text-primary" />
-              </div>
-            </Button>
-            <span class="mx-2 text-sm font-medium text-primary">{m['wallet.upload_card']()}</span>
-          </div>
+          <div class="flex-1"></div>
         {/if}
+        <Button
+          class="flex h-10 items-center gap-2 rounded-full bg-secondary px-4 text-secondary-foreground shadow-sm hover:bg-secondary/90"
+          onclick={uploadAction}
+          aria-label="Upload"
+        >
+          <Upload class="h-4 w-4" />
+          <span class="text-sm font-medium">{m['wallet.upload_card']()}</span>
+        </Button>
 
         <input
           type="file"
@@ -268,38 +240,39 @@
       </div>
     </div>
 
-    <!-- Scrollable Wallet Items Section -->
-    <div class="relative flex-1 overflow-y-auto">
+    <!-- Wallet Items Section -->
+    <div class="relative flex-1 space-y-3">
       {#if displayedItems.length === 0}
-        <div class="py-8 text-center text-muted-foreground">
-          {currentTab === TabId.ACTIVE ? m['wallet.empty']() : m['wallet.gifted.no_items_found']()}
+        <div class="flex flex-col items-center justify-center py-16 text-center">
+          <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted/60">
+            <WalletIcon class="h-7 w-7 text-muted-foreground/50" />
+          </div>
+          <p class="text-sm text-muted-foreground">
+            {currentTab === TabId.ACTIVE ? m['wallet.empty']() : m['wallet.gifted.no_items_found']()}
+          </p>
         </div>
       {/if}
       {#each displayedItems as item}
         <button
           type="button"
-          class="border-borde col-span-2 flex w-full items-start justify-between border-b text-left focus:outline-none md:col-span-3"
+          class="group flex w-full items-center gap-4 rounded-2xl bg-card p-3 text-left shadow-soft transition-all duration-200 hover:-translate-y-0.5 hover:shadow-soft-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           onclick={() => navigateToGiftCardDetail(item)}
           onkeydown={(e) => e.key === 'Enter' && navigateToGiftCardDetail(item)}
         >
-          <div class="my-2 flex flex-shrink-0">
-            <img
-              src={giftCardImageDomain + '/giftcards/' + item.imageSourceFront}
-              alt={item.imageSourceFront}
-              class="mr-4 w-32 rounded-xl object-cover shadow-lg"
-              use:handleImageError
-            />
-            <div class="flex flex-col">
-              <span class="text-base font-medium text-foreground">{item.name ? item.name : ''}</span
-              >
-              <span class="text-lg font-bold text-muted-foreground"
-                >${(item.balance / 1000).toFixed(2)}</span
-              >
-              <span class="text-sm text-muted-foreground">
-                {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : ''}</span
-              >
-            </div>
+          <img
+            src={giftCardImageDomain + '/giftcards/' + item.imageSourceFront}
+            alt={item.imageSourceFront}
+            class="w-28 flex-shrink-0 rounded-xl object-cover shadow-sm"
+            use:handleImageError
+          />
+          <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+            <span class="truncate text-sm font-semibold text-foreground">{item.name ? item.name : ''}</span>
+            <span class="text-lg font-bold text-primary">${(item.balance / 1000).toFixed(2)}</span>
+            <span class="text-xs text-muted-foreground">
+              {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : ''}
+            </span>
           </div>
+          <ChevronRight class="h-5 w-5 flex-shrink-0 text-muted-foreground/40 transition-transform group-hover:translate-x-0.5" />
         </button>
       {/each}
     </div>
