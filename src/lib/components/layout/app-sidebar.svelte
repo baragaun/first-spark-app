@@ -111,40 +111,37 @@
     <Sidebar.Header>
       <Sidebar.Menu>
         <Sidebar.MenuItem>
-          <div class="justify-horizontal flex items-center pt-2">
-            <!-- Commenting first spark logo -->
-            <!-- <div class="flex aspect-square size-8 items-center justify-center rounded-lg">
-            <img src={$headerIcon} alt="First Spark Logo" class="size-8" />
-            </div> -->
-            <!-- <span class="font-lexend truncate ps-2 text-xl font-bold text-foreground">
-              {appTitle()}
-            </span> -->
-
-            {#if sidebar?.open}
-              <div class="flex items-center justify-center">
-                <img src={headerIcon()} alt="First Spark Logo" class="h-10" />
-              </div>
-            {:else}
-              <div class="flex min-h-[2.5rem] min-w-[2rem] items-center justify-center">
+          <div class="flex items-center px-1 py-3">
+            <div class="flex min-h-[2.5rem] w-full items-center justify-center">
+              {#if sidebar?.open}
+                <img src={headerIcon()} alt="Logo" class="h-10 object-contain" />
+              {:else}
                 <img
                   src={headerSmallIcon()}
-                  alt="First Spark Logo"
-                  class="h-10 w-10 object-contain"
+                  alt="Logo"
+                  class="h-9 w-9 object-contain"
                 />
-              </div>
-            {/if}
+              {/if}
+            </div>
           </div>
         </Sidebar.MenuItem>
       </Sidebar.Menu>
     </Sidebar.Header>
-    <Sidebar.Group>
+    <Sidebar.Group class="px-2">
       <Sidebar.Menu>
         {#each visibleItems as item, i (item.title)}
           <Sidebar.MenuItem>
             <Sidebar.MenuButton isActive={isItemActive(item.url, page.url.pathname)}>
               {#snippet child({ props })}
-                <a href={item.url} onclick={handleItemClick} {...props}>
-                  <item.icon />
+                <a
+                  href={item.url}
+                  onclick={handleItemClick}
+                  {...props}
+                  class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 {isItemActive(item.url, page.url.pathname)
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'}"
+                >
+                  <item.icon class="h-5 w-5" />
                   <span>{item.title}</span>
                 </a>
               {/snippet}
@@ -156,14 +153,14 @@
 
     {#if !isSignedIn}
       <Sidebar.Group class="mb-2 mt-auto px-3 group-data-[collapsible=icon]:hidden">
-        <div class="rounded-lg border border-border bg-card p-4 shadow-sm">
-          <h2 class="mb-3 text-sm font-bold">{m['join_first_spark']({ title: appTitle() })}</h2>
-          <h3 class="mb-3 text-sm font-medium">{m['welcome_subtitle']()}</h3>
+        <div class="rounded-2xl bg-gradient-to-br from-primary to-primary/80 p-5 text-white shadow-soft">
+          <h2 class="mb-2 text-sm font-bold">{m['join_first_spark']({ title: appTitle() })}</h2>
+          <h3 class="mb-4 text-xs font-medium text-white/80">{m['welcome_subtitle']()}</h3>
           <div class="flex flex-col gap-2">
             <Button
               href="/signup"
               size="sm"
-              class="w-full text-background"
+              class="w-full rounded-full bg-white text-primary shadow-sm hover:bg-white/90"
               onclick={handleItemClick}
             >
               {m['get_started']()}
@@ -172,7 +169,7 @@
               href="/signin"
               variant="outline"
               size="sm"
-              class="w-full"
+              class="w-full rounded-full border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
               onclick={handleItemClick}
             >
               {m['nav.auth.sign_in']()}
@@ -189,13 +186,13 @@
         <Sidebar.MenuItem>
           <Sidebar.MenuButton>
             {#snippet child({ props })}
-              <Button {...props} disabled={!isDevEnv} onclick={toggleConnection} variant="ghost">
+              <Button {...props} disabled={!isDevEnv} onclick={toggleConnection} variant="ghost" class="text-muted-foreground hover:text-foreground">
                 {#if !isOffline}
-                  <Zap class="h-5 w-5 text-muted-foreground" />
+                  <Zap class="h-4 w-4" />
                 {:else}
-                  <PlugZap class="h-5 w-5 text-muted-foreground" />
+                  <PlugZap class="h-4 w-4" />
                 {/if}
-                <span class="text-muted-foreground"
+                <span class="text-xs"
                   >{isOffline
                     ? m['connection.offline']()
                     : m['connection.online']({ title: appTitle() })}</span

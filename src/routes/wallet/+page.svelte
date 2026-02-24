@@ -2,27 +2,22 @@
   import { Tabs } from 'bits-ui';
   import { onMount } from 'svelte';
   import placeholderImage from '../../assets/images/placeholder.png';
-  import { Search, Upload } from 'lucide-svelte';
+  import { Search, Upload, ChevronRight, Wallet as WalletIcon } from 'lucide-svelte';
   import { Input } from '$lib/components/ui/input';
   import { Button } from '$lib/components/ui/button';
   import { goto } from '$app/navigation';
   import { getWalletItemsStore, loadWalletItems } from '@/stores/wallet-store.svelte';
   import { uploadedCardSetValues } from '@/stores/uploaded-card.svelte';
-  import Quagga from 'quagga';
   import Tesseract from 'tesseract.js';
   import { m } from '@/paraglide/messages';
   import { giftCardImageDomain } from '@/constants';
   import type { WalletItem } from '@baragaun/bg-node-client';
   import { IsMobile } from '$lib/hooks/is-mobile.svelte.js';
+  import { extractGiftCardWithAI } from '$lib/utils/ai-client';
+  import { toast } from 'svelte-sonner';
+  import { logger } from '@/utils/logger';
 
   const isMobile = new IsMobile();
-
-  interface QuaggaResult {
-    codeResult?: {
-      code: string;
-      format: string;
-    };
-  }
 
   const TabId = {
     ACTIVE: 'active',
@@ -35,10 +30,10 @@
   let currentTab = $state<string>(TabId.ACTIVE);
   let searchQuery = $state<string>('');
   let fileInputRef: HTMLInputElement;
+  let isModelAvailable = $state(true);
 
   onMount(async () => {
     loadWalletItems();
-    // loadWalletItemTransfers();
   });
 
   let displayedItems = $derived.by(() => {
@@ -74,12 +69,10 @@
   }
 
   function uploadAction() {
-    goto(`/wallet/upload-gift-card`);
-    // TODO - below code will allow to browse files
-    // if (fileInputRef) {
-    //   fileInputRef.value = '';
-    //   fileInputRef.click();
-    // }
+    if (fileInputRef) {
+      fileInputRef.value = '';
+      fileInputRef.click();
+    }
   }
 
   const handleImageError = (node: HTMLImageElement) => {
@@ -96,106 +89,91 @@
     };
   };
 
-  function handleFileChange(event: Event) {
+  async function handleFileChange(event: Event) {
     const files = (event.target as HTMLInputElement).files;
     if (files && files.length > 0) {
       const file = files[0];
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         const imageDataUrl = e.target?.result as string;
 
         // Set loading and navigate instantly
         uploadedCardSetValues({ imageUrlData: imageDataUrl, isLoading: true });
         goto('/wallet/upload-card');
         // Now process extraction in background
-        Quagga.decodeSingle(
-          {
-            src: imageDataUrl,
-            numOfWorkers: 0,
-            inputStream: { size: 800 },
-            decoder: {
-              readers: [
-                'code_128_reader',
-                'ean_reader',
-                'ean_8_reader',
-                'code_39_reader',
-                'upc_reader',
-                'upc_e_reader',
-                'codabar_reader',
-              ],
-            },
-          },
-          async (result: QuaggaResult | undefined) => {
-            let barcode = '';
-            let company = '';
-            let price = '';
-            let pin = '';
-            if (result && result.codeResult) {
-              barcode = result.codeResult.code;
+        let barcode = '';
+        try {
+          let detector: any;
+          if (
+            typeof window !== 'undefined' &&
+            typeof (window as any).BarcodeDetector !== 'undefined'
+          ) {
+            detector = new (window as any).BarcodeDetector({
+              formats: ['code_128', 'ean_13', 'ean_8', 'code_39', 'upc_a', 'upc_e', 'codabar'],
+            });
+          } else {
+            throw new Error('BarcodeDetector is not available');
+          }
+          const img = new window.Image();
+          img.src = imageDataUrl;
+          await new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = reject;
+          });
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0);
+            const barcodes = await detector.detect(canvas);
+            if (barcodes.length > 0) {
+              barcode = barcodes[0].rawValue || barcodes[0].value || '';
             }
-            const {
-              data: { text },
-            } = await Tesseract.recognize(imageDataUrl, 'eng');
-            const priceMatch = text.match(/\$\s?\d+[.,]?\d*/);
-            price = priceMatch ? priceMatch[0] : '';
-            const lines = text
-              .split(/\r?\n/)
-              .map((l) => l.trim())
-              .filter(Boolean);
-            // Improved brand extraction: find a line that looks like a brand (all uppercase, not price/barcode/pin)
-            const brandLine = lines.find(
-              (l) => /^[A-Z0-9 '&.-]{3,}$/.test(l) && !/\$|pin|\d{4,}/i.test(l),
-            );
-            company = brandLine || lines[0] || '';
-            // Improved barcode extraction: look for 16-20 digit numbers (with or without spaces)
-            if (!barcode) {
-              // Try to find a long number (with or without spaces)
-              const joined = text.replace(/\s+/g, '');
-              const barcodeMatch = joined.match(/\d{16,20}/);
-              if (barcodeMatch) {
-                barcode = barcodeMatch[0];
-              } else {
-                // fallback: try spaced numbers
-                const spacedMatch = text.match(/(\d{4,}\s?){4,6}/);
-                if (spacedMatch) {
-                  barcode = spacedMatch[0].replace(/\s+/g, '');
-                }
-              }
-            }
-            // Improved pin extraction: look for Pin: xxxx or pin xxxx
-            let pinMatch = text.match(/pin\s*:?\s*(\d{4,8})/i);
-            if (!pinMatch) {
-              // fallback: try to find a 4-8 digit number after the word Pin
-              pinMatch = text.match(/Pin[^\d]*(\d{4,8})/i);
-            }
-            if (pinMatch) {
-              pin = pinMatch[1];
-            }
-            // Update store with extracted values and set loading false
+          }
+        } catch (e) {
+          console.warn('Barcode detection failed:', e);
+        } finally {
+          logger.info('Detected barcode:', barcode);
+        }
+
+        // Step 1: Extract text with Tesseract OCR
+        const {
+          data: { text },
+        } = await Tesseract.recognize(imageDataUrl, 'eng');
+
+        // Step 2: Try GitHub Models AI extraction if available
+        if (isModelAvailable) {
+          const aiResult = await extractGiftCardWithAI(text);
+
+          if (aiResult.success && aiResult.data) {
+            // Use AI-extracted data
             uploadedCardSetValues({
-              brandNameValue: company,
-              balanceValue: price,
-              barcodeValue: barcode,
-              pinValue: pin,
+              brandNameValue: aiResult.data.brandName,
+              balanceValue: aiResult.data.balance,
+              barcodeValue: aiResult.data.barcode || barcode,
+              pinValue: aiResult.data.pin,
               imageUrlData: imageDataUrl,
               isLoading: false,
             });
-          },
-        );
+            toast.success('Gift card extracted with AI!');
+            return;
+          } else {
+            toast.error('AI extraction failed, please enter details manually.');
+            logger.error('AI extraction failed:', aiResult.error);
+          }
+        }
       };
       reader.readAsDataURL(file);
     }
   }
 </script>
 
-<div class="container mx-auto px-4 py-2">
+<div class="animate-fade-in container mx-auto px-4 py-4 md:px-6">
   {#if !isMobile.current}
-    <div class="flex">
-      <header class="mb-6">
-        <h1 class="text-3xl font-bold text-foreground">{m['wallet.title']()}</h1>
-        <!--      <p class="mt-2 text-muted-foreground">{m['wallet.subtitle']()}</p>-->
-      </header>
-    </div>
+    <header class="mb-5">
+      <h1 class="text-2xl font-bold tracking-tight text-foreground">{m['wallet.title']()}</h1>
+    </header>
   {/if}
 
   <div class="flex flex-col">
@@ -204,75 +182,52 @@
       <!-- Tab Navigation -->
       <Tabs.Root bind:value={currentTab}>
         <Tabs.List
-          class="flex h-10 w-full items-center justify-center rounded-2xl bg-muted p-1 text-muted-foreground "
+          class="flex h-11 w-full items-center justify-center rounded-2xl bg-muted/50 p-1 text-muted-foreground"
         >
           <Tabs.Trigger
             value={TabId.ACTIVE}
-            class="inline-flex flex-1 items-center justify-center whitespace-nowrap rounded-xl px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+            class="inline-flex flex-1 items-center justify-center whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
           >
             {m['wallet.tabs.active']()}
           </Tabs.Trigger>
           <Tabs.Trigger
             value={TabId.GIFTED}
-            class="inline-flex flex-1 items-center justify-center whitespace-nowrap rounded-xl px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+            class="inline-flex flex-1 items-center justify-center whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
           >
             {m['wallet.tabs.gifted']()}
           </Tabs.Trigger>
           <Tabs.Trigger
             value={TabId.ARCHIVED}
-            class="inline-flex flex-1 items-center justify-center whitespace-nowrap rounded-xl px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+            class="inline-flex flex-1 items-center justify-center whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
           >
             {m['wallet.tabs.archived']()}
           </Tabs.Trigger>
         </Tabs.List>
       </Tabs.Root>
-      <!-- Search -->
-      <div class="mb-3 mt-3 flex items-center gap-3">
+
+      <!-- Search & Upload -->
+      <div class="mb-4 mt-4 flex items-center gap-3">
         {#if displayedItems.length > 10}
-          <div
-            class="relative flex-1 rounded-full bg-gradient-to-r from-kcu-lime via-kcu-glacier to-kcu-juniper p-[2px]"
-          >
-            <Search
-              class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-            />
+          <div class="relative flex-1">
+            <Search class="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="search"
-              class="search-input-override w-full rounded-full border-0 bg-background px-3 py-2 pl-10 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+              placeholder="Search cards..."
+              class="h-11 w-full rounded-2xl border-border/60 bg-muted/40 pl-10 shadow-none placeholder:text-muted-foreground/50 focus-visible:bg-background focus-visible:ring-primary/30"
               bind:value={searchQuery}
             />
           </div>
-          <div class="mt-3 flex flex-col items-center justify-center">
-            <Button
-              class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-kcu-lime via-kcu-glacier to-kcu-juniper p-[2px]"
-              onclick={uploadAction}
-              aria-label="Upload"
-            >
-              <div
-                class="flex h-full w-full items-center justify-center rounded-full bg-background"
-              >
-                <Upload class="h-5 w-5 text-primary" />
-              </div>
-            </Button>
-            <span class="ml-2 text-sm font-medium text-primary">{m['wallet.upload_card']()}</span>
-          </div>
         {:else}
-          <div class="mt-3 flex w-full flex-row items-center justify-end">
-            <div class="flex-1"></div>
-            <Button
-              class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-kcu-lime via-kcu-glacier to-kcu-juniper p-[2px]"
-              onclick={uploadAction}
-              aria-label="Upload"
-            >
-              <div
-                class="flex h-full w-full items-center justify-center rounded-full bg-background"
-              >
-                <Upload class="h-5 w-5 text-primary" />
-              </div>
-            </Button>
-            <span class="mx-2 text-sm font-medium text-primary">{m['wallet.upload_card']()}</span>
-          </div>
+          <div class="flex-1"></div>
         {/if}
+        <Button
+          class="flex h-10 items-center gap-2 rounded-full bg-secondary px-4 text-secondary-foreground shadow-sm hover:bg-secondary/90"
+          onclick={uploadAction}
+          aria-label="Upload"
+        >
+          <Upload class="h-4 w-4" />
+          <span class="text-sm font-medium">{m['wallet.upload_card']()}</span>
+        </Button>
 
         <input
           type="file"
@@ -285,53 +240,41 @@
       </div>
     </div>
 
-    <!-- Scrollable Wallet Items Section -->
-    <div class="relative flex-1 overflow-y-auto">
+    <!-- Wallet Items Section -->
+    <div class="relative flex-1 space-y-3">
       {#if displayedItems.length === 0}
-        <div class="py-8 text-center text-muted-foreground">
-          {currentTab === TabId.ACTIVE ? m['wallet.empty']() : m['wallet.gifted.no_items_found']()}
+        <div class="flex flex-col items-center justify-center py-16 text-center">
+          <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted/60">
+            <WalletIcon class="h-7 w-7 text-muted-foreground/50" />
+          </div>
+          <p class="text-sm text-muted-foreground">
+            {currentTab === TabId.ACTIVE ? m['wallet.empty']() : m['wallet.gifted.no_items_found']()}
+          </p>
         </div>
       {/if}
       {#each displayedItems as item}
         <button
           type="button"
-          class="border-borde col-span-2 flex w-full items-start justify-between border-b text-left focus:outline-none md:col-span-3"
+          class="group flex w-full items-center gap-4 rounded-2xl bg-card p-3 text-left shadow-soft transition-all duration-200 hover:-translate-y-0.5 hover:shadow-soft-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           onclick={() => navigateToGiftCardDetail(item)}
           onkeydown={(e) => e.key === 'Enter' && navigateToGiftCardDetail(item)}
         >
-          <div class="my-2 flex flex-shrink-0">
-            <img
-              src={giftCardImageDomain + '/giftcards/' + item.imageSourceFront}
-              alt={item.imageSourceFront}
-              class="mr-4 w-32 rounded-xl object-cover shadow-lg"
-              use:handleImageError
-            />
-            <div class="flex flex-col">
-              <span class="text-base font-medium text-foreground">{item.name ? item.name : ''}</span
-              >
-              <span class="text-lg font-bold text-muted-foreground"
-                >${(item.balance / 1000).toFixed(2)}</span
-              >
-              <span class="text-sm text-muted-foreground">
-                {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : ''}</span
-              >
-            </div>
+          <img
+            src={giftCardImageDomain + '/giftcards/' + item.imageSourceFront}
+            alt={item.imageSourceFront}
+            class="w-28 flex-shrink-0 rounded-xl object-cover shadow-sm"
+            use:handleImageError
+          />
+          <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+            <span class="truncate text-sm font-semibold text-foreground">{item.name ? item.name : ''}</span>
+            <span class="text-lg font-bold text-primary">${(item.balance / 1000).toFixed(2)}</span>
+            <span class="text-xs text-muted-foreground">
+              {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : ''}
+            </span>
           </div>
+          <ChevronRight class="h-5 w-5 flex-shrink-0 text-muted-foreground/40 transition-transform group-hover:translate-x-0.5" />
         </button>
       {/each}
-
-      <!-- Floating Upload Button -->
-      <!-- <div class="fixed bottom-16 right-4 z-50 pb-4">
-        <Button
-          class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-kcu-lime via-kcu-glacier to-kcu-juniper p-[2px]"
-          onclick={uploadAction}
-          aria-label="Upload"
-        >
-          <div class="flex h-full w-full items-center justify-center rounded-full bg-background">
-            <Upload class="h-5 w-5 text-primary" />
-          </div>
-        </Button>
-      </div> -->
     </div>
   </div>
 </div>

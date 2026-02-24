@@ -42,12 +42,12 @@
           <NavBar />
         {/if}
         <main class="flex flex-1 flex-col">
-          {@render children?.()}
+          {#key page.url.pathname}
+            {@render children?.()}
+          {/key}
         </main>
         {#if !isMobile.current}
           <Footer />
-        {:else}
-          <div class="h-16 md:hidden"></div>
         {/if}
       </div>
       <BottomNavbar />

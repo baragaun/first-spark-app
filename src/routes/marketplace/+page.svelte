@@ -11,6 +11,7 @@
   import { IsMobile } from '$lib/hooks/is-mobile.svelte';
   import { giftCardImageDomain } from '$lib/constants';
   import SpinLoadIndicator from '@/components/forms/spin-load-indicator.svelte';
+  import { onMount } from 'svelte';
 
   let marketplaceData = $state(getMarketplaceData());
   let isLoading = $state(true);
@@ -71,51 +72,48 @@
     };
   };
 
-  // Load on mount
-  $effect(() => {
+  onMount(async () => {
     isLoading = true;
-    loadMarketplaceData()
-      .catch(console.error)
-      .finally(() => {
-        marketplaceData = getMarketplaceData();
-        isLoading = false;
-      });
+    try {
+      await loadMarketplaceData();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      marketplaceData = getMarketplaceData();
+      isLoading = false;
+    }
   });
 </script>
 
-<div class="container mx-auto px-4 py-2">
-  <header class="mb-6">
+<div class="animate-fade-in container mx-auto px-4 py-4 md:px-6">
+  <header class="mb-5">
     {#if !isMobile.current}
-      <h1 class="text-3xl font-bold text-foreground">{m['marketplace.title']()}</h1>
+      <h1 class="text-2xl font-bold tracking-tight text-foreground">{m['marketplace.title']()}</h1>
     {/if}
-    <p class="mt-2 text-muted-foreground">{m['marketplace.subtitle']()}</p>
+    <p class="mt-1 text-sm text-muted-foreground">{m['marketplace.subtitle']()}</p>
   </header>
 
-  <div class="mb-6 flex items-center gap-4">
+  <!-- Search & Filter -->
+  <div class="mb-5 flex items-center gap-3">
     <div class="relative flex-1">
-      <!-- Gradient border wrapper -->
-      <div
-        class="relative rounded-full bg-gradient-to-r from-kcu-glacier via-kcu-juniper to-kcu-lime p-[2px]"
-      >
-        <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          type="search"
-          placeholder={m['marketplace.search_placeholder']()}
-          class="search-input-override w-full rounded-full border-0 bg-background px-3 py-2 pl-10 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-          bind:value={searchText}
-        />
-      </div>
+      <Search class="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <Input
+        type="search"
+        placeholder={m['marketplace.search_placeholder']()}
+        class="h-11 w-full rounded-2xl border-border/60 bg-muted/40 pl-10 shadow-none placeholder:text-muted-foreground/50 focus-visible:bg-background focus-visible:ring-primary/30"
+        bind:value={searchText}
+      />
     </div>
 
     <DropdownMenu.Root>
       <DropdownMenu.Trigger>
-        <Button variant="outline" class="flex items-center gap-2">
+        <Button variant="outline" class="flex h-11 items-center gap-2 rounded-2xl border-border/60 px-4">
           {selectedCategory === 'All' ? m['marketplace.all']() : selectedCategory.labelEn}
-          <ChevronDown class="h-4 w-4" />
+          <ChevronDown class="h-4 w-4 text-muted-foreground" />
         </Button>
       </DropdownMenu.Trigger>
-      <DropdownMenu.Content class="max-h-[300px] overflow-y-auto bg-background">
-        <DropdownMenu.Item onclick={() => (selectedCategory = 'All')} class="cursor-pointer">
+      <DropdownMenu.Content class="max-h-[300px] overflow-y-auto rounded-xl bg-background shadow-soft-lg">
+        <DropdownMenu.Item onclick={() => (selectedCategory = 'All')} class="cursor-pointer rounded-lg">
           {m['marketplace.all']()}
           {#if selectedCategory === 'All'}
             <DropdownMenu.Shortcut>✓</DropdownMenu.Shortcut>
@@ -123,7 +121,7 @@
         </DropdownMenu.Item>
 
         {#each marketplaceData.productCategories as category}
-          <DropdownMenu.Item onclick={() => (selectedCategory = category)} class="cursor-pointer">
+          <DropdownMenu.Item onclick={() => (selectedCategory = category)} class="cursor-pointer rounded-lg">
             {category.labelEn}
             {#if selectedCategory !== 'All' && selectedCategory.name === category.name}
               <DropdownMenu.Shortcut>✓</DropdownMenu.Shortcut>
@@ -135,53 +133,48 @@
   </div>
 
   {#if isLoading}
-    <div class="flex items-center justify-center">
+    <div class="flex h-60 items-center justify-center">
       <SpinLoadIndicator />
     </div>
   {:else if filteredProducts.length === 0}
-    <div class="py-8 text-center text-lg text-muted-foreground">
-      {m['marketplace.no_results']()}
+    <div class="flex h-60 flex-col items-center justify-center text-center">
+      <Search class="mb-3 h-10 w-10 text-muted-foreground/40" />
+      <p class="text-base text-muted-foreground">{m['marketplace.no_results']()}</p>
     </div>
   {:else}
-    <div
-      class="grid max-h-[calc(100vh-220px)] grid-cols-2 gap-4 overflow-y-auto px-4 py-4 md:grid-cols-3 lg:grid-cols-4"
-    >
+    <div class="grid grid-cols-2 gap-4 pb-6 md:grid-cols-3 lg:grid-cols-4 xl:gap-5">
       {#each filteredProducts as product (product.id)}
         {@const brand = getBrandForGiftCard(product)}
         {#if brand}
           <button
             type="button"
-            class="group flex flex-col items-center border-0 bg-transparent p-0 text-left transition-all duration-300 hover:scale-105 hover:opacity-90"
+            class="group flex flex-col items-start border-0 bg-transparent p-0 text-left"
             onclick={() => navigateToGiftCardDetail(product.id)}
             onkeydown={(e) => e.key === 'Enter' && navigateToGiftCardDetail(product.id)}
             aria-label={m['marketplace.view_gift_card_aria']({ vendor: brand.name })}
           >
             <div
-              class="mb-2 aspect-[5/3] w-full overflow-hidden rounded-xl bg-card shadow-lg transition-all duration-300 group-hover:shadow-xl"
+              class="mb-2.5 aspect-[5/3] w-full overflow-hidden rounded-2xl bg-muted/30 shadow-soft transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-soft-lg"
             >
               <img
                 src={giftCardImageDomain + '/giftcards/' + product.imageSourceFront}
                 alt={brand.name}
-                class="object-scale h-full w-full rounded-xl transition-transform duration-300 group-hover:scale-110"
+                class="h-full w-full rounded-2xl object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                 use:handleImageError
               />
             </div>
-            <div
-              class="flex items-center gap-2 transition-colors duration-300 group-hover:text-primary"
-            >
-              {#if !isMobile.current}
-                <div
-                  class="h-6 w-6 overflow-hidden rounded-full transition-transform duration-300 group-hover:scale-110"
-                >
-                  <img
-                    src={giftCardImageDomain + '/vendors/' + brand.logoImageSource}
-                    alt=""
-                    class="h-full w-full object-contain"
-                    use:handleImageError
-                  />
-                </div>
-              {/if}
-              <span class="text-sm font-medium">{brand.name}</span>
+            <div class="flex items-center gap-2 pl-0.5">
+              <div
+                class="h-5 w-5 flex-shrink-0 overflow-hidden rounded-full bg-muted/50"
+              >
+                <img
+                  src={giftCardImageDomain + '/vendors/' + brand.logoImageSource}
+                  alt=""
+                  class="h-full w-full object-contain"
+                  use:handleImageError
+                />
+              </div>
+              <span class="truncate text-sm font-medium text-foreground">{brand.name}</span>
             </div>
           </button>
         {/if}

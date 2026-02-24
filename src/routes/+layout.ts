@@ -21,35 +21,29 @@ export const load: LayoutLoad = async ({ url }) => {
   );
 
   // Initialize user context in the browser
-  if (typeof window !== 'undefined') {
-    try {
-      if (!myUserContext.isInitialized) {
-        await myUserContext.initialize();
-      }
-
-      // Only redirect if not on a public route and user is not signed in
-      if (!isPublicRoute && !myUserContext.isSignedIn) {
-        throw redirect(302, '/signin');
-      }
-
-      return {
-        userInitialized: true,
-      };
-    } catch (error) {
-      // If it's a redirect error, re-throw it
-      if (error && typeof error === 'object' && 'status' in error) {
-        throw error;
-      }
-
-      console.error('Error initializing user context:', error);
-      return {
-        userInitialized: false,
-        userError: error instanceof Error ? error.message : 'Unknown error',
-      };
+  try {
+    if (!myUserContext.isInitialized) {
+      await myUserContext.initialize();
     }
-  }
 
-  return {
-    userInitialized: false,
-  };
+    // Only redirect if not on a public route and user is not signed in
+    if (!isPublicRoute && !myUserContext.isSignedIn) {
+      throw redirect(302, '/signin');
+    }
+
+    return {
+      userInitialized: true,
+    };
+  } catch (error) {
+    // If it's a redirect error, re-throw it
+    if (error && typeof error === 'object' && 'status' in error) {
+      throw error;
+    }
+
+    console.error('Error initializing user context:', error);
+    return {
+      userInitialized: false,
+      userError: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
 };

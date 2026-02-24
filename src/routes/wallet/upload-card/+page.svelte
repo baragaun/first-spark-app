@@ -16,13 +16,39 @@
   import { goto } from '$app/navigation';
   import { marketplaceContext } from '@/contexts/marketplace-context.svelte';
   import { WalletItem, Brand, GiftCardProduct, ProductType } from '@baragaun/bg-node-client';
-  import { toast } from 'svelte-sonner';
+  import { getMarketplaceData, loadMarketplaceData } from '@/stores/marketplace-store.svelte';
   import { giftCardImageDomain } from '$lib/constants';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
+  import { toast } from 'svelte-sonner';
+  import { number } from 'zod/v4';
 
-  let { brandName, balance, barcode, pin, imageUrl, loading, uploadedBrand, uploadedProduct } =
-    $state(uploadedCardGetValues());
+  // Get reactive store values
+  const uploadedCard = uploadedCardGetValues();
+
+  // Create local state for editable fields
+  let brandName = $state('');
+  let balance = $state(0.0);
+  let barcode = $state('');
+  let pin = $state('');
+  let imageUrl = $state('');
+  let loading = $state(false);
+  let uploadedBrand = $state<Brand | null>(null);
+  let uploadedProduct = $state<GiftCardProduct | null>(null);
+  let brands = $state<Brand[]>([]);
+  let products = $state<GiftCardProduct[]>([]);
   let showSuccessDialog = $state(false);
+
+  // Sync local state with store values whenever they change
+  $effect(() => {
+    brandName = uploadedCard.brandName;
+    balance = uploadedCard.balance;
+    barcode = uploadedCard.barcode;
+    pin = uploadedCard.pin;
+    imageUrl = uploadedCard.imageUrl;
+    loading = uploadedCard.loading;
+    uploadedBrand = uploadedCard.uploadedBrand;
+    uploadedProduct = uploadedCard.uploadedProduct;
+  });
 
   onMount(() => {
     if (uploadedProduct !== null) {
@@ -44,45 +70,50 @@
     barcode = raw;
   }
 
-  function sanitizePriceInput(value: string): string {
-    const stripped = value.replace(/[^\d.]/g, '');
-    if (stripped === '') return '';
-    const parts = stripped.split('.');
-    const whole = parts[0];
-    const decimals = parts.slice(1).join('');
-    let result = whole.replace(/^0+(?=\d)/, '');
-    if (result === '') result = '0';
-    if (stripped.includes('.')) {
-      result = result + '.' + decimals.slice(0, 2);
-    }
-    if (result === '.') result = '0.';
-    return result;
-  }
-
   function handleBalanceInput(event: Event) {
     const raw = (event.target as HTMLInputElement).value;
-    balance = sanitizePriceInput(raw);
+    balance = Number(raw);
   }
 
   async function handleSubmit(event: Event) {
     event.preventDefault();
-    const balanceInDollar = +balance * 1000;
+    await loadData();
+
+    if (!brandName) {
+      return toast.error('No brand name found');
+    }
+
+    let matchedProduct = undefined;
+    if (brandName) {
+      const cleanSearchText = brandName.trim().toLowerCase();
+      matchedProduct = products.find((product) => {
+        const productBrand = brands.find((brand) => brand.id === product.brandId);
+        return productBrand && productBrand.name.toLowerCase().includes(cleanSearchText);
+      });
+    }
+
+    // fallback to uploadedProduct if not found
+    if (!matchedProduct) {
+      return toast.error('No matching product found');
+    }
+
+    const balanceInDollar = balance * 1000;
     const newWalletItem = new WalletItem();
-    newWalletItem.name = uploadedBrand?.name ?? '';
+    newWalletItem.name = brandName ?? '';
     newWalletItem.pin = pin;
     newWalletItem.balance = balanceInDollar;
     newWalletItem.initialBalance = balanceInDollar;
     newWalletItem.price = balanceInDollar;
     newWalletItem.hasBarcode = true;
-    newWalletItem.imageSourceFront = uploadedProduct?.imageSourceFront;
-    newWalletItem.brandId = uploadedBrand?.id ?? '';
-    newWalletItem.productId = uploadedProduct?.id ?? '';
+    newWalletItem.imageSourceFront = matchedProduct?.imageSourceFront;
+    newWalletItem.brandId = matchedProduct?.brandId ?? '';
+    newWalletItem.productId = matchedProduct?.id ?? '';
     newWalletItem.walletId = myUserContext.myUserId ?? '';
     newWalletItem.productType = ProductType.giftCard;
-    newWalletItem.instructionsEn = uploadedProduct?.instructionsEn;
-    newWalletItem.instructionsUrl = uploadedProduct?.instructionsUrl;
-    newWalletItem.termsEn = uploadedProduct?.termsEn;
-    newWalletItem.termsUrl = uploadedProduct?.termsUrl;
+    newWalletItem.instructionsEn = matchedProduct?.instructionsEn;
+    newWalletItem.instructionsUrl = matchedProduct?.instructionsUrl;
+    newWalletItem.termsEn = matchedProduct?.termsEn;
+    newWalletItem.termsUrl = matchedProduct?.termsUrl;
 
     const response = await marketplaceContext.createWalletItem(newWalletItem);
     if (response.error) {
@@ -92,6 +123,19 @@
     }
     showSuccessDialog = true;
   }
+
+  const loadData = async () => {
+    if (getMarketplaceData().products.length > 0) {
+      const data = getMarketplaceData();
+      brands = data.brands;
+      products = data.products;
+      return;
+    }
+    await loadMarketplaceData().catch(console.error);
+    const data = getMarketplaceData();
+    brands = data.brands;
+    products = data.products;
+  };
 </script>
 
 <div class="flex min-h-screen flex-col bg-background">

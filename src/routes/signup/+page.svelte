@@ -4,8 +4,8 @@
   let { data }: { data: PageData } = $props();
 </script>
 
-<div class="flex h-full w-full items-center justify-center px-4">
-  <div class="w-full max-w-md">
+<div class="flex h-full w-full items-center justify-center px-4 py-8">
+  <div class="w-full max-w-sm animate-fade-in">
     <SignUpForm {data} />
   </div>
 </div>
