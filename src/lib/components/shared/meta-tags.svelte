@@ -6,7 +6,7 @@
   const siteUrl = 'http://localhost:5173';
 
   // Use $props rune for component props
-  let { title, description, canonicalUrl, ogImage }: MetaTagsProps = $props();
+  let { title, description, canonicalUrl, ogImage, favicon }: MetaTagsProps = $props();
 
   // Derive the full canonical URL using environment variable
   const fullCanonicalUrl = `${siteUrl}${canonicalUrl}`;
@@ -17,6 +17,9 @@
   <title>{title}</title>
   <meta name="description" content={description} />
   <link rel="canonical" href={fullCanonicalUrl} />
+  {#if favicon}
+    <link rel="icon" href={favicon} />
+  {/if}
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />

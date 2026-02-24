@@ -67,3 +67,16 @@ export const headerSmallIcon = () => {
       return '/fs-logo.svg';
   }
 };
+
+export const faviconUrl = () => {
+  switch (projectName) {
+    case 'FirstSpark':
+      return '/favicon.png';
+    case 'KCU':
+      return '/favicon-kcu.png';
+    case 'Tapco':
+      return '/tapco-small.png';
+    default:
+      return '/favicon.png';
+  }
+};

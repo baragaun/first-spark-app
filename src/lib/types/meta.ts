@@ -3,4 +3,5 @@ export interface MetaTagsProps {
   description: string;
   canonicalUrl: string;
   ogImage?: string;
+  favicon?: string;
 }
