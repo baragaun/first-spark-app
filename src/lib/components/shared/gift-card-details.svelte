@@ -12,8 +12,8 @@
   } from '@baragaun/bg-node-client';
   import placeholderImage from '../../../assets/images/placeholder.png';
   import { Archive, ArrowLeft, ExternalLink, Gift, Printer, ZoomOut } from 'lucide-svelte';
-  import { brandsStore, giftCardProductsStore } from '$lib/stores/marketplace-store';
-  import { walletItemsStore } from '@/stores/wallet-store';
+  import { getMarketplaceData } from '$lib/stores/marketplace-store.svelte';
+  import { getWalletItemsStore } from '@/stores/wallet-store.svelte';
   import BarcodeView from './barcode-view.svelte';
   import { downloadPdf } from '@/utils/pdf-utils';
   import { m } from '@/paraglide/messages';
@@ -37,7 +37,7 @@
   let isBarcodeViewOpen = $state(false);
 
   const brand =
-    $brandsStore.find((v) => v.id === (walletItem?.brandId || giftCardItem?.brandId)) || null;
+    marketplaceData.brands.find((v) => v.id === (walletItem?.brandId || giftCardItem?.brandId)) || null;
 
   onMount(async () => {
     try {
@@ -77,7 +77,7 @@
     try {
       await marketplaceContext.archiveWalletItem(walletItem.id, !walletItem?.archivedAt);
 
-      walletItemsStore.update((items) =>
+      getWalletItemsStore.update((items) =>
         items.map((item) => {
           if (item.id === walletItem?.id) {
             item.archivedAt = walletItem?.archivedAt ? null : new Date().toISOString();
@@ -102,7 +102,7 @@
     if (giftCardProduct?.denominations && giftCardProduct.denominations.length > 0) {
       denominationsToReturn = giftCardProduct.denominations;
     } else if (giftCardProduct?.genericGiftCardId) {
-      const genericProduct = $giftCardProductsStore.find(
+      const genericProduct = marketplaceData.products.find(
         (product) => product.id === giftCardProduct.genericGiftCardId,
       );
 
