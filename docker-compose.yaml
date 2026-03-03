@@ -1,5 +1,6 @@
 services:
   first-spark-app:
+    container_name: "${PUBLIC_PROJECTNAME}_app"
     build:
       context: .
       dockerfile: Dockerfile
