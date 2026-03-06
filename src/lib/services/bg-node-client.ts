@@ -6,6 +6,7 @@ import {
   type BgBaseListener,
   type BgNodeClientConfig,
 } from '@baragaun/bg-node-client';
+import { getBgHeaders } from './bg-headers';
 
 const client = new BgNodeClient();
 let isInitializing = false;
@@ -18,9 +19,7 @@ export async function initializeBgNodeClient(listener?: BgBaseListener) {
     inBrowser: true,
     fsdata: {
       url: import.meta.env.VITE_FSDATA_URL || 'http://localhost:8092/fsdata/api/graphql',
-      headers: {
-        [HttpHeaderName.consumer]: 'first-spark-app',
-      },
+      headers: getBgHeaders(),
     },
     clientInfoStoreType: ClientInfoStoreType.db,
     logLevel: 'debug',

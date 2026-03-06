@@ -16,6 +16,7 @@
   import { extractGiftCardWithAI } from '$lib/utils/ai-client';
   import { toast } from 'svelte-sonner';
   import { logger } from '@/utils/logger';
+  import { PUBLIC_IS_MODEL_AVAILABLE } from '$env/static/public';
 
   const isMobile = new IsMobile();
 
@@ -30,7 +31,7 @@
   let currentTab = $state<string>(TabId.ACTIVE);
   let searchQuery = $state<string>('');
   let fileInputRef: HTMLInputElement;
-  let isModelAvailable = $state(true);
+  let isModelAvailable = $state(PUBLIC_IS_MODEL_AVAILABLE === 'true');
 
   onMount(async () => {
     loadWalletItems();
@@ -69,6 +70,10 @@
   }
 
   function uploadAction() {
+    if (!isModelAvailable) {
+      goto(`/wallet/upload-gift-card`);
+      return;
+    }
     if (fileInputRef) {
       fileInputRef.value = '';
       fileInputRef.click();
@@ -169,7 +174,7 @@
   }
 </script>
 
-<div class="animate-fade-in container mx-auto px-4 py-4 md:px-6">
+<div class="container mx-auto animate-fade-in px-4 py-4 md:px-6">
   {#if !isMobile.current}
     <header class="mb-5">
       <h1 class="text-2xl font-bold tracking-tight text-foreground">{m['wallet.title']()}</h1>
@@ -209,7 +214,9 @@
       <div class="mb-4 mt-4 flex items-center gap-3">
         {#if displayedItems.length > 10}
           <div class="relative flex-1">
-            <Search class="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search
+              class="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+            />
             <Input
               type="search"
               placeholder="Search cards..."
@@ -248,7 +255,9 @@
             <WalletIcon class="h-7 w-7 text-muted-foreground/50" />
           </div>
           <p class="text-sm text-muted-foreground">
-            {currentTab === TabId.ACTIVE ? m['wallet.empty']() : m['wallet.gifted.no_items_found']()}
+            {currentTab === TabId.ACTIVE
+              ? m['wallet.empty']()
+              : m['wallet.gifted.no_items_found']()}
           </p>
         </div>
       {/if}
@@ -266,13 +275,17 @@
             use:handleImageError
           />
           <div class="flex min-w-0 flex-1 flex-col gap-0.5">
-            <span class="truncate text-sm font-semibold text-foreground">{item.name ? item.name : ''}</span>
+            <span class="truncate text-sm font-semibold text-foreground"
+              >{item.name ? item.name : ''}</span
+            >
             <span class="text-lg font-bold text-primary">${(item.balance / 1000).toFixed(2)}</span>
             <span class="text-xs text-muted-foreground">
               {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : ''}
             </span>
           </div>
-          <ChevronRight class="h-5 w-5 flex-shrink-0 text-muted-foreground/40 transition-transform group-hover:translate-x-0.5" />
+          <ChevronRight
+            class="h-5 w-5 flex-shrink-0 text-muted-foreground/40 transition-transform group-hover:translate-x-0.5"
+          />
         </button>
       {/each}
     </div>

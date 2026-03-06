@@ -1,5 +1,6 @@
 import { env } from '$env/dynamic/public';
 import translate from '@/helpers/language/translate';
+import { getBgHeaders } from '@/services/bg-headers';
 import { AppUiMessage } from '@/types/enums';
 import { handleUnauthorizedError } from '@/utils/auth-error-handler';
 import {
@@ -60,9 +61,7 @@ export class MyUserContext {
       inBrowser: true,
       fsdata: {
         url: env.PUBLIC_FSDATA_URL || 'http://localhost:8092/fsdata/api/graphql',
-        headers: {
-          [HttpHeaderName.consumer]: 'first-spark-app',
-        },
+        headers: getBgHeaders(),
       },
       clientInfoStoreType: ClientInfoStoreType.db,
       logLevel: env.PUBLIC_LOG_LEVEL as 'debug' | 'info' | 'warn' | 'error' | 'silent' | undefined,

@@ -71,7 +71,7 @@
   };
 
   function handleBrandClick(product: GiftCardProduct, brand: Brand) {
-    uploadedCardSetValues({ brand: brand, product: product });
+    uploadedCardSetValues({ brandNameValue: brand.name, brand: brand, product: product });
     goto('/wallet/upload-card');
   }
 </script>
