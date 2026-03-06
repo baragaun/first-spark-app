@@ -1,4 +1,5 @@
 import { env } from '$env/dynamic/public';
+import { getBgHeaders } from '@/services/bg-headers';
 import translate from '@/helpers/language/translate';
 import { AppUiMessage } from '@/types/enums';
 import { handleUnauthorizedError } from '@/utils/auth-error-handler';
@@ -7,7 +8,6 @@ import {
   BgListenerTopic,
   BgNodeClient,
   ClientInfoStoreType,
-  HttpHeaderName,
   MyUserChanges,
   NotificationMethod,
   UserIdentType,
@@ -60,10 +60,7 @@ export class MyUserContext {
       inBrowser: true,
       fsdata: {
         url: env.PUBLIC_FSDATA_URL || 'http://localhost:8092/fsdata/api/graphql',
-        headers: {
-          [HttpHeaderName.consumer]: 'first-spark-app',
-          ['x-branding' as HttpHeaderName]: env.PUBLIC_PROJECTNAME || 'First Spark',
-        },
+        headers: getBgHeaders(),
       },
       clientInfoStoreType: ClientInfoStoreType.db,
       logLevel: env.PUBLIC_LOG_LEVEL as 'debug' | 'info' | 'warn' | 'error' | 'silent' | undefined,
