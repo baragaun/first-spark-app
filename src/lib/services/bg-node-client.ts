@@ -2,7 +2,6 @@ import {
   AppEnvironment,
   BgNodeClient,
   ClientInfoStoreType,
-  HttpHeaderName,
   type BgBaseListener,
   type BgNodeClientConfig,
 } from '@baragaun/bg-node-client';

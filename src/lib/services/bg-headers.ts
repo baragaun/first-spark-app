@@ -1,9 +1,9 @@
-import { HttpHeaderName } from '@baragaun/bg-node-client';
+import { HttpHeaderName, type HttpHeaders } from '@baragaun/bg-node-client';
 import { env } from '$env/dynamic/public';
 
-export function getBgHeaders(): Record<string, string> {
+export function getBgHeaders(): HttpHeaders {
   return {
     [HttpHeaderName.consumer]: 'first-spark-app',
-    'x-branding': env.PUBLIC_PROJECTNAME || 'First Spark',
+    [HttpHeaderName.branding]: env.PUBLIC_PROJECTNAME || 'First Spark',
   };
 }
