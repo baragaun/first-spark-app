@@ -6,6 +6,7 @@ import {
   type BgBaseListener,
   type BgNodeClientConfig,
 } from '@baragaun/bg-node-client';
+import { env } from '$env/dynamic/public';
 
 const client = new BgNodeClient();
 let isInitializing = false;
@@ -20,6 +21,7 @@ export async function initializeBgNodeClient(listener?: BgBaseListener) {
       url: import.meta.env.VITE_FSDATA_URL || 'http://localhost:8092/fsdata/api/graphql',
       headers: {
         [HttpHeaderName.consumer]: 'first-spark-app',
+        ['x-branding' as HttpHeaderName]: env.PUBLIC_PROJECTNAME || 'First Spark',
       },
     },
     clientInfoStoreType: ClientInfoStoreType.db,

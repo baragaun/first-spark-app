@@ -16,6 +16,7 @@
   import { extractGiftCardWithAI } from '$lib/utils/ai-client';
   import { toast } from 'svelte-sonner';
   import { logger } from '@/utils/logger';
+  import { PUBLIC_IS_MODEL_AVAILABLE } from '$env/static/public';
 
   const isMobile = new IsMobile();
 
@@ -30,7 +31,7 @@
   let currentTab = $state<string>(TabId.ACTIVE);
   let searchQuery = $state<string>('');
   let fileInputRef: HTMLInputElement;
-  let isModelAvailable = $state(true);
+  let isModelAvailable = $state(PUBLIC_IS_MODEL_AVAILABLE === 'true');
 
   onMount(async () => {
     loadWalletItems();
@@ -69,10 +70,16 @@
   }
 
   function uploadAction() {
-    if (fileInputRef) {
+    if(!isModelAvailable) {
+      goto(`/wallet/upload-gift-card`);
+    } else {
+      if (fileInputRef) {
       fileInputRef.value = '';
       fileInputRef.click();
+      }
+
     }
+    return;
   }
 
   const handleImageError = (node: HTMLImageElement) => {

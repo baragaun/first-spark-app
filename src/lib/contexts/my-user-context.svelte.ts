@@ -62,6 +62,7 @@ export class MyUserContext {
         url: env.PUBLIC_FSDATA_URL || 'http://localhost:8092/fsdata/api/graphql',
         headers: {
           [HttpHeaderName.consumer]: 'first-spark-app',
+          ['x-branding' as HttpHeaderName]: env.PUBLIC_PROJECTNAME || 'First Spark',
         },
       },
       clientInfoStoreType: ClientInfoStoreType.db,
