@@ -70,16 +70,15 @@
   }
 
   function uploadAction() {
-    if(!isModelAvailable) {
+    if (!isModelAvailable) {
       goto(`/wallet/upload-gift-card`);
-    } else {
-      if (fileInputRef) {
+      return;
+    }
+
+    if (fileInputRef) {
       fileInputRef.value = '';
       fileInputRef.click();
-      }
-
     }
-    return;
   }
 
   const handleImageError = (node: HTMLImageElement) => {
