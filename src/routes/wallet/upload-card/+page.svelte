@@ -30,6 +30,8 @@
   let barcode = $state('');
   let pin = $state('');
   let imageUrl = $state('');
+  let frontImage = $state('');
+  let backImage = $state('');
   let loading = $state(false);
   let uploadedBrand = $state<Brand | null>(null);
   let uploadedProduct = $state<GiftCardProduct | null>(null);
@@ -44,6 +46,8 @@
     barcode = uploadedCard.barcode;
     pin = uploadedCard.pin;
     imageUrl = uploadedCard.imageUrl;
+    frontImage = uploadedCard.frontImage;
+    backImage = uploadedCard.backImage;
     loading = uploadedCard.loading;
     uploadedBrand = uploadedCard.uploadedBrand;
     uploadedProduct = uploadedCard.uploadedProduct;
@@ -157,7 +161,26 @@
       </div>
     {/if}
 
-    {#if imageUrl}
+    {#if frontImage || backImage}
+      <div class="mb-6 flex gap-3">
+        {#if frontImage}
+          <div class="overflow-hidden rounded-xl shadow">
+            <img src={frontImage} alt="Front" class="h-32 w-48 object-cover" />
+            <p class="bg-muted/50 py-1 text-center text-xs text-muted-foreground">
+              {m['upload_card.step_front']()}
+            </p>
+          </div>
+        {/if}
+        {#if backImage}
+          <div class="overflow-hidden rounded-xl shadow">
+            <img src={backImage} alt="Back" class="h-32 w-48 object-cover" />
+            <p class="bg-muted/50 py-1 text-center text-xs text-muted-foreground">
+              {m['upload_card.step_back']()}
+            </p>
+          </div>
+        {/if}
+      </div>
+    {:else if imageUrl}
       <img src={imageUrl} alt="Gift Card" class="mb-6 w-64 rounded-xl shadow" />
     {:else}
       <div

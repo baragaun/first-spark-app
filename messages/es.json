@@ -365,7 +365,19 @@
     "submit": "ENVIAR",
     "loading": "Obteniendo detalles de la tarjeta...",
     "upload_success_title": "Tarjeta de regalo subida",
-    "upload_success_message": "¡Tu tarjeta de regalo ha sido enviada con éxito!"
+    "upload_success_message": "¡Tu tarjeta de regalo ha sido enviada con éxito!",
+    "step_front": "Frente de la tarjeta",
+    "step_back": "Reverso de la tarjeta",
+    "front_instruction": "Toma una foto o sube el frente de tu tarjeta de regalo",
+    "back_instruction": "Ahora captura el reverso de tu tarjeta (código de barras, PIN, saldo)",
+    "take_photo": "Tomar foto",
+    "choose_gallery": "Elegir de la galería",
+    "retake": "Volver a tomar",
+    "next_step": "Siguiente: Capturar reverso",
+    "extract_now": "Extraer detalles de la tarjeta",
+    "skip_back": "Omitir — Solo tengo el frente",
+    "processing": "Analizando tu tarjeta...",
+    "processing_hint": "Nuestra IA está leyendo las imágenes de tu tarjeta"
   },
   "order_history": {
     "title": "Historial de pedidos",
