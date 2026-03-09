@@ -15,6 +15,7 @@
     Zap,
     HistoryIcon,
   } from 'lucide-svelte';
+  import { cn } from '$lib/utils.js';
   import { appTitle, headerIcon, headerSmallIcon } from '@/stores/app-store.svelte';
 
   const items = [
@@ -137,12 +138,16 @@
                   href={item.url}
                   onclick={handleItemClick}
                   {...props}
-                  class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 {isItemActive(item.url, page.url.pathname)
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'}"
+                  class={cn(
+                    props.class,
+                    'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200',
+                    isItemActive(item.url, page.url.pathname)
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                  )}
                 >
-                  <item.icon class="h-5 w-5" />
-                  <span>{item.title}</span>
+                  <item.icon class="h-5 w-5 shrink-0" />
+                  <span class="truncate group-data-[collapsible=icon]:hidden">{item.title}</span>
                 </a>
               {/snippet}
             </Sidebar.MenuButton>
@@ -186,13 +191,13 @@
         <Sidebar.MenuItem>
           <Sidebar.MenuButton>
             {#snippet child({ props })}
-              <Button {...props} disabled={!isDevEnv} onclick={toggleConnection} variant="ghost" class="text-muted-foreground hover:text-foreground">
+              <Button {...props} disabled={!isDevEnv} onclick={toggleConnection} variant="ghost" class={cn(props.class, 'text-muted-foreground hover:text-foreground')}>
                 {#if !isOffline}
-                  <Zap class="h-4 w-4" />
+                  <Zap class="h-4 w-4 shrink-0" />
                 {:else}
-                  <PlugZap class="h-4 w-4" />
+                  <PlugZap class="h-4 w-4 shrink-0" />
                 {/if}
-                <span class="text-xs"
+                <span class="truncate text-xs group-data-[collapsible=icon]:hidden"
                   >{isOffline
                     ? m['connection.offline']()
                     : m['connection.online']({ title: appTitle() })}</span
