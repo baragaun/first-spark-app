@@ -139,7 +139,7 @@
                   onclick={handleItemClick}
                   {...props}
                   class={cn(
-                    props.class,
+                    props.class as string,
                     'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200',
                     isItemActive(item.url, page.url.pathname)
                       ? 'bg-primary/10 text-primary'
@@ -191,7 +191,7 @@
         <Sidebar.MenuItem>
           <Sidebar.MenuButton>
             {#snippet child({ props })}
-              <Button {...props} disabled={!isDevEnv} onclick={toggleConnection} variant="ghost" class={cn(props.class, 'text-muted-foreground hover:text-foreground')}>
+              <Button {...props} disabled={!isDevEnv} onclick={toggleConnection} variant="ghost" class={cn(props.class as string, 'text-muted-foreground hover:text-foreground')}>
                 {#if !isOffline}
                   <Zap class="h-4 w-4 shrink-0" />
                 {:else}
