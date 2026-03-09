@@ -7,16 +7,10 @@
   import { Button } from '$lib/components/ui/button';
   import { goto } from '$app/navigation';
   import { getWalletItemsStore, loadWalletItems } from '@/stores/wallet-store.svelte';
-  import { uploadedCardSetValues } from '@/stores/uploaded-card.svelte';
-  import Tesseract from 'tesseract.js';
   import { m } from '@/paraglide/messages';
   import { giftCardImageDomain } from '@/constants';
   import type { WalletItem } from '@baragaun/bg-node-client';
   import { IsMobile } from '$lib/hooks/is-mobile.svelte.js';
-  import { extractGiftCardWithAI } from '$lib/utils/ai-client';
-  import { toast } from 'svelte-sonner';
-  import { logger } from '@/utils/logger';
-  import { PUBLIC_IS_MODEL_AVAILABLE } from '$env/static/public';
 
   const isMobile = new IsMobile();
 
@@ -30,8 +24,6 @@
   // Tabs and wallet items
   let currentTab = $state<string>(TabId.ACTIVE);
   let searchQuery = $state<string>('');
-  let fileInputRef: HTMLInputElement;
-  let isModelAvailable = $state(PUBLIC_IS_MODEL_AVAILABLE === 'true');
 
   onMount(async () => {
     loadWalletItems();
@@ -65,19 +57,8 @@
     else goto(`/wallet/transferred/${walletItem.id}`);
   }
 
-  function isMobileDevice() {
-    return /Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
-  }
-
   function uploadAction() {
-    if (!isModelAvailable) {
-      goto(`/wallet/upload-gift-card`);
-      return;
-    }
-    if (fileInputRef) {
-      fileInputRef.value = '';
-      fileInputRef.click();
-    }
+    goto('/wallet/upload-gift-card');
   }
 
   const handleImageError = (node: HTMLImageElement) => {
@@ -93,85 +74,6 @@
       },
     };
   };
-
-  async function handleFileChange(event: Event) {
-    const files = (event.target as HTMLInputElement).files;
-    if (files && files.length > 0) {
-      const file = files[0];
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const imageDataUrl = e.target?.result as string;
-
-        // Set loading and navigate instantly
-        uploadedCardSetValues({ imageUrlData: imageDataUrl, isLoading: true });
-        goto('/wallet/upload-card');
-        // Now process extraction in background
-        let barcode = '';
-        try {
-          let detector: any;
-          if (
-            typeof window !== 'undefined' &&
-            typeof (window as any).BarcodeDetector !== 'undefined'
-          ) {
-            detector = new (window as any).BarcodeDetector({
-              formats: ['code_128', 'ean_13', 'ean_8', 'code_39', 'upc_a', 'upc_e', 'codabar'],
-            });
-          } else {
-            throw new Error('BarcodeDetector is not available');
-          }
-          const img = new window.Image();
-          img.src = imageDataUrl;
-          await new Promise((resolve, reject) => {
-            img.onload = resolve;
-            img.onerror = reject;
-          });
-          const canvas = document.createElement('canvas');
-          canvas.width = img.width;
-          canvas.height = img.height;
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            ctx.drawImage(img, 0, 0);
-            const barcodes = await detector.detect(canvas);
-            if (barcodes.length > 0) {
-              barcode = barcodes[0].rawValue || barcodes[0].value || '';
-            }
-          }
-        } catch (e) {
-          console.warn('Barcode detection failed:', e);
-        } finally {
-          logger.info('Detected barcode:', barcode);
-        }
-
-        // Step 1: Extract text with Tesseract OCR
-        const {
-          data: { text },
-        } = await Tesseract.recognize(imageDataUrl, 'eng');
-
-        // Step 2: Try GitHub Models AI extraction if available
-        if (isModelAvailable) {
-          const aiResult = await extractGiftCardWithAI(text);
-
-          if (aiResult.success && aiResult.data) {
-            // Use AI-extracted data
-            uploadedCardSetValues({
-              brandNameValue: aiResult.data.brandName,
-              balanceValue: aiResult.data.balance,
-              barcodeValue: aiResult.data.barcode || barcode,
-              pinValue: aiResult.data.pin,
-              imageUrlData: imageDataUrl,
-              isLoading: false,
-            });
-            toast.success('Gift card extracted with AI!');
-            return;
-          } else {
-            toast.error('AI extraction failed, please enter details manually.');
-            logger.error('AI extraction failed:', aiResult.error);
-          }
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  }
 </script>
 
 <div class="container mx-auto animate-fade-in px-4 py-4 md:px-6">
@@ -236,14 +138,6 @@
           <span class="text-sm font-medium">{m['wallet.upload_card']()}</span>
         </Button>
 
-        <input
-          type="file"
-          bind:this={fileInputRef}
-          class="hidden"
-          onchange={handleFileChange}
-          accept="image/*"
-          capture={isMobileDevice() ? 'environment' : undefined}
-        />
       </div>
     </div>
 

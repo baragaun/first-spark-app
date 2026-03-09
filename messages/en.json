@@ -365,7 +365,19 @@
     "submit": "SUBMIT",
     "loading": "Fetching card details...",
     "upload_success_title": "Gift card uploaded",
-    "upload_success_message": "Your gift card has been submitted successfully!"
+    "upload_success_message": "Your gift card has been submitted successfully!",
+    "step_front": "Front of Card",
+    "step_back": "Back of Card",
+    "front_instruction": "Take a photo or upload the front of your gift card",
+    "back_instruction": "Now capture the back of your card (barcode, PIN, balance)",
+    "take_photo": "Take Photo",
+    "choose_gallery": "Choose from Gallery",
+    "retake": "Retake",
+    "next_step": "Next: Capture Back",
+    "extract_now": "Extract Card Details",
+    "skip_back": "Skip — I only have the front",
+    "processing": "Analyzing your card...",
+    "processing_hint": "Our AI is reading your card images"
   },
   "order_history": {
     "title": "Order History",
