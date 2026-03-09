@@ -50,6 +50,9 @@ export async function extractGiftCardFromImages(
   backImageBase64?: string,
 ): Promise<AIExtractionResult> {
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 90000);
+
     const response = await fetch('/api/ai/extract-gift-card', {
       method: 'POST',
       headers: {
@@ -60,7 +63,10 @@ export async function extractGiftCardFromImages(
         backImage: backImageBase64 || undefined,
         useVision: true,
       }),
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     const result = await response.json();
 

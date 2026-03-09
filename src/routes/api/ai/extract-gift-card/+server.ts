@@ -35,22 +35,20 @@ export const POST: RequestHandler = async ({ request }) => {
       temperature: 0.1,
     });
 
-    // Check if GitHub Models is available
-    const isAvailable = await githubModelsService.isAvailable();
-    if (!isAvailable) {
-      return json(
-        { error: 'GitHub Models API is not available. Please check your GITHUB_PAT.' },
-        { status: 503 },
-      );
-    }
-
     let giftCardData;
 
     if (useVision && frontImage) {
-      // Vision-based extraction from images
+      // Vision-based extraction from images — skip isAvailable check to avoid extra API call
       giftCardData = await githubModelsService.extractGiftCardFromImages(frontImage, backImage);
     } else {
-      // Text-based extraction from OCR
+      // Text-based extraction from OCR — check availability first
+      const isAvailable = await githubModelsService.isAvailable();
+      if (!isAvailable) {
+        return json(
+          { error: 'GitHub Models API is not available. Please check your GITHUB_PAT.' },
+          { status: 503 },
+        );
+      }
       giftCardData = await githubModelsService.extractGiftCardData(ocrText);
     }
 
