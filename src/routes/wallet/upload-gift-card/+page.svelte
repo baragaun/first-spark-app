@@ -25,8 +25,9 @@
   let backImageUrl = $state('');
   let isProcessing = $state(false);
 
-  let cameraInputRef: HTMLInputElement;
-  let galleryInputRef: HTMLInputElement;
+  let cameraInputRef = $state<HTMLInputElement>();
+  let galleryInputRef = $state<HTMLInputElement>();
+  let showManualFlow = $state(false);
 
   // --- Brand selection (manual) flow state ---
   let brands = $state<Brand[]>([]);
@@ -53,11 +54,11 @@
     brands.find((brand) => brand.id === giftCardProduct.brandId);
 
   // Load brand data for manual flow
-  if (!isModelAvailable) {
-    $effect(() => {
+  $effect(() => {
+    if (!isModelAvailable || showManualFlow) {
       loadData().catch(console.error);
-    });
-  }
+    }
+  });
 
   const loadData = async () => {
     if (getMarketplaceData().products.length > 0) {
@@ -144,8 +145,13 @@
     isProcessing = true;
 
     try {
-      const frontBase64 = dataUrlToBase64(frontImageUrl);
-      const backBase64 = backImageUrl ? dataUrlToBase64(backImageUrl) : undefined;
+      // Compress images more aggressively for AI extraction (doesn't need high-res)
+      const [compressedFront, compressedBack] = await Promise.all([
+        compressImage(frontImageUrl, 800, 0.6),
+        backImageUrl ? compressImage(backImageUrl, 800, 0.6) : Promise.resolve(''),
+      ]);
+      const frontBase64 = dataUrlToBase64(compressedFront);
+      const backBase64 = compressedBack ? dataUrlToBase64(compressedBack) : undefined;
 
       // Run barcode detection on both images in parallel
       const [frontBarcode, backBarcode] = await Promise.all([
@@ -193,6 +199,8 @@
       toast.error('Something went wrong. Please try again.');
       currentStep = 'front';
       isProcessing = false;
+    } finally {
+      isProcessing = false;
     }
   }
 
@@ -208,7 +216,9 @@
   >
     <button
       onclick={() => {
-        if (isModelAvailable && currentStep === 'back') {
+        if (showManualFlow) {
+          showManualFlow = false;
+        } else if (isModelAvailable && currentStep === 'back') {
           currentStep = 'front';
         } else {
           history.back();
@@ -219,12 +229,12 @@
       <ArrowLeft class="h-6 w-6" />
     </button>
     <span class="flex-1 text-center text-lg font-bold">
-      {isModelAvailable ? m['upload_card.title']() : m['upload_card.select_brand']()}
+      {isModelAvailable && !showManualFlow ? m['upload_card.title']() : m['upload_card.select_brand']()}
     </span>
     <div class="w-6"></div>
   </div>
 
-  {#if isModelAvailable}
+  {#if isModelAvailable && !showManualFlow}
     <!-- ===== AI-POWERED CAMERA FLOW ===== -->
 
     <!-- Step Indicator -->
@@ -383,7 +393,7 @@
 
           <!-- Manual entry fallback -->
           <button
-            onclick={() => goto('/wallet/upload-card')}
+            onclick={() => (showManualFlow = true)}
             class="mt-6 text-sm text-muted-foreground underline transition-colors hover:text-foreground"
           >
             {m['upload_card.enter_manually']()}

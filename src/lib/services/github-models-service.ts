@@ -32,6 +32,9 @@ export class GitHubModelsService {
    */
   async isAvailable(): Promise<boolean> {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
@@ -45,10 +48,10 @@ export class GitHubModelsService {
           messages: [{ role: 'user', content: 'test' }],
           max_tokens: 1,
         }),
+        signal: controller.signal,
       });
 
-      console.log('Response status:', response.status);
-      console.log('Response ok:', response.ok);
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -68,6 +71,9 @@ export class GitHubModelsService {
   async extractGiftCardData(ocrText: string): Promise<GiftCardData | null> {
     try {
       const prompt = this.buildPrompt(ocrText);
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
 
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: 'POST',
@@ -93,7 +99,10 @@ export class GitHubModelsService {
           temperature: this.temperature,
           response_format: { type: 'json_object' },
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const error = await response.text();
@@ -150,6 +159,9 @@ export class GitHubModelsService {
         });
       }
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000);
+
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
@@ -174,7 +186,10 @@ export class GitHubModelsService {
           temperature: this.temperature,
           response_format: { type: 'json_object' },
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const error = await response.text();
