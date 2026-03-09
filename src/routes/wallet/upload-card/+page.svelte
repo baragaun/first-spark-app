@@ -20,6 +20,7 @@
   import { giftCardImageDomain } from '$lib/constants';
   import { myUserContext } from '@/contexts/my-user-context.svelte';
   import { toast } from 'svelte-sonner';
+  import { number } from 'zod/v4';
 
   // Get reactive store values
   const uploadedCard = uploadedCardGetValues();

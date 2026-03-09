@@ -377,7 +377,8 @@
     "extract_now": "Extraer detalles de la tarjeta",
     "skip_back": "Omitir — Solo tengo el frente",
     "processing": "Analizando tu tarjeta...",
-    "processing_hint": "Nuestra IA está leyendo las imágenes de tu tarjeta"
+    "processing_hint": "Nuestra IA está leyendo las imágenes de tu tarjeta",
+    "enter_manually": "Ingresar detalles manualmente"
   },
   "order_history": {
     "title": "Historial de pedidos",

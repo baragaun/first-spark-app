@@ -377,7 +377,8 @@
     "extract_now": "Extract Card Details",
     "skip_back": "Skip — I only have the front",
     "processing": "Analyzing your card...",
-    "processing_hint": "Our AI is reading your card images"
+    "processing_hint": "Our AI is reading your card images",
+    "enter_manually": "Enter details manually instead"
   },
   "order_history": {
     "title": "Order History",

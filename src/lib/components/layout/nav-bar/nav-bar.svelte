@@ -1,32 +1,21 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import * as Sidebar from '@/components/ui/sidebar';
-  import * as Tooltip from '@/components/ui/tooltip';
   import { Button } from '@/components/ui/button';
   import { m } from '@/paraglide/messages.js';
   import { LogIn } from 'lucide-svelte';
   import LanguageButton from './language-button.svelte';
-  import ThemeButton from './light-switch.svelte';
   import type { MyUserContext } from '@/contexts/my-user-context.svelte';
   import { getContext } from 'svelte';
-  import type { MyUser } from '@baragaun/bg-node-client';
-  import { getPurchaseOrdersStore } from '$lib/stores/order-history.svelte';
   import { IsMobile } from '$lib/hooks/is-mobile.svelte.js';
   import { headerSmallIcon } from '@/stores/app-store.svelte';
 
-  const purchaseOrdersStore = getPurchaseOrdersStore();
 
   const userContext = getContext<MyUserContext>('myUserContext');
   let isSignedIn: boolean = $derived(userContext.isSignedIn);
-  let myUser: MyUser | undefined = $derived(userContext.myUser);
 
   const isMobile = new IsMobile();
 
-  const onSignOut = async () => {
-    purchaseOrdersStore.reset();
-    await userContext.signMeOut();
-    await goto('/signin');
-  };
 </script>
 
 <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-xl shadow-soft supports-[backdrop-filter]:bg-white/75">
