@@ -69,8 +69,9 @@
     {#each visibleItems as item (item.title)}
       <a
         href={item.url}
+        aria-label={item.title}
         class={cn(
-          'flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-2 transition-all duration-200',
+          'flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-2 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
           isItemActive(item.url, page.url.pathname)
             ? 'text-primary'
             : 'text-muted-foreground hover:text-foreground',
@@ -98,4 +99,4 @@
 </nav>
 
 <!-- Spacer to prevent content from being hidden behind the bottom navbar -->
-<div class="h-20 md:hidden"></div>
+<div class="h-16 md:hidden"></div>

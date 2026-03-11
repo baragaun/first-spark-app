@@ -29,16 +29,18 @@
       <p class="text-md">{m['send_gift_card.note']()}</p>
       <div class="space-y-3">
         <Button
-          class="w-full rounded-full border border-foreground bg-background text-foreground"
-          onclick={() => (sendGiftCardType = 'email')}>Send Email</Button
+          variant="outline"
+          class="w-full rounded-full"
+          onclick={() => (sendGiftCardType = 'email')}>{m['send_gift_card.send_email']()}</Button
         >
         <Button
-          class="w-full rounded-full border border-foreground bg-background text-foreground"
-          onclick={() => (sendGiftCardType = 'sms')}>Send Text</Button
+          variant="outline"
+          class="w-full rounded-full"
+          onclick={() => (sendGiftCardType = 'sms')}>{m['send_gift_card.send_text']()}</Button
         >
         <Button
-          class="w-full rounded-full bg-nav-foreground py-3 text-lg font-bold text-nav hover:bg-nav-foreground/90"
-          onclick={() => (sendGiftCardType = 'share')}>Share Gift Link</Button
+          class="w-full rounded-full py-3 text-lg font-bold"
+          onclick={() => (sendGiftCardType = 'share')}>{m['send_gift_card.share_gift_link']()}</Button
         >
       </div>
     </div>

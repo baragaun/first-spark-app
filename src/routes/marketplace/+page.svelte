@@ -160,6 +160,7 @@
                 src={giftCardImageDomain + '/giftcards/' + product.imageSourceFront}
                 alt={brand.name}
                 class="h-full w-full rounded-2xl object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                loading="lazy"
                 use:handleImageError
               />
             </div>
@@ -174,7 +175,7 @@
                   use:handleImageError
                 />
               </div>
-              <span class="truncate text-sm font-medium text-foreground">{brand.name}</span>
+              <span class="truncate text-sm font-medium text-foreground" title={brand.name}>{brand.name}</span>
             </div>
           </button>
         {/if}

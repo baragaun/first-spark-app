@@ -24,9 +24,12 @@
   // Tabs and wallet items
   let currentTab = $state<string>(TabId.ACTIVE);
   let searchQuery = $state<string>('');
+  let isLoadingWallet = $state(true);
 
   onMount(async () => {
-    loadWalletItems();
+    isLoadingWallet = true;
+    await loadWalletItems();
+    isLoadingWallet = false;
   });
 
   let displayedItems = $derived.by(() => {
@@ -141,7 +144,11 @@
 
     <!-- Wallet Items Section -->
     <div class="relative flex-1 space-y-3">
-      {#if displayedItems.length === 0}
+      {#if isLoadingWallet}
+        <div class="flex items-center justify-center py-16">
+          <div class="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+        </div>
+      {:else if displayedItems.length === 0}
         <div class="flex flex-col items-center justify-center py-16 text-center">
           <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted/60">
             <WalletIcon class="h-7 w-7 text-muted-foreground/50" />

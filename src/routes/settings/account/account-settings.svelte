@@ -37,6 +37,12 @@
   };
 </script>
 
+{#if !myUser}
+  <div class="flex flex-col items-center justify-center py-16 text-center">
+    <p class="text-sm text-muted-foreground">{m['setting.account']()}</p>
+    <p class="mt-2 text-sm text-destructive">Unable to load account data. Please try again later.</p>
+  </div>
+{:else}
 <div class="space-y-8 py-8">
   <h4 class="font-lexend text-lg font-bold">{m['setting.account']()}</h4>
   <div class="space-y-4">
@@ -105,3 +111,4 @@
     <span>{m['nav.auth.sign_out']()}</span>
   </button>
 </div>
+{/if}

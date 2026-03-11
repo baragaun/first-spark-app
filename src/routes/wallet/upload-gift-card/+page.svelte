@@ -212,7 +212,7 @@
 <div class="flex min-h-screen flex-col bg-background">
   <!-- Header -->
   <div
-    class="sticky top-0 z-10 flex items-center justify-between bg-nav px-4 py-3 text-nav-foreground shadow"
+    class="sticky top-0 z-30 flex items-center justify-between bg-nav px-4 py-3 text-nav-foreground shadow"
   >
     <button
       onclick={() => {
@@ -430,7 +430,7 @@
         <Input
           type="search"
           placeholder={m['marketplace.search_placeholder']()}
-          class="search-input-override w-full rounded-full border-0 bg-background px-3 py-2 pl-10 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+          class="w-full rounded-full border-0 bg-background px-3 py-2 pl-10 text-base shadow-none ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus:outline-none focus:ring-0 focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
           bind:value={searchText}
         />
       </div>
@@ -439,7 +439,7 @@
     <!-- Brands Grid -->
     <div class="flex h-full flex-col">
       <div class="flex-1 overflow-y-auto">
-        <div class="mx-auto w-full max-w-5xl px-4 pb-8" style="height: calc(100vh - 120px);">
+        <div class="mx-auto w-full max-w-5xl px-4 pb-24 md:pb-8" style="height: calc(100vh - 120px - env(safe-area-inset-bottom, 0px));">
           <div
             class="grid h-full grid-cols-3 items-start gap-x-2 gap-y-6 overflow-y-auto sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7"
           >
@@ -447,9 +447,10 @@
               {@const brand = getBrandForGiftCard(product)}
               {#if brand}
                 <button
-                  class="group flex flex-col items-center justify-center focus:outline-none"
+                  class="group flex flex-col items-center justify-center rounded-lg p-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                   onclick={() => handleBrandClick(product, brand)}
                   onkeydown={(e) => e.key === 'Enter' && handleBrandClick(product, brand)}
+                  aria-label={brand.name}
                 >
                   <img
                     src={giftCardImageDomain + '/vendors/' + brand.logoImageSource}
@@ -458,8 +459,9 @@
                     use:handleImageError
                   />
                   <span
-                    class="max-w-[5.5rem] break-words text-center text-xs leading-tight text-gray-500 group-hover:text-primary"
+                    class="max-w-[7rem] break-words text-center text-xs leading-tight text-muted-foreground group-hover:text-primary"
                     style="word-break:break-word;"
+                    title={brand.name}
                   >
                     {brand.name}
                   </span>

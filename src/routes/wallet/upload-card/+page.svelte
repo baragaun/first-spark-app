@@ -143,12 +143,13 @@
 
 <div class="flex min-h-screen flex-col bg-background">
   <div
-    class="sticky top-0 z-10 flex items-center justify-between bg-nav px-4 py-3 text-nav-foreground shadow"
+    class="sticky top-0 z-30 flex items-center justify-between bg-nav px-4 py-3 text-nav-foreground shadow"
   >
-    <button onclick={() => history.back()} class="flex items-center">
+    <button onclick={() => history.back()} class="flex shrink-0 items-center" aria-label="Go back">
       <ArrowLeft class="h-6 w-6" />
     </button>
-    <span class="flex-1 text-center text-lg font-bold">{m['upload_card.title']()}</span>
+    <span class="min-w-0 flex-1 truncate text-center text-lg font-bold">{m['upload_card.title']()}</span>
+    <div class="w-6 shrink-0"></div>
   </div>
 
   <form

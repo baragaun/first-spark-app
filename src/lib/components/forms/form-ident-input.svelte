@@ -67,7 +67,7 @@
             class={cn(
               'border-2 transition-all duration-200',
               $errors[fieldName]
-                ? 'border-red-500 focus-visible:border-transparent focus-visible:ring-red-500'
+                ? 'border-destructive focus-visible:border-transparent focus-visible:ring-destructive'
                 : 'border-gray-300 focus-visible:border-transparent',
               'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
             )}
@@ -89,7 +89,7 @@
               </div>
             {:else}
               <div
-                class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-red-500"
+                class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-destructive"
               >
                 <AlertCircle class="h-4 w-4" />
               </div>
