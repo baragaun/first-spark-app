@@ -247,6 +247,7 @@
                 class="flex h-8 w-8 items-center justify-center rounded-full border border-border transition-colors hover:bg-muted disabled:opacity-40"
                 onclick={() => updateItemQuantity(item, (item.quantity || 0) - 1)}
                 disabled={loadingItemId === item.id}
+                aria-label="Decrease quantity"
               >
                 <Minus class="h-3.5 w-3.5" />
               </button>
@@ -261,6 +262,7 @@
                 class="flex h-8 w-8 items-center justify-center rounded-full border border-border transition-colors hover:bg-muted disabled:opacity-40"
                 onclick={() => updateItemQuantity(item, (item.quantity || 0) + 1)}
                 disabled={loadingItemId === item.id}
+                aria-label="Increase quantity"
               >
                 <Plus class="h-3.5 w-3.5" />
               </button>
@@ -300,7 +302,7 @@
       </div>
     {:else if shoppingCart === undefined}
       <div class="flex h-[60vh] items-center justify-center">
-        <div class="h-8 w-8 animate-spin rounded-full border-3 border-primary border-t-transparent"></div>
+        <div class="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
       </div>
     {:else}
       <div class="flex flex-col items-center justify-center py-20 text-center">

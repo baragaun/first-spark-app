@@ -31,7 +31,7 @@
 </script>
 
 {#snippet icon()}
-  <div class="mx-2">
+  <div class="ml-2">
     <SpinLoadIndicator {isLoading} {isSuccess} />
   </div>
 {/snippet}

@@ -8,9 +8,9 @@
   let { children }: Props = $props();
 </script>
 
-<div class="flex h-full w-full items-center bg-background">
-  <div class="flex rotate-90 flex-col items-center">
+<div class="flex h-full w-full items-center justify-center bg-background">
+  <div class="flex origin-center rotate-90 flex-col items-center" style="max-width: 100vh; max-height: 100vw;">
     {@render children?.()}
-    <span class="mt-4 text-xs text-gray-500">Scan or show at checkout</span>
+    <span class="mt-4 text-xs text-muted-foreground">Scan or show at checkout</span>
   </div>
 </div>
